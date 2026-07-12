@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Kupkop PH",
+    "slug": "kupkop-ph",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1C6B6B"
+      }
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
