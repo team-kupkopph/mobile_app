@@ -26,6 +26,7 @@ type WelcomeCopy = {
   getStarted: string;
   continueWithGoogle: string;
   login: string;
+  browseGuest: string;
   terms: string;
 };
 
@@ -41,6 +42,7 @@ const DEFAULT_COPY: WelcomeCopy = {
   getStarted: "Get started",
   continueWithGoogle: "Continue with Google",
   login: "Already have an account? Log in",
+  browseGuest: "Browse as a guest",
   terms: "By continuing you agree to our Terms & Privacy."
 };
 
@@ -67,6 +69,7 @@ type WelcomeScreenProps = {
   onGetStarted?: () => void;
   onContinueWithGoogle?: () => void;
   onLogin?: () => void;
+  onBrowseGuest?: () => void;
   onTerms?: () => void;
 };
 
@@ -75,6 +78,7 @@ export function WelcomeScreen({
   onGetStarted,
   onContinueWithGoogle,
   onLogin,
+  onBrowseGuest,
   onTerms
 }: WelcomeScreenProps) {
   const copy = mergeCopy(copyInput);
@@ -249,14 +253,21 @@ export function WelcomeScreen({
           <TouchableOpacity
             activeOpacity={0.75}
             onPress={onLogin}
-            style={[styles.loginPressable, { top: sy(1000), width: size.width }]}
+            style={[styles.loginPressable, { top: sy(978), width: size.width }]}
           >
             <Text style={[styles.loginText, { fontSize: s(20), lineHeight: s(28) }]}>{copy.login}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.75}
+            onPress={onBrowseGuest}
+            style={[styles.browseGuestPressable, { top: sy(1014), width: size.width }]}
+          >
+            <Text style={[styles.browseGuestText, { fontSize: s(18), lineHeight: s(24) }]}>{copy.browseGuest}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.75}
             onPress={onTerms}
-            style={[styles.termsPressable, { top: sy(1044), width: size.width }]}
+            style={[styles.termsPressable, { top: sy(1054), width: size.width }]}
           >
             <Text style={[styles.termsText, { fontSize: s(16), lineHeight: s(22) }]}>{copy.terms}</Text>
           </TouchableOpacity>
@@ -362,6 +373,16 @@ const styles = StyleSheet.create({
   },
   loginText: {
     color: "#5F5E5A",
+    textAlign: "center"
+  },
+  browseGuestPressable: {
+    position: "absolute",
+    left: 0,
+    alignItems: "center"
+  },
+  browseGuestText: {
+    color: "#1C7876",
+    fontWeight: "800",
     textAlign: "center"
   },
   termsPressable: {

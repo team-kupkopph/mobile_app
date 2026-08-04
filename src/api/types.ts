@@ -6,3 +6,9 @@ export type Me = {
   capabilities: Capability[]; shelter: null; settings: Record<string, boolean>;
 };
 export type ApiError = { code: string; message: string; field?: string; details?: any };
+export type Listing = {
+  listing_id: string;
+  pet: { name: string; species: string; breed: string | null };
+  city: string;
+  status: string;
+};

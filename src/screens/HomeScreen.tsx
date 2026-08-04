@@ -7,13 +7,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { Me } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { BellIcon, ClockIcon } from "../components/AppIcons";
+import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
@@ -43,6 +44,21 @@ export function HomeScreen({ navigation }: Props) {
     useCallback(() => {
       api.get("/me").then((r) => r.ok && setMe(r.data));
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
+    }, [])
+  );
+
+  // US-A1b resume: SignupSuccessScreen's "Start exploring" resets straight to Home, so this is
+  // where a guest's pre-signup intent (SignupWall -> accountType -> signup -> otp -> here) gets
+  // surfaced. takeIntent() clears itself on read, so a later focus of Home is a no-op — the toast
+  // fires exactly once, right after the intent that queued it. Deep-linking into the actual
+  // adopt/report/volunteer screen is out of scope here (later sprints); this just confirms it.
+  useFocusEffect(
+    useCallback(() => {
+      const intent = takeIntent();
+      if (intent) {
+        const [title, body] = intentToast(intent);
+        Alert.alert(title, body);
+      }
     }, [])
   );
 
@@ -144,6 +160,22 @@ export function HomeScreen({ navigation }: Props) {
       <OwnerTabs active="home" />
     </View>
   );
+}
+
+function intentToast(action: GuestIntentAction): [string, string] {
+  switch (action) {
+    case "adopt":
+      return ["You're in!", "You can now send adoption inquiries."];
+    case "save":
+      return ["You're in!", "You can now save pets you love."];
+    case "report":
+      return ["You're in!", "You can now report strays."];
+    case "volunteer":
+      return ["You're in!", "You can now sign up to volunteer."];
+    case "account":
+    default:
+      return ["You're in!", "You can now manage your profile."];
+  }
 }
 
 function renderQuickIcon(icon: QuickAction["icon"]) {

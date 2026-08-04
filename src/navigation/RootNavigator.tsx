@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
+import { HomeGuestScreen } from "../screens/HomeGuestScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { LocationPickerScreen } from "../screens/LocationPickerScreen";
 import { MemberSubmittedScreen } from "../screens/MemberSubmittedScreen";
@@ -50,6 +51,7 @@ export function RootNavigator() {
       <Stack.Screen name="passwordChanged" component={PasswordChangedScreen} />
       <Stack.Screen name="support" component={PlaceholderSupport} />
       <Stack.Screen name="home" component={HomeScreen} />
+      <Stack.Screen name="homeGuest" component={HomeGuestScreen} />
       <Stack.Screen name="adopt" component={AdoptScreen} />
       <Stack.Screen name="volunteer" component={VolunteerScreen} />
       <Stack.Screen name="profile" component={ProfileScreen} />
@@ -66,6 +68,7 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
     <WelcomeScreen
       onGetStarted={() => navigation.navigate("accountType")}
       onLogin={() => navigation.navigate("signin")}
+      onBrowseGuest={() => navigation.navigate("homeGuest")}
     />
   );
 }
