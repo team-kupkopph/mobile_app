@@ -1,0 +1,20 @@
+export type RootStackParamList = {
+  welcome: undefined;
+  accountType: undefined;
+  signup: { accountType: "personal" | "shelter" };
+  otp: { email: string; mode: "signup" | "unverified" };
+  otpLocked: { email: string };
+  signupSuccess: undefined;
+  signin: undefined;
+  forgotPassword: undefined;
+  resetOtp: { email: string };
+  resetPassword: { email: string; code: string };
+  passwordChanged: undefined;
+  home: undefined;
+  homeGuest: undefined;
+  profile: undefined;
+  locationPicker: undefined;
+  memberUpgrade: undefined;
+  memberVerify: undefined;
+  memberSubmitted: undefined;
+};
