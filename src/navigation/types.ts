@@ -12,6 +12,8 @@ export type RootStackParamList = {
   passwordChanged: undefined;
   home: undefined;
   homeGuest: undefined;
+  adopt: undefined;
+  volunteer: undefined;
   profile: undefined;
   locationPicker: undefined;
   memberUpgrade: undefined;

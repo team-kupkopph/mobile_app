@@ -2,10 +2,14 @@ import { NativeStackScreenProps, createNativeStackNavigator } from "@react-navig
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
+import { OwnerTabs } from "../components/OwnerTabs";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
+import { AdoptScreen } from "../screens/AdoptScreen";
+import { HomeScreen } from "../screens/HomeScreen";
 import { OtpScreen } from "../screens/OtpScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
+import { VolunteerScreen } from "../screens/VolunteerScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
 // screen imports are added as tasks land; start with the ones that exist.
@@ -29,7 +33,10 @@ export function RootNavigator() {
       <Stack.Screen name="otp" component={OtpScreen} />
       <Stack.Screen name="otpLocked" component={PlaceholderOtpLocked} />
       <Stack.Screen name="signupSuccess" component={SignupSuccessScreen} />
-      <Stack.Screen name="home" component={PlaceholderHome} />
+      <Stack.Screen name="home" component={HomeScreen} />
+      <Stack.Screen name="adopt" component={AdoptScreen} />
+      <Stack.Screen name="volunteer" component={VolunteerScreen} />
+      <Stack.Screen name="profile" component={PlaceholderProfile} />
     </Stack.Navigator>
   );
 }
@@ -38,7 +45,17 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
   return <WelcomeScreen onGetStarted={() => navigation.navigate("accountType")} />;
 }
 
-function PlaceholderHome() { return null; } // replaced in Task 4
+// Minimal stand-in so the "You" tab has somewhere to navigate to and typechecks end-to-end.
+// Full profile (settings, Verified Member status, location) lands in M5.
+function PlaceholderProfile() {
+  return (
+    <View style={styles.lockedScreen}>
+      <Text style={styles.lockedTitle}>You</Text>
+      <Text style={styles.lockedBody}>Profile is coming soon.</Text>
+      <OwnerTabs active="profile" />
+    </View>
+  );
+}
 
 // Minimal stand-in so otp's 423 (code_locked) branch has somewhere to `replace()` into and
 // typechecks end-to-end. Full lockout UI (countdown, support link, etc.) lands in M6.

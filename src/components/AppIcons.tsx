@@ -110,6 +110,25 @@ export function UserBadgeIcon({ color }: { color: string }) {
   );
 }
 
+export function ClockIcon({ color, size = 38 }: { color: string; size?: number }) {
+  return (
+    <View style={[styles.clock, { width: size, height: size, borderRadius: size / 2, borderColor: color }]}>
+      <View
+        style={[
+          styles.clockHandTall,
+          { backgroundColor: color, height: size * 0.29, transform: [{ translateY: -size * 0.08 }] }
+        ]}
+      />
+      <View
+        style={[
+          styles.clockHandWide,
+          { backgroundColor: color, width: size * 0.24, marginTop: -size * 0.12, marginLeft: size * 0.16 }
+        ]}
+      />
+    </View>
+  );
+}
+
 export function DocumentIcon({ color }: { color: string }) {
   return (
     <View style={[styles.document, { borderColor: color }]}> 
@@ -245,5 +264,18 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     marginTop: 5,
     borderRadius: 1
+  },
+  clock: {
+    borderWidth: 3,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  clockHandTall: {
+    width: 3,
+    borderRadius: 2
+  },
+  clockHandWide: {
+    height: 3,
+    borderRadius: 2
   }
 });
