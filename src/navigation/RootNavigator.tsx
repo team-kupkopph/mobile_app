@@ -8,7 +8,8 @@ import { WelcomeScreen } from "../WelcomeScreen";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { tokens } = useAuth();
+  const { tokens, isReady } = useAuth();
+  if (!isReady) return null; // hold render until secure-store hydration completes
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {tokens ? (

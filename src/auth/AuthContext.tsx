@@ -13,8 +13,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     SecureStore.getItemAsync(KEY).then((raw) => {
-      if (raw) setTokensState(JSON.parse(raw));
-      setReady(true);
+      try {
+        if (raw) setTokensState(JSON.parse(raw));
+      } catch {
+        // corrupt entry — treat as signed out
+      } finally {
+        setReady(true);
+      }
     });
   }, []);
 
