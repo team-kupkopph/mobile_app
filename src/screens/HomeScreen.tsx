@@ -35,7 +35,7 @@ const pets = [
   { name: "Luna", details: "Puspin · 2 yrs · Female", shelter: "Marikina AWG · 4 km" }
 ];
 
-export function HomeScreen({ navigation }: Props) {
+export function HomeScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
@@ -47,19 +47,22 @@ export function HomeScreen({ navigation }: Props) {
     }, [])
   );
 
-  // US-A1b resume: SignupSuccessScreen's "Start exploring" resets straight to Home, so this is
-  // where a guest's pre-signup intent (SignupWall -> accountType -> signup -> otp -> here) gets
-  // surfaced. takeIntent() clears itself on read, so a later focus of Home is a no-op — the toast
-  // fires exactly once, right after the intent that queued it. Deep-linking into the actual
-  // adopt/report/volunteer screen is out of scope here (later sprints); this just confirms it.
+  // US-A1b resume: SignupSuccessScreen's "Start exploring" resets to Home with
+  // params.justSignedUp = true, and ONLY that route sets the flag (SigninScreen's plain-login
+  // reset to "home" carries no params). Without this gate, any arrival at Home — including a
+  // later, unrelated sign-in — would drain and surface a stale guest intent left over from a
+  // signup someone abandoned earlier in the session (see M8 review). takeIntent() also clears
+  // itself on read, so a later focus of this same Home mount is a no-op even while the flag
+  // is still true.
   useFocusEffect(
     useCallback(() => {
+      if (!route.params?.justSignedUp) return;
       const intent = takeIntent();
       if (intent) {
         const [title, body] = intentToast(intent);
         Alert.alert(title, body);
       }
-    }, [])
+    }, [route.params?.justSignedUp])
   );
 
   const pendingMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "pending") ?? false;

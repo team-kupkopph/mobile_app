@@ -11,7 +11,7 @@ export type RootStackParamList = {
   resetPassword: { email: string; code: string };
   passwordChanged: undefined;
   support: undefined;
-  home: undefined;
+  home: { justSignedUp?: boolean } | undefined;
   homeGuest: undefined;
   adopt: undefined;
   volunteer: undefined;

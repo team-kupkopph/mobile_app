@@ -44,7 +44,10 @@ export function SignupSuccessScreen({ navigation }: Props) {
   ];
 
   function onStartExploring() {
-    navigation.reset({ index: 0, routes: [{ name: "home" }] });
+    // justSignedUp gates HomeScreen's guest-intent resume (see HomeScreen.tsx) — this is the only
+    // route that should ever set it, since it's the sole confirmation that a signup actually
+    // completed (SigninScreen's reset to "home" must NOT carry this flag).
+    navigation.reset({ index: 0, routes: [{ name: "home", params: { justSignedUp: true } }] });
   }
 
   return (
