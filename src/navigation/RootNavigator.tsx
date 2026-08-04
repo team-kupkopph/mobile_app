@@ -7,6 +7,9 @@ import { AdoptScreen } from "../screens/AdoptScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { LocationPickerScreen } from "../screens/LocationPickerScreen";
+import { MemberSubmittedScreen } from "../screens/MemberSubmittedScreen";
+import { MemberUpgradeScreen } from "../screens/MemberUpgradeScreen";
+import { MemberVerifyScreen } from "../screens/MemberVerifyScreen";
 import { OtpLockedScreen } from "../screens/OtpLockedScreen";
 import { OtpScreen } from "../screens/OtpScreen";
 import { PasswordChangedScreen } from "../screens/PasswordChangedScreen";
@@ -51,7 +54,9 @@ export function RootNavigator() {
       <Stack.Screen name="volunteer" component={VolunteerScreen} />
       <Stack.Screen name="profile" component={ProfileScreen} />
       <Stack.Screen name="locationPicker" component={LocationPickerScreen} />
-      <Stack.Screen name="memberUpgrade" component={PlaceholderMemberUpgrade} />
+      <Stack.Screen name="memberUpgrade" component={MemberUpgradeScreen} />
+      <Stack.Screen name="memberVerify" component={MemberVerifyScreen} />
+      <Stack.Screen name="memberSubmitted" component={MemberSubmittedScreen} />
     </Stack.Navigator>
   );
 }
@@ -72,17 +77,6 @@ function PlaceholderSupport() {
     <View style={styles.lockedScreen}>
       <Text style={styles.lockedTitle}>Contact support</Text>
       <Text style={styles.lockedBody}>Support is coming soon. Email hello@kupkop.ph for now.</Text>
-    </View>
-  );
-}
-
-// Minimal stand-in so Profile's "Get Verified" row has somewhere to navigate to and typechecks
-// end-to-end. Full Verified Member submission flow (documents, review state) lands in M7.
-function PlaceholderMemberUpgrade() {
-  return (
-    <View style={styles.lockedScreen}>
-      <Text style={styles.lockedTitle}>Get Verified</Text>
-      <Text style={styles.lockedBody}>Verified Member submission is coming soon.</Text>
     </View>
   );
 }
