@@ -4,10 +4,16 @@ import { StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../auth/AuthContext";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
+import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { LocationPickerScreen } from "../screens/LocationPickerScreen";
+import { OtpLockedScreen } from "../screens/OtpLockedScreen";
 import { OtpScreen } from "../screens/OtpScreen";
+import { PasswordChangedScreen } from "../screens/PasswordChangedScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { ResetOtpScreen } from "../screens/ResetOtpScreen";
+import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
+import { SigninScreen } from "../screens/SigninScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
@@ -32,8 +38,14 @@ export function RootNavigator() {
       <Stack.Screen name="accountType" component={AccountTypeScreen} />
       <Stack.Screen name="signup" component={SignupScreen} />
       <Stack.Screen name="otp" component={OtpScreen} />
-      <Stack.Screen name="otpLocked" component={PlaceholderOtpLocked} />
+      <Stack.Screen name="otpLocked" component={OtpLockedScreen} />
       <Stack.Screen name="signupSuccess" component={SignupSuccessScreen} />
+      <Stack.Screen name="signin" component={SigninScreen} />
+      <Stack.Screen name="forgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="resetOtp" component={ResetOtpScreen} />
+      <Stack.Screen name="resetPassword" component={ResetPasswordScreen} />
+      <Stack.Screen name="passwordChanged" component={PasswordChangedScreen} />
+      <Stack.Screen name="support" component={PlaceholderSupport} />
       <Stack.Screen name="home" component={HomeScreen} />
       <Stack.Screen name="adopt" component={AdoptScreen} />
       <Stack.Screen name="volunteer" component={VolunteerScreen} />
@@ -45,7 +57,23 @@ export function RootNavigator() {
 }
 
 function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList, "welcome">) {
-  return <WelcomeScreen onGetStarted={() => navigation.navigate("accountType")} />;
+  return (
+    <WelcomeScreen
+      onGetStarted={() => navigation.navigate("accountType")}
+      onLogin={() => navigation.navigate("signin")}
+    />
+  );
+}
+
+// Minimal stand-in so passwordChanged's "Need help?" link has somewhere to go and typechecks
+// end-to-end. A real contact-support flow (ticket form, FAQ, etc.) is out of scope for M6.
+function PlaceholderSupport() {
+  return (
+    <View style={styles.lockedScreen}>
+      <Text style={styles.lockedTitle}>Contact support</Text>
+      <Text style={styles.lockedBody}>Support is coming soon. Email hello@kupkop.ph for now.</Text>
+    </View>
+  );
 }
 
 // Minimal stand-in so Profile's "Get Verified" row has somewhere to navigate to and typechecks
@@ -55,19 +83,6 @@ function PlaceholderMemberUpgrade() {
     <View style={styles.lockedScreen}>
       <Text style={styles.lockedTitle}>Get Verified</Text>
       <Text style={styles.lockedBody}>Verified Member submission is coming soon.</Text>
-    </View>
-  );
-}
-
-// Minimal stand-in so otp's 423 (code_locked) branch has somewhere to `replace()` into and
-// typechecks end-to-end. Full lockout UI (countdown, support link, etc.) lands in M6.
-function PlaceholderOtpLocked({ route }: NativeStackScreenProps<RootStackParamList, "otpLocked">) {
-  return (
-    <View style={styles.lockedScreen}>
-      <Text style={styles.lockedTitle}>Too many attempts</Text>
-      <Text style={styles.lockedBody}>
-        This code is locked for {route.params.email}. Please try again later.
-      </Text>
     </View>
   );
 }

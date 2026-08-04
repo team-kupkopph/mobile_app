@@ -10,6 +10,7 @@ export type RootStackParamList = {
   resetOtp: { email: string };
   resetPassword: { email: string; code: string };
   passwordChanged: undefined;
+  support: undefined;
   home: undefined;
   homeGuest: undefined;
   adopt: undefined;

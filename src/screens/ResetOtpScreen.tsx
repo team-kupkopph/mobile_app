@@ -1,10 +1,9 @@
-// US-A1 step 3 / US-A5 unverified-resume — reference: screens/user/screen-otp.png,
-// screens/user/screen-otp-unverified.png
-// POST /auth/email/verify { email, code } -> 400 attempts_left | 410 expired | 423 locked | 200 { access, refresh }
-// POST /auth/email/resend { email } -> 202
-// mode: "signup" (post-signup verify, -> signupSuccess) | "unverified" (signin hit 403 because the
-// account was never verified; amber banner explains why, success resets straight to home instead
-// of the "You're in!" recap since this is a returning user, not someone finishing first signup).
+// US-A6 — reference: screens/user/screen-reset-otp.png
+// Collects the 6-digit reset code only — no API call here. The code isn't checked until
+// ResetPasswordScreen submits it alongside the new password to POST /auth/password/reset;
+// checking it early here would need its own endpoint, which doesn't exist. "Resend" re-triggers
+// POST /auth/password/forgot (the same call that sends the first code) rather than a dedicated
+// resend endpoint — there isn't one for password reset.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -18,29 +17,24 @@ import {
 } from "react-native";
 
 import { useApi } from "../api/useApi";
-import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { AuthHeader, PrimaryButton, authColors } from "./AuthFormKit";
+import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
 
-type Props = NativeStackScreenProps<RootStackParamList, "otp">;
+type Props = NativeStackScreenProps<RootStackParamList, "resetOtp">;
 
-export function OtpScreen({ navigation, route }: Props) {
+export function ResetOtpScreen({ navigation, route }: Props) {
   const api = useApi();
-  const { setTokens } = useAuth();
-  const { email, mode } = route.params;
-  const isUnverifiedResume = mode === "unverified";
+  const { email } = route.params;
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(""));
-  const [error, setError] = useState<string | undefined>(undefined);
-  const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
   const [resendNotice, setResendNotice] = useState<string | undefined>(undefined);
   const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
   const inputRefs = useRef<Array<TextInput | null>>([]);
-  const submittedRef = useRef(false);
+  const advancedRef = useRef(false);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -57,8 +51,6 @@ export function OtpScreen({ navigation, route }: Props) {
       next[index] = nextDigit;
       return next;
     });
-    if (error) setError(undefined);
-
     if (nextDigit && index < CODE_LENGTH - 1) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -70,62 +62,27 @@ export function OtpScreen({ navigation, route }: Props) {
     }
   }
 
+  function onContinue() {
+    if (code.length !== CODE_LENGTH || advancedRef.current) return;
+    advancedRef.current = true;
+    navigation.navigate("resetPassword", { email, code });
+  }
+
   useEffect(() => {
-    if (code.length === CODE_LENGTH && !submittedRef.current) {
-      onVerify();
-    }
+    if (code.length === CODE_LENGTH) onContinue();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fires only when the 6th digit lands
   }, [code]);
-
-  async function onVerify() {
-    if (code.length !== CODE_LENGTH || submitting) return;
-    submittedRef.current = true;
-    setSubmitting(true);
-    setError(undefined);
-    try {
-      const res = await api.post("/auth/email/verify", { email, code });
-      if (res.status === 400) {
-        const attemptsLeft = res.data?.error?.details?.attempts_left;
-        setError(`Incorrect code. ${attemptsLeft} tries left.`);
-        setDigits(Array(CODE_LENGTH).fill(""));
-        inputRefs.current[0]?.focus();
-        return;
-      }
-      if (res.status === 410) {
-        setError("That code expired. Request a new one.");
-        return;
-      }
-      if (res.status === 423) {
-        navigation.replace("otpLocked", { email });
-        return;
-      }
-      if (res.ok) {
-        await setTokens({ access: res.data.access, refresh: res.data.refresh });
-        if (isUnverifiedResume) {
-          // Resuming a signin, not finishing a fresh signup — land straight on home rather than
-          // the "You're in!" recap. Single-stack nav doesn't auto-switch on token change.
-          navigation.reset({ index: 0, routes: [{ name: "home" }] });
-        } else {
-          navigation.navigate("signupSuccess");
-        }
-        return;
-      }
-      setError("Something went wrong. Please try again.");
-    } finally {
-      submittedRef.current = false;
-      setSubmitting(false);
-    }
-  }
 
   async function onResend() {
     if (cooldown > 0 || resending) return;
     setResending(true);
     setResendNotice(undefined);
     try {
-      await api.post("/auth/email/resend", { email });
+      await api.post("/auth/password/forgot", { email });
       setResendNotice("We sent a new code.");
       setCooldown(RESEND_COOLDOWN_SECONDS);
       setDigits(Array(CODE_LENGTH).fill(""));
+      advancedRef.current = false;
       inputRefs.current[0]?.focus();
     } finally {
       setResending(false);
@@ -134,19 +91,9 @@ export function OtpScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <AuthHeader title="Verify your email" activeStep={2} onBack={() => navigation.goBack()} />
+      <SimpleHeader title="Reset password" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
-        {isUnverifiedResume && (
-          <View style={styles.unverifiedBanner}>
-            <Text style={styles.unverifiedIcon}>!</Text>
-            <View style={styles.unverifiedCopy}>
-              <Text style={styles.unverifiedTitle}>Your email isn't verified yet</Text>
-              <Text style={styles.unverifiedBody}>Confirm your email to finish signing in.</Text>
-            </View>
-          </View>
-        )}
-
         <Text style={styles.title}>Enter the code</Text>
         <Text style={styles.caption}>We emailed a 6-digit code to</Text>
         <Text style={styles.emailText}>{email}</Text>
@@ -164,13 +111,11 @@ export function OtpScreen({ navigation, route }: Props) {
               keyboardType="number-pad"
               maxLength={1}
               selectTextOnFocus
-              style={[styles.otpBox, !!error && styles.otpBoxError]}
+              style={styles.otpBox}
               textAlign="center"
             />
           ))}
         </View>
-
-        {!!error && <Text style={styles.errorText}>{error}</Text>}
 
         <Text style={styles.resendHint}>Didn't get a code?</Text>
         <TouchableOpacity activeOpacity={0.75} onPress={onResend} disabled={cooldown > 0 || resending}>
@@ -180,7 +125,7 @@ export function OtpScreen({ navigation, route }: Props) {
         </TouchableOpacity>
         {!!resendNotice && <Text style={styles.resendNotice}>{resendNotice}</Text>}
 
-        <PrimaryButton label="Verify" onPress={onVerify} disabled={code.length !== CODE_LENGTH} loading={submitting} style={styles.verifyButton} />
+        <PrimaryButton label="Verify" onPress={onContinue} disabled={code.length !== CODE_LENGTH} style={styles.verifyButton} />
 
         <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.goBack()}>
           <Text style={styles.changeEmail}>Wrong email? Change it</Text>
@@ -198,42 +143,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 28
-  },
-  unverifiedBanner: {
-    marginBottom: 18,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "#FBE9CF"
-  },
-  unverifiedIcon: {
-    width: 22,
-    height: 22,
-    marginRight: 12,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: "#7A5310",
-    color: "#7A5310",
-    fontSize: 13,
-    fontWeight: "800",
-    textAlign: "center",
-    lineHeight: 19
-  },
-  unverifiedCopy: {
-    flex: 1
-  },
-  unverifiedTitle: {
-    color: "#7A5310",
-    fontSize: 14,
-    fontWeight: "800"
-  },
-  unverifiedBody: {
-    marginTop: 3,
-    color: "#7A5310",
-    fontSize: 12,
-    lineHeight: 17
   },
   title: {
     color: authColors.ink,
@@ -271,16 +180,6 @@ const styles = StyleSheet.create({
     color: authColors.ink,
     fontSize: 22,
     fontWeight: "800"
-  },
-  otpBoxError: {
-    borderColor: authColors.danger
-  },
-  errorText: {
-    marginTop: 14,
-    color: authColors.danger,
-    fontSize: 13,
-    fontWeight: "700",
-    textAlign: "center"
   },
   resendHint: {
     marginTop: 26,

@@ -86,8 +86,7 @@ export function SignupScreen({ navigation, route }: Props) {
 
         <PrimaryButton label="Send code" onPress={onSubmit} disabled={!canSubmit} loading={submitting} style={styles.submitButton} />
 
-        {/* "signin" isn't registered until M6 — inert for now rather than wired to something misleading. */}
-        <TouchableOpacity activeOpacity={0.75} disabled>
+        <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate("signin")}>
           <Text style={styles.linkCentered}>Already have an account? Log in</Text>
         </TouchableOpacity>
 

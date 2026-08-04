@@ -61,6 +61,39 @@ export function AuthHeader({ title, activeStep, onBack }: AuthHeaderProps) {
   );
 }
 
+type SimpleHeaderProps = {
+  title?: string;
+  onBack?: () => void;
+};
+
+// Header variant for screens outside the 3-step onboarding flow (signin, recovery chain):
+// same status-bar-and-back-button chrome as AuthHeader, but no step dots — those screens aren't
+// part of the account-type/signup/otp sequence. onBack omitted renders no back button (e.g.
+// passwordChanged, which is a dead-end success screen).
+export function SimpleHeader({ title, onBack }: SimpleHeaderProps) {
+  return (
+    <View style={styles.header}>
+      <Text style={styles.statusTime}>9:41</Text>
+      <View style={styles.statusBattery}>
+        <View style={styles.statusBatteryDot} />
+        <View style={styles.statusBatteryDot} />
+      </View>
+
+      {!!onBack && (
+        <TouchableOpacity
+          activeOpacity={0.75}
+          onPress={onBack}
+          style={styles.backButton}
+          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
+        >
+          <Text style={styles.backText}>‹</Text>
+        </TouchableOpacity>
+      )}
+      {!!title && <Text style={styles.headerTitle}>{title}</Text>}
+    </View>
+  );
+}
+
 type FormFieldProps = {
   label: string;
   value: string;
