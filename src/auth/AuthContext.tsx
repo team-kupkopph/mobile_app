@@ -37,8 +37,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function setTokens(t: Tokens) {
     setTokensState(t);
-    if (t) await SecureStore.setItemAsync(KEY, JSON.stringify(t));
-    else await SecureStore.deleteItemAsync(KEY);
+    if (t) {
+      await SecureStore.setItemAsync(KEY, JSON.stringify(t));
+    } else {
+      await SecureStore.deleteItemAsync(KEY);
+      // Any tokens -> null transition ends the session — not just explicit signOut(). The API
+      // client's own 401/refresh-failure branch (src/api/client.ts) calls this setTokens(null)
+      // directly on silent session expiry, bypassing signOut(). Clearing the cached city here
+      // too (rather than only in signOut()) closes that leak: without it, a second person
+      // signing in on the same device after a silent expiry would see the previous account's
+      // city until they manually changed it.
+      setCityState(null);
+      await SecureStore.deleteItemAsync(CITY_KEY);
+    }
   }
 
   async function setCity(c: string | null) {
@@ -48,8 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut() {
-    await setTokens(null);
-    await setCity(null); // don't leak the previous account's city to whoever signs in next
+    await setTokens(null); // also clears the cached city — see the comment in setTokens()
   }
 
   return (
