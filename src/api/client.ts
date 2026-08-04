@@ -4,10 +4,11 @@ type Tokens = { access: string; refresh: string } | null;
 export type ApiResult<T = any> = { ok: boolean; status: number; data: T };
 
 export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Promise<void>) {
-  async function raw(method: string, path: string, body?: any, retry = true): Promise<ApiResult> {
+  async function raw(method: string, path: string, body?: any, retry = true, accessOverride?: string): Promise<ApiResult> {
     const tokens = getTokens();
+    const access = accessOverride ?? tokens?.access;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (tokens?.access) headers.Authorization = `Bearer ${tokens.access}`;
+    if (access) headers.Authorization = `Bearer ${access}`;
     const res = await fetch(`${BASE}${path}`, {
       method, headers, body: body ? JSON.stringify(body) : undefined,
     });
@@ -20,7 +21,7 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
       if (r.ok) {
         const rd = await r.json();
         await setTokens({ access: rd.access, refresh: tokens.refresh });
-        return raw(method, path, body, false);
+        return raw(method, path, body, false, rd.access);
       }
       await setTokens(null);
     }

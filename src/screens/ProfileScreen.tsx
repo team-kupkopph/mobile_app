@@ -128,9 +128,10 @@ export function ProfileScreen({ navigation }: Props) {
         </View>
 
         <TouchableOpacity
-          activeOpacity={0.85}
+          activeOpacity={pendingMember || approvedMember ? 1 : 0.85}
           style={styles.verifyCard}
-          onPress={() => navigation.navigate("memberUpgrade")}
+          onPress={pendingMember || approvedMember ? undefined : () => navigation.navigate("memberUpgrade")}
+          disabled={pendingMember || approvedMember}
         >
           <View style={styles.verifyIcon}>
             <UserBadgeIcon color={colors.teal} />
