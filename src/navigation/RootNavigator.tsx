@@ -2,11 +2,12 @@ import { NativeStackScreenProps, createNativeStackNavigator } from "@react-navig
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
-import { OwnerTabs } from "../components/OwnerTabs";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
 import { HomeScreen } from "../screens/HomeScreen";
+import { LocationPickerScreen } from "../screens/LocationPickerScreen";
 import { OtpScreen } from "../screens/OtpScreen";
+import { ProfileScreen } from "../screens/ProfileScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
@@ -36,7 +37,9 @@ export function RootNavigator() {
       <Stack.Screen name="home" component={HomeScreen} />
       <Stack.Screen name="adopt" component={AdoptScreen} />
       <Stack.Screen name="volunteer" component={VolunteerScreen} />
-      <Stack.Screen name="profile" component={PlaceholderProfile} />
+      <Stack.Screen name="profile" component={ProfileScreen} />
+      <Stack.Screen name="locationPicker" component={LocationPickerScreen} />
+      <Stack.Screen name="memberUpgrade" component={PlaceholderMemberUpgrade} />
     </Stack.Navigator>
   );
 }
@@ -45,14 +48,13 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
   return <WelcomeScreen onGetStarted={() => navigation.navigate("accountType")} />;
 }
 
-// Minimal stand-in so the "You" tab has somewhere to navigate to and typechecks end-to-end.
-// Full profile (settings, Verified Member status, location) lands in M5.
-function PlaceholderProfile() {
+// Minimal stand-in so Profile's "Get Verified" row has somewhere to navigate to and typechecks
+// end-to-end. Full Verified Member submission flow (documents, review state) lands in M7.
+function PlaceholderMemberUpgrade() {
   return (
     <View style={styles.lockedScreen}>
-      <Text style={styles.lockedTitle}>You</Text>
-      <Text style={styles.lockedBody}>Profile is coming soon.</Text>
-      <OwnerTabs active="profile" />
+      <Text style={styles.lockedTitle}>Get Verified</Text>
+      <Text style={styles.lockedBody}>Verified Member submission is coming soon.</Text>
     </View>
   );
 }

@@ -1,7 +1,9 @@
 // US-X1/X2 — owner home. Reference: screens/user/screen-home.png (plain) and
 // screens/user/screen-home-member-pending.png (Verified Member under review).
-// Fetches /me on focus and derives the pending-member banner from capabilities; the "Saw a
-// stray?" hero, quick actions, and city chip are static — their destinations land in later sprints.
+// Fetches /me on focus and derives the pending-member banner from capabilities; the city chip
+// routes to locationPicker (M5) and reads the cached city from AuthContext (no GET /me/location
+// exists — see AuthContext.tsx). The "Saw a stray?" hero and quick actions are still static —
+// their destinations land in later sprints.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -9,6 +11,7 @@ import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpac
 
 import { useApi } from "../api/useApi";
 import { Me } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { BellIcon, ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
@@ -31,8 +34,9 @@ const pets = [
   { name: "Luna", details: "Puspin · 2 yrs · Female", shelter: "Marikina AWG · 4 km" }
 ];
 
-export function HomeScreen({}: Props) {
+export function HomeScreen({ navigation }: Props) {
   const api = useApi();
+  const { city } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
 
   useFocusEffect(
@@ -54,9 +58,8 @@ export function HomeScreen({}: Props) {
               <Text style={styles.role}>Pet owner · Verified Member pending</Text>
             ) : (
               <View style={styles.cityRow}>
-                <Text style={styles.cityText}>Marikina City</Text>
-                {/* location-picker lands in M5 — inert for now rather than wired to something misleading */}
-                <TouchableOpacity activeOpacity={0.75} disabled>
+                <Text style={styles.cityText}>{city ?? "Set your city"}</Text>
+                <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate("locationPicker")}>
                   <Text style={styles.cityChange}>Change ›</Text>
                 </TouchableOpacity>
               </View>

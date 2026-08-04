@@ -129,6 +129,47 @@ export function ClockIcon({ color, size = 38 }: { color: string; size?: number }
   );
 }
 
+export function LocationPinIcon({ color, size = 20 }: IconProps) {
+  return (
+    <View style={[styles.iconBox, { width: size, height: size }]}>
+      <View
+        style={[
+          styles.pinHead,
+          { width: size * 0.62, height: size * 0.62, borderRadius: size * 0.31, borderColor: color, top: 0 }
+        ]}
+      />
+      <View
+        style={[
+          styles.pinPoint,
+          {
+            borderLeftWidth: size * 0.16,
+            borderRightWidth: size * 0.16,
+            borderTopWidth: size * 0.2,
+            borderTopColor: color,
+            top: size * 0.5
+          }
+        ]}
+      />
+    </View>
+  );
+}
+
+export function CheckIcon({ color = "#FFFFFF", size = 14 }: { color?: string; size?: number }) {
+  return (
+    <View style={[styles.iconBox, { width: size, height: size }]}>
+      <View
+        style={[
+          styles.checkShort,
+          { backgroundColor: color, width: size * 0.36, left: size * 0.08, top: size * 0.46 }
+        ]}
+      />
+      <View
+        style={[styles.checkLong, { backgroundColor: color, width: size * 0.64, left: size * 0.26, top: size * 0.34 }]}
+      />
+    </View>
+  );
+}
+
 export function DocumentIcon({ color }: { color: string }) {
   return (
     <View style={[styles.document, { borderColor: color }]}> 
@@ -277,5 +318,28 @@ const styles = StyleSheet.create({
   clockHandWide: {
     height: 3,
     borderRadius: 2
+  },
+  pinHead: {
+    position: "absolute",
+    borderWidth: 2
+  },
+  pinPoint: {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent"
+  },
+  checkShort: {
+    position: "absolute",
+    height: 2.4,
+    borderRadius: 2,
+    transform: [{ rotate: "45deg" }]
+  },
+  checkLong: {
+    position: "absolute",
+    height: 2.4,
+    borderRadius: 2,
+    transform: [{ rotate: "-45deg" }]
   }
 });
