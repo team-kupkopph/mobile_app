@@ -20,7 +20,7 @@ import {
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { AuthHeader, PrimaryButton, authColors } from "./AuthFormKit";
+import { AuthHeader, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -30,7 +30,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "otp">;
 export function OtpScreen({ navigation, route }: Props) {
   const api = useApi();
   const { setTokens } = useAuth();
-  const { email, mode } = route.params;
+  const { email, mode, tier } = route.params;
   const isUnverifiedResume = mode === "unverified";
 
   const [digits, setDigits] = useState<string[]>(Array(CODE_LENGTH).fill(""));
@@ -105,6 +105,9 @@ export function OtpScreen({ navigation, route }: Props) {
           // Resuming a signin, not finishing a fresh signup — land straight on home rather than
           // the "You're in!" recap. Single-stack nav doesn't auto-switch on token change.
           navigation.reset({ index: 0, routes: [{ name: "home" }] });
+        } else if (tier) {
+          // Shelter signup continues into org setup (US-B2), not the owner "You're in!" recap.
+          navigation.navigate("shelterSetup", { tier });
         } else {
           navigation.navigate("signupSuccess");
         }
@@ -134,7 +137,12 @@ export function OtpScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <AuthHeader title="Verify your email" activeStep={2} onBack={() => navigation.goBack()} />
+      <AuthHeader
+        title="Verify your email"
+        activeStep={2}
+        stepCount={tier ? SHELTER_STEP_COUNT : undefined}
+        onBack={() => navigation.goBack()}
+      />
 
       <View style={styles.content}>
         {isUnverifiedResume && (

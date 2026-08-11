@@ -42,7 +42,16 @@ export function HomeScreen({ navigation, route }: Props) {
 
   useFocusEffect(
     useCallback(() => {
-      api.get("/me").then((r) => r.ok && setMe(r.data));
+      api.get("/me").then((r) => {
+        if (!r.ok) return;
+        // US-X1: the right shell for who you are. A returning shelter account lands here (the
+        // single stack's initialRouteName is always "home") — redirect it to the shelter shell.
+        if (r.data.account_type === "shelter") {
+          navigation.reset({ index: 0, routes: [{ name: "shelterDashboard" }] });
+          return;
+        }
+        setMe(r.data);
+      });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
     }, [])
   );

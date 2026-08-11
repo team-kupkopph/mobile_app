@@ -26,14 +26,19 @@ export const authColors = {
 };
 
 export const AUTH_STEP_COUNT = 3;
+// Shelters carry a 4-dot stepper on every onboarding step (rule 4 / US-B1) — the
+// owner journey is 3 stops, the shelter journey is 4. `stepCount` lets the shared
+// header render the right dot count without a shelter-specific header component.
+export const SHELTER_STEP_COUNT = 4;
 
 type AuthHeaderProps = {
   title: string;
-  activeStep: number; // 0-based index into AUTH_STEP_COUNT
+  activeStep: number; // 0-based index into stepCount
   onBack: () => void;
+  stepCount?: number;
 };
 
-export function AuthHeader({ title, activeStep, onBack }: AuthHeaderProps) {
+export function AuthHeader({ title, activeStep, onBack, stepCount = AUTH_STEP_COUNT }: AuthHeaderProps) {
   return (
     <View style={styles.header}>
       <Text style={styles.statusTime}>9:41</Text>
@@ -53,7 +58,7 @@ export function AuthHeader({ title, activeStep, onBack }: AuthHeaderProps) {
       <Text style={styles.headerTitle}>{title}</Text>
 
       <View style={styles.steps}>
-        {Array.from({ length: AUTH_STEP_COUNT }).map((_, step) => (
+        {Array.from({ length: stepCount }).map((_, step) => (
           <View key={step} style={[styles.stepDot, step <= activeStep && styles.stepActive]} />
         ))}
       </View>

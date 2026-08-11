@@ -5,20 +5,24 @@ import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { TERMS_VERSION } from "../consent";
+import { passwordError } from "../passwordRules";
 import { RootStackParamList } from "../navigation/types";
-import { AuthHeader, FormField, PrimaryButton, authColors } from "./AuthFormKit";
+import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signup">;
 
 export function SignupScreen({ navigation, route }: Props) {
   const api = useApi();
-  const { accountType } = route.params;
+  const { accountType, tier } = route.params;
+  const isShelter = accountType === "shelter";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [emailError, setEmailError] = useState<string | undefined>(undefined);
+  const [passwordFieldError, setPasswordFieldError] = useState<string | undefined>(undefined);
   const [formError, setFormError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
 
@@ -28,20 +32,28 @@ export function SignupScreen({ navigation, route }: Props) {
     if (!canSubmit) return;
     setEmailError(undefined);
     setFormError(undefined);
+    // Client-side strength check (server enforces the same rule as a backstop). The button
+    // stays enabled per the app's interaction rule — the error appears under the field.
+    const pwError = passwordError(password);
+    setPasswordFieldError(pwError);
+    if (pwError) return;
     setSubmitting(true);
     try {
       const res = await api.post("/auth/signup", {
         account_type: accountType,
         display_name: name.trim(),
         email: email.trim(),
-        password
+        password,
+        // RA 10173: record the terms version actually shown below, so the consent is
+        // demonstrable rather than merely rendered (US-A1).
+        consent_version: TERMS_VERSION
       });
       if (res.status === 409) {
         setEmailError("That email is already registered.");
         return;
       }
       if (res.ok) {
-        navigation.navigate("otp", { email: email.trim(), mode: "signup" });
+        navigation.navigate("otp", { email: email.trim(), mode: "signup", tier });
         return;
       }
       setFormError(res.data?.error?.message ?? "Something went wrong. Please try again.");
@@ -52,13 +64,24 @@ export function SignupScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <AuthHeader title="Create account" activeStep={1} onBack={() => navigation.goBack()} />
+      <AuthHeader
+        title="Create account"
+        activeStep={1}
+        stepCount={isShelter ? SHELTER_STEP_COUNT : undefined}
+        onBack={() => navigation.goBack()}
+      />
 
       <View style={styles.content}>
         <Text style={styles.title}>Let's get you set up</Text>
-        <Text style={styles.caption}>A few details and you're in.</Text>
+        <Text style={styles.caption}>{isShelter ? "Use your organisation's email." : "A few details and you're in."}</Text>
 
-        <FormField label="Full name" value={name} onChangeText={setName} autoCapitalize="words" autoComplete="name" />
+        <FormField
+          label={isShelter ? "Organization name" : "Full name"}
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+          autoComplete={isShelter ? undefined : "name"}
+        />
         <FormField
           label="Email"
           value={email}
@@ -74,13 +97,17 @@ export function SignupScreen({ navigation, route }: Props) {
         <FormField
           label="Password"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(value) => {
+            setPassword(value);
+            if (passwordFieldError) setPasswordFieldError(undefined);
+          }}
           secure={!passwordVisible}
           onToggleSecure={() => setPasswordVisible((visible) => !visible)}
           autoComplete="password-new"
+          error={passwordFieldError}
         />
 
-        <Text style={styles.helper}>We'll email you a 6-digit code to verify it.</Text>
+        <Text style={styles.helper}>At least 8 characters, including a number. We'll email a 6-digit code to verify it.</Text>
 
         {!!formError && <Text style={styles.formError}>{formError}</Text>}
 

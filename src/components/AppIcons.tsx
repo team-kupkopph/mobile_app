@@ -129,6 +129,61 @@ export function ClockIcon({ color, size = 38 }: { color: string; size?: number }
   );
 }
 
+export function LockIcon({ color, size = 16 }: { color: string; size?: number }) {
+  // Shackle + body, matching the stroke weight of the rest of the set (gen-screens.js
+  // `lockIcon`). Used on gated rows — the design system forbids emoji glyphs.
+  const bodyW = size, bodyH = size * 0.62, shackle = size * 0.52;
+  return (
+    <View style={{ width: bodyW, height: size * 1.1, alignItems: "center", justifyContent: "flex-end" }}>
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          width: shackle,
+          height: shackle,
+          borderWidth: size * 0.12,
+          borderColor: color,
+          borderBottomWidth: 0,
+          borderTopLeftRadius: shackle / 2,
+          borderTopRightRadius: shackle / 2
+        }}
+      />
+      <View style={{ width: bodyW, height: bodyH, borderRadius: size * 0.16, backgroundColor: color }} />
+    </View>
+  );
+}
+
+export function AlertIcon({ color, size = 38 }: { color: string; size?: number }) {
+  // Circle with an exclamation mark — the not-submitted / needs-action state, matching the
+  // stroke weight of the other glyphs in this set (see gen-screens.js `alertIcon`).
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: size * 0.08,
+        borderColor: color,
+        alignItems: "center",
+        justifyContent: "center"
+      }}
+    >
+      <View
+        style={{
+          width: size * 0.09,
+          height: size * 0.3,
+          borderRadius: size * 0.05,
+          backgroundColor: color,
+          marginTop: -size * 0.02
+        }}
+      />
+      <View
+        style={{ width: size * 0.1, height: size * 0.1, borderRadius: size * 0.05, backgroundColor: color, marginTop: size * 0.05 }}
+      />
+    </View>
+  );
+}
+
 export function LocationPinIcon({ color, size = 20 }: IconProps) {
   return (
     <View style={[styles.iconBox, { width: size, height: size }]}>

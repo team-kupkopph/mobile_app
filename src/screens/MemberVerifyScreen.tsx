@@ -10,6 +10,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 
 import { useApi } from "../api/useApi";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
+import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
@@ -66,7 +67,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
       const res = await api.post("/verifications", {
         type: "rescuer",
         social_proof_url: socialUrl.trim(),
-        consent_version: "2026-08-01",
+        consent_version: DOC_CONSENT_VERSION,
         documents: [{ doc_type: "gov_id", file_url: url }]
       });
 

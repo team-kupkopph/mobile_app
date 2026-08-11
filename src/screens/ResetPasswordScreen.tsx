@@ -6,10 +6,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
+import { PASSWORD_RULE, passwordError } from "../passwordRules";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
-
-const MIN_LENGTH = 8;
-const HAS_NUMBER_OR_SYMBOL = /[0-9!"#$%&'()*+,\-./:;<=>?@[\]^_`{|}~]/;
 
 type Props = NativeStackScreenProps<RootStackParamList, "resetPassword">;
 
@@ -24,9 +22,11 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
   const [error, setError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
 
-  const hasLength = password.length >= MIN_LENGTH;
-  const hasNumberOrSymbol = HAS_NUMBER_OR_SYMBOL.test(password);
-  const meetsRules = hasLength && hasNumberOrSymbol;
+  // Same rule as signup, and the same rule the server now enforces on new_password —
+  // previously this screen accepted "number OR symbol", which the server would reject.
+  const hasLength = password.length >= 8;
+  const hasNumber = /\d/.test(password);
+  const meetsRules = !passwordError(password);
   const canSubmit = meetsRules && confirm.length > 0 && !submitting;
 
   async function onSubmit() {
@@ -40,7 +40,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
     try {
       const res = await api.post("/auth/password/reset", { email, code, new_password: password });
       if (res.status === 400) {
-        setError("That code is invalid.");
+        setError(res.data?.error?.field === "new_password" ? PASSWORD_RULE : "That code is invalid.");
         return;
       }
       if (res.status === 410) {
@@ -90,7 +90,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
 
         <View style={styles.rulesGroup}>
           <RuleRow met={hasLength} label="At least 8 characters" />
-          <RuleRow met={hasNumberOrSymbol} label="One number or symbol" />
+          <RuleRow met={hasNumber} label="At least one number" />
         </View>
 
         {!!error && <Text style={styles.formError}>{error}</Text>}

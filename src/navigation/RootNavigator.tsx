@@ -1,7 +1,8 @@
 import { NativeStackScreenProps, createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
+import { NOT_CONFIGURED_MESSAGE, SocialProvider, signInWithProvider } from "../auth/socialAuth";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
@@ -17,6 +18,14 @@ import { PasswordChangedScreen } from "../screens/PasswordChangedScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { ResetOtpScreen } from "../screens/ResetOtpScreen";
 import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
+import { ShelterContactScreen } from "../screens/ShelterContactScreen";
+import { ShelterDashboardScreen } from "../screens/ShelterDashboardScreen";
+import { ShelterPhoneVerifyScreen } from "../screens/ShelterPhoneVerifyScreen";
+import { ShelterProfileScreen } from "../screens/ShelterProfileScreen";
+import { ShelterSetupScreen } from "../screens/ShelterSetupScreen";
+import { ShelterTierScreen } from "../screens/ShelterTierScreen";
+import { ShelterVerifyNgoScreen } from "../screens/ShelterVerifyNgoScreen";
+import { ShelterVerifyScreen } from "../screens/ShelterVerifyScreen";
 import { SigninScreen } from "../screens/SigninScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
@@ -59,16 +68,41 @@ export function RootNavigator() {
       <Stack.Screen name="memberUpgrade" component={MemberUpgradeScreen} />
       <Stack.Screen name="memberVerify" component={MemberVerifyScreen} />
       <Stack.Screen name="memberSubmitted" component={MemberSubmittedScreen} />
+      <Stack.Screen name="shelterTier" component={ShelterTierScreen} />
+      <Stack.Screen name="shelterSetup" component={ShelterSetupScreen} />
+      <Stack.Screen name="shelterContact" component={ShelterContactScreen} />
+      <Stack.Screen name="shelterPhoneVerify" component={ShelterPhoneVerifyScreen} />
+      <Stack.Screen name="shelterVerify" component={ShelterVerifyScreen} />
+      <Stack.Screen name="shelterVerifyNgo" component={ShelterVerifyNgoScreen} />
+      <Stack.Screen name="shelterDashboard" component={ShelterDashboardScreen} />
+      <Stack.Screen name="shelterProfile" component={ShelterProfileScreen} />
     </Stack.Navigator>
   );
 }
 
 function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList, "welcome">) {
+  // US-A2. This handler was MISSING until 2026-08-06: WelcomeScreen rendered a "Continue with
+  // Google" button and nothing was ever passed for it, so tapping it did nothing at all —
+  // silently. Now it either starts the provider flow or explains why it can't.
+  async function onSocial(provider: SocialProvider) {
+    const res = await signInWithProvider(provider);
+    if (res.ok) {
+      navigation.navigate("accountType", { social: res.identity });
+      return;
+    }
+    if (res.reason === "cancelled") return;
+    Alert.alert(
+      res.reason === "not_configured" ? "Not available yet" : "Sign-in failed",
+      res.reason === "not_configured" ? NOT_CONFIGURED_MESSAGE : "Please try again."
+    );
+  }
+
   return (
     <WelcomeScreen
       onGetStarted={() => navigation.navigate("accountType")}
       onLogin={() => navigation.navigate("signin")}
       onBrowseGuest={() => navigation.navigate("homeGuest")}
+      onContinueWithGoogle={() => onSocial("google")}
     />
   );
 }
