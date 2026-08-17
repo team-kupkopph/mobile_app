@@ -1,6 +1,18 @@
 export type Capability = { capability: "rescuer" | "provider"; status: "pending" | "approved" | "rejected" };
 export type ShelterTier = "community_rescue" | "registered_ngo";
 export type VerificationStatus = "pending" | "needs_info" | "approved" | "rejected";
+export type DocStatus = "pending" | "approved" | "rejected";
+// GET /me/verifications (US-V2) — the applicant's document tracker.
+export type MeVerificationDoc = {
+  document_id: string; doc_type: string; status: DocStatus;
+  review_note: string | null; superseded_by: string | null;
+};
+export type MeVerification = {
+  verification_id: string; type: "shelter_org" | "rescuer" | "provider";
+  status: VerificationStatus; notes: string | null;
+  submitted_at: string; reviewed_at: string | null;
+  documents: MeVerificationDoc[];
+};
 export type Me = {
   account_id: string; account_type: "personal" | "shelter" | "admin";
   display_name: string; email: string; email_verified_at: string | null;

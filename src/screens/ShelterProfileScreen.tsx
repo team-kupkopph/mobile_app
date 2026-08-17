@@ -89,7 +89,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
             <TouchableOpacity
               activeOpacity={0.85}
               style={styles.accentWarn}
-              onPress={() => navigation.navigate("shelterVerify", { tier })}
+              onPress={() => navigation.navigate("verifyDocuments")}
             >
               <View style={styles.accentCopy}>
                 <Text style={styles.accentWarnTitle}>Under review</Text>

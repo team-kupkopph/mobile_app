@@ -29,6 +29,8 @@ import { ShelterVerifyScreen } from "../screens/ShelterVerifyScreen";
 import { SigninScreen } from "../screens/SigninScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
+import { VerifyDocumentsScreen } from "../screens/VerifyDocumentsScreen";
+import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
@@ -76,6 +78,8 @@ export function RootNavigator() {
       <Stack.Screen name="shelterVerifyNgo" component={ShelterVerifyNgoScreen} />
       <Stack.Screen name="shelterDashboard" component={ShelterDashboardScreen} />
       <Stack.Screen name="shelterProfile" component={ShelterProfileScreen} />
+      <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
+      <Stack.Screen name="verifyResubmit" component={VerifyResubmitScreen} />
     </Stack.Navigator>
   );
 }
