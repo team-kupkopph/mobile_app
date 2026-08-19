@@ -30,6 +30,7 @@ import { SigninScreen } from "../screens/SigninScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
 import { MyReportsScreen } from "../screens/MyReportsScreen";
+import { AdjustPinScreen } from "../screens/AdjustPinScreen";
 import { ReportDetailScreen } from "../screens/ReportDetailScreen";
 import { ReportSentScreen } from "../screens/ReportSentScreen";
 import { ReportStrayScreen } from "../screens/ReportStrayScreen";
@@ -86,6 +87,7 @@ export function RootNavigator() {
       <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
       <Stack.Screen name="verifyResubmit" component={VerifyResubmitScreen} />
       <Stack.Screen name="reportStray" component={ReportStrayScreen} />
+      <Stack.Screen name="adjustPin" component={AdjustPinScreen} />
       <Stack.Screen name="reportSent" component={ReportSentScreen} />
       <Stack.Screen name="myReports" component={MyReportsScreen} />
       <Stack.Screen name="rescueMap" component={RescueMapScreen} />

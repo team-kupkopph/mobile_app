@@ -46,7 +46,10 @@ export type RootStackParamList = {
     verificationId: string; documentId: string; docType: string; reviewNote?: string | null;
   };
   // Sagip — report a stray (Track S)
-  reportStray: undefined;
+  // adjustedLat/Lng ride back from the US-S2 Adjust map when the reporter refines the exact pin.
+  reportStray: { adjustedLat?: number; adjustedLng?: number } | undefined;
+  // US-S2 · refine the report's precise pin on a map. Seeded with the current GPS coords.
+  adjustPin: { lat: number; lng: number };
   reportSent: { reportId: string; title: string; city: string | null };
   myReports: undefined;
   rescueMap: undefined;

@@ -2,7 +2,7 @@
 // POST /reports { species, condition, notes?, is_anonymous, lat, lng, location_text?, photos } -> 201.
 // Location = the app's ONE precise-GPS surface (decision 11): expo-location gives the coords, and
 // the disclosure below is NOT optional copy — everywhere else a person's location is city-level.
-// The draggable-pin refinement (US-S2 "Adjust") needs react-native-maps + a dev build — deferred.
+// The precise-pin refinement (US-S2 "Adjust") opens AdjustPinScreen (react-native-maps, dev build).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -23,7 +23,7 @@ const CONDITIONS = ["injured", "sick", "healthy", "pregnant"] as const;
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportStray">;
 
-export function ReportStrayScreen({ navigation }: Props) {
+export function ReportStrayScreen({ navigation, route }: Props) {
   const api = useApi();
   const [species, setSpecies] = useState<string>("dog");
   const [condition, setCondition] = useState<string>("injured");
@@ -61,6 +61,26 @@ export function ReportStrayScreen({ navigation }: Props) {
       }
     })();
   }, []);
+
+  // US-S2 · the Adjust map pops back with refined coords — adopt them and refresh the address.
+  const adjLat = route.params?.adjustedLat;
+  const adjLng = route.params?.adjustedLng;
+  useEffect(() => {
+    if (adjLat == null || adjLng == null) return;
+    setCoords({ lat: adjLat, lng: adjLng });
+    setLocState("ready");
+    (async () => {
+      try {
+        const [place] = await Location.reverseGeocodeAsync({ latitude: adjLat, longitude: adjLng });
+        if (place) {
+          const line = [place.name, place.street, place.city].filter(Boolean).join(", ");
+          setLocationText(line || place.city || "");
+        }
+      } catch {
+        // best-effort; the refined coords are what matter
+      }
+    })();
+  }, [adjLat, adjLng]);
 
   async function addPhoto() {
     if (uploading) return;
@@ -133,7 +153,17 @@ export function ReportStrayScreen({ navigation }: Props) {
           ) : (
             <>
               <Text style={styles.locAddr}>{locationText || "Current location"}</Text>
-              <Text style={styles.locFrom}>From your GPS</Text>
+              <View style={styles.locFooter}>
+                <Text style={styles.locFrom}>From your GPS</Text>
+                {coords ? (
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("adjustPin", { lat: coords.lat, lng: coords.lng })}
+                    hitSlop={10}
+                  >
+                    <Text style={styles.adjust}>Adjust exact location ›</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
             </>
           )}
         </View>
@@ -210,7 +240,9 @@ const styles = StyleSheet.create({
   locRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   locText: { color: colors.muted, fontSize: 15 },
   locAddr: { color: colors.ink, fontSize: 17, fontWeight: "700" },
-  locFrom: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  locFooter: { marginTop: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  locFrom: { color: colors.muted, fontSize: 14, fontWeight: "600" },
+  adjust: { color: colors.teal, fontSize: 15, fontWeight: "800" },
   locDenied: { color: colors.warn2, fontSize: 15, fontWeight: "600" },
   fine: { marginTop: 12, color: colors.fine, fontSize: 13, lineHeight: 19 },
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: 18, ...card },
