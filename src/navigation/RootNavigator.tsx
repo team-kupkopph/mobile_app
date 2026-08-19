@@ -29,6 +29,11 @@ import { ShelterVerifyScreen } from "../screens/ShelterVerifyScreen";
 import { SigninScreen } from "../screens/SigninScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
+import { MyReportsScreen } from "../screens/MyReportsScreen";
+import { ReportDetailScreen } from "../screens/ReportDetailScreen";
+import { ReportSentScreen } from "../screens/ReportSentScreen";
+import { ReportStrayScreen } from "../screens/ReportStrayScreen";
+import { RescueMapScreen } from "../screens/RescueMapScreen";
 import { VerifyDocumentsScreen } from "../screens/VerifyDocumentsScreen";
 import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
@@ -80,6 +85,11 @@ export function RootNavigator() {
       <Stack.Screen name="shelterProfile" component={ShelterProfileScreen} />
       <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
       <Stack.Screen name="verifyResubmit" component={VerifyResubmitScreen} />
+      <Stack.Screen name="reportStray" component={ReportStrayScreen} />
+      <Stack.Screen name="reportSent" component={ReportSentScreen} />
+      <Stack.Screen name="myReports" component={MyReportsScreen} />
+      <Stack.Screen name="rescueMap" component={RescueMapScreen} />
+      <Stack.Screen name="reportDetail" component={ReportDetailScreen} />
     </Stack.Navigator>
   );
 }

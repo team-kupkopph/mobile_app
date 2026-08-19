@@ -18,7 +18,13 @@
     },
     "plugins": [
       "expo-asset",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Kupkop uses your location only to place a stray report so a rescuer can find the animal. Your profile still shows just your city."
+        }
+      ]
     ]
   }
 }

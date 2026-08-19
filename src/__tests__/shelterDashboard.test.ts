@@ -17,4 +17,8 @@ describe("shelterBannerState (US-B5 — two derived states)", () => {
   it("shows 'incomplete' when nothing was submitted", () => {
     expect(shelterBannerState(dash(false, null))).toBe("incomplete");
   });
+
+  it("shows 'verified' once the request is approved (US-V5)", () => {
+    expect(shelterBannerState(dash(true, "approved"))).toBe("verified");
+  });
 });

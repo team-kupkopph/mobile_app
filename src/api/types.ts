@@ -22,6 +22,21 @@ export type Me = {
   settings: Record<string, boolean>;
 };
 export type ApiError = { code: string; message: string; field?: string; details?: any };
+
+// Sagip — stray reports (Track S)
+export type StrayStatus = "reported" | "claimed" | "rescued" | "safe" | "resolved";
+export type MyReport = {
+  report_id: string; species: string; condition: string;
+  status: StrayStatus; city: string | null; created_at: string;
+};
+export type MapReport = {
+  report_id: string; species: string; condition: string;
+  status: StrayStatus; city: string | null; reported_at: string;
+};
+export type ReportDetail = {
+  report_id: string; species: string; condition: string; status: StrayStatus;
+  notes: string | null; city: string | null; reported_at: string; photos: string[];
+};
 export type Listing = {
   listing_id: string;
   pet: { name: string; species: string; breed: string | null };

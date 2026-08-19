@@ -113,11 +113,24 @@ export function HomeScreen({ navigation, route }: Props) {
           <View>
             <Text style={styles.reportTitle}>Saw a stray?</Text>
             <Text style={styles.reportText}>Report it in seconds — help is near.</Text>
-            <TouchableOpacity activeOpacity={0.85} style={styles.reportButton}>
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={styles.reportButton}
+              onPress={() => navigation.navigate("reportStray")}
+            >
               <Text style={styles.reportButtonText}>Report now</Text>
             </TouchableOpacity>
           </View>
           <Image source={paw} resizeMode="contain" style={styles.reportPaw} />
+        </View>
+
+        <View style={styles.sagipLinks}>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("rescueMap")}>
+            <Text style={styles.sagipLink}>See nearby strays ›</Text>
+          </TouchableOpacity>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("myReports")}>
+            <Text style={styles.sagipLink}>My reports ›</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.quickGrid}>
@@ -343,6 +356,16 @@ const styles = StyleSheet.create({
   reportButtonText: {
     color: "#126B69",
     fontSize: 13,
+    fontWeight: "800"
+  },
+  sagipLinks: {
+    marginTop: 14,
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  sagipLink: {
+    color: "#1C6B6B",
+    fontSize: 14,
     fontWeight: "800"
   },
   reportPaw: {

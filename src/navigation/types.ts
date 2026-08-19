@@ -45,4 +45,10 @@ export type RootStackParamList = {
   verifyResubmit: {
     verificationId: string; documentId: string; docType: string; reviewNote?: string | null;
   };
+  // Sagip — report a stray (Track S)
+  reportStray: undefined;
+  reportSent: { reportId: string; title: string; city: string | null };
+  myReports: undefined;
+  rescueMap: undefined;
+  reportDetail: { reportId: string };
 };

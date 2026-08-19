@@ -95,7 +95,21 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
           </View>
         ) : (
           <>
-            {verification.status === "needs_info" && verification.notes ? (
+            {verification.status === "rejected" ? (
+              // US-V4 · a rejection always shows the reason and a next step.
+              <View style={[styles.noteBanner, styles.noteBannerDanger]}>
+                <AlertIcon color={colors.danger} size={30} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.noteBannerTitle}>Not verified</Text>
+                  {verification.notes ? (
+                    <Text style={styles.noteBannerBody}>{verification.notes}</Text>
+                  ) : null}
+                  <Text style={styles.noteBannerHint}>
+                    Your org stays in draft — fix the flagged files below and resubmit.
+                  </Text>
+                </View>
+              </View>
+            ) : verification.status === "needs_info" && verification.notes ? (
               <View style={styles.noteBanner}>
                 <AlertIcon color={colors.warn2} size={30} />
                 <Text style={styles.noteBannerText}>{verification.notes}</Text>
@@ -217,6 +231,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.warnBg
   },
   noteBannerText: { flex: 1, color: colors.warn2, fontSize: 15, fontWeight: "600", lineHeight: 21 },
+  noteBannerDanger: { backgroundColor: colors.dangerBg },
+  noteBannerTitle: { color: colors.danger, fontSize: 17, fontWeight: "800" },
+  noteBannerBody: { marginTop: 6, color: colors.danger, fontSize: 15, fontWeight: "600", lineHeight: 21 },
+  noteBannerHint: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 20 },
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 20, fontWeight: "800" },
   docCard: {
     marginBottom: 14,
