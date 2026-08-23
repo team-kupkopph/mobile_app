@@ -246,7 +246,12 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.teal
   },
   fieldGroup: {
-    marginTop: 17
+    marginTop: 17,
+    // Fill the parent's width. Without this, a screen whose form column centers its children
+    // (SigninScreen's `content` has alignItems:"center") collapses the field to its intrinsic
+    // width — a tiny ~150px box that's hard to tap and stacks the email/password targets close
+    // enough that taps land on the wrong one. A form field should always be full-width.
+    alignSelf: "stretch"
   },
   label: {
     marginBottom: 8,
