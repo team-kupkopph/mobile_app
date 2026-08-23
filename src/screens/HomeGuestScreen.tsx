@@ -112,7 +112,11 @@ export function HomeGuestScreen({ navigation }: Props) {
             key={listing.listing_id}
             activeOpacity={0.85}
             style={styles.petCard}
-            onPress={() => openWall("adopt", listing.pet.name)}
+            // US-A3: a guest may now open the listing read-only; the wall is raised at the
+            // Inquire action inside detail, not at the card tap. (The signup-wall itself still
+            // exists here for the Report / Adopt-tab / You-tab entry points, which have no
+            // read-only surface to fall through to.)
+            onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
           >
             <View style={styles.avatarCircle}>
               <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />

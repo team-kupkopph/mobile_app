@@ -10,6 +10,9 @@ import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, Touchabl
 
 import { ListingDetail } from "../api/types";
 import { useApi } from "../api/useApi";
+import { useAuth } from "../auth/AuthContext";
+import { SignupWall } from "../components/SignupWall";
+import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 
 const colors = {
@@ -21,11 +24,14 @@ type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
 
 export function ListingDetailScreen({ navigation, route }: Props) {
   const api = useApi();
+  const { tokens } = useAuth();
+  const isGuest = tokens === null;
   const { listingId } = route.params;
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [inquiring, setInquiring] = useState(false);
   const [inquired, setInquired] = useState(false);
+  const [wallOpen, setWallOpen] = useState(false);
 
   const load = useCallback(() => {
     api.get(`/listings/${listingId}`).then((r) => {
@@ -36,6 +42,17 @@ export function ListingDetailScreen({ navigation, route }: Props) {
   }, [listingId]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  function onInquirePressed() {
+    // US-A1b/A3: a guest may VIEW this screen read-only, but Inquire is the gated action —
+    // it raises the signup wall rather than hitting the API (which would just 401). A
+    // signed-in user goes straight to the real inquiry.
+    if (isGuest) {
+      setWallOpen(true);
+      return;
+    }
+    inquire();
+  }
 
   async function inquire() {
     if (inquiring) return;
@@ -62,10 +79,10 @@ export function ListingDetailScreen({ navigation, route }: Props) {
       return;
     }
     if (code === "phone_unverified") {
-      // ⚠️ The owner-side verify-phone screen doesn't exist yet (only the shelter one does).
-      // Surface the requirement honestly rather than routing to a screen that isn't built.
       Alert.alert("Verify your phone first",
-        "Add and verify a mobile number in your profile before inquiring — it's how the poster reaches you.");
+        "The poster reaches you by phone — verify a mobile number, then send your inquiry.",
+        [{ text: "Not now", style: "cancel" },
+         { text: "Verify phone", onPress: () => navigation.navigate("verifyPhone") }]);
       return;
     }
     Alert.alert("Couldn't send the inquiry", res.data?.error?.message ?? "Try again.");
@@ -131,7 +148,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
           <TouchableOpacity
             style={[styles.inquireBtn, (inquiring || inquired) && styles.inquireBtnIdle]}
             activeOpacity={0.9}
-            onPress={inquire}
+            onPress={onInquirePressed}
             disabled={inquiring || inquired}
           >
             {inquiring ? <ActivityIndicator color={colors.white} />
@@ -139,6 +156,15 @@ export function ListingDetailScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </ScrollView>
       )}
+
+      <SignupWall
+        visible={wallOpen}
+        action="adopt"
+        subject={listing?.pet.name}
+        onCreateAccount={() => { setIntent("adopt"); setWallOpen(false); navigation.navigate("accountType"); }}
+        onLogin={() => { setWallOpen(false); navigation.navigate("signin"); }}
+        onDismiss={() => setWallOpen(false)}
+      />
     </View>
   );
 }
