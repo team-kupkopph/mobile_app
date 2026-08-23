@@ -35,9 +35,13 @@ export type MapReport = {
 };
 // US-O3 — reporter-only block, present only when the caller IS the report's reporter.
 export type ReportStatusHistoryEntry = { status: StrayStatus; changed_at: string };
+// US-SEC1 — approx_location is always present (coarsened, ~500m grid, everyone incl.
+// guests); precise_location appears ONLY for the reporter or the report's active claimer.
+export type LatLng = { lat: number; lng: number };
 export type ReportDetail = {
   report_id: string; species: string; condition: string; status: StrayStatus;
   notes: string | null; city: string | null; reported_at: string; photos: string[];
+  approx_location: LatLng; precise_location?: LatLng;
   escalation_level?: number; offers_count?: number;
   status_history?: ReportStatusHistoryEntry[];
 };
@@ -46,6 +50,16 @@ export type ReportDetail = {
 export type RescueCaseSummary = {
   case_id: string;
   report: { report_id: string; species: string; condition: string; city: string | null };
+  status: StrayStatus; claimed_at: string; expired_at: string | null;
+};
+// GET /cases/{id} (US-SEC1) — the claimer's own case; precise_location present only
+// while the claim is still active (absent once expired, even for the original claimer).
+export type CaseDetail = {
+  case_id: string;
+  report: {
+    report_id: string; species: string; condition: string; city: string | null;
+    approx_location: LatLng; precise_location?: LatLng;
+  };
   status: StrayStatus; claimed_at: string; expired_at: string | null;
 };
 

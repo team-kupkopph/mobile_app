@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -110,6 +111,23 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
+          {/* US-SEC1 — GET /reports/{id} already includes precise_location for the
+              active claimer (that's you, on this screen), so no second fetch is needed. */}
+          {report.precise_location ? (
+            <View style={styles.mapWrap}>
+              <MapView
+                style={styles.map}
+                pointerEvents="none"
+                initialRegion={{
+                  latitude: report.precise_location.lat, longitude: report.precise_location.lng,
+                  latitudeDelta: 0.01, longitudeDelta: 0.01
+                }}
+              >
+                <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
+              </MapView>
+            </View>
+          ) : null}
+
           {options.length === 0 ? (
             <Text style={styles.resolvedNote}>This case is resolved — there's nothing left to update.</Text>
           ) : (
@@ -199,6 +217,8 @@ const styles = StyleSheet.create({
   h1: { color: colors.ink, fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 6, color: colors.muted, fontSize: 16 },
   currentChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
+  mapWrap: { marginTop: 18, height: 150, borderRadius: 20, overflow: "hidden", backgroundColor: "#E7F0EE" },
+  map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { fontSize: 13, fontWeight: "800" },
   resolvedNote: { marginTop: 24, color: colors.muted, fontSize: 16, lineHeight: 22 },
   sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 18, fontWeight: "800" },

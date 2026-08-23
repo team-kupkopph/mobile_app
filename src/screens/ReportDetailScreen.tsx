@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import MapView, { Circle, Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -122,6 +123,38 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
+          {/* US-SEC1 — precise_location only ever appears here when the backend has
+              already decided the caller may see it (reporter or active claimer); this
+              screen just renders whichever field is present, it doesn't re-derive access. */}
+          <View style={styles.mapWrap}>
+            <MapView
+              style={styles.map}
+              pointerEvents="none"
+              initialRegion={{
+                latitude: (report.precise_location ?? report.approx_location).lat,
+                longitude: (report.precise_location ?? report.approx_location).lng,
+                latitudeDelta: 0.01, longitudeDelta: 0.01
+              }}
+            >
+              {report.precise_location ? (
+                <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
+              ) : (
+                <Circle
+                  center={{ latitude: report.approx_location.lat, longitude: report.approx_location.lng }}
+                  radius={500}
+                  strokeColor="rgba(28,107,107,0.9)"
+                  fillColor="rgba(28,107,107,0.15)"
+                  strokeWidth={2}
+                />
+              )}
+            </MapView>
+          </View>
+          <Text style={styles.mapNote}>
+            {report.precise_location
+              ? "Exact spot — shown to you because you reported this or claimed it."
+              : "Approximate area only · the exact spot goes to the reporter and whoever claims this."}
+          </Text>
+
           {isReporterView && report.status === "reported" ? (
             <View style={styles.waitingCard}>
               <Text style={styles.waitingLine}>
@@ -212,6 +245,9 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13, fontWeight: "800" },
   notesCard: { marginTop: 20, padding: 18, borderRadius: 18, ...card },
   notesText: { color: colors.ink, fontSize: 16, lineHeight: 23 },
+  mapWrap: { marginTop: 20, height: 160, borderRadius: 20, overflow: "hidden", backgroundColor: "#E7F0EE" },
+  map: { ...StyleSheet.absoluteFillObject },
+  mapNote: { marginTop: 8, color: "#9a988f", fontSize: 12, lineHeight: 17 },
   waitingCard: { marginTop: 20, padding: 18, borderRadius: 18, backgroundColor: colors.tealBg },
   waitingLine: { color: colors.tealFg, fontSize: 16, fontWeight: "700" },
   waitingSub: { marginTop: 6, color: colors.tealFg, fontSize: 14 },
