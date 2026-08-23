@@ -49,3 +49,38 @@ export function splitDocs(docs: MeVerificationDoc[]): {
   const approved = current.filter((d) => d.status === "approved");
   return { attention, approved };
 }
+
+// A tracker row: one card in "Needs your attention". Same-type IN-REVIEW files collapse into a
+// single row with a count (3 rescue_photos → one "Photos of rescue space · 3 photos" card, matching
+// the reviewer's grouped view). REJECTED files stay separate — each carries its own reason and is
+// replaced on its own (a rejected photo is fixed while the rest stay approved), so it can't be
+// folded into a count.
+export type DocGroup = {
+  key: string;
+  docType: string;
+  status: DocStatus;
+  count: number;
+  doc: MeVerificationDoc; // representative (the rejected file itself, or the first in-review one)
+};
+
+export function groupAttention(attention: MeVerificationDoc[]): DocGroup[] {
+  const groups: DocGroup[] = [];
+  const inReviewByType = new Map<string, DocGroup>();
+  for (const d of attention) {
+    if (d.status === "rejected") {
+      groups.push({ key: d.document_id, docType: d.doc_type, status: d.status, count: 1, doc: d });
+      continue;
+    }
+    const existing = inReviewByType.get(d.doc_type);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      const group: DocGroup = {
+        key: `${d.doc_type}:in-review`, docType: d.doc_type, status: d.status, count: 1, doc: d
+      };
+      inReviewByType.set(d.doc_type, group);
+      groups.push(group);
+    }
+  }
+  return groups;
+}

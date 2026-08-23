@@ -1,5 +1,5 @@
 import { MeVerificationDoc } from "../api/types";
-import { docChip, docLabel, splitDocs } from "../verifications";
+import { docChip, docLabel, groupAttention, splitDocs } from "../verifications";
 
 function doc(p: Partial<MeVerificationDoc>): MeVerificationDoc {
   return {
@@ -43,5 +43,38 @@ describe("splitDocs (US-V2 — outstanding first, approved collapses)", () => {
       doc({ document_id: "new", status: "pending" })
     ]);
     expect(attention.map((d) => d.document_id)).toEqual(["new"]);
+  });
+});
+
+describe("groupAttention (collapse in-review files of a type into one card)", () => {
+  it("folds multiple in-review rescue_photos into a single row with a count", () => {
+    const groups = groupAttention([
+      doc({ document_id: "p1", doc_type: "rescue_photos", status: "pending" }),
+      doc({ document_id: "p2", doc_type: "rescue_photos", status: "pending" }),
+      doc({ document_id: "p3", doc_type: "rescue_photos", status: "pending" })
+    ]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].docType).toBe("rescue_photos");
+    expect(groups[0].count).toBe(3);
+  });
+
+  it("keeps rejected files separate so each can be replaced on its own", () => {
+    const groups = groupAttention([
+      doc({ document_id: "r1", doc_type: "rescue_photos", status: "rejected" }),
+      doc({ document_id: "r2", doc_type: "rescue_photos", status: "rejected" })
+    ]);
+    expect(groups.map((g) => g.count)).toEqual([1, 1]);
+    expect(groups.map((g) => g.doc.document_id)).toEqual(["r1", "r2"]);
+  });
+
+  it("groups by type — a distinct type is its own row", () => {
+    const groups = groupAttention([
+      doc({ document_id: "g", doc_type: "gov_id", status: "pending" }),
+      doc({ document_id: "p1", doc_type: "rescue_photos", status: "pending" }),
+      doc({ document_id: "p2", doc_type: "rescue_photos", status: "pending" })
+    ]);
+    expect(groups.map((g) => [g.docType, g.count])).toEqual([
+      ["gov_id", 1], ["rescue_photos", 2]
+    ]);
   });
 });

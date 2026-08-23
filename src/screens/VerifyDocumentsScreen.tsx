@@ -12,7 +12,7 @@ import { MeVerification, MeVerificationDoc } from "../api/types";
 import { useApi } from "../api/useApi";
 import { AlertIcon, CheckIcon, ClockIcon, DocumentIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { docChip, docLabel, splitDocs } from "../verifications";
+import { docChip, docLabel, groupAttention, splitDocs } from "../verifications";
 
 const colors = {
   ink: "#12213A",
@@ -119,17 +119,22 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
             {attention.length > 0 ? (
               <>
                 <Text style={styles.groupTitle}>Needs your attention</Text>
-                {attention.map((doc) => {
-                  const chip = docChip(doc.status);
+                {groupAttention(attention).map((group) => {
+                  const doc = group.doc;
+                  const chip = docChip(group.status);
                   const tone = CHIP_STYLE[chip.tone];
+                  const countLabel = group.count > 1
+                    ? `${group.count} ${group.docType === "rescue_photos" ? "photos" : "files"}`
+                    : null;
                   return (
-                    <View key={doc.document_id} style={styles.docCard}>
+                    <View key={group.key} style={styles.docCard}>
                       <View style={styles.docRow}>
                         <View style={styles.docIconTile}>
                           <DocumentIcon color={colors.teal} />
                         </View>
                         <View style={styles.docMeta}>
-                          <Text style={styles.docName}>{docLabel(doc.doc_type)}</Text>
+                          <Text style={styles.docName}>{docLabel(group.docType)}</Text>
+                          {countLabel ? <Text style={styles.docCount}>{countLabel}</Text> : null}
                           <View style={[styles.chip, { backgroundColor: tone.bg }]}>
                             <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
                           </View>
@@ -258,6 +263,7 @@ const styles = StyleSheet.create({
   },
   docMeta: { flex: 1, gap: 8 },
   docName: { color: colors.ink, fontSize: 18, fontWeight: "700" },
+  docCount: { color: colors.muted, fontSize: 14, fontWeight: "600", marginTop: -4 },
   chip: { alignSelf: "flex-start", paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { fontSize: 13, fontWeight: "800" },
   reviewNote: { marginTop: 12, color: colors.danger, fontSize: 15, lineHeight: 21 },
