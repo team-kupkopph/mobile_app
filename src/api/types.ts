@@ -63,6 +63,13 @@ export type Listing = {
   city: string;
   status: string;
 };
+// US-X1 — the bell. `type` is free-text on the backend (notifications/models.py); the
+// known values in use are enumerated in notifications.ts, but new ones need no migration.
+export type MeNotification = {
+  notification_id: string; type: string; title: string | null; body: string | null;
+  data: Record<string, any> | null; read: boolean; created_at: string;
+};
+
 export type ShelterDashboard = {
   verification: {
     submitted: boolean;

@@ -61,4 +61,6 @@ export type RootStackParamList = {
   // Track K — claim + work the case
   myRescues: undefined;
   rescueUpdate: { caseId: string; reportId: string };
+  // US-X1 — the bell
+  notifications: undefined;
 };

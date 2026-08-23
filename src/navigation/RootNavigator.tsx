@@ -40,6 +40,7 @@ import { RescueOfferSentScreen } from "../screens/RescueOfferSentScreen";
 import { MyOffersScreen } from "../screens/MyOffersScreen";
 import { MyRescuesScreen } from "../screens/MyRescuesScreen";
 import { RescueUpdateScreen } from "../screens/RescueUpdateScreen";
+import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { VerifyDocumentsScreen } from "../screens/VerifyDocumentsScreen";
 import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
@@ -102,6 +103,7 @@ export function RootNavigator() {
       <Stack.Screen name="myOffers" component={MyOffersScreen} />
       <Stack.Screen name="myRescues" component={MyRescuesScreen} />
       <Stack.Screen name="rescueUpdate" component={RescueUpdateScreen} />
+      <Stack.Screen name="notifications" component={NotificationsScreen} />
     </Stack.Navigator>
   );
 }

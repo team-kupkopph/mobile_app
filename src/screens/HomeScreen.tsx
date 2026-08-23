@@ -39,6 +39,7 @@ export function HomeScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
+  const [hasUnread, setHasUnread] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -51,6 +52,11 @@ export function HomeScreen({ navigation, route }: Props) {
           return;
         }
         setMe(r.data);
+      });
+      // Refetched on every focus, including right after leaving NotificationsScreen (which
+      // marks everything read on open) — so the dot clears the moment you come back.
+      api.get("/me/notifications").then((r) => {
+        if (r.ok) setHasUnread((r.data?.notifications ?? []).some((n: { read: boolean }) => !n.read));
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
     }, [])
@@ -93,9 +99,15 @@ export function HomeScreen({ navigation, route }: Props) {
               </View>
             )}
           </View>
-          <View style={styles.bellButton}>
+          <TouchableOpacity
+            style={styles.bellButton}
+            activeOpacity={0.75}
+            onPress={() => navigation.navigate("notifications")}
+            hitSlop={10}
+          >
             <BellIcon color="#12213A" />
-          </View>
+            {hasUnread ? <View style={styles.bellDot} /> : null}
+          </TouchableOpacity>
         </View>
 
         {pendingMember && (
@@ -298,6 +310,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF"
+  },
+  bellDot: {
+    position: "absolute",
+    top: 6,
+    right: 7,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: "#B23B3B",
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF"
   },
   reviewCard: {
     minHeight: 84,
