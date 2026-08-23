@@ -63,4 +63,7 @@ export type RootStackParamList = {
   rescueUpdate: { caseId: string; reportId: string };
   // US-X1 — the bell
   notifications: undefined;
+  // Track A — adoption (US-A3/A4)
+  listingDetail: { listingId: string };
+  myInquiries: undefined;
 };

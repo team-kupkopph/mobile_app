@@ -41,6 +41,8 @@ import { MyOffersScreen } from "../screens/MyOffersScreen";
 import { MyRescuesScreen } from "../screens/MyRescuesScreen";
 import { RescueUpdateScreen } from "../screens/RescueUpdateScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
+import { ListingDetailScreen } from "../screens/ListingDetailScreen";
+import { MyInquiriesScreen } from "../screens/MyInquiriesScreen";
 import { VerifyDocumentsScreen } from "../screens/VerifyDocumentsScreen";
 import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
@@ -104,6 +106,8 @@ export function RootNavigator() {
       <Stack.Screen name="myRescues" component={MyRescuesScreen} />
       <Stack.Screen name="rescueUpdate" component={RescueUpdateScreen} />
       <Stack.Screen name="notifications" component={NotificationsScreen} />
+      <Stack.Screen name="listingDetail" component={ListingDetailScreen} />
+      <Stack.Screen name="myInquiries" component={MyInquiriesScreen} />
     </Stack.Navigator>
   );
 }

@@ -71,11 +71,39 @@ export type MyOffer = {
   report: { report_id: string; species: string; condition: string; city: string | null };
   offer_type: OfferType; status: OfferListStatus; expires_at: string;
 };
+// Track A — adoption listings. The browse card (US-A1b/A3) plus the fuller shapes
+// US-A3's detail and US-A4's inquiries add.
+export type ListingPet = {
+  name: string; species: string; breed: string | null; sex?: string | null;
+  birthdate?: string | null; size_category?: string | null;
+  spayed_neutered?: boolean | null; vaccinated?: boolean | null;
+  walkable?: boolean; temperament?: string | null;
+};
 export type Listing = {
   listing_id: string;
-  pet: { name: string; species: string; breed: string | null };
+  pet: ListingPet;
   city: string;
   status: string;
+  adoption_fee?: string;
+  photo_url?: string | null;
+};
+export type ListingDetail = {
+  listing_id: string;
+  pet: ListingPet;
+  description: string | null;
+  adoption_fee: string;
+  requirements: string | null;
+  city: string;
+  status: string;
+  photos: string[];
+  poster: { name: string; is_shelter: boolean; city: string | null };
+};
+export type InquiryStage = { stage_key: string; state: string };
+export type MyInquiry = {
+  inquiry_id: string;
+  listing: { listing_id: string; name: string; species: string };
+  status: string;
+  stages: InquiryStage[];
 };
 // US-X1 — the bell. `type` is free-text on the backend (notifications/models.py); the
 // known values in use are enumerated in notifications.ts, but new ones need no migration.
