@@ -1,5 +1,5 @@
 // US-S1 · report a stray. Reference: screens/user/screen-report-stray.png.
-// POST /reports { species, condition, notes?, is_anonymous, lat, lng, location_text?, photos } -> 201.
+// POST /reports { species, condition, notes?, is_anonymous, lat, lng, location_text?, city?, photos } -> 201.
 // Location = the app's ONE precise-GPS surface (decision 11): expo-location gives the coords, and
 // the disclosure below is NOT optional copy — everywhere else a person's location is city-level.
 // The precise-pin refinement (US-S2 "Adjust") opens AdjustPinScreen (react-native-maps, dev build).
@@ -34,6 +34,9 @@ export function ReportStrayScreen({ navigation, route }: Props) {
 
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locationText, setLocationText] = useState<string>("");
+  // Coarse city label from the same reverse-geocode; sent so the report stores its own city
+  // (report-detail + the map show it) instead of the server needing a geocoder. Never precise.
+  const [city, setCity] = useState<string>("");
   const [locState, setLocState] = useState<"loading" | "ready" | "denied">("loading");
 
   const [submitting, setSubmitting] = useState(false);
@@ -51,6 +54,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           if (place) {
             const line = [place.name, place.street, place.city].filter(Boolean).join(", ");
             setLocationText(line || place.city || "");
+            setCity(place.city ?? "");
           }
         } catch {
           // reverse-geocode is best-effort; the coords are what matter
@@ -75,6 +79,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
         if (place) {
           const line = [place.name, place.street, place.city].filter(Boolean).join(", ");
           setLocationText(line || place.city || "");
+          setCity(place.city ?? "");
         }
       } catch {
         // best-effort; the refined coords are what matter
@@ -98,6 +103,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     const res = await api.post("/reports", {
       species, condition, notes: notes.trim() || undefined, is_anonymous: anonymous,
       lat: coords.lat, lng: coords.lng, location_text: locationText || undefined,
+      city: city || undefined,
       photos: photoUrl ? [{ file_url: photoUrl }] : []
     });
     setSubmitting(false);
