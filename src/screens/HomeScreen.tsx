@@ -111,7 +111,16 @@ export function HomeScreen({ navigation, route }: Props) {
         </View>
 
         {pendingMember && (
-          <TouchableOpacity activeOpacity={0.85} style={styles.reviewCard}>
+          // US-D4 audit (2026-08-24) · was a dead tap — "Documents ›" implied a
+          // destination but no onPress existed at all, same shape as the dead
+          // Google-signup / "+ List an animal" buttons earlier audits found. This is
+          // the *only* status surface a Verified Member has (US-V2's own ⚠️ note) — with
+          // no handler, a pending Member had no way to learn anything from Home.
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={styles.reviewCard}
+            onPress={() => navigation.navigate("verifyDocuments")}
+          >
             <ClockIcon color="#8A5A12" size={38} />
             <View style={styles.reviewCopy}>
               <Text style={styles.reviewTitle}>Verified Member in review</Text>
