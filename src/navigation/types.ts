@@ -70,4 +70,8 @@ export type RootStackParamList = {
   listingForm: { listingId?: string } | undefined;
   // Owner-side first-use phone verification (decision 14); first trigger = US-A4 inquiry.
   verifyPhone: undefined;
+  // Track Q — donations. donationQr (shelter side) uploads/replaces the QR; donate
+  // (public side) renders an org's verified QRs, reached from a listing's poster row.
+  donationQr: undefined;
+  donate: { accountId: string; orgName: string };
 };

@@ -5,6 +5,8 @@ import { useAuth } from "../auth/AuthContext";
 import { NOT_CONFIGURED_MESSAGE, SocialProvider, signInWithProvider } from "../auth/socialAuth";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
+import { DonateScreen } from "../screens/DonateScreen";
+import { DonationQrScreen } from "../screens/DonationQrScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
 import { HomeGuestScreen } from "../screens/HomeGuestScreen";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -112,6 +114,8 @@ export function RootNavigator() {
       <Stack.Screen name="listingForm" component={ListingFormScreen} />
       <Stack.Screen name="myInquiries" component={MyInquiriesScreen} />
       <Stack.Screen name="verifyPhone" component={VerifyPhoneScreen} />
+      <Stack.Screen name="donationQr" component={DonationQrScreen} />
+      <Stack.Screen name="donate" component={DonateScreen} />
     </Stack.Navigator>
   );
 }

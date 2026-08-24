@@ -145,6 +145,19 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             {listing.poster.city ? ` · ${listing.poster.city}` : ""}
           </Text>
 
+          {listing.poster.is_shelter ? (
+            // US-Q2 · a 404 (org unapproved or no verified QR yet) is handled on the
+            // donate screen itself — this link doesn't need to know which is true.
+            <TouchableOpacity
+              style={styles.donateLink}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate("donate",
+                { accountId: listing.poster.account_id, orgName: listing.poster.name })}
+            >
+              <Text style={styles.donateLinkText}>Donate to {listing.poster.name} ›</Text>
+            </TouchableOpacity>
+          ) : null}
+
           <TouchableOpacity
             style={[styles.inquireBtn, (inquiring || inquired) && styles.inquireBtnIdle]}
             activeOpacity={0.9}
@@ -193,6 +206,8 @@ const styles = StyleSheet.create({
   photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.line },
   name: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, fontSize: 16 },
+  donateLink: { marginTop: 10 },
+  donateLinkText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
   tag: { backgroundColor: colors.chipBg, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   tagText: { color: colors.chipFg, fontSize: 13, fontWeight: "700" },

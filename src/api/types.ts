@@ -96,7 +96,7 @@ export type ListingDetail = {
   city: string;
   status: string;
   photos: string[];
-  poster: { name: string; is_shelter: boolean; city: string | null };
+  poster: { account_id: string; name: string; is_shelter: boolean; city: string | null };
 };
 export type InquiryStage = { stage_key: string; state: string };
 export type MyInquiry = {
