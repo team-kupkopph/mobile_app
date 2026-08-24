@@ -48,8 +48,13 @@ export function NotificationsScreen({ navigation }: Props) {
   function onPress(n: MeNotification) {
     const target = notificationTarget(n);
     if (!target) return; // unrecognized type, or missing the data it needs — no destination
+    // US-N1 · was an if/else that silently sent anything non-reportDetail to
+    // verifyDocuments — harmless while that was the only other variant, but wrong the
+    // moment a third one (myInquiries) existed. Switched to match every variant by name.
     if (target.screen === "reportDetail") {
       navigation.navigate("reportDetail", { reportId: target.reportId });
+    } else if (target.screen === "myInquiries") {
+      navigation.navigate("myInquiries");
     } else {
       navigation.navigate("verifyDocuments");
     }

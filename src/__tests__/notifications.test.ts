@@ -23,4 +23,14 @@ describe("notificationTarget", () => {
   it("is a no-op for an unrecognized type", () => {
     expect(notificationTarget({ type: "something_new", data: { report_id: "r1" } })).toBeNull();
   });
+
+  it("routes stage_advanced (the adopter's own inquiry moved forward) to their inquiries list", () => {
+    expect(notificationTarget({ type: "stage_advanced", data: { inquiry_id: "i1", stage_key: "vet_check" } }))
+      .toEqual({ screen: "myInquiries" });
+  });
+
+  it("is a no-op for inquiry_received — no poster-side inquiry screen exists yet", () => {
+    expect(notificationTarget({ type: "inquiry_received", data: { listing_id: "l1", inquiry_id: "i1" } }))
+      .toBeNull();
+  });
 });

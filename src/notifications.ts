@@ -1,10 +1,13 @@
 // US-X1 (bell) deep-linking — where a tap on a notification goes. Tested like sagip.ts:
 // a derivation, not a screen. Every type below is one `notify()` actually calls in the
-// backend (verifications/review.py, sagip/views.py, sagip/sweeps.py) — kept in sync by
-// hand since `type` is free-text on the server (no shared enum to import).
+// backend, now registered once in `notifications/types.py::REGISTRY` (US-N1) — this map
+// is still hand-kept in sync with that registry (the server has no shared-package export
+// for the mobile client to import), but there's now one source of truth to sync AGAINST
+// instead of reverse-engineering call sites.
 export type NotificationTarget =
   | { screen: "verifyDocuments" }
-  | { screen: "reportDetail"; reportId: string };
+  | { screen: "reportDetail"; reportId: string }
+  | { screen: "myInquiries" };
 
 const REPORT_LINKED_TYPES = new Set([
   "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened"
@@ -12,6 +15,14 @@ const REPORT_LINKED_TYPES = new Set([
 const VERIFICATION_TYPES = new Set([
   "verification_approved", "verification_rejected", "verification_needs_info"
 ]);
+// stage_advanced is the adopter's own notification (a poster advanced their inquiry) —
+// their inquiry list is where to see it. inquiry_received is the OTHER direction (a
+// poster is told someone inquired) and has deliberately no target here: no poster-side
+// inquiry-review screen exists yet in the mobile app at all (US-A4's "poster advances
+// stages" was built backend-only — POST /inquiries/{id}/stages/{stage_key} has no
+// caller on the client) — a real gap found while building this registry, not something
+// to paper over with a link to a screen that doesn't exist.
+const MY_INQUIRIES_TYPES = new Set(["stage_advanced"]);
 
 export function notificationTarget(n: { type: string; data: Record<string, any> | null }): NotificationTarget | null {
   if (VERIFICATION_TYPES.has(n.type)) {
@@ -19,6 +30,9 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   }
   if (REPORT_LINKED_TYPES.has(n.type) && n.data?.report_id) {
     return { screen: "reportDetail", reportId: n.data.report_id };
+  }
+  if (MY_INQUIRIES_TYPES.has(n.type)) {
+    return { screen: "myInquiries" };
   }
   return null; // unknown type, or a report-linked type missing its report_id — no-op tap
 }
