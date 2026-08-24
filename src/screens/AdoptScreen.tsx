@@ -47,9 +47,14 @@ export function AdoptScreen({ navigation }: Props) {
     <View style={styles.screen}>
       <View style={styles.header}>
         <Text style={styles.title}>Adopt</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("myInquiries")} hitSlop={10}>
-          <Text style={styles.headerLink}>My inquiries ›</Text>
-        </TouchableOpacity>
+        <View style={styles.headerLinks}>
+          <TouchableOpacity onPress={() => navigation.navigate("listingForm", undefined)} hitSlop={10}>
+            <Text style={styles.headerLink}>+ List</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("myInquiries")} hitSlop={10}>
+            <Text style={styles.headerLink}>My inquiries ›</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.filterRow}>
@@ -118,6 +123,7 @@ const styles = StyleSheet.create({
   header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 4, flexDirection: "row",
             alignItems: "center", justifyContent: "space-between" },
   title: { color: colors.ink, fontSize: 26, fontWeight: "800" },
+  headerLinks: { flexDirection: "row", gap: 16 },
   headerLink: { color: colors.teal, fontSize: 14, fontWeight: "700" },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 26, paddingTop: 14, paddingBottom: 4 },
   filterChip: { paddingHorizontal: 16, height: 36, borderRadius: 18, alignItems: "center",

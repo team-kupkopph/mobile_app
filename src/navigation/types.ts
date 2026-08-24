@@ -66,6 +66,8 @@ export type RootStackParamList = {
   // Track A — adoption (US-A3/A4)
   listingDetail: { listingId: string };
   myInquiries: undefined;
+  // US-A2 — create (no listingId) or edit (listingId) a listing.
+  listingForm: { listingId?: string } | undefined;
   // Owner-side first-use phone verification (decision 14); first trigger = US-A4 inquiry.
   verifyPhone: undefined;
 };

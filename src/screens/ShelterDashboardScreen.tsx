@@ -110,7 +110,11 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           <Stat n={counts.donations} label="Donations" />
         </View>
 
-        <TouchableOpacity activeOpacity={0.85} style={styles.primaryButton}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.primaryButton}
+          onPress={() => navigation.navigate("listingForm", undefined)}
+        >
           <Text style={styles.primaryText}>+  List an animal</Text>
         </TouchableOpacity>
         <Text style={styles.primaryHint}>
