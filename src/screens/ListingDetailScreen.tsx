@@ -95,6 +95,16 @@ export function ListingDetailScreen({ navigation, route }: Props) {
           <Text style={styles.backGlyph}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Adopt</Text>
+        {listing ? (
+          <TouchableOpacity
+            style={styles.flagLink}
+            hitSlop={12}
+            onPress={() => navigation.navigate("reportContent",
+              { targetType: "listing", targetId: listing.listing_id })}
+          >
+            <Text style={styles.flagLinkText}>Report this</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       {!listing ? (
@@ -201,6 +211,8 @@ const styles = StyleSheet.create({
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
+  flagLink: { marginLeft: "auto" },
+  flagLinkText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   empty: { marginTop: 60, color: colors.muted, fontSize: 16, textAlign: "center" },
   photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.line },

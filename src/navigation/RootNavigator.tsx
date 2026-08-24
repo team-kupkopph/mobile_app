@@ -33,6 +33,7 @@ import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
 import { MyReportsScreen } from "../screens/MyReportsScreen";
 import { AdjustPinScreen } from "../screens/AdjustPinScreen";
+import { ReportContentScreen } from "../screens/ReportContentScreen";
 import { ReportDetailScreen } from "../screens/ReportDetailScreen";
 import { ReportSentScreen } from "../screens/ReportSentScreen";
 import { ReportStrayScreen } from "../screens/ReportStrayScreen";
@@ -116,6 +117,7 @@ export function RootNavigator() {
       <Stack.Screen name="verifyPhone" component={VerifyPhoneScreen} />
       <Stack.Screen name="donationQr" component={DonationQrScreen} />
       <Stack.Screen name="donate" component={DonateScreen} />
+      <Stack.Screen name="reportContent" component={ReportContentScreen} />
     </Stack.Navigator>
   );
 }
