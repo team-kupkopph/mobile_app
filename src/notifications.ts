@@ -9,7 +9,8 @@ export type NotificationTarget =
   | { screen: "reportDetail"; reportId: string }
   | { screen: "myInquiries" }
   | { screen: "kawanggawaSchedule" }
-  | { screen: "kawanggawaHistory" };
+  | { screen: "kawanggawaHistory" }
+  | { screen: "shelterVolunteerRequests"; shiftId: string };
 
 const REPORT_LINKED_TYPES = new Set([
   "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened"
@@ -27,11 +28,13 @@ const VERIFICATION_TYPES = new Set([
 const MY_INQUIRIES_TYPES = new Set(["stage_advanced"]);
 // US-V8 · the volunteer side of notify(): shift_confirmed/shift_reminder are "look at your
 // upcoming shifts", signup_declined/shift_cancelled_by_shelter are "see what happened" —
-// both already-past events, so history rather than schedule. signup_requested is the
-// SHELTER's own notification (a volunteer requested one of their shifts) — deliberately
-// not handled here; that's V9, a shelter-side screen that doesn't exist on mobile yet.
+// both already-past events, so history rather than schedule.
 const SCHEDULE_TYPES = new Set(["shift_confirmed", "shift_reminder"]);
 const HISTORY_TYPES = new Set(["signup_declined", "shift_cancelled_by_shelter"]);
+// US-V9 · signup_requested is the SHELTER's own notification (a volunteer requested one of
+// their shifts) — routes to the shelter-side requests screen for that shift, same
+// whitelist-by-type posture as reportDetail above: the only `data` read is the id plugged
+// into a fixed screen, never a URL parsed out of `data`.
 
 export function notificationTarget(n: { type: string; data: Record<string, any> | null }): NotificationTarget | null {
   if (VERIFICATION_TYPES.has(n.type)) {
@@ -48,6 +51,9 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   }
   if (HISTORY_TYPES.has(n.type)) {
     return { screen: "kawanggawaHistory" };
+  }
+  if (n.type === "signup_requested" && n.data?.shift_id) {
+    return { screen: "shelterVolunteerRequests", shiftId: n.data.shift_id };
   }
   return null; // unknown type, or a report-linked type missing its report_id — no-op tap
 }

@@ -44,4 +44,14 @@ describe("notificationTarget", () => {
     expect(notificationTarget({ type: "shift_cancelled_by_shelter", data: { shift_id: "s" } }))
       .toEqual({ screen: "kawanggawaHistory" });
   });
+
+  it("routes signup_requested (the shelter's own notification) to its requests screen for that shift", () => {
+    expect(notificationTarget({ type: "signup_requested", data: { shift_id: "s", signup_id: "x" } }))
+      .toEqual({ screen: "shelterVolunteerRequests", shiftId: "s" });
+  });
+
+  it("is a no-op for signup_requested with no shift_id in its payload", () => {
+    expect(notificationTarget({ type: "signup_requested", data: { signup_id: "x" } })).toBeNull();
+    expect(notificationTarget({ type: "signup_requested", data: null })).toBeNull();
+  });
 });

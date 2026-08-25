@@ -10,7 +10,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 
 import { MeNotification } from "../api/types";
 import { useApi } from "../api/useApi";
-import { AlertIcon, CheckIcon, ClockIcon, XIcon } from "../components/AppIcons";
+import { AlertIcon, CheckIcon, ClockIcon, UserBadgeIcon, XIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { notificationTarget } from "../notifications";
 import { relTime } from "../sagip";
@@ -27,11 +27,15 @@ const colors = {
 // request didn't go through, teal = a heads-up, amber = something changed on you). Every
 // other type (verification_*, report-linked, stage_advanced) keeps the plain unread-dot
 // treatment it already had — this map only ever adds, never changes existing behavior.
+// US-V9 · signup_requested (the shelter's own "a volunteer wants your shift" notification)
+// joins the same map — teal heads-up tone, same as shift_reminder, since it's an FYI that
+// needs the shelter's attention rather than good/bad news about something already decided.
 const VOLUNTEER_ICON: Record<string, { bg: string; fg: string; Icon: (p: { color: string; size?: number }) => ReactElement }> = {
   shift_confirmed: { bg: colors.greenBg, fg: colors.green, Icon: CheckIcon },
   signup_declined: { bg: colors.pinkBg, fg: colors.pink, Icon: XIcon },
   shift_reminder: { bg: colors.chipBg, fg: colors.teal, Icon: ClockIcon },
-  shift_cancelled_by_shelter: { bg: colors.amberBg, fg: colors.amber, Icon: AlertIcon }
+  shift_cancelled_by_shelter: { bg: colors.amberBg, fg: colors.amber, Icon: AlertIcon },
+  signup_requested: { bg: colors.chipBg, fg: colors.teal, Icon: UserBadgeIcon }
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, "notifications">;
@@ -74,6 +78,8 @@ export function NotificationsScreen({ navigation }: Props) {
       navigation.navigate("kawanggawaSchedule");
     } else if (target.screen === "kawanggawaHistory") {
       navigation.navigate("kawanggawaHistory");
+    } else if (target.screen === "shelterVolunteerRequests") {
+      navigation.navigate("shelterVolunteerRequests", { shiftId: target.shiftId });
     } else {
       navigation.navigate("verifyDocuments");
     }
