@@ -55,6 +55,7 @@ import { KawangGawaScreen } from "../screens/KawangGawaScreen";
 import { KawangGawaDetailScreen } from "../screens/KawangGawaDetailScreen";
 import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen";
 import { KawangGawaScheduleScreen } from "../screens/KawangGawaScheduleScreen";
+import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
@@ -123,14 +124,14 @@ export function RootNavigator() {
       <Stack.Screen name="donationQr" component={DonationQrScreen} />
       <Stack.Screen name="donate" component={DonateScreen} />
       <Stack.Screen name="reportContent" component={ReportContentScreen} />
-      {/* US-V8 — the real hub + shift detail/waiver (Task 4), plus placeholders (Tasks 5–8
-          swap these for real components). */}
+      {/* US-V8 — the real hub + shift detail/waiver (Task 4), schedule (Task 5), and
+          check-in/out (Task 6), plus placeholders (Tasks 7–8 swap these for real components). */}
       <Stack.Screen name="kawanggawa" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaDetail" component={KawangGawaDetailScreen} />
       <Stack.Screen name="waiver" component={WaiverScreen} />
       <Stack.Screen name="kawanggawaRequested" component={KawangGawaRequestedScreen} />
       <Stack.Screen name="kawanggawaSchedule" component={KawangGawaScheduleScreen} />
-      <Stack.Screen name="kawanggawaCheckin" component={KawangGawaScreen} />
+      <Stack.Screen name="kawanggawaCheckin" component={KawangGawaCheckinScreen} />
       <Stack.Screen name="kawanggawaHistory" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaCancel" component={KawangGawaScreen} />
     </Stack.Navigator>
