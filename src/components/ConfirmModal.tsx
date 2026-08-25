@@ -14,13 +14,21 @@ export type ConfirmModalProps = {
   tone?: ConfirmModalTone;
   onConfirm: () => void;
   onCancel: () => void;
+  // Opt-in third affordance (e.g. V9's "Decline instead" on the reapprove-confirm dialog).
+  // When provided it REPLACES the default "Never mind" text — the dialog still dismisses via
+  // backdrop tap / hardware back (both still call onCancel), so no action is lost, only the
+  // visible label changes. Omitted by every other caller, so their rendering is unchanged.
+  secondaryLabel?: string;
+  onSecondary?: () => void;
 };
 
 const colors = {
   ink: "#12213A", muted: "#5F5E5A", white: "#FFFFFF", teal: "#1C6B6B", danger: "#B23B3B"
 };
 
-export function ConfirmModal({ visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel }: ConfirmModalProps) {
+export function ConfirmModal({
+  visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel, secondaryLabel, onSecondary
+}: ConfirmModalProps) {
   const confirmColor = tone === "danger" ? colors.danger : colors.teal;
 
   return (
@@ -42,9 +50,15 @@ export function ConfirmModal({ visible, title, body, confirmLabel, tone = "neutr
             <Text style={styles.confirmText}>{confirmLabel}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.75} style={styles.cancelButton} onPress={onCancel}>
-            <Text style={styles.cancelText}>Never mind</Text>
-          </TouchableOpacity>
+          {secondaryLabel && onSecondary ? (
+            <TouchableOpacity activeOpacity={0.75} style={styles.cancelButton} onPress={onSecondary}>
+              <Text style={[styles.cancelText, styles.secondaryText]}>{secondaryLabel}</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity activeOpacity={0.75} style={styles.cancelButton} onPress={onCancel}>
+              <Text style={styles.cancelText}>Never mind</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -102,5 +116,9 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 14,
     fontWeight: "700"
+  },
+  secondaryText: {
+    color: colors.danger,
+    fontWeight: "800"
   }
 });
