@@ -52,6 +52,8 @@ import { VerifyDocumentsScreen } from "../screens/VerifyDocumentsScreen";
 import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
 import { KawangGawaScreen } from "../screens/KawangGawaScreen";
+import { KawangGawaDetailScreen } from "../screens/KawangGawaDetailScreen";
+import { WaiverScreen } from "../screens/WaiverScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
 // screen imports are added as tasks land; start with the ones that exist.
@@ -119,10 +121,11 @@ export function RootNavigator() {
       <Stack.Screen name="donationQr" component={DonationQrScreen} />
       <Stack.Screen name="donate" component={DonateScreen} />
       <Stack.Screen name="reportContent" component={ReportContentScreen} />
-      {/* US-V8 — the real hub, plus placeholders (Tasks 4–8 swap these for real components). */}
+      {/* US-V8 — the real hub + shift detail/waiver (Task 4), plus placeholders (Tasks 5–8
+          swap these for real components). */}
       <Stack.Screen name="kawanggawa" component={KawangGawaScreen} />
-      <Stack.Screen name="kawanggawaDetail" component={KawangGawaScreen} />
-      <Stack.Screen name="waiver" component={KawangGawaScreen} />
+      <Stack.Screen name="kawanggawaDetail" component={KawangGawaDetailScreen} />
+      <Stack.Screen name="waiver" component={WaiverScreen} />
       <Stack.Screen name="kawanggawaRequested" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaSchedule" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaCheckin" component={KawangGawaScreen} />

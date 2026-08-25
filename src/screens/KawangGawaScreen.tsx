@@ -31,15 +31,14 @@ const colors = {
   chipBg: "#E7F0EE"
 };
 
-// Registered under "kawanggawa" (the real hub) and, temporarily, under the other seven new
-// US-V8 route names too — RootNavigator points them all at this component so the app compiles
-// before Tasks 4–8 swap in their real screens. The union keeps that placeholder wiring
-// typechecking without an `any` cast; this screen never reads `route.params`.
+// Registered under "kawanggawa" (the real hub) and, temporarily, under the remaining
+// not-yet-built US-V8 route names too — RootNavigator points them all at this component so the
+// app compiles before Tasks 5–8 swap in their real screens ("kawanggawaDetail" and "waiver" got
+// their real components in Task 4). The union keeps that placeholder wiring typechecking without
+// an `any` cast; this screen never reads `route.params`.
 type Props = NativeStackScreenProps<
   RootStackParamList,
   | "kawanggawa"
-  | "kawanggawaDetail"
-  | "waiver"
   | "kawanggawaRequested"
   | "kawanggawaSchedule"
   | "kawanggawaCheckin"
