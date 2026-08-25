@@ -29,6 +29,7 @@ import { ShelterTierScreen } from "../screens/ShelterTierScreen";
 import { ShelterVolunteerActivityScreen } from "../screens/ShelterVolunteerActivityScreen";
 import { ShelterVolunteerAttendanceScreen } from "../screens/ShelterVolunteerAttendanceScreen";
 import { ShelterVolunteerCalendarScreen } from "../screens/ShelterVolunteerCalendarScreen";
+import { ShelterVolunteerCancelScreen } from "../screens/ShelterVolunteerCancelScreen";
 import { ShelterVolunteerCreateScreen } from "../screens/ShelterVolunteerCreateScreen";
 import { ShelterVolunteerDetailScreen } from "../screens/ShelterVolunteerDetailScreen";
 import { ShelterVolunteerEditScreen } from "../screens/ShelterVolunteerEditScreen";
@@ -146,9 +147,8 @@ export function RootNavigator() {
       <Stack.Screen name="kawanggawaCancel" component={KawangGawaCancelScreen} />
       {/* US-V9 — the shelter side of Kawang-Gawa: the manage list (Task 5, real), the
           activity hub + calendar (Task 6, real), create/edit (Task 7, real), requests
-          (Task 8, real), and attendance/detail (Task 9, real). Task 10 registers the
-          remaining cancel screen; until then it's temporarily stubbed at
-          ShelterVolunteerScreen so the app compiles. */}
+          (Task 8, real), attendance/detail (Task 9, real), and cancel — naming the blast
+          radius before it fires (Task 10, real). All nine screens are now real. */}
       <Stack.Screen name="shelterVolunteer" component={ShelterVolunteerScreen} />
       <Stack.Screen name="shelterVolunteerCreate" component={ShelterVolunteerCreateScreen} />
       <Stack.Screen name="shelterVolunteerActivity" component={ShelterVolunteerActivityScreen} />
@@ -157,7 +157,7 @@ export function RootNavigator() {
       <Stack.Screen name="shelterVolunteerDetail" component={ShelterVolunteerDetailScreen} />
       <Stack.Screen name="shelterVolunteerCalendar" component={ShelterVolunteerCalendarScreen} />
       <Stack.Screen name="shelterVolunteerEdit" component={ShelterVolunteerEditScreen} />
-      <Stack.Screen name="shelterVolunteerCancel" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerCancel" component={ShelterVolunteerCancelScreen} />
     </Stack.Navigator>
   );
 }
