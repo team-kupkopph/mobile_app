@@ -64,10 +64,10 @@ function ShiftCardBody({ item }: { item: MySignupItem }) {
 // A small, separately-tappable affordance on an upcoming card. Nested inside the card's own
 // TouchableOpacity (which navigates to check-in) — RN's touch responder system lets the
 // innermost Touchable claim the gesture, so tapping "Cancel" never also fires the card tap.
-function CancelLink({ onPress }: { onPress: () => void }) {
+function CancelLink({ label = "Cancel", onPress }: { label?: string; onPress: () => void }) {
   return (
     <TouchableOpacity activeOpacity={0.6} onPress={onPress} hitSlop={8} style={styles.cancelLink}>
-      <Text style={styles.cancelLinkText}>Cancel</Text>
+      <Text style={styles.cancelLinkText}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -145,8 +145,14 @@ export function KawangGawaScheduleScreen({ navigation }: Props) {
             <>
               <Text style={styles.sectionLabel}>Awaiting approval</Text>
               {requested.map((item) => (
-                <View key={item.signup_id} style={styles.card}>
-                  <ShiftCardBody item={item} />
+                <View key={item.signup_id} style={[styles.card, styles.cardColumn]}>
+                  <View style={styles.cardRow}>
+                    <ShiftCardBody item={item} />
+                  </View>
+                  <CancelLink
+                    label="Cancel request"
+                    onPress={() => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })}
+                  />
                 </View>
               ))}
             </>
