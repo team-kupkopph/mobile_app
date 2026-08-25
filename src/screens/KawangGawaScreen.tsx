@@ -114,6 +114,7 @@ export function KawangGawaScreen({ navigation }: Props) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
+                <Text style={styles.cardOrg}>{s.org_name}</Text>
                 <Text style={styles.cardMeta}>{shiftWhenLabel(s.starts_at, s.ends_at)}</Text>
               </View>
               <View style={styles.chip}>
@@ -152,6 +153,7 @@ const styles = StyleSheet.create({
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.chipBg,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  cardOrg: { marginTop: 2, color: colors.muted, fontSize: 13, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, fontSize: 14, fontWeight: "700" },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center", backgroundColor: colors.chipBg },
   chipText: { fontSize: 13, fontWeight: "800", color: colors.teal },

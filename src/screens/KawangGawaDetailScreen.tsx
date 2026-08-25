@@ -1,6 +1,6 @@
 // US-V8 · Kawang-Gawa shift detail — the two consents, then the request.
 // Reference: screens/user/screen-kawanggawa-detail.png. GET /shifts/{shiftId} returns the
-// BrowseShift shape (no org_name/location on this endpoint — see volunteer.ts); POST
+// BrowseShift shape, which carries `org_name` (Task 4b) but no location field yet; POST
 // /shifts/{shiftId}/signups sends both consents together.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
@@ -123,6 +123,8 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
             <Text style={styles.heroTitle}>{shiftTypeLabel(shift.type)}</Text>
           </View>
 
+          <Text style={styles.orgName}>{shift.org_name}</Text>
+
           <View style={styles.infoCard}>
             <Text style={styles.infoLine}>{shiftWhenLabel(shift.starts_at, shift.ends_at)}</Text>
             <Text style={[styles.infoLine, styles.infoLineLast]}>
@@ -204,7 +206,8 @@ const styles = StyleSheet.create({
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   heroIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
   heroTitle: { flex: 1, color: colors.ink, fontSize: 24, fontWeight: "800" },
-  infoCard: { marginTop: 20, borderRadius: 18, paddingHorizontal: 18, paddingVertical: 16, ...card },
+  orgName: { marginTop: 14, color: colors.ink, fontSize: 16, fontWeight: "800" },
+  infoCard: { marginTop: 16, borderRadius: 18, paddingHorizontal: 18, paddingVertical: 16, ...card },
   infoLine: { color: colors.ink, fontSize: 15, fontWeight: "700", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.line },
   infoLineLast: { borderBottomWidth: 0, paddingBottom: 0 },
   notOpenNote: { marginTop: 14, color: colors.danger, fontSize: 13, fontWeight: "700" },
