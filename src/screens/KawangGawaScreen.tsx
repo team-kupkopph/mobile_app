@@ -1,0 +1,176 @@
+// US-V8 · the Kawang-Gawa hub — the Volunteer tab. Browse open shifts across shelters.
+// Reference: screens/user/screen-kawanggawa.png. GET /shifts (optionally ?type=).
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+import { useApi } from "../api/useApi";
+import { VolunteerIcon } from "../components/AppIcons";
+import { OwnerTabs } from "../components/OwnerTabs";
+import { RootStackParamList } from "../navigation/types";
+import { ShiftType, shiftTypeLabel, slotsLeftLabel } from "../volunteer";
+
+// GET /shifts (ShiftsBrowseView -> backend `_shift_repr`) never carries `org_name` — that field
+// only rides on /me/signups' embedded shift (`_my_shift_repr`), and it carries `slots_left`
+// which `_shift_repr` has but the /me/signups shape doesn't. So this is typed locally rather
+// than reusing volunteer.ts's `ShiftSummary` (which mirrors the /me/signups embedded shape) —
+// reusing it here would both claim a field the browse endpoint never sends and drop the one
+// (`slots_left`) the hub card needs for `slotsLeftLabel`.
+type BrowseShift = {
+  shift_id: string;
+  type: ShiftType;
+  starts_at: string;
+  ends_at: string;
+  capacity: number;
+  status: "open" | "full" | "closed";
+  slots_left: number;
+};
+
+const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
+const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
+  { key: "", label: "All" },
+  ...SHIFT_TYPES.map((t) => ({ key: t, label: shiftTypeLabel(t) }))
+];
+
+function shiftWhenLabel(startsAt: string, endsAt: string): string {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+  const date = start.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  const startTime = start.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  const endTime = end.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return `${date} · ${startTime}–${endTime}`;
+}
+
+const colors = {
+  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
+  chipBg: "#E7F0EE"
+};
+
+// Registered under "kawanggawa" (the real hub) and, temporarily, under the other seven new
+// US-V8 route names too — RootNavigator points them all at this component so the app compiles
+// before Tasks 4–8 swap in their real screens. The union keeps that placeholder wiring
+// typechecking without an `any` cast; this screen never reads `route.params`.
+type Props = NativeStackScreenProps<
+  RootStackParamList,
+  | "kawanggawa"
+  | "kawanggawaDetail"
+  | "waiver"
+  | "kawanggawaRequested"
+  | "kawanggawaSchedule"
+  | "kawanggawaCheckin"
+  | "kawanggawaHistory"
+  | "kawanggawaCancel"
+>;
+
+export function KawangGawaScreen({ navigation }: Props) {
+  const api = useApi();
+  const [shifts, setShifts] = useState<BrowseShift[]>([]);
+  const [type, setType] = useState<"" | ShiftType>("");
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  const load = useCallback(() => {
+    const qs = type ? `?type=${type}` : "";
+    api.get(`/shifts${qs}`).then((r) => {
+      if (r.ok) {
+        setShifts(r.data?.results ?? []);
+        setError(false);
+      } else {
+        setError(true);
+      }
+      setLoaded(true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter change
+  }, [type]);
+
+  useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  return (
+    <View style={styles.screen}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Kawang-Gawa</Text>
+        <View style={styles.headerLinks}>
+          <TouchableOpacity onPress={() => navigation.navigate("kawanggawaSchedule")} hitSlop={10}>
+            <Text style={styles.headerLink}>My schedule ›</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("kawanggawaHistory")} hitSlop={10}>
+            <Text style={styles.headerLink}>History ›</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.filterRow}>
+          {FILTERS.map((f) => (
+            <TouchableOpacity
+              key={f.key || "all"}
+              style={[styles.filterChip, type === f.key && styles.filterChipActive]}
+              onPress={() => setType(f.key)}
+              activeOpacity={0.85}
+            >
+              <Text style={[styles.filterText, type === f.key && styles.filterTextActive]}>{f.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {loaded && error ? (
+          <Text style={styles.empty}>Couldn't load shifts. Pull to refresh or try again shortly.</Text>
+        ) : loaded && shifts.length === 0 ? (
+          <Text style={styles.empty}>No open shifts right now — check back soon.</Text>
+        ) : (
+          shifts.map((s) => (
+            <TouchableOpacity
+              key={s.shift_id}
+              style={styles.card}
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate("kawanggawaDetail", { shiftId: s.shift_id })}
+            >
+              <View style={styles.cardIcon}>
+                <VolunteerIcon color={colors.teal} size={22} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
+                <Text style={styles.cardMeta}>{shiftWhenLabel(s.starts_at, s.ends_at)}</Text>
+              </View>
+              <View style={styles.chip}>
+                <Text style={styles.chipText}>{slotsLeftLabel(s.slots_left, s.capacity)}</Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+      </ScrollView>
+
+      <OwnerTabs active="volunteer" />
+    </View>
+  );
+}
+
+const card = {
+  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+};
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.page },
+  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 4, flexDirection: "row",
+            alignItems: "center", justifyContent: "space-between" },
+  title: { color: colors.ink, fontSize: 26, fontWeight: "800" },
+  headerLinks: { flexDirection: "row", gap: 16 },
+  headerLink: { color: colors.teal, fontSize: 14, fontWeight: "700" },
+  content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 130 },
+  filterRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 },
+  filterChip: { paddingHorizontal: 16, height: 38, borderRadius: 19, alignItems: "center",
+                justifyContent: "center", backgroundColor: colors.white },
+  filterChipActive: { backgroundColor: colors.teal },
+  filterText: { color: colors.muted, fontSize: 14, fontWeight: "700" },
+  filterTextActive: { color: colors.white },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.chipBg,
+              alignItems: "center", justifyContent: "center" },
+  cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  cardMeta: { marginTop: 6, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center", backgroundColor: colors.chipBg },
+  chipText: { fontSize: 13, fontWeight: "800", color: colors.teal },
+  empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
+});

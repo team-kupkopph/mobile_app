@@ -77,4 +77,15 @@ export type RootStackParamList = {
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };
+  // US-V8 — Kawang-Gawa volunteer flow (Track V, Sprint 5). `kawanggawa` is the real hub
+  // (Task 3); the other seven are placeholders pointed at KawangGawaScreen until Tasks 4–8
+  // register their own components.
+  kawanggawa: undefined;
+  kawanggawaDetail: { shiftId: string };
+  waiver: undefined; // the D-S5-1 placeholder
+  kawanggawaRequested: undefined;
+  kawanggawaSchedule: undefined;
+  kawanggawaCheckin: { signupId: string };
+  kawanggawaHistory: undefined;
+  kawanggawaCancel: { signupId: string };
 };
