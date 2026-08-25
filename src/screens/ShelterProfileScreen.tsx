@@ -87,7 +87,13 @@ export function ShelterProfileScreen({ navigation }: Props) {
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("donationQr")}>
             <Row label="Donation QR & wishlist" locked={gated} value={gated ? undefined : "On"} />
           </TouchableOpacity>
-          <Row label="Volunteer program" locked={gated} value={gated ? undefined : "3 active"} last={gated || isTier1} />
+          <TouchableOpacity
+            activeOpacity={0.8}
+            disabled={gated}
+            onPress={() => navigation.navigate("shelterVolunteer")}
+          >
+            <Row label="Volunteer program" locked={gated} value={gated ? undefined : "3 active"} last={gated || isTier1} />
+          </TouchableOpacity>
 
           {gated ? (
             // The one outstanding thing — an accent, not a row, so it reads as the next action.

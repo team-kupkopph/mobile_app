@@ -26,6 +26,7 @@ import { ShelterPhoneVerifyScreen } from "../screens/ShelterPhoneVerifyScreen";
 import { ShelterProfileScreen } from "../screens/ShelterProfileScreen";
 import { ShelterSetupScreen } from "../screens/ShelterSetupScreen";
 import { ShelterTierScreen } from "../screens/ShelterTierScreen";
+import { ShelterVolunteerScreen } from "../screens/ShelterVolunteerScreen";
 import { ShelterVerifyNgoScreen } from "../screens/ShelterVerifyNgoScreen";
 import { ShelterVerifyScreen } from "../screens/ShelterVerifyScreen";
 import { SigninScreen } from "../screens/SigninScreen";
@@ -136,6 +137,18 @@ export function RootNavigator() {
       <Stack.Screen name="kawanggawaCheckin" component={KawangGawaCheckinScreen} />
       <Stack.Screen name="kawanggawaHistory" component={KawangGawaHistoryScreen} />
       <Stack.Screen name="kawanggawaCancel" component={KawangGawaCancelScreen} />
+      {/* US-V9 — the shelter side of Kawang-Gawa: the manage list (Task 5, real). Tasks 6–10
+          register the create/activity/requests/attendance/detail/calendar/edit/cancel screens;
+          until then they're temporarily stubbed at ShelterVolunteerScreen so the app compiles. */}
+      <Stack.Screen name="shelterVolunteer" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerCreate" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerActivity" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerRequests" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerAttendance" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerDetail" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerCalendar" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerEdit" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerCancel" component={ShelterVolunteerScreen} />
     </Stack.Navigator>
   );
 }

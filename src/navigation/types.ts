@@ -88,4 +88,16 @@ export type RootStackParamList = {
   kawanggawaCheckin: { signupId: string };
   kawanggawaHistory: undefined;
   kawanggawaCancel: { signupId: string };
+  // US-V9 — the shelter side of Kawang-Gawa (Track V, Sprint 5). `shelterVolunteer` is the real
+  // manage list (Task 5); the other eight are placeholders pointed at ShelterVolunteerScreen until
+  // Tasks 6–10 register their own components.
+  shelterVolunteer: undefined;
+  shelterVolunteerCreate: undefined;
+  shelterVolunteerActivity: { shiftId: string };
+  shelterVolunteerRequests: { shiftId: string };
+  shelterVolunteerAttendance: { shiftId: string };
+  shelterVolunteerDetail: { signupId: string };
+  shelterVolunteerCalendar: undefined;
+  shelterVolunteerEdit: { shiftId: string };
+  shelterVolunteerCancel: { shiftId: string };
 };
