@@ -4,9 +4,18 @@
 export type ShiftType = "walking" | "feeding" | "visitor" | "event" | "facility" | "transport";
 export type SignupStatus = "requested" | "approved" | "declined" | "cancelled" | "completed" | "no_show";
 
+// The /me/signups embedded-shift shape (backend `_my_shift_repr`): carries `org_name` but no
+// `slots_left`. Distinct from `BrowseShift` below (the GET /shifts and GET /shifts/{id} shape,
+// `_shift_repr`), which has `slots_left` but no `org_name`. Keep this name — `MySignupItem.shift`
+// references it.
 export type ShiftSummary = {
   shift_id: string; type: ShiftType; org_name: string;
   starts_at: string; ends_at: string; status: "open" | "full" | "closed"; capacity: number;
+};
+// The GET /shifts (browse) and GET /shifts/{id} (detail) shape (backend `_shift_repr`).
+export type BrowseShift = {
+  shift_id: string; type: ShiftType; starts_at: string; ends_at: string;
+  capacity: number; status: "open" | "full" | "closed"; slots_left: number;
 };
 export type MySignupItem = {
   signup_id: string; status: SignupStatus; cancelled_at: string | null; was_late: boolean;

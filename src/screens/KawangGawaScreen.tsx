@@ -9,23 +9,7 @@ import { useApi } from "../api/useApi";
 import { VolunteerIcon } from "../components/AppIcons";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { RootStackParamList } from "../navigation/types";
-import { ShiftType, shiftTypeLabel, slotsLeftLabel } from "../volunteer";
-
-// GET /shifts (ShiftsBrowseView -> backend `_shift_repr`) never carries `org_name` — that field
-// only rides on /me/signups' embedded shift (`_my_shift_repr`), and it carries `slots_left`
-// which `_shift_repr` has but the /me/signups shape doesn't. So this is typed locally rather
-// than reusing volunteer.ts's `ShiftSummary` (which mirrors the /me/signups embedded shape) —
-// reusing it here would both claim a field the browse endpoint never sends and drop the one
-// (`slots_left`) the hub card needs for `slotsLeftLabel`.
-type BrowseShift = {
-  shift_id: string;
-  type: ShiftType;
-  starts_at: string;
-  ends_at: string;
-  capacity: number;
-  status: "open" | "full" | "closed";
-  slots_left: number;
-};
+import { BrowseShift, ShiftType, shiftTypeLabel, slotsLeftLabel } from "../volunteer";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
