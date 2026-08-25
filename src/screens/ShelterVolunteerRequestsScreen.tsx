@@ -14,7 +14,7 @@ import { useApi } from "../api/useApi";
 import { AlertIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { RootStackParamList } from "../navigation/types";
-import { ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
+import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
 import { Reliability, shiftTypeLabel } from "../volunteer";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
@@ -64,6 +64,11 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
   const { shiftId } = route.params;
 
   const [shift, setShift] = useState<ShelterShift | null>(null);
+  // Approve must never fire before this resolves — see onPressApprove: a walking shift's
+  // picker is gated on `shift?.type === "walking"`, and while `shift` is still null that
+  // check is silently false, so an early tap would approve with no assigned_listing_id and
+  // there is no way to attach one after the fact.
+  const [shiftLoaded, setShiftLoaded] = useState(false);
   const [requests, setRequests] = useState<RequestRow[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -82,6 +87,7 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
   useEffect(() => {
     api.get(`/shelter/shifts/${shiftId}`).then((r) => {
       if (r.ok) setShift(r.data);
+      setShiftLoaded(true);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once
   }, [shiftId]);
@@ -115,6 +121,9 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
   }
 
   function onPressApprove(signupId: string) {
+    // Defense in depth alongside the button's own `disabled` — never approve before we know
+    // the shift's type, or a walking shift's picker could be silently skipped (IMPORTANT 1).
+    if (!shiftLoaded) return;
     setBanner(null);
     if (shift?.type === "walking") {
       loadListingsIfNeeded();
@@ -173,6 +182,10 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
       setReapprove(null);
       loadRequests();
     } else {
+      // Close the reapprove modal on any other failure too — otherwise it stays open on top
+      // of the banner and hides the error (a no-op when it wasn't open, i.e. a plain row
+      // Decline that failed).
+      setReapprove(null);
       setBanner(res.data?.error?.message ?? "Couldn't decline this request. Try again.");
     }
   }
@@ -220,6 +233,10 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
             requests.map((row) => {
               const chip = reliabilityChip(row.reliability);
               const busy = busySignupId === row.signup_id;
+              // Approve stays disabled (spinner in place of the label) until the shift's
+              // type is known — see IMPORTANT 1: approving a walking shift before then would
+              // silently skip the animal picker with no way to attach a listing afterward.
+              const approveBusy = busy || !shiftLoaded;
               return (
                 <View key={row.signup_id} style={styles.card}>
                   <View style={styles.cardTop}>
@@ -261,12 +278,12 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
                       <Text style={styles.declineText}>Decline</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.approveBtn, busy && styles.btnDisabled]}
+                      style={[styles.approveBtn, approveBusy && styles.btnDisabled]}
                       activeOpacity={0.85}
-                      disabled={busy}
+                      disabled={approveBusy}
                       onPress={() => onPressApprove(row.signup_id)}
                     >
-                      {busy ? (
+                      {approveBusy ? (
                         <ActivityIndicator color={colors.white} size="small" />
                       ) : (
                         <Text style={styles.approveText}>Approve</Text>
@@ -342,7 +359,11 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
         confirmLabel="Approve anyway"
         tone="danger"
         secondaryLabel="Decline instead"
-        onSecondary={() => { if (reapprove) doDecline(reapprove.signupId); }}
+        onSecondary={() => {
+          // Guard against a double-tap firing two concurrent declines, same as the row
+          // buttons' `disabled={busy}`.
+          if (reapprove && !busySignupId) doDecline(reapprove.signupId);
+        }}
         onConfirm={() => { if (reapprove) doApprove(reapprove.signupId, reapprove.assignedListingId, true); }}
         onCancel={() => setReapprove(null)}
       />
@@ -356,7 +377,6 @@ const colors = {
   greyBg: "#ECEAE3", grey: "#5F5E5A", danger: "#B23B3B", dangerBg: "#FBEAEA", line: "#E3E1D9"
 };
 
-type ChipTone = "done" | "muted" | "danger";
 const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = {
   done: { backgroundColor: colors.chipBg }, muted: { backgroundColor: colors.greyBg }, danger: { backgroundColor: colors.amberBg }
 };
