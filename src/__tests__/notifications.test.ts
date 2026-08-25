@@ -33,4 +33,15 @@ describe("notificationTarget", () => {
     expect(notificationTarget({ type: "inquiry_received", data: { listing_id: "l1", inquiry_id: "i1" } }))
       .toBeNull();
   });
+
+  it("routes volunteer notification types to schedule/history", () => {
+    expect(notificationTarget({ type: "shift_confirmed", data: { shift_id: "s", signup_id: "x" } }))
+      .toEqual({ screen: "kawanggawaSchedule" });
+    expect(notificationTarget({ type: "shift_reminder", data: { shift_id: "s", signup_id: "x", window: "24h" } }))
+      .toEqual({ screen: "kawanggawaSchedule" });
+    expect(notificationTarget({ type: "signup_declined", data: { shift_id: "s", signup_id: "x" } }))
+      .toEqual({ screen: "kawanggawaHistory" });
+    expect(notificationTarget({ type: "shift_cancelled_by_shelter", data: { shift_id: "s" } }))
+      .toEqual({ screen: "kawanggawaHistory" });
+  });
 });

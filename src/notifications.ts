@@ -7,7 +7,9 @@
 export type NotificationTarget =
   | { screen: "verifyDocuments" }
   | { screen: "reportDetail"; reportId: string }
-  | { screen: "myInquiries" };
+  | { screen: "myInquiries" }
+  | { screen: "kawanggawaSchedule" }
+  | { screen: "kawanggawaHistory" };
 
 const REPORT_LINKED_TYPES = new Set([
   "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened"
@@ -23,6 +25,13 @@ const VERIFICATION_TYPES = new Set([
 // caller on the client) — a real gap found while building this registry, not something
 // to paper over with a link to a screen that doesn't exist.
 const MY_INQUIRIES_TYPES = new Set(["stage_advanced"]);
+// US-V8 · the volunteer side of notify(): shift_confirmed/shift_reminder are "look at your
+// upcoming shifts", signup_declined/shift_cancelled_by_shelter are "see what happened" —
+// both already-past events, so history rather than schedule. signup_requested is the
+// SHELTER's own notification (a volunteer requested one of their shifts) — deliberately
+// not handled here; that's V9, a shelter-side screen that doesn't exist on mobile yet.
+const SCHEDULE_TYPES = new Set(["shift_confirmed", "shift_reminder"]);
+const HISTORY_TYPES = new Set(["signup_declined", "shift_cancelled_by_shelter"]);
 
 export function notificationTarget(n: { type: string; data: Record<string, any> | null }): NotificationTarget | null {
   if (VERIFICATION_TYPES.has(n.type)) {
@@ -33,6 +42,12 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   }
   if (MY_INQUIRIES_TYPES.has(n.type)) {
     return { screen: "myInquiries" };
+  }
+  if (SCHEDULE_TYPES.has(n.type)) {
+    return { screen: "kawanggawaSchedule" };
+  }
+  if (HISTORY_TYPES.has(n.type)) {
+    return { screen: "kawanggawaHistory" };
   }
   return null; // unknown type, or a report-linked type missing its report_id — no-op tap
 }
