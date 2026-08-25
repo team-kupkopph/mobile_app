@@ -61,6 +61,17 @@ function ShiftCardBody({ item }: { item: MySignupItem }) {
   );
 }
 
+// A small, separately-tappable affordance on an upcoming card. Nested inside the card's own
+// TouchableOpacity (which navigates to check-in) — RN's touch responder system lets the
+// innermost Touchable claim the gesture, so tapping "Cancel" never also fires the card tap.
+function CancelLink({ onPress }: { onPress: () => void }) {
+  return (
+    <TouchableOpacity activeOpacity={0.6} onPress={onPress} hitSlop={8} style={styles.cancelLink}>
+      <Text style={styles.cancelLinkText}>Cancel</Text>
+    </TouchableOpacity>
+  );
+}
+
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaSchedule">;
 
 export function KawangGawaScheduleScreen({ navigation }: Props) {
@@ -117,11 +128,14 @@ export function KawangGawaScheduleScreen({ navigation }: Props) {
               {upcoming.map((item) => (
                 <TouchableOpacity
                   key={item.signup_id}
-                  style={styles.card}
+                  style={[styles.card, styles.cardColumn]}
                   activeOpacity={0.85}
                   onPress={() => navigation.navigate("kawanggawaCheckin", { signupId: item.signup_id })}
                 >
-                  <ShiftCardBody item={item} />
+                  <View style={styles.cardRow}>
+                    <ShiftCardBody item={item} />
+                  </View>
+                  <CancelLink onPress={() => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })} />
                 </TouchableOpacity>
               ))}
             </>
@@ -159,6 +173,10 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   sectionLabel: { marginTop: 18, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  cardColumn: { flexDirection: "column", alignItems: "stretch" },
+  cardRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  cancelLink: { alignSelf: "flex-end", marginTop: 10, paddingVertical: 4, paddingHorizontal: 4 },
+  cancelLinkText: { color: colors.pink, fontSize: 13, fontWeight: "800" },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.chipBg,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
