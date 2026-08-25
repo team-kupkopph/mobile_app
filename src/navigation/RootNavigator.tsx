@@ -53,6 +53,8 @@ import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
 import { KawangGawaScreen } from "../screens/KawangGawaScreen";
 import { KawangGawaDetailScreen } from "../screens/KawangGawaDetailScreen";
+import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen";
+import { KawangGawaScheduleScreen } from "../screens/KawangGawaScheduleScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
@@ -126,8 +128,8 @@ export function RootNavigator() {
       <Stack.Screen name="kawanggawa" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaDetail" component={KawangGawaDetailScreen} />
       <Stack.Screen name="waiver" component={WaiverScreen} />
-      <Stack.Screen name="kawanggawaRequested" component={KawangGawaScreen} />
-      <Stack.Screen name="kawanggawaSchedule" component={KawangGawaScreen} />
+      <Stack.Screen name="kawanggawaRequested" component={KawangGawaRequestedScreen} />
+      <Stack.Screen name="kawanggawaSchedule" component={KawangGawaScheduleScreen} />
       <Stack.Screen name="kawanggawaCheckin" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaHistory" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaCancel" component={KawangGawaScreen} />
