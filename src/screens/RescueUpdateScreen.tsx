@@ -128,6 +128,19 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
+          {/* US-H1 — once the case's report is safe, the claiming rescuer can hand it off
+              to adoption. Shown alongside the forward-status options below (a safe case can
+              still be moved on to resolved), not instead of them. */}
+          {report.status === "safe" ? (
+            <TouchableOpacity
+              style={styles.listBtn}
+              onPress={() => navigation.navigate("rescueList", { caseId })}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.listBtnText}>List for adoption</Text>
+            </TouchableOpacity>
+          ) : null}
+
           {options.length === 0 ? (
             <Text style={styles.resolvedNote}>This case is resolved — there's nothing left to update.</Text>
           ) : (
@@ -220,6 +233,8 @@ const styles = StyleSheet.create({
   mapWrap: { marginTop: 18, height: 150, borderRadius: 20, overflow: "hidden", backgroundColor: "#E7F0EE" },
   map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { fontSize: 13, fontWeight: "800" },
+  listBtn: { marginTop: 20, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal, backgroundColor: colors.white },
+  listBtnText: { color: colors.teal, fontSize: 17, fontWeight: "800" },
   resolvedNote: { marginTop: 24, color: colors.muted, fontSize: 16, lineHeight: 22 },
   sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 18, fontWeight: "800" },
   radioList: { gap: 10 },

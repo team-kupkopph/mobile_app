@@ -52,6 +52,8 @@ import { RescueOfferSentScreen } from "../screens/RescueOfferSentScreen";
 import { MyOffersScreen } from "../screens/MyOffersScreen";
 import { MyRescuesScreen } from "../screens/MyRescuesScreen";
 import { RescueUpdateScreen } from "../screens/RescueUpdateScreen";
+import { RescueListScreen } from "../screens/RescueListScreen";
+import { RescueListedScreen } from "../screens/RescueListedScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { ListingDetailScreen } from "../screens/ListingDetailScreen";
 import { ListingFormScreen } from "../screens/ListingFormScreen";
@@ -127,6 +129,9 @@ export function RootNavigator() {
       <Stack.Screen name="myOffers" component={MyOffersScreen} />
       <Stack.Screen name="myRescues" component={MyRescuesScreen} />
       <Stack.Screen name="rescueUpdate" component={RescueUpdateScreen} />
+      {/* US-H1 — list an adoption from a safe rescue case. */}
+      <Stack.Screen name="rescueList" component={RescueListScreen} />
+      <Stack.Screen name="rescueListed" component={RescueListedScreen} />
       <Stack.Screen name="notifications" component={NotificationsScreen} />
       <Stack.Screen name="listingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="listingForm" component={ListingFormScreen} />

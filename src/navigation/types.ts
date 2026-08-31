@@ -61,6 +61,10 @@ export type RootStackParamList = {
   // Track K — claim + work the case
   myRescues: undefined;
   rescueUpdate: { caseId: string; reportId: string };
+  // Track H — handoff from a safe rescue case (US-H1: list for adoption). Reachable
+  // from RescueUpdateScreen once the case's report is `safe`.
+  rescueList: { caseId: string };
+  rescueListed: undefined;
   // US-X1 — the bell
   notifications: undefined;
   // Track A — adoption (US-A3/A4)
