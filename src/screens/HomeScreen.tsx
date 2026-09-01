@@ -10,7 +10,7 @@ import { useCallback, useState } from "react";
 import { Alert, Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
-import { Me } from "../api/types";
+import { Listing, Me } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
@@ -21,25 +21,29 @@ const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;
 
-type QuickAction = { label: string; icon: "search" | "heart" | "peso" | "person" };
+type QuickAction = {
+  label: string;
+  icon: "search" | "heart" | "peso" | "person";
+  dest: keyof RootStackParamList;
+};
 
 const quickActions: QuickAction[] = [
-  { label: "Lost & found", icon: "search" },
-  { label: "Adopt", icon: "heart" },
-  { label: "Donate", icon: "peso" },
-  { label: "Volunteer", icon: "person" }
+  { label: "Lost & found", icon: "search", dest: "rescueMap" },
+  { label: "Adopt", icon: "heart", dest: "adopt" },
+  // No generic "browse shelters" screen yet — adopt feed is the nearest landing.
+  { label: "Donate", icon: "peso", dest: "adopt" },
+  { label: "Volunteer", icon: "person", dest: "kawanggawa" },
 ];
 
-const pets = [
-  { name: "Milo", details: "Aspin · 1 yr · Male", shelter: "PAWS Manila · 2 km" },
-  { name: "Luna", details: "Puspin · 2 yrs · Female", shelter: "Marikina AWG · 4 km" }
-];
+type MapReport = { report_id: string; species: string; condition: string; city: string | null };
 
 export function HomeScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
   const [hasUnread, setHasUnread] = useState(false);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [rescues, setRescues] = useState<MapReport[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -57,6 +61,16 @@ export function HomeScreen({ navigation, route }: Props) {
       // marks everything read on open) — so the dot clears the moment you come back.
       api.get("/me/notifications").then((r) => {
         if (r.ok) setHasUnread((r.data?.notifications ?? []).some((n: { read: boolean }) => !n.read));
+      });
+      // Adoption preview — first 2 available listings near the user's city.
+      const cityParam = city ? `&city=${encodeURIComponent(city)}` : "";
+      api.get(`/listings?page_size=2${cityParam}`).then((r) => {
+        if (r.ok) setListings(r.data?.results ?? []);
+      });
+      // Nearby rescues — first 2 reported strays near the user's city.
+      const rescueCity = city ?? "Marikina";
+      api.get(`/reports/map?city=${encodeURIComponent(rescueCity)}&status=reported`).then((r) => {
+        if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
     }, [])
@@ -181,49 +195,81 @@ export function HomeScreen({ navigation, route }: Props) {
 
         <View style={styles.quickGrid}>
           {quickActions.map((action) => (
-            <View key={action.label} style={styles.quickCard}>
+            <TouchableOpacity
+              key={action.label}
+              activeOpacity={0.75}
+              style={styles.quickCard}
+              onPress={() => navigation.navigate(action.dest as never)}
+            >
               <View style={styles.quickIcon}>{renderQuickIcon(action.icon)}</View>
               <Text style={styles.quickLabel}>{action.label}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Adopt near you</Text>
-          <Text style={styles.seeAll}>See all</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("adopt")}>
+            <Text style={styles.seeAll}>See all ›</Text>
+          </TouchableOpacity>
         </View>
 
-        {pets.map((pet) => (
-          <View key={pet.name} style={styles.petCard}>
+        {listings.length === 0 ? (
+          <Text style={styles.emptyNote}>No pets listed near you yet.</Text>
+        ) : listings.map((listing) => (
+          <TouchableOpacity
+            key={listing.listing_id}
+            activeOpacity={0.75}
+            style={styles.petCard}
+            onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
+          >
             <View style={styles.avatarCircle}>
               <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
             </View>
             <View style={styles.petCopy}>
-              <Text style={styles.petName}>{pet.name}</Text>
-              <Text style={styles.petDetails}>{pet.details}</Text>
+              <Text style={styles.petName}>{listing.pet.name}</Text>
+              <Text style={styles.petDetails}>
+                {[listing.pet.species, listing.pet.breed, listing.city].filter(Boolean).join(" · ")}
+              </Text>
             </View>
             <View style={styles.petMeta}>
               <View style={styles.availableBadge}>
                 <Text style={styles.availableText}>Available</Text>
               </View>
-              <Text style={styles.shelterText}>{pet.shelter}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
 
-        <Text style={[styles.sectionTitle, styles.rescueTitle]}>Nearby rescues</Text>
-        <View style={styles.rescueCard}>
-          <View style={styles.avatarCircle}>
-            <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
-          </View>
-          <View style={styles.petCopy}>
-            <Text style={styles.petName}>Aspin · Quezon City</Text>
-            <Text style={styles.petDetails}>0.4 km · needs pickup</Text>
-          </View>
-          <View style={styles.urgentBadge}>
-            <Text style={styles.urgentText}>Urgent</Text>
-          </View>
-        </View>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.rescueSectionRow}
+          onPress={() => navigation.navigate("rescueMap")}
+        >
+          <Text style={[styles.sectionTitle, styles.rescueTitle]}>Nearby rescues</Text>
+          <Text style={styles.seeAll}>See map ›</Text>
+        </TouchableOpacity>
+
+        {rescues.length === 0 ? (
+          <Text style={styles.emptyNote}>No strays reported nearby yet.</Text>
+        ) : rescues.map((report) => (
+          <TouchableOpacity
+            key={report.report_id}
+            activeOpacity={0.75}
+            style={styles.rescueCard}
+            onPress={() => navigation.navigate("reportDetail", { reportId: report.report_id })}
+          >
+            <View style={styles.avatarCircle}>
+              <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
+            </View>
+            <View style={styles.petCopy}>
+              <Text style={styles.petName}>{report.species} · {report.city ?? "Nearby"}</Text>
+              <Text style={styles.petDetails}>{report.condition} · needs pickup</Text>
+            </View>
+            <View style={conditionBadgeStyle(report.condition)}>
+              <Text style={conditionTextStyle(report.condition)}>{conditionLabel(report.condition)}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
 
         {pendingMember && <Text style={styles.lockedNote}>Claiming rescues unlocks once you're verified.</Text>}
       </ScrollView>
@@ -231,6 +277,24 @@ export function HomeScreen({ navigation, route }: Props) {
       <OwnerTabs active="home" />
     </View>
   );
+}
+
+function conditionLabel(condition: string): string {
+  if (condition === "injured" || condition === "sick") return "Urgent";
+  if (condition === "pregnant") return "Special";
+  return "Stable";
+}
+
+function conditionBadgeStyle(condition: string) {
+  if (condition === "injured" || condition === "sick") return styles.urgentBadge;
+  if (condition === "pregnant") return styles.specialBadge;
+  return styles.stableBadge;
+}
+
+function conditionTextStyle(condition: string) {
+  if (condition === "injured" || condition === "sick") return styles.urgentText;
+  if (condition === "pregnant") return styles.specialText;
+  return styles.stableText;
 }
 
 function intentToast(action: GuestIntentAction): [string, string] {
@@ -617,9 +681,7 @@ const styles = StyleSheet.create({
     color: "#AAA69D",
     fontSize: 10
   },
-  rescueTitle: {
-    marginTop: 34
-  },
+  rescueTitle: {},
   rescueCard: {
     height: 68,
     marginTop: 16,
@@ -652,5 +714,43 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 11,
     textAlign: "center"
+  },
+  emptyNote: {
+    marginTop: 12,
+    color: colors.muted,
+    fontSize: 12,
+    textAlign: "center"
+  },
+  rescueSectionRow: {
+    marginTop: 34,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  specialBadge: {
+    minWidth: 68,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.paleTeal
+  },
+  specialText: {
+    color: colors.teal,
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  stableBadge: {
+    minWidth: 68,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E1F2D3"
+  },
+  stableText: {
+    color: "#356A24",
+    fontSize: 12,
+    fontWeight: "800"
   }
 });
