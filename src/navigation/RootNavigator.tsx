@@ -57,6 +57,8 @@ import { RescueListedScreen } from "../screens/RescueListedScreen";
 import { RescuePlaceScreen } from "../screens/RescuePlaceScreen";
 import { RescuePlaceConfirmScreen } from "../screens/RescuePlaceConfirmScreen";
 import { RescuePlaceSentScreen } from "../screens/RescuePlaceSentScreen";
+import { PlaceRequestScreen } from "../screens/PlaceRequestScreen";
+import { PlaceAcceptedScreen } from "../screens/PlaceAcceptedScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { ListingDetailScreen } from "../screens/ListingDetailScreen";
 import { ListingFormScreen } from "../screens/ListingFormScreen";
@@ -139,6 +141,9 @@ export function RootNavigator() {
       <Stack.Screen name="rescuePlace" component={RescuePlaceScreen} />
       <Stack.Screen name="rescuePlaceConfirm" component={RescuePlaceConfirmScreen} />
       <Stack.Screen name="rescuePlaceSent" component={RescuePlaceSentScreen} />
+      {/* US-H3 — the recipient of a direct placement accepts or declines it. */}
+      <Stack.Screen name="placeRequest" component={PlaceRequestScreen} />
+      <Stack.Screen name="placeAccepted" component={PlaceAcceptedScreen} />
       <Stack.Screen name="notifications" component={NotificationsScreen} />
       <Stack.Screen name="listingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="listingForm" component={ListingFormScreen} />

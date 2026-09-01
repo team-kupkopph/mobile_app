@@ -19,13 +19,18 @@ const VERIFICATION_TYPES = new Set([
   "verification_approved", "verification_rejected", "verification_needs_info"
 ]);
 // stage_advanced is the adopter's own notification (a poster advanced their inquiry) —
-// their inquiry list is where to see it. inquiry_received is the OTHER direction (a
-// poster is told someone inquired) and has deliberately no target here: no poster-side
-// inquiry-review screen exists yet in the mobile app at all (US-A4's "poster advances
-// stages" was built backend-only — POST /inquiries/{id}/stages/{stage_key} has no
-// caller on the client) — a real gap found while building this registry, not something
-// to paper over with a link to a screen that doesn't exist.
-const MY_INQUIRIES_TYPES = new Set(["stage_advanced"]);
+// their inquiry list is where to see it. inquiry_received fires in TWO directions with the
+// identical {listing_id, inquiry_id} payload shape, so the type alone can't tell them apart:
+// (a) a poster is told someone inquired on their listing — still no poster-side review
+// screen (US-A4's "poster advances stages" was built backend-only), so this is a no-op for
+// them, same as before; (b) US-H3 — a direct-placement recipient is told they were offered
+// an animal (CasePlaceView). (b) now HAS a destination: MyInquiriesScreen shows the
+// recipient's own inquiries (they're `adopter_account` on a placement) and flags a placement
+// row client-side (see MyInquiriesScreen's isPlacement — every stage SKIPPED) with a
+// tap-through to placeRequest. Routing both directions here to myInquiries is a deliberate
+// over-approximation: harmless for (a) (they land on their own — unrelated — inquiry list,
+// same as tapping the bell icon itself would), and correct for (b).
+const MY_INQUIRIES_TYPES = new Set(["stage_advanced", "inquiry_received"]);
 // US-V8 · the volunteer side of notify(): shift_confirmed/shift_reminder are "look at your
 // upcoming shifts", signup_declined/shift_cancelled_by_shelter are "see what happened" —
 // both already-past events, so history rather than schedule.

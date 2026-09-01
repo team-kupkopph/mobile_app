@@ -1,6 +1,13 @@
 // US-A4 · the adopter's own inquiries with each one's stage progress.
 // GET /me/inquiries. "Both sides see the same state" — this reads the same stage rows the
 // poster's advance writes.
+//
+// US-H3: a direct placement (US-H2) is also an AdoptionInquiry with `adopter_account` set to
+// the recipient — CasePlaceView creates every stage row and immediately marks it SKIPPED (the
+// bypass), so "every stage is skipped" is the client-side signal that this row is a placement
+// awaiting the recipient's decision, not a real inquiry working through the normal ladder.
+// There's no separate flag on the wire for this — it's derived from `stages`, same as
+// inquiryProgressLabel() below derives its label from the same array.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -24,6 +31,13 @@ const STATUS_TONE: Record<string, { bg: string; fg: string; label: string }> = {
   declined: { bg: colors.pinkBg, fg: colors.pink, label: "Declined" },
   withdrawn: { bg: colors.greyBg, fg: colors.grey, label: "Withdrawn" }
 };
+
+// See the file header: every stage SKIPPED is the direct-placement bypass. `some` guards
+// against an inquiry with no stage rows at all (shouldn't happen, but "every" on an empty
+// array is vacuously true) reading as a false-positive placement.
+function isPlacement(iq: MyInquiry): boolean {
+  return iq.stages.length > 0 && iq.stages.every((s) => s.state === "skipped");
+}
 
 type Props = NativeStackScreenProps<RootStackParamList, "myInquiries">;
 
@@ -54,12 +68,20 @@ export function MyInquiriesScreen({ navigation }: Props) {
         ) : (
           inquiries.map((iq) => {
             const tone = STATUS_TONE[iq.status] ?? STATUS_TONE.active;
+            const placement = isPlacement(iq);
+            const pendingPlacement = placement && iq.status === "active";
+            // A placement still awaiting the recipient's decision goes to the accept/decline
+            // screen; a decided placement (or a normal inquiry) goes to the listing like today.
+            function onPress() {
+              if (pendingPlacement) navigation.navigate("placeRequest", { inquiryId: iq.inquiry_id });
+              else navigation.navigate("listingDetail", { listingId: iq.listing.listing_id });
+            }
             return (
               <TouchableOpacity
                 key={iq.inquiry_id}
                 style={styles.card}
                 activeOpacity={0.85}
-                onPress={() => navigation.navigate("listingDetail", { listingId: iq.listing.listing_id })}
+                onPress={onPress}
               >
                 <View style={styles.cardTop}>
                   <View style={{ flex: 1 }}>
@@ -70,7 +92,11 @@ export function MyInquiriesScreen({ navigation }: Props) {
                     <Text style={[styles.chipText, { color: tone.fg }]}>{tone.label}</Text>
                   </View>
                 </View>
-                <Text style={styles.progress}>{inquiryProgressLabel(iq.stages)}</Text>
+                {pendingPlacement ? (
+                  <Text style={styles.placementNote}>Placement offer — tap to accept or decline</Text>
+                ) : (
+                  <Text style={styles.progress}>{inquiryProgressLabel(iq.stages)}</Text>
+                )}
               </TouchableOpacity>
             );
           })
@@ -103,5 +129,6 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { fontSize: 13, fontWeight: "800" },
   progress: { marginTop: 12, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  placementNote: { marginTop: 12, color: colors.teal, fontSize: 14, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

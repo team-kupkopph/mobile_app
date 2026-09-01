@@ -72,6 +72,12 @@ export type RootStackParamList = {
   rescuePlace: { caseId: string };
   rescuePlaceConfirm: { caseId: string; recipientEmail: string };
   rescuePlaceSent: undefined;
+  // Track H — the recipient's side of a direct placement (US-H3): accept/decline the animal
+  // a rescuer/shelter placed with them. Reachable from MyInquiriesScreen, which flags a
+  // placement inquiry client-side (all six stages skipped — the CasePlaceView bypass) and
+  // taps through with its inquiry_id.
+  placeRequest: { inquiryId: string };
+  placeAccepted: undefined;
   // US-X1 — the bell
   notifications: undefined;
   // Track A — adoption (US-A3/A4)

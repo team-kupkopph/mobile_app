@@ -29,9 +29,12 @@ describe("notificationTarget", () => {
       .toEqual({ screen: "myInquiries" });
   });
 
-  it("is a no-op for inquiry_received — no poster-side inquiry screen exists yet", () => {
+  it("routes inquiry_received to My inquiries — the only destination for either direction it fires in", () => {
+    // Same {listing_id, inquiry_id} payload shape for both a poster told someone inquired and
+    // a US-H3 placement recipient told they were offered an animal; myInquiries is a no-op
+    // landing for the former and the real destination for the latter (see notifications.ts).
     expect(notificationTarget({ type: "inquiry_received", data: { listing_id: "l1", inquiry_id: "i1" } }))
-      .toBeNull();
+      .toEqual({ screen: "myInquiries" });
   });
 
   it("routes volunteer notification types to schedule/history", () => {
