@@ -65,6 +65,13 @@ export type RootStackParamList = {
   // from RescueUpdateScreen once the case's report is `safe`.
   rescueList: { caseId: string };
   rescueListed: undefined;
+  // Track H — direct placement from a safe rescue case (US-H2: place with a known verified
+  // member/shelter, no public listing). Reachable from RescueUpdateScreen alongside rescueList,
+  // same safe gating. recipientEmail rides Place → Confirm; city/fee are collected on Confirm
+  // itself (reviewed alongside the recipient right before the POST).
+  rescuePlace: { caseId: string };
+  rescuePlaceConfirm: { caseId: string; recipientEmail: string };
+  rescuePlaceSent: undefined;
   // US-X1 — the bell
   notifications: undefined;
   // Track A — adoption (US-A3/A4)
