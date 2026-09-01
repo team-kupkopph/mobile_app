@@ -13,7 +13,7 @@ import { useApi } from "../api/useApi";
 import { Me } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
-import { BellIcon, ClockIcon } from "../components/AppIcons";
+import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 
@@ -81,6 +81,10 @@ export function HomeScreen({ navigation, route }: Props) {
   );
 
   const pendingMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "pending") ?? false;
+  // US-G1 · the owner side never had a "you're verified" moment — only the shelter (verifiedHero)
+  // did; this closes the gap the US-D4 audit left open. Mutually exclusive with pendingMember on
+  // the same rescuer capability.
+  const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
 
   return (
     <View style={styles.screen}>
@@ -128,6 +132,21 @@ export function HomeScreen({ navigation, route }: Props) {
             </View>
             <Text style={styles.statusLink}>Documents ›</Text>
           </TouchableOpacity>
+        )}
+
+        {approvedMember && (
+          // US-G1 · mirrors ShelterDashboardScreen's verifiedHero (solid teal card + white check
+          // tile) — the app uses solid fills, not gradients, so this matches the sibling exactly.
+          // Names the type ("Verified Member"), never a bare "Verified".
+          <View style={styles.verifiedHero}>
+            <View style={styles.verifiedHeroIcon}>
+              <CheckIcon color="#FFFFFF" size={20} />
+            </View>
+            <View style={styles.verifiedHeroCopy}>
+              <Text style={styles.verifiedHeroTitle}>You're a Verified Member</Text>
+              <Text style={styles.verifiedHeroBody}>You can now claim rescues and help strays find safety.</Text>
+            </View>
+          </View>
         )}
 
         <View style={styles.reportCard}>
@@ -359,6 +378,37 @@ const styles = StyleSheet.create({
     color: colors.warn2,
     fontSize: 12,
     fontWeight: "800"
+  },
+  verifiedHero: {
+    marginTop: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    padding: 20,
+    borderRadius: 24, // matches ShelterDashboardScreen.verifiedHero exactly
+    backgroundColor: colors.teal
+  },
+  verifiedHeroIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.18)"
+  },
+  verifiedHeroCopy: {
+    flex: 1
+  },
+  verifiedHeroTitle: {
+    color: "#FFFFFF",
+    fontSize: 21,
+    fontWeight: "800"
+  },
+  verifiedHeroBody: {
+    marginTop: 4,
+    color: "#DCEDEB",
+    fontSize: 15,
+    lineHeight: 21
   },
   reportCard: {
     height: 136,
