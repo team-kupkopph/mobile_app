@@ -78,6 +78,9 @@ export type RootStackParamList = {
   // taps through with its inquiry_id.
   placeRequest: { inquiryId: string };
   placeAccepted: undefined;
+  // Track H — the owner's own pets (US-H3): what a rescuer/shelter placed with them, or what
+  // they adopted. Reachable from ProfileScreen; GET /me/pets.
+  myPets: undefined;
   // US-X1 — the bell
   notifications: undefined;
   // Track A — adoption (US-A3/A4)

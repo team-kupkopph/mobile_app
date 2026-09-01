@@ -59,6 +59,7 @@ import { RescuePlaceConfirmScreen } from "../screens/RescuePlaceConfirmScreen";
 import { RescuePlaceSentScreen } from "../screens/RescuePlaceSentScreen";
 import { PlaceRequestScreen } from "../screens/PlaceRequestScreen";
 import { PlaceAcceptedScreen } from "../screens/PlaceAcceptedScreen";
+import { MyPetsScreen } from "../screens/MyPetsScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { ListingDetailScreen } from "../screens/ListingDetailScreen";
 import { ListingFormScreen } from "../screens/ListingFormScreen";
@@ -144,6 +145,8 @@ export function RootNavigator() {
       {/* US-H3 — the recipient of a direct placement accepts or declines it. */}
       <Stack.Screen name="placeRequest" component={PlaceRequestScreen} />
       <Stack.Screen name="placeAccepted" component={PlaceAcceptedScreen} />
+      {/* US-H3 — the recipient's own pets. */}
+      <Stack.Screen name="myPets" component={MyPetsScreen} />
       <Stack.Screen name="notifications" component={NotificationsScreen} />
       <Stack.Screen name="listingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="listingForm" component={ListingFormScreen} />

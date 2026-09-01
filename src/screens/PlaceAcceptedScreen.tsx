@@ -1,10 +1,7 @@
 // US-H3 · placement-accepted confirmation. Like RescueListedScreen/RescuePlaceSentScreen
 // (US-H1/H2), the route carries no params — PlacementDecisionView's accept response is just
 // { pet_id }, not threaded through — so this is a plain confirmation, not a link-through.
-// The natural next stop is My pets, but that route doesn't exist yet (it lands in Task 8 —
-// see RootStackParamList's Track H notes); rather than add a route this task doesn't own and
-// point it at a screen that isn't registered yet, this links back to Home like the sibling
-// H1/H2 confirmations link back to My rescues.
+// The natural next stop is My pets (Task 8), now registered — this links straight there.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -32,9 +29,9 @@ export function PlaceAcceptedScreen({ navigation }: Props) {
         <TouchableOpacity
           style={styles.primary}
           activeOpacity={0.9}
-          onPress={() => navigation.navigate("home", undefined)}
+          onPress={() => navigation.navigate("myPets")}
         >
-          <Text style={styles.primaryText}>Back to home</Text>
+          <Text style={styles.primaryText}>See my pets</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

@@ -112,6 +112,9 @@ export type MeNotification = {
   data: Record<string, any> | null; read: boolean; created_at: string;
 };
 
+// Track H — the recipient's owned pets (US-H3). GET /me/pets, newest first, owner-scoped.
+export type MyPet = { pet_id: string; name: string; species: string; photo_url: string | null };
+
 export type ShelterDashboard = {
   verification: {
     submitted: boolean;
