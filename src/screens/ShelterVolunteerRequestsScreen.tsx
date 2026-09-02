@@ -364,7 +364,12 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
           // buttons' `disabled={busy}`.
           if (reapprove && !busySignupId) doDecline(reapprove.signupId);
         }}
-        onConfirm={() => { if (reapprove) doApprove(reapprove.signupId, reapprove.assignedListingId, true); }}
+        onConfirm={() => {
+          // Same double-tap guard as onSecondary above — a second "Approve anyway" before the
+          // first resolves would fire two concurrent approves (the 2nd a harmless not_pending,
+          // but no reason to send it).
+          if (reapprove && !busySignupId) doApprove(reapprove.signupId, reapprove.assignedListingId, true);
+        }}
         onCancel={() => setReapprove(null)}
       />
     </View>

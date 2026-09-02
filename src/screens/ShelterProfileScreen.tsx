@@ -27,14 +27,26 @@ export function ShelterProfileScreen({ navigation }: Props) {
   const { signOut } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
+  // US-C1 · a REAL count, not the hardcoded "3 active". Active = shifts still open or full.
+  const [activeShifts, setActiveShifts] = useState<number | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       api.get("/me").then((r) => r.ok && setMe(r.data));
       api.get("/shelter/dashboard").then((r) => r.ok && setDash(r.data));
+      api.get("/shelter/shifts").then((r) => {
+        if (r.ok) {
+          const rows: Array<{ status: string }> = r.data.results ?? [];
+          setActiveShifts(rows.filter((s) => s.status === "open" || s.status === "full").length);
+        }
+      });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, [])
   );
+
+  const volunteerValue = activeShifts === null
+    ? undefined
+    : activeShifts === 0 ? "None" : `${activeShifts} active`;
 
   const tier = me?.shelter?.tier ?? "community_rescue";
   const isTier1 = tier === "community_rescue";
@@ -98,7 +110,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
             disabled={gated}
             onPress={() => navigation.navigate("shelterVolunteer")}
           >
-            <Row label="Volunteer program" locked={gated} value={gated ? undefined : "3 active"} last={gated || isTier1} />
+            <Row label="Volunteer program" locked={gated} value={gated ? undefined : volunteerValue} last={gated || isTier1} />
           </TouchableOpacity>
 
           {gated ? (

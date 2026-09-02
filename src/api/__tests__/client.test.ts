@@ -52,3 +52,23 @@ test("refreshes once on 401 then retries with the refreshed access token", async
   expect(authHeaders[0]).toBe("Bearer old");
   expect(authHeaders[2]).toBe("Bearer new");
 });
+
+test("US-C1 · a rejected fetch (offline/timeout) returns status 0, never throws or hangs", async () => {
+  global.fetch = jest.fn(async () => { throw new TypeError("Network request failed"); });
+  const api = createApi(() => null, async () => {});
+  const res = await api.get("/me/impact");            // a bare await must resolve, not reject
+  expect(res.ok).toBe(false);
+  expect(res.status).toBe(0);
+  expect(res.data.error.code).toBe("network_error");
+});
+
+test("US-C1 · a non-JSON body keeps the HTTP status and falls back to empty data", async () => {
+  global.fetch = jest.fn(async () => ({
+    status: 500, ok: false, json: async () => { throw new SyntaxError("Unexpected token < in JSON"); }
+  } as unknown as Response));
+  const api = createApi(() => null, async () => {});
+  const res = await api.get("/anything");
+  expect(res.ok).toBe(false);
+  expect(res.status).toBe(500);
+  expect(res.data).toEqual({});
+});
