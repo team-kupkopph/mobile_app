@@ -47,3 +47,18 @@ export function needProgressFraction(received: number, needed: number): number {
   if (needed <= 0) return 0;
   return Math.max(0, Math.min(1, received / needed));
 }
+
+// US-B2 · the four impact aggregates as labelled stat tiles, in a stable display order.
+export type Impact = {
+  shifts_completed: number; rescues_helped: number; pets_rehomed: number;
+  pledges_delivered: number;
+};
+
+export function impactTiles(i: Impact): { label: string; value: number }[] {
+  return [
+    { label: "Shifts", value: i.shifts_completed },
+    { label: "Rescues", value: i.rescues_helped },
+    { label: "Rehomed", value: i.pets_rehomed },
+    { label: "Donations", value: i.pledges_delivered }
+  ];
+}

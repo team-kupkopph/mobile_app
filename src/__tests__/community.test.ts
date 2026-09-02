@@ -1,5 +1,5 @@
 import {
-  needProgressFraction, needProgressLabel, needStatusChip, pledgeIsCancellable,
+  impactTiles, needProgressFraction, needProgressLabel, needStatusChip, pledgeIsCancellable,
   pledgeStatusChip
 } from "../community";
 
@@ -35,5 +35,15 @@ describe("need progress", () => {
     expect(needProgressFraction(2, 4)).toBe(0.5);
     expect(needProgressFraction(9, 4)).toBe(1);
     expect(needProgressFraction(1, 0)).toBe(0);
+  });
+});
+
+describe("impactTiles", () => {
+  it("returns the four aggregates as labelled tiles in order", () => {
+    const tiles = impactTiles({
+      shifts_completed: 3, rescues_helped: 1, pets_rehomed: 2, pledges_delivered: 5
+    });
+    expect(tiles.map((t) => t.label)).toEqual(["Shifts", "Rescues", "Rehomed", "Donations"]);
+    expect(tiles.map((t) => t.value)).toEqual([3, 1, 2, 5]);
   });
 });

@@ -5,6 +5,12 @@ import { SocialIdentity } from "../auth/socialAuth";
 // POST /verifications (US-C1) can submit the base set + NGO papers in one request.
 export type ShelterDoc = { doc_type: string; file_url: string };
 
+// US-B2 · a badge, threaded from the impact grid to its detail.
+export type BadgeShape = {
+  badge_code: string; name: string; description: string; icon: string; criteria: string;
+  earned: boolean; earned_at: string | null;
+};
+
 // US-W3 · a shelter need, threaded through the manage/edit/pledges screens.
 export type ShelterNeedShape = {
   need_id: string; title: string; category: string; description: string;
@@ -107,6 +113,9 @@ export type RootStackParamList = {
   shelterNeeds: undefined;
   needForm: { need?: ShelterNeedShape } | undefined;
   needPledges: { need: ShelterNeedShape };
+  // US-B2 · My impact: the badge grid + a single badge's detail.
+  impact: undefined;
+  badgeComparison: { badge: BadgeShape };
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };
