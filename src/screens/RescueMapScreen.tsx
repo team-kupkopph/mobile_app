@@ -1,15 +1,17 @@
 // US-S4 · the public rescue map. Reference: screens/user/screen-rescue-map.png. GET /reports/map.
-// The interactive MapView + pins needs react-native-maps + a dev build (deferred); this ships the
-// full functional surface — the colour-coded list + legend — with a placeholder where the map goes.
+// The map is a CITY-SCOPED backdrop only: it centres on the queried city and draws the search
+// radius. It deliberately shows NO per-report pins — the backend withholds each report's precise
+// geom (§12.5 / decision 11), so the strays live in the colour-coded list, not as map markers.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import MapView, { Circle } from "react-native-maps";
 
 import { MapReport } from "../api/types";
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
-import { LocationPinIcon } from "../components/AppIcons";
+import { centroidFor } from "../cityCentroids";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
 
@@ -30,6 +32,7 @@ export function RescueMapScreen({ navigation }: Props) {
   const api = useApi();
   const { city: savedCity } = useAuth();
   const city = savedCity ?? "Marikina";
+  const center = centroidFor(city);
   const [reports, setReports] = useState<MapReport[]>([]);
 
   useFocusEffect(useCallback(() => {
@@ -47,11 +50,27 @@ export function RescueMapScreen({ navigation }: Props) {
         <Text style={styles.title}>Nearby strays</Text>
       </View>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Map placeholder — the real MapView with colour-coded pins lands with the dev build. */}
-        <View style={styles.mapPlaceholder}>
-          <LocationPinIcon color={colors.teal} size={30} />
-          <Text style={styles.mapText}>{reports.length} nearby · within {RADIUS_KM} km of {city}</Text>
+        {/* City-scoped backdrop: centred on the city + search radius. No per-report pins (§12.5) —
+            the strays are in the list below; only rescuers ever see a report's exact spot. */}
+        <View style={styles.mapWrap}>
+          <MapView
+            style={styles.map}
+            pointerEvents="none"
+            initialRegion={{ latitude: center.lat, longitude: center.lng, latitudeDelta: 0.24, longitudeDelta: 0.24 }}
+          >
+            <Circle
+              center={{ latitude: center.lat, longitude: center.lng }}
+              radius={RADIUS_KM * 1000}
+              strokeColor="rgba(28,107,107,0.9)"
+              fillColor="rgba(28,107,107,0.12)"
+              strokeWidth={2}
+            />
+          </MapView>
+          <View style={styles.mapBadge} pointerEvents="none">
+            <Text style={styles.mapBadgeText}>{reports.length} nearby · within {RADIUS_KM} km of {city}</Text>
+          </View>
         </View>
+        <Text style={styles.mapNote}>Shown by city — a report's exact spot goes only to rescuers.</Text>
 
         <View style={styles.legendRow}>
           <Legend color={colors.amber} label="Needs help" />
@@ -109,8 +128,11 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
-  mapPlaceholder: { height: 150, borderRadius: 22, alignItems: "center", justifyContent: "center", gap: 10, backgroundColor: colors.soft },
-  mapText: { color: colors.tealFg, fontSize: 15, fontWeight: "700" },
+  mapWrap: { height: 200, borderRadius: 22, overflow: "hidden", backgroundColor: colors.soft },
+  map: { ...StyleSheet.absoluteFillObject },
+  mapBadge: { position: "absolute", left: 12, bottom: 12, backgroundColor: "rgba(255,255,255,0.94)", paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: "center" },
+  mapBadgeText: { color: colors.tealFg, fontSize: 14, fontWeight: "800" },
+  mapNote: { marginTop: 10, color: colors.muted, fontSize: 13, lineHeight: 18 },
   legendRow: { flexDirection: "row", gap: 18, marginTop: 16, marginBottom: 18 },
   legend: { flexDirection: "row", alignItems: "center", gap: 7 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },

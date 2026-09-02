@@ -9,9 +9,11 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "ph.kupkop.app"
     },
     "android": {
+      "package": "ph.kupkop.app",
       "adaptiveIcon": {
         "backgroundColor": "#1C6B6B"
       }
