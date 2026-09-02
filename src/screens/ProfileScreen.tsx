@@ -1,0 +1,381 @@
+// US-X3/X4 — the "You" tab. Reference: screens/user/screen-profile.png.
+// Fetches /me on focus (avatar, name, email, Verified Member status). City has no GET endpoint
+// (only PUT /me/location — see accounts/views.py MeLocationView) so the last-picked city is cached
+// in AuthContext/SecureStore by LocationPickerScreen and read from there instead of /me.
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+
+import { useApi } from "../api/useApi";
+import { Me } from "../api/types";
+import { useAuth } from "../auth/AuthContext";
+import { OwnerTabs } from "../components/OwnerTabs";
+import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
+import { RootStackParamList } from "../navigation/types";
+
+type Props = NativeStackScreenProps<RootStackParamList, "profile">;
+
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+export function ProfileScreen({ navigation }: Props) {
+  const api = useApi();
+  const { city, signOut } = useAuth();
+  const [me, setMe] = useState<Me | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [draftName, setDraftName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | undefined>(undefined);
+
+  useFocusEffect(
+    useCallback(() => {
+      api.get("/me").then((r) => r.ok && setMe(r.data));
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
+    }, [])
+  );
+
+  const pendingMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "pending") ?? false;
+  const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
+
+  function startEdit() {
+    setSaveError(undefined);
+    setDraftName(me?.display_name ?? "");
+    setEditing(true);
+  }
+
+  async function saveEdit() {
+    const name = draftName.trim();
+    if (!name || saving) return;
+    setSaving(true);
+    setSaveError(undefined);
+    try {
+      const res = await api.patch("/me", { display_name: name });
+      if (res.ok) {
+        setMe(res.data);
+        setEditing(false);
+      } else {
+        setSaveError(res.data?.error?.message ?? "Couldn't save that name. Try again.");
+      }
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleLogout() {
+    await signOut();
+    // Single stack (see RootNavigator) — signing out doesn't cross a stack boundary on its own,
+    // so land the user back on welcome explicitly rather than stranding them on a gated screen.
+    navigation.reset({ index: 0, routes: [{ name: "welcome" }] });
+  }
+
+  return (
+    <View style={styles.screen}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={styles.pageTitle}>Profile</Text>
+
+        <View style={styles.card}>
+          <View style={styles.avatar}>
+            {me?.photo_url ? (
+              <Image source={{ uri: me.photo_url } as ImageSourcePropType} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarInitials}>{initialsOf(me?.display_name ?? "")}</Text>
+            )}
+          </View>
+
+          {editing ? (
+            <View style={styles.editBlock}>
+              <TextInput
+                value={draftName}
+                onChangeText={setDraftName}
+                autoCapitalize="words"
+                autoFocus
+                style={styles.nameInput}
+              />
+              {!!saveError && <Text style={styles.saveError}>{saveError}</Text>}
+              <View style={styles.editActions}>
+                <TouchableOpacity activeOpacity={0.75} onPress={() => setEditing(false)} disabled={saving}>
+                  <Text style={styles.editCancel}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity activeOpacity={0.85} onPress={saveEdit} disabled={saving}>
+                  <Text style={styles.editSave}>{saving ? "Saving…" : "Save"}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.name}>{me?.display_name ?? ""}</Text>
+              <Text style={styles.email}>{me?.email ?? ""}</Text>
+              <TouchableOpacity activeOpacity={0.75} onPress={startEdit} style={styles.editLinkWrap}>
+                <Text style={styles.editLink}>Edit profile</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          <TouchableOpacity
+            activeOpacity={0.75}
+            style={styles.cityChip}
+            onPress={() => navigation.navigate("locationPicker")}
+          >
+            <LocationPinIcon color={colors.teal} size={16} />
+            <Text style={styles.cityChipText}>{city ?? "Set your city"}</Text>
+            <Text style={styles.cityChipChevron}>›</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity
+          activeOpacity={pendingMember || approvedMember ? 1 : 0.85}
+          style={styles.verifyCard}
+          onPress={pendingMember || approvedMember ? undefined : () => navigation.navigate("memberUpgrade")}
+          disabled={pendingMember || approvedMember}
+        >
+          <View style={styles.verifyIcon}>
+            <UserBadgeIcon color={colors.teal} />
+          </View>
+          <View style={styles.verifyCopy}>
+            <Text style={styles.verifyTitle}>
+              {approvedMember ? "Verified Member" : pendingMember ? "Verified Member" : "Get Verified"}
+            </Text>
+            <Text style={styles.verifyText}>
+              {approvedMember
+                ? "You're verified."
+                : pendingMember
+                  ? "Documents in review."
+                  : "Verify to adopt & rescue strays."}
+            </Text>
+          </View>
+          {!approvedMember && !pendingMember && (
+            <View style={styles.verifyButton}>
+              <Text style={styles.verifyButtonText}>Start</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.accountCard}>
+          <TouchableOpacity activeOpacity={0.75} style={styles.accountRow} onPress={handleLogout}>
+            <Text style={styles.accountRowLabel}>Log out</Text>
+            <Text style={styles.accountRowChevron}>›</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      <OwnerTabs active="profile" />
+    </View>
+  );
+}
+
+const colors = {
+  ink: "#12213A",
+  teal: "#1C6B6B",
+  tealDark: "#14504F",
+  page: "#F4F5F2",
+  border: "#E3E1D9",
+  muted: "#5F5E5A",
+  soft: "#E7F0EE",
+  danger: "#B23B3B"
+};
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: colors.page
+  },
+  content: {
+    paddingHorizontal: 26,
+    paddingTop: 20,
+    paddingBottom: 156
+  },
+  pageTitle: {
+    color: colors.ink,
+    fontSize: 28,
+    fontWeight: "800",
+    letterSpacing: -0.5
+  },
+  card: {
+    marginTop: 18,
+    borderRadius: 18,
+    alignItems: "center",
+    paddingVertical: 26,
+    paddingHorizontal: 20,
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#1F3A5F",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 4
+  },
+  avatar: {
+    width: 84,
+    height: 84,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.soft,
+    overflow: "hidden"
+  },
+  avatarImage: {
+    width: 84,
+    height: 84
+  },
+  avatarInitials: {
+    color: colors.teal,
+    fontSize: 28,
+    fontWeight: "800"
+  },
+  name: {
+    marginTop: 16,
+    color: colors.ink,
+    fontSize: 20,
+    fontWeight: "800"
+  },
+  email: {
+    marginTop: 5,
+    color: colors.muted,
+    fontSize: 13
+  },
+  editLinkWrap: {
+    marginTop: 10
+  },
+  editLink: {
+    color: colors.teal,
+    fontSize: 13,
+    fontWeight: "800"
+  },
+  editBlock: {
+    marginTop: 16,
+    width: "100%",
+    alignItems: "center"
+  },
+  nameInput: {
+    width: "100%",
+    height: 46,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    color: colors.ink,
+    fontSize: 15,
+    fontWeight: "800",
+    backgroundColor: "#FFFFFF",
+    textAlign: "center"
+  },
+  saveError: {
+    marginTop: 8,
+    color: colors.danger,
+    fontSize: 12,
+    fontWeight: "700"
+  },
+  editActions: {
+    marginTop: 12,
+    flexDirection: "row",
+    gap: 22
+  },
+  editCancel: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "700"
+  },
+  editSave: {
+    color: colors.teal,
+    fontSize: 13,
+    fontWeight: "800"
+  },
+  cityChip: {
+    marginTop: 18,
+    height: 40,
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    gap: 8,
+    backgroundColor: colors.soft
+  },
+  cityChipText: {
+    color: colors.tealDark,
+    fontSize: 13,
+    fontWeight: "700"
+  },
+  cityChipChevron: {
+    marginLeft: 2,
+    color: colors.teal,
+    fontSize: 15,
+    fontWeight: "800"
+  },
+  verifyCard: {
+    minHeight: 84,
+    marginTop: 18,
+    borderRadius: 15,
+    alignItems: "center",
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: colors.soft
+  },
+  verifyIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF"
+  },
+  verifyCopy: {
+    flex: 1,
+    marginLeft: 14
+  },
+  verifyTitle: {
+    color: colors.tealDark,
+    fontSize: 15,
+    fontWeight: "800"
+  },
+  verifyText: {
+    marginTop: 5,
+    color: colors.muted,
+    fontSize: 12
+  },
+  verifyButton: {
+    height: 38,
+    minWidth: 68,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    backgroundColor: colors.teal
+  },
+  verifyButtonText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "800"
+  },
+  accountCard: {
+    marginTop: 18,
+    borderRadius: 15,
+    paddingHorizontal: 18,
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#1F3A5F",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 7,
+    elevation: 2
+  },
+  accountRow: {
+    height: 56,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  accountRowLabel: {
+    color: colors.ink,
+    fontSize: 15,
+    fontWeight: "800"
+  },
+  accountRowChevron: {
+    color: "#B9B5AA",
+    fontSize: 22,
+    lineHeight: 22
+  }
+});

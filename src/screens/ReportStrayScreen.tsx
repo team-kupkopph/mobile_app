@@ -1,0 +1,222 @@
+// US-S1 · report a stray. Reference: screens/user/screen-report-stray.png.
+// POST /reports { species, condition, notes?, is_anonymous, lat, lng, location_text?, photos } -> 201.
+// Location = the app's ONE precise-GPS surface (decision 11): expo-location gives the coords, and
+// the disclosure below is NOT optional copy — everywhere else a person's location is city-level.
+// The draggable-pin refinement (US-S2 "Adjust") needs react-native-maps + a dev build — deferred.
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import * as Location from "expo-location";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+
+import { useApi } from "../api/useApi";
+import { RootStackParamList } from "../navigation/types";
+import { sagipTitle } from "../sagip";
+
+const colors = {
+  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
+  soft: "#E2EEF0", line: "#E3E1D9", danger: "#B23B3B", warnBg: "#FAEEDA", warn2: "#633806",
+  white: "#FFFFFF", fine: "#9a988f"
+};
+
+const SPECIES = ["dog", "cat", "other"] as const;
+const CONDITIONS = ["injured", "sick", "healthy", "pregnant"] as const;
+
+type Props = NativeStackScreenProps<RootStackParamList, "reportStray">;
+
+export function ReportStrayScreen({ navigation }: Props) {
+  const api = useApi();
+  const [species, setSpecies] = useState<string>("dog");
+  const [condition, setCondition] = useState<string>("injured");
+  const [notes, setNotes] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationText, setLocationText] = useState<string>("");
+  const [locState, setLocState] = useState<"loading" | "ready" | "denied">("loading");
+
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") { setLocState("denied"); return; }
+        const loc = await Location.getCurrentPositionAsync({});
+        setCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+        try {
+          const [place] = await Location.reverseGeocodeAsync(loc.coords);
+          if (place) {
+            const line = [place.name, place.street, place.city].filter(Boolean).join(", ");
+            setLocationText(line || place.city || "");
+          }
+        } catch {
+          // reverse-geocode is best-effort; the coords are what matter
+        }
+        setLocState("ready");
+      } catch {
+        setLocState("denied");
+      }
+    })();
+  }, []);
+
+  async function addPhoto() {
+    if (uploading) return;
+    setUploading(true);
+    // Uploads are the same dev stub as the shelter docs (no real picker in Expo Go).
+    const res = await api.post("/media/presign", { purpose: "stray_photo", content_type: "image/jpeg" });
+    setUploading(false);
+    if (res.ok) setPhotoUrl(res.data.file_url);
+  }
+
+  async function submit() {
+    if (!coords || submitting) return;
+    setSubmitting(true);
+    setError(undefined);
+    const res = await api.post("/reports", {
+      species, condition, notes: notes.trim() || undefined, is_anonymous: anonymous,
+      lat: coords.lat, lng: coords.lng, location_text: locationText || undefined,
+      photos: photoUrl ? [{ file_url: photoUrl }] : []
+    });
+    setSubmitting(false);
+    if (res.ok) {
+      navigation.replace("reportSent", {
+        reportId: res.data.report_id, title: sagipTitle(species, condition),
+        city: locationText || null
+      });
+    } else {
+      setError(res.data?.error?.message ?? "Couldn't send the report. Try again.");
+    }
+  }
+
+  return (
+    <View style={styles.screen}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}>
+          <Text style={styles.backGlyph}>‹</Text>
+        </TouchableOpacity>
+        <Text style={styles.title}>Report a stray</Text>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={styles.h1}>What did you see?</Text>
+        <Text style={styles.sub}>A photo helps — but don't wait for one.</Text>
+
+        <TouchableOpacity style={styles.photoBtn} onPress={addPhoto} activeOpacity={0.85}>
+          {uploading ? <ActivityIndicator color={colors.teal} />
+            : <Text style={styles.photoText}>{photoUrl ? "✓ Photo added" : "Add a photo · optional"}</Text>}
+        </TouchableOpacity>
+
+        <Text style={styles.label}>Animal</Text>
+        <Segmented options={SPECIES} value={species} onChange={setSpecies} />
+
+        <Text style={styles.label}>Condition</Text>
+        <Segmented options={CONDITIONS} value={condition} onChange={setCondition} />
+
+        <Text style={styles.label}>Notes (optional)</Text>
+        <TextInput
+          style={styles.notes}
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          placeholder="Limping, near the sari-sari store — wouldn't let me near."
+          placeholderTextColor={colors.fine}
+        />
+
+        <View style={styles.locCard}>
+          {locState === "loading" ? (
+            <View style={styles.locRow}><ActivityIndicator color={colors.teal} /><Text style={styles.locText}>Finding your location…</Text></View>
+          ) : locState === "denied" ? (
+            <Text style={styles.locDenied}>Location off — turn it on so a rescuer can find the animal.</Text>
+          ) : (
+            <>
+              <Text style={styles.locAddr}>{locationText || "Current location"}</Text>
+              <Text style={styles.locFrom}>From your GPS</Text>
+            </>
+          )}
+        </View>
+        <Text style={styles.fine}>Only this report uses your exact spot · your profile still shows just your city.</Text>
+
+        <View style={styles.anonRow}>
+          <Text style={styles.anonLabel}>Report anonymously</Text>
+          <Switch value={anonymous} onValueChange={setAnonymous} trackColor={{ true: colors.teal }} />
+        </View>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <TouchableOpacity
+          style={[styles.submit, !coords && styles.submitIdle]}
+          onPress={submit}
+          activeOpacity={0.9}
+        >
+          {submitting ? <ActivityIndicator color={colors.white} />
+            : <Text style={styles.submitText}>Send report</Text>}
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
+  );
+}
+
+function Segmented({ options, value, onChange }: {
+  options: readonly string[]; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <View style={styles.segTrack}>
+      {options.map((opt) => {
+        const active = opt === value;
+        return (
+          <TouchableOpacity
+            key={opt}
+            style={[styles.segItem, active && styles.segItemActive]}
+            onPress={() => onChange(opt)}
+            activeOpacity={0.85}
+          >
+            <Text style={[styles.segText, active && styles.segTextActive]}>
+              {opt.charAt(0).toUpperCase() + opt.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
+const card = {
+  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+};
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.page },
+  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
+  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
+  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
+  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
+  sub: { marginTop: 8, color: colors.muted, fontSize: 17 },
+  photoBtn: { marginTop: 18, height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.line, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoText: { color: colors.teal, fontSize: 16, fontWeight: "700" },
+  label: { marginTop: 24, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
+  segTrack: { flexDirection: "row", backgroundColor: "#ECEAE3", borderRadius: 16, padding: 4, gap: 4 },
+  segItem: { flex: 1, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  segItemActive: { ...card },
+  segText: { color: colors.muted, fontSize: 15, fontWeight: "700" },
+  segTextActive: { color: colors.ink },
+  notes: { marginTop: 2, minHeight: 90, borderRadius: 18, padding: 16, color: colors.ink, fontSize: 16, textAlignVertical: "top", ...card },
+  locCard: { marginTop: 24, padding: 18, borderRadius: 18, ...card },
+  locRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  locText: { color: colors.muted, fontSize: 15 },
+  locAddr: { color: colors.ink, fontSize: 17, fontWeight: "700" },
+  locFrom: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  locDenied: { color: colors.warn2, fontSize: 15, fontWeight: "600" },
+  fine: { marginTop: 12, color: colors.fine, fontSize: 13, lineHeight: 19 },
+  anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: 18, ...card },
+  anonLabel: { color: colors.ink, fontSize: 17, fontWeight: "700" },
+  error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
+  submitIdle: { backgroundColor: "#7FA8A6" },
+  submitText: { color: colors.white, fontSize: 22, fontWeight: "700" }
+});
