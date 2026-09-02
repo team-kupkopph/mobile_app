@@ -85,7 +85,13 @@ export function ShelterProfileScreen({ navigation }: Props) {
               animal" dead button US-A2 found) — upload works pre-approval (decision 2's
               draft-first pattern), donations just stay off until the org is approved. */}
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("donationQr")}>
-            <Row label="Donation QR & wishlist" locked={gated} value={gated ? undefined : "On"} />
+            <Row label="Donation QR" locked={gated} value={gated ? undefined : "On"} />
+          </TouchableOpacity>
+          {/* US-W3 · the real Abot-tulong wishlist manager (needs + pledges), distinct from
+              the QR row above; gated until the org is approved, same as donations. */}
+          <TouchableOpacity activeOpacity={0.8} disabled={gated}
+            onPress={() => navigation.navigate("shelterNeeds")}>
+            <Row label="Wishlist" locked={gated} />
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.8}

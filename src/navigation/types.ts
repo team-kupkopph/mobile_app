@@ -5,6 +5,12 @@ import { SocialIdentity } from "../auth/socialAuth";
 // POST /verifications (US-C1) can submit the base set + NGO papers in one request.
 export type ShelterDoc = { doc_type: string; file_url: string };
 
+// US-W3 · a shelter need, threaded through the manage/edit/pledges screens.
+export type ShelterNeedShape = {
+  need_id: string; title: string; category: string; description: string;
+  quantity_needed: number; quantity_received: number; status: "open" | "fulfilled" | "closed";
+};
+
 export type RootStackParamList = {
   welcome: undefined;
   // A social identity rides through account-type (US-A2): the provider already asserted a
@@ -97,6 +103,10 @@ export type RootStackParamList = {
   // US-W2 · Abot-tulong wishlist (giver side): pledge to a need, then My Donations.
   donatePledge: { needId: string; needTitle: string; shelterName: string };
   myDonations: undefined;
+  // US-W3 · Abot-tulong wishlist (shelter side): manage needs, edit/create, confirm pledges.
+  shelterNeeds: undefined;
+  needForm: { need?: ShelterNeedShape } | undefined;
+  needPledges: { need: ShelterNeedShape };
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };
