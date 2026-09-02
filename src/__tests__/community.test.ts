@@ -1,6 +1,6 @@
 import {
   impactTiles, needProgressFraction, needProgressLabel, needStatusChip, pledgeIsCancellable,
-  pledgeStatusChip
+  pledgeStatusChip, storyTypeChip
 } from "../community";
 
 describe("pledgeStatusChip", () => {
@@ -45,5 +45,13 @@ describe("impactTiles", () => {
     });
     expect(tiles.map((t) => t.label)).toEqual(["Shifts", "Rescues", "Rehomed", "Donations"]);
     expect(tiles.map((t) => t.value)).toEqual([3, 1, 2, 5]);
+  });
+});
+
+describe("storyTypeChip", () => {
+  it("labels + tones each story type", () => {
+    expect(storyTypeChip("adoption")).toEqual({ label: "Adoption", tone: "ok" });
+    expect(storyTypeChip("rescue")).toEqual({ label: "Rescue", tone: "teal" });
+    expect(storyTypeChip("general")).toEqual({ label: "General", tone: "muted" });
   });
 });

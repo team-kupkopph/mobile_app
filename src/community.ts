@@ -62,3 +62,20 @@ export function impactTiles(i: Impact): { label: string; value: number }[] {
     { label: "Donations", value: i.pledges_delivered }
   ];
 }
+
+// US-T2 · a story-type chip. Colours: adoption=green (a completed rehoming), rescue=teal
+// (brand action), general=grey. Type auto-derives from the linked object on compose.
+export type StoryType = "adoption" | "rescue" | "general";
+export type StoryTone = "ok" | "teal" | "muted";
+
+export function storyTypeChip(type: StoryType): { label: string; tone: StoryTone } {
+  switch (type) {
+    case "adoption":
+      return { label: "Adoption", tone: "ok" };
+    case "rescue":
+      return { label: "Rescue", tone: "teal" };
+    case "general":
+    default:
+      return { label: "General", tone: "muted" };
+  }
+}

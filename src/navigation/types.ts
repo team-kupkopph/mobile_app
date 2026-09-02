@@ -116,6 +116,10 @@ export type RootStackParamList = {
   // US-B2 · My impact: the badge grid + a single badge's detail.
   impact: undefined;
   badgeComparison: { badge: BadgeShape };
+  // US-T2 · success stories: feed, compose (optionally prefilled from an adoption), detail.
+  stories: undefined;
+  storyCompose: { adoptionListingId?: string } | undefined;
+  storyDetail: { storyId: string };
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };
