@@ -94,6 +94,9 @@ export type RootStackParamList = {
   // (public side) renders an org's verified QRs, reached from a listing's poster row.
   donationQr: undefined;
   donate: { accountId: string; orgName: string };
+  // US-W2 · Abot-tulong wishlist (giver side): pledge to a need, then My Donations.
+  donatePledge: { needId: string; needTitle: string; shelterName: string };
+  myDonations: undefined;
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };

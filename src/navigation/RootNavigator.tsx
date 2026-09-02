@@ -6,6 +6,8 @@ import { NOT_CONFIGURED_MESSAGE, SocialProvider, signInWithProvider } from "../a
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
 import { DonateScreen } from "../screens/DonateScreen";
+import { DonatePledgeScreen } from "../screens/DonatePledgeScreen";
+import { MyDonationsScreen } from "../screens/MyDonationsScreen";
 import { DonationQrScreen } from "../screens/DonationQrScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
 import { HomeGuestScreen } from "../screens/HomeGuestScreen";
@@ -154,6 +156,8 @@ export function RootNavigator() {
       <Stack.Screen name="verifyPhone" component={VerifyPhoneScreen} />
       <Stack.Screen name="donationQr" component={DonationQrScreen} />
       <Stack.Screen name="donate" component={DonateScreen} />
+      <Stack.Screen name="donatePledge" component={DonatePledgeScreen} />
+      <Stack.Screen name="myDonations" component={MyDonationsScreen} />
       <Stack.Screen name="reportContent" component={ReportContentScreen} />
       {/* US-V8 — the real hub + shift detail/waiver (Task 4), schedule (Task 5),
           check-in/out (Task 6), history (Task 7), and the cancel flow (Task 8). */}
