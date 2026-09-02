@@ -35,9 +35,13 @@ export type MapReport = {
 };
 // US-O3 — reporter-only block, present only when the caller IS the report's reporter.
 export type ReportStatusHistoryEntry = { status: StrayStatus; changed_at: string };
+// US-SEC1 — approx_location is always present (coarsened, ~500m grid, everyone incl.
+// guests); precise_location appears ONLY for the reporter or the report's active claimer.
+export type LatLng = { lat: number; lng: number };
 export type ReportDetail = {
   report_id: string; species: string; condition: string; status: StrayStatus;
   notes: string | null; city: string | null; reported_at: string; photos: string[];
+  approx_location: LatLng; precise_location?: LatLng;
   escalation_level?: number; offers_count?: number;
   status_history?: ReportStatusHistoryEntry[];
 };
@@ -46,6 +50,16 @@ export type ReportDetail = {
 export type RescueCaseSummary = {
   case_id: string;
   report: { report_id: string; species: string; condition: string; city: string | null };
+  status: StrayStatus; claimed_at: string; expired_at: string | null;
+};
+// GET /cases/{id} (US-SEC1) — the claimer's own case; precise_location present only
+// while the claim is still active (absent once expired, even for the original claimer).
+export type CaseDetail = {
+  case_id: string;
+  report: {
+    report_id: string; species: string; condition: string; city: string | null;
+    approx_location: LatLng; precise_location?: LatLng;
+  };
   status: StrayStatus; claimed_at: string; expired_at: string | null;
 };
 
@@ -57,12 +71,50 @@ export type MyOffer = {
   report: { report_id: string; species: string; condition: string; city: string | null };
   offer_type: OfferType; status: OfferListStatus; expires_at: string;
 };
+// Track A — adoption listings. The browse card (US-A1b/A3) plus the fuller shapes
+// US-A3's detail and US-A4's inquiries add.
+export type ListingPet = {
+  name: string; species: string; breed: string | null; sex?: string | null;
+  birthdate?: string | null; size_category?: string | null;
+  spayed_neutered?: boolean | null; vaccinated?: boolean | null;
+  walkable?: boolean; temperament?: string | null;
+};
 export type Listing = {
   listing_id: string;
-  pet: { name: string; species: string; breed: string | null };
+  pet: ListingPet;
   city: string;
   status: string;
+  adoption_fee?: string;
+  photo_url?: string | null;
 };
+export type ListingDetail = {
+  listing_id: string;
+  pet: ListingPet;
+  description: string | null;
+  adoption_fee: string;
+  requirements: string | null;
+  city: string;
+  status: string;
+  photos: string[];
+  poster: { account_id: string; name: string; is_shelter: boolean; city: string | null };
+};
+export type InquiryStage = { stage_key: string; state: string };
+export type MyInquiry = {
+  inquiry_id: string;
+  listing: { listing_id: string; name: string; species: string };
+  status: string;
+  stages: InquiryStage[];
+};
+// US-X1 — the bell. `type` is free-text on the backend (notifications/models.py); the
+// known values in use are enumerated in notifications.ts, but new ones need no migration.
+export type MeNotification = {
+  notification_id: string; type: string; title: string | null; body: string | null;
+  data: Record<string, any> | null; read: boolean; created_at: string;
+};
+
+// Track H — the recipient's owned pets (US-H3). GET /me/pets, newest first, owner-scoped.
+export type MyPet = { pet_id: string; name: string; species: string; photo_url: string | null };
+
 export type ShelterDashboard = {
   verification: {
     submitted: boolean;

@@ -5,6 +5,8 @@ import { useAuth } from "../auth/AuthContext";
 import { NOT_CONFIGURED_MESSAGE, SocialProvider, signInWithProvider } from "../auth/socialAuth";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
+import { DonateScreen } from "../screens/DonateScreen";
+import { DonationQrScreen } from "../screens/DonationQrScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
 import { HomeGuestScreen } from "../screens/HomeGuestScreen";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -24,6 +26,15 @@ import { ShelterPhoneVerifyScreen } from "../screens/ShelterPhoneVerifyScreen";
 import { ShelterProfileScreen } from "../screens/ShelterProfileScreen";
 import { ShelterSetupScreen } from "../screens/ShelterSetupScreen";
 import { ShelterTierScreen } from "../screens/ShelterTierScreen";
+import { ShelterVolunteerActivityScreen } from "../screens/ShelterVolunteerActivityScreen";
+import { ShelterVolunteerAttendanceScreen } from "../screens/ShelterVolunteerAttendanceScreen";
+import { ShelterVolunteerCalendarScreen } from "../screens/ShelterVolunteerCalendarScreen";
+import { ShelterVolunteerCancelScreen } from "../screens/ShelterVolunteerCancelScreen";
+import { ShelterVolunteerCreateScreen } from "../screens/ShelterVolunteerCreateScreen";
+import { ShelterVolunteerDetailScreen } from "../screens/ShelterVolunteerDetailScreen";
+import { ShelterVolunteerEditScreen } from "../screens/ShelterVolunteerEditScreen";
+import { ShelterVolunteerRequestsScreen } from "../screens/ShelterVolunteerRequestsScreen";
+import { ShelterVolunteerScreen } from "../screens/ShelterVolunteerScreen";
 import { ShelterVerifyNgoScreen } from "../screens/ShelterVerifyNgoScreen";
 import { ShelterVerifyScreen } from "../screens/ShelterVerifyScreen";
 import { SigninScreen } from "../screens/SigninScreen";
@@ -31,6 +42,7 @@ import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
 import { MyReportsScreen } from "../screens/MyReportsScreen";
 import { AdjustPinScreen } from "../screens/AdjustPinScreen";
+import { ReportContentScreen } from "../screens/ReportContentScreen";
 import { ReportDetailScreen } from "../screens/ReportDetailScreen";
 import { ReportSentScreen } from "../screens/ReportSentScreen";
 import { ReportStrayScreen } from "../screens/ReportStrayScreen";
@@ -40,9 +52,30 @@ import { RescueOfferSentScreen } from "../screens/RescueOfferSentScreen";
 import { MyOffersScreen } from "../screens/MyOffersScreen";
 import { MyRescuesScreen } from "../screens/MyRescuesScreen";
 import { RescueUpdateScreen } from "../screens/RescueUpdateScreen";
+import { RescueListScreen } from "../screens/RescueListScreen";
+import { RescueListedScreen } from "../screens/RescueListedScreen";
+import { RescuePlaceScreen } from "../screens/RescuePlaceScreen";
+import { RescuePlaceConfirmScreen } from "../screens/RescuePlaceConfirmScreen";
+import { RescuePlaceSentScreen } from "../screens/RescuePlaceSentScreen";
+import { PlaceRequestScreen } from "../screens/PlaceRequestScreen";
+import { PlaceAcceptedScreen } from "../screens/PlaceAcceptedScreen";
+import { MyPetsScreen } from "../screens/MyPetsScreen";
+import { NotificationsScreen } from "../screens/NotificationsScreen";
+import { ListingDetailScreen } from "../screens/ListingDetailScreen";
+import { ListingFormScreen } from "../screens/ListingFormScreen";
+import { MyInquiriesScreen } from "../screens/MyInquiriesScreen";
+import { VerifyPhoneScreen } from "../screens/VerifyPhoneScreen";
 import { VerifyDocumentsScreen } from "../screens/VerifyDocumentsScreen";
 import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { VolunteerScreen } from "../screens/VolunteerScreen";
+import { KawangGawaScreen } from "../screens/KawangGawaScreen";
+import { KawangGawaDetailScreen } from "../screens/KawangGawaDetailScreen";
+import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen";
+import { KawangGawaScheduleScreen } from "../screens/KawangGawaScheduleScreen";
+import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
+import { KawangGawaHistoryScreen } from "../screens/KawangGawaHistoryScreen";
+import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
+import { WaiverScreen } from "../screens/WaiverScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
 // screen imports are added as tasks land; start with the ones that exist.
@@ -102,6 +135,49 @@ export function RootNavigator() {
       <Stack.Screen name="myOffers" component={MyOffersScreen} />
       <Stack.Screen name="myRescues" component={MyRescuesScreen} />
       <Stack.Screen name="rescueUpdate" component={RescueUpdateScreen} />
+      {/* US-H1 — list an adoption from a safe rescue case. */}
+      <Stack.Screen name="rescueList" component={RescueListScreen} />
+      <Stack.Screen name="rescueListed" component={RescueListedScreen} />
+      {/* US-H2 — place an animal directly with a known verified member/shelter, no public listing. */}
+      <Stack.Screen name="rescuePlace" component={RescuePlaceScreen} />
+      <Stack.Screen name="rescuePlaceConfirm" component={RescuePlaceConfirmScreen} />
+      <Stack.Screen name="rescuePlaceSent" component={RescuePlaceSentScreen} />
+      {/* US-H3 — the recipient of a direct placement accepts or declines it. */}
+      <Stack.Screen name="placeRequest" component={PlaceRequestScreen} />
+      <Stack.Screen name="placeAccepted" component={PlaceAcceptedScreen} />
+      {/* US-H3 — the recipient's own pets. */}
+      <Stack.Screen name="myPets" component={MyPetsScreen} />
+      <Stack.Screen name="notifications" component={NotificationsScreen} />
+      <Stack.Screen name="listingDetail" component={ListingDetailScreen} />
+      <Stack.Screen name="listingForm" component={ListingFormScreen} />
+      <Stack.Screen name="myInquiries" component={MyInquiriesScreen} />
+      <Stack.Screen name="verifyPhone" component={VerifyPhoneScreen} />
+      <Stack.Screen name="donationQr" component={DonationQrScreen} />
+      <Stack.Screen name="donate" component={DonateScreen} />
+      <Stack.Screen name="reportContent" component={ReportContentScreen} />
+      {/* US-V8 — the real hub + shift detail/waiver (Task 4), schedule (Task 5),
+          check-in/out (Task 6), history (Task 7), and the cancel flow (Task 8). */}
+      <Stack.Screen name="kawanggawa" component={KawangGawaScreen} />
+      <Stack.Screen name="kawanggawaDetail" component={KawangGawaDetailScreen} />
+      <Stack.Screen name="waiver" component={WaiverScreen} />
+      <Stack.Screen name="kawanggawaRequested" component={KawangGawaRequestedScreen} />
+      <Stack.Screen name="kawanggawaSchedule" component={KawangGawaScheduleScreen} />
+      <Stack.Screen name="kawanggawaCheckin" component={KawangGawaCheckinScreen} />
+      <Stack.Screen name="kawanggawaHistory" component={KawangGawaHistoryScreen} />
+      <Stack.Screen name="kawanggawaCancel" component={KawangGawaCancelScreen} />
+      {/* US-V9 — the shelter side of Kawang-Gawa: the manage list (Task 5, real), the
+          activity hub + calendar (Task 6, real), create/edit (Task 7, real), requests
+          (Task 8, real), attendance/detail (Task 9, real), and cancel — naming the blast
+          radius before it fires (Task 10, real). All nine screens are now real. */}
+      <Stack.Screen name="shelterVolunteer" component={ShelterVolunteerScreen} />
+      <Stack.Screen name="shelterVolunteerCreate" component={ShelterVolunteerCreateScreen} />
+      <Stack.Screen name="shelterVolunteerActivity" component={ShelterVolunteerActivityScreen} />
+      <Stack.Screen name="shelterVolunteerRequests" component={ShelterVolunteerRequestsScreen} />
+      <Stack.Screen name="shelterVolunteerAttendance" component={ShelterVolunteerAttendanceScreen} />
+      <Stack.Screen name="shelterVolunteerDetail" component={ShelterVolunteerDetailScreen} />
+      <Stack.Screen name="shelterVolunteerCalendar" component={ShelterVolunteerCalendarScreen} />
+      <Stack.Screen name="shelterVolunteerEdit" component={ShelterVolunteerEditScreen} />
+      <Stack.Screen name="shelterVolunteerCancel" component={ShelterVolunteerCancelScreen} />
     </Stack.Navigator>
   );
 }

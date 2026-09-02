@@ -156,6 +156,14 @@ export function ProfileScreen({ navigation }: Props) {
         </TouchableOpacity>
 
         <View style={styles.accountCard}>
+          <TouchableOpacity
+            activeOpacity={0.75}
+            style={[styles.accountRow, styles.accountRowDivided]}
+            onPress={() => navigation.navigate("myPets")}
+          >
+            <Text style={styles.accountRowLabel}>My pets</Text>
+            <Text style={styles.accountRowChevron}>›</Text>
+          </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.75} style={styles.accountRow} onPress={handleLogout}>
             <Text style={styles.accountRowLabel}>Log out</Text>
             <Text style={styles.accountRowChevron}>›</Text>
@@ -367,6 +375,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between"
+  },
+  accountRowDivided: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border
   },
   accountRowLabel: {
     color: colors.ink,

@@ -52,7 +52,13 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
 
   function onBannerPress() {
+    // US-D4 audit (2026-08-24) · was a dead tap for "pending" — the banner's own CTA
+    // reads "Status ›" but nothing navigated, same shape as the dead Google-signup and
+    // "+ List an animal" buttons earlier audits found. ShelterProfileScreen's "Under
+    // review" accent already reached verifyDocuments for the same gated state; this
+    // banner (the first thing a pending shelter sees) is the more obvious entry point.
     if (state === "incomplete") navigation.navigate("shelterVerify", { tier });
+    else if (state === "pending") navigation.navigate("verifyDocuments");
   }
 
   return (
@@ -110,7 +116,11 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           <Stat n={counts.donations} label="Donations" />
         </View>
 
-        <TouchableOpacity activeOpacity={0.85} style={styles.primaryButton}>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.primaryButton}
+          onPress={() => navigation.navigate("listingForm", undefined)}
+        >
           <Text style={styles.primaryText}>+  List an animal</Text>
         </TouchableOpacity>
         <Text style={styles.primaryHint}>

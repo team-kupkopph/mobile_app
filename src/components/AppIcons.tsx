@@ -225,6 +225,29 @@ export function CheckIcon({ color = "#FFFFFF", size = 14 }: { color?: string; si
   );
 }
 
+export function XIcon({ color, size = 28 }: IconProps) {
+  // Two crossed bars, matching the stroke weight of the other glyphs in this set — the
+  // "declined" counterpart to CheckIcon's checkmark. No emoji glyphs in this design system.
+  const barW = size * 0.62;
+  const barH = Math.max(2, size * 0.1);
+  return (
+    <View style={[styles.iconBox, { width: size, height: size }]}>
+      <View
+        style={[
+          styles.xBar,
+          { backgroundColor: color, width: barW, height: barH, top: size / 2 - barH / 2, left: (size - barW) / 2, transform: [{ rotate: "45deg" }] }
+        ]}
+      />
+      <View
+        style={[
+          styles.xBar,
+          { backgroundColor: color, width: barW, height: barH, top: size / 2 - barH / 2, left: (size - barW) / 2, transform: [{ rotate: "-45deg" }] }
+        ]}
+      />
+    </View>
+  );
+}
+
 export function DocumentIcon({ color }: { color: string }) {
   return (
     <View style={[styles.document, { borderColor: color }]}> 
@@ -396,5 +419,9 @@ const styles = StyleSheet.create({
     height: 2.4,
     borderRadius: 2,
     transform: [{ rotate: "-45deg" }]
+  },
+  xBar: {
+    position: "absolute",
+    borderRadius: 2
   }
 });

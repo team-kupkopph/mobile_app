@@ -61,4 +61,63 @@ export type RootStackParamList = {
   // Track K — claim + work the case
   myRescues: undefined;
   rescueUpdate: { caseId: string; reportId: string };
+  // Track H — handoff from a safe rescue case (US-H1: list for adoption). Reachable
+  // from RescueUpdateScreen once the case's report is `safe`.
+  rescueList: { caseId: string };
+  rescueListed: undefined;
+  // Track H — direct placement from a safe rescue case (US-H2: place with a known verified
+  // member/shelter, no public listing). Reachable from RescueUpdateScreen alongside rescueList,
+  // same safe gating. recipientEmail rides Place → Confirm; city/fee are collected on Confirm
+  // itself (reviewed alongside the recipient right before the POST).
+  rescuePlace: { caseId: string };
+  rescuePlaceConfirm: { caseId: string; recipientEmail: string };
+  rescuePlaceSent: undefined;
+  // Track H — the recipient's side of a direct placement (US-H3): accept/decline the animal
+  // a rescuer/shelter placed with them. Reachable from MyInquiriesScreen, which flags a
+  // placement inquiry client-side (all six stages skipped — the CasePlaceView bypass) and
+  // taps through with its inquiry_id.
+  placeRequest: { inquiryId: string };
+  placeAccepted: undefined;
+  // Track H — the owner's own pets (US-H3): what a rescuer/shelter placed with them, or what
+  // they adopted. Reachable from ProfileScreen; GET /me/pets.
+  myPets: undefined;
+  // US-X1 — the bell
+  notifications: undefined;
+  // Track A — adoption (US-A3/A4)
+  listingDetail: { listingId: string };
+  myInquiries: undefined;
+  // US-A2 — create (no listingId) or edit (listingId) a listing.
+  listingForm: { listingId?: string } | undefined;
+  // Owner-side first-use phone verification (decision 14); first trigger = US-A4 inquiry.
+  verifyPhone: undefined;
+  // Track Q — donations. donationQr (shelter side) uploads/replaces the QR; donate
+  // (public side) renders an org's verified QRs, reached from a listing's poster row.
+  donationQr: undefined;
+  donate: { accountId: string; orgName: string };
+  // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
+  // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
+  reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };
+  // US-V8 — Kawang-Gawa volunteer flow (Track V, Sprint 5). `kawanggawa` is the real hub
+  // (Task 3); the other seven are placeholders pointed at KawangGawaScreen until Tasks 4–8
+  // register their own components.
+  kawanggawa: undefined;
+  kawanggawaDetail: { shiftId: string };
+  waiver: undefined; // the D-S5-1 placeholder
+  kawanggawaRequested: undefined;
+  kawanggawaSchedule: undefined;
+  kawanggawaCheckin: { signupId: string };
+  kawanggawaHistory: undefined;
+  kawanggawaCancel: { signupId: string };
+  // US-V9 — the shelter side of Kawang-Gawa (Track V, Sprint 5). `shelterVolunteer` is the real
+  // manage list (Task 5); the other eight are placeholders pointed at ShelterVolunteerScreen until
+  // Tasks 6–10 register their own components.
+  shelterVolunteer: undefined;
+  shelterVolunteerCreate: undefined;
+  shelterVolunteerActivity: { shiftId: string };
+  shelterVolunteerRequests: { shiftId: string };
+  shelterVolunteerAttendance: { shiftId: string };
+  shelterVolunteerDetail: { signupId: string };
+  shelterVolunteerCalendar: undefined;
+  shelterVolunteerEdit: { shiftId: string };
+  shelterVolunteerCancel: { shiftId: string };
 };

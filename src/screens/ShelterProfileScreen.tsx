@@ -81,8 +81,19 @@ export function ShelterProfileScreen({ navigation }: Props) {
         <Text style={styles.groupTitle}>Organization</Text>
         <View style={styles.group}>
           <Row label="Organization details" />
-          <Row label="Donation QR & wishlist" locked={gated} value={gated ? undefined : "On"} />
-          <Row label="Volunteer program" locked={gated} value={gated ? undefined : "3 active"} last={gated || isTier1} />
+          {/* US-Q1 · was a dead row (no onPress at all, same shape as the "+ List an
+              animal" dead button US-A2 found) — upload works pre-approval (decision 2's
+              draft-first pattern), donations just stay off until the org is approved. */}
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("donationQr")}>
+            <Row label="Donation QR & wishlist" locked={gated} value={gated ? undefined : "On"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            disabled={gated}
+            onPress={() => navigation.navigate("shelterVolunteer")}
+          >
+            <Row label="Volunteer program" locked={gated} value={gated ? undefined : "3 active"} last={gated || isTier1} />
+          </TouchableOpacity>
 
           {gated ? (
             // The one outstanding thing — an accent, not a row, so it reads as the next action.

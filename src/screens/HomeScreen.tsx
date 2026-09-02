@@ -10,10 +10,10 @@ import { useCallback, useState } from "react";
 import { Alert, Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
-import { Me } from "../api/types";
+import { Listing, Me } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
-import { BellIcon, ClockIcon } from "../components/AppIcons";
+import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 
@@ -21,24 +21,29 @@ const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;
 
-type QuickAction = { label: string; icon: "search" | "heart" | "peso" | "person" };
+type QuickAction = {
+  label: string;
+  icon: "search" | "heart" | "peso" | "person";
+  dest: keyof RootStackParamList;
+};
 
 const quickActions: QuickAction[] = [
-  { label: "Lost & found", icon: "search" },
-  { label: "Adopt", icon: "heart" },
-  { label: "Donate", icon: "peso" },
-  { label: "Volunteer", icon: "person" }
+  { label: "Lost & found", icon: "search", dest: "rescueMap" },
+  { label: "Adopt", icon: "heart", dest: "adopt" },
+  // No generic "browse shelters" screen yet — adopt feed is the nearest landing.
+  { label: "Donate", icon: "peso", dest: "adopt" },
+  { label: "Volunteer", icon: "person", dest: "kawanggawa" },
 ];
 
-const pets = [
-  { name: "Milo", details: "Aspin · 1 yr · Male", shelter: "PAWS Manila · 2 km" },
-  { name: "Luna", details: "Puspin · 2 yrs · Female", shelter: "Marikina AWG · 4 km" }
-];
+type MapReport = { report_id: string; species: string; condition: string; city: string | null };
 
 export function HomeScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
+  const [hasUnread, setHasUnread] = useState(false);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [rescues, setRescues] = useState<MapReport[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -51,6 +56,21 @@ export function HomeScreen({ navigation, route }: Props) {
           return;
         }
         setMe(r.data);
+      });
+      // Refetched on every focus, including right after leaving NotificationsScreen (which
+      // marks everything read on open) — so the dot clears the moment you come back.
+      api.get("/me/notifications").then((r) => {
+        if (r.ok) setHasUnread((r.data?.notifications ?? []).some((n: { read: boolean }) => !n.read));
+      });
+      // Adoption preview — first 2 available listings near the user's city.
+      const cityParam = city ? `&city=${encodeURIComponent(city)}` : "";
+      api.get(`/listings?page_size=2${cityParam}`).then((r) => {
+        if (r.ok) setListings(r.data?.results ?? []);
+      });
+      // Nearby rescues — first 2 reported strays near the user's city.
+      const rescueCity = city ?? "Marikina";
+      api.get(`/reports/map?city=${encodeURIComponent(rescueCity)}&status=reported`).then((r) => {
+        if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
     }, [])
@@ -75,6 +95,10 @@ export function HomeScreen({ navigation, route }: Props) {
   );
 
   const pendingMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "pending") ?? false;
+  // US-G1 · the owner side never had a "you're verified" moment — only the shelter (verifiedHero)
+  // did; this closes the gap the US-D4 audit left open. Mutually exclusive with pendingMember on
+  // the same rescuer capability.
+  const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
 
   return (
     <View style={styles.screen}>
@@ -93,13 +117,28 @@ export function HomeScreen({ navigation, route }: Props) {
               </View>
             )}
           </View>
-          <View style={styles.bellButton}>
+          <TouchableOpacity
+            style={styles.bellButton}
+            activeOpacity={0.75}
+            onPress={() => navigation.navigate("notifications")}
+            hitSlop={10}
+          >
             <BellIcon color="#12213A" />
-          </View>
+            {hasUnread ? <View style={styles.bellDot} /> : null}
+          </TouchableOpacity>
         </View>
 
         {pendingMember && (
-          <TouchableOpacity activeOpacity={0.85} style={styles.reviewCard}>
+          // US-D4 audit (2026-08-24) · was a dead tap — "Documents ›" implied a
+          // destination but no onPress existed at all, same shape as the dead
+          // Google-signup / "+ List an animal" buttons earlier audits found. This is
+          // the *only* status surface a Verified Member has (US-V2's own ⚠️ note) — with
+          // no handler, a pending Member had no way to learn anything from Home.
+          <TouchableOpacity
+            activeOpacity={0.85}
+            style={styles.reviewCard}
+            onPress={() => navigation.navigate("verifyDocuments")}
+          >
             <ClockIcon color="#8A5A12" size={38} />
             <View style={styles.reviewCopy}>
               <Text style={styles.reviewTitle}>Verified Member in review</Text>
@@ -107,6 +146,21 @@ export function HomeScreen({ navigation, route }: Props) {
             </View>
             <Text style={styles.statusLink}>Documents ›</Text>
           </TouchableOpacity>
+        )}
+
+        {approvedMember && (
+          // US-G1 · mirrors ShelterDashboardScreen's verifiedHero (solid teal card + white check
+          // tile) — the app uses solid fills, not gradients, so this matches the sibling exactly.
+          // Names the type ("Verified Member"), never a bare "Verified".
+          <View style={styles.verifiedHero}>
+            <View style={styles.verifiedHeroIcon}>
+              <CheckIcon color="#FFFFFF" size={20} />
+            </View>
+            <View style={styles.verifiedHeroCopy}>
+              <Text style={styles.verifiedHeroTitle}>You're a Verified Member</Text>
+              <Text style={styles.verifiedHeroBody}>You can now claim rescues and help strays find safety.</Text>
+            </View>
+          </View>
         )}
 
         <View style={styles.reportCard}>
@@ -141,49 +195,81 @@ export function HomeScreen({ navigation, route }: Props) {
 
         <View style={styles.quickGrid}>
           {quickActions.map((action) => (
-            <View key={action.label} style={styles.quickCard}>
+            <TouchableOpacity
+              key={action.label}
+              activeOpacity={0.75}
+              style={styles.quickCard}
+              onPress={() => navigation.navigate(action.dest as never)}
+            >
               <View style={styles.quickIcon}>{renderQuickIcon(action.icon)}</View>
               <Text style={styles.quickLabel}>{action.label}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Adopt near you</Text>
-          <Text style={styles.seeAll}>See all</Text>
+          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("adopt")}>
+            <Text style={styles.seeAll}>See all ›</Text>
+          </TouchableOpacity>
         </View>
 
-        {pets.map((pet) => (
-          <View key={pet.name} style={styles.petCard}>
+        {listings.length === 0 ? (
+          <Text style={styles.emptyNote}>No pets listed near you yet.</Text>
+        ) : listings.map((listing) => (
+          <TouchableOpacity
+            key={listing.listing_id}
+            activeOpacity={0.75}
+            style={styles.petCard}
+            onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
+          >
             <View style={styles.avatarCircle}>
               <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
             </View>
             <View style={styles.petCopy}>
-              <Text style={styles.petName}>{pet.name}</Text>
-              <Text style={styles.petDetails}>{pet.details}</Text>
+              <Text style={styles.petName}>{listing.pet.name}</Text>
+              <Text style={styles.petDetails}>
+                {[listing.pet.species, listing.pet.breed, listing.city].filter(Boolean).join(" · ")}
+              </Text>
             </View>
             <View style={styles.petMeta}>
               <View style={styles.availableBadge}>
                 <Text style={styles.availableText}>Available</Text>
               </View>
-              <Text style={styles.shelterText}>{pet.shelter}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
 
-        <Text style={[styles.sectionTitle, styles.rescueTitle]}>Nearby rescues</Text>
-        <View style={styles.rescueCard}>
-          <View style={styles.avatarCircle}>
-            <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
-          </View>
-          <View style={styles.petCopy}>
-            <Text style={styles.petName}>Aspin · Quezon City</Text>
-            <Text style={styles.petDetails}>0.4 km · needs pickup</Text>
-          </View>
-          <View style={styles.urgentBadge}>
-            <Text style={styles.urgentText}>Urgent</Text>
-          </View>
-        </View>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.rescueSectionRow}
+          onPress={() => navigation.navigate("rescueMap")}
+        >
+          <Text style={[styles.sectionTitle, styles.rescueTitle]}>Nearby rescues</Text>
+          <Text style={styles.seeAll}>See map ›</Text>
+        </TouchableOpacity>
+
+        {rescues.length === 0 ? (
+          <Text style={styles.emptyNote}>No strays reported nearby yet.</Text>
+        ) : rescues.map((report) => (
+          <TouchableOpacity
+            key={report.report_id}
+            activeOpacity={0.75}
+            style={styles.rescueCard}
+            onPress={() => navigation.navigate("reportDetail", { reportId: report.report_id })}
+          >
+            <View style={styles.avatarCircle}>
+              <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
+            </View>
+            <View style={styles.petCopy}>
+              <Text style={styles.petName}>{report.species} · {report.city ?? "Nearby"}</Text>
+              <Text style={styles.petDetails}>{report.condition} · needs pickup</Text>
+            </View>
+            <View style={conditionBadgeStyle(report.condition)}>
+              <Text style={conditionTextStyle(report.condition)}>{conditionLabel(report.condition)}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
 
         {pendingMember && <Text style={styles.lockedNote}>Claiming rescues unlocks once you're verified.</Text>}
       </ScrollView>
@@ -191,6 +277,24 @@ export function HomeScreen({ navigation, route }: Props) {
       <OwnerTabs active="home" />
     </View>
   );
+}
+
+function conditionLabel(condition: string): string {
+  if (condition === "injured" || condition === "sick") return "Urgent";
+  if (condition === "pregnant") return "Special";
+  return "Stable";
+}
+
+function conditionBadgeStyle(condition: string) {
+  if (condition === "injured" || condition === "sick") return styles.urgentBadge;
+  if (condition === "pregnant") return styles.specialBadge;
+  return styles.stableBadge;
+}
+
+function conditionTextStyle(condition: string) {
+  if (condition === "injured" || condition === "sick") return styles.urgentText;
+  if (condition === "pregnant") return styles.specialText;
+  return styles.stableText;
 }
 
 function intentToast(action: GuestIntentAction): [string, string] {
@@ -299,6 +403,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#FFFFFF"
   },
+  bellDot: {
+    position: "absolute",
+    top: 6,
+    right: 7,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: "#B23B3B",
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF"
+  },
   reviewCard: {
     minHeight: 84,
     marginTop: 22,
@@ -327,6 +442,37 @@ const styles = StyleSheet.create({
     color: colors.warn2,
     fontSize: 12,
     fontWeight: "800"
+  },
+  verifiedHero: {
+    marginTop: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    padding: 20,
+    borderRadius: 24, // matches ShelterDashboardScreen.verifiedHero exactly
+    backgroundColor: colors.teal
+  },
+  verifiedHeroIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.18)"
+  },
+  verifiedHeroCopy: {
+    flex: 1
+  },
+  verifiedHeroTitle: {
+    color: "#FFFFFF",
+    fontSize: 21,
+    fontWeight: "800"
+  },
+  verifiedHeroBody: {
+    marginTop: 4,
+    color: "#DCEDEB",
+    fontSize: 15,
+    lineHeight: 21
   },
   reportCard: {
     height: 136,
@@ -535,9 +681,7 @@ const styles = StyleSheet.create({
     color: "#AAA69D",
     fontSize: 10
   },
-  rescueTitle: {
-    marginTop: 34
-  },
+  rescueTitle: {},
   rescueCard: {
     height: 68,
     marginTop: 16,
@@ -570,5 +714,43 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 11,
     textAlign: "center"
+  },
+  emptyNote: {
+    marginTop: 12,
+    color: colors.muted,
+    fontSize: 12,
+    textAlign: "center"
+  },
+  rescueSectionRow: {
+    marginTop: 34,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  specialBadge: {
+    minWidth: 68,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.paleTeal
+  },
+  specialText: {
+    color: colors.teal,
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  stableBadge: {
+    minWidth: 68,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E1F2D3"
+  },
+  stableText: {
+    color: "#356A24",
+    fontSize: 12,
+    fontWeight: "800"
   }
 });

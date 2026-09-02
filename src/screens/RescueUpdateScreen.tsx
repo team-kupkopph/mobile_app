@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -35,6 +36,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   const [target, setTarget] = useState<StrayStatus | null>(null);
   const [note, setNote] = useState("");
   const [outcomeNotes, setOutcomeNotes] = useState("");
+  const [outcomePhotoUrl, setOutcomePhotoUrl] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -50,6 +53,16 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
 
   const options = report ? advanceableStatuses(report.status) : [];
 
+  async function addOutcomePhoto() {
+    if (uploadingPhoto) return;
+    setUploadingPhoto(true);
+    // Same dev-stub presign flow as ReportStrayScreen's addPhoto — no real bucket yet
+    // (S3 is still a dev seam), but the client-side wiring is real.
+    const res = await api.post("/media/presign", { purpose: "rescue_outcome_photo", content_type: "image/jpeg" });
+    setUploadingPhoto(false);
+    if (res.ok) setOutcomePhotoUrl(res.data.file_url);
+  }
+
   async function submit() {
     if (!target || submitting) return;
     setSubmitting(true);
@@ -57,10 +70,11 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     const body: Record<string, string> = { status: target };
     if (note.trim()) body.note = note.trim();
     if (target === "resolved" && outcomeNotes.trim()) body.outcome_notes = outcomeNotes.trim();
+    if (target === "resolved" && outcomePhotoUrl) body.outcome_photo_url = outcomePhotoUrl;
     const res = await api.post(`/cases/${caseId}/status`, body);
     setSubmitting(false);
     if (res.ok) {
-      setNote(""); setTarget(null);
+      setNote(""); setTarget(null); setOutcomeNotes(""); setOutcomePhotoUrl(null);
       load(); // refetch — the report's status (and so the remaining options) just changed
       return;
     }
@@ -94,6 +108,46 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
           {chip && tone ? (
             <View style={[styles.currentChip, { backgroundColor: tone.bg }]}>
               <Text style={[styles.currentChipText, { color: tone.fg }]}>Currently: {chip.label}</Text>
+            </View>
+          ) : null}
+
+          {/* US-SEC1 — GET /reports/{id} already includes precise_location for the
+              active claimer (that's you, on this screen), so no second fetch is needed. */}
+          {report.precise_location ? (
+            <View style={styles.mapWrap}>
+              <MapView
+                style={styles.map}
+                pointerEvents="none"
+                initialRegion={{
+                  latitude: report.precise_location.lat, longitude: report.precise_location.lng,
+                  latitudeDelta: 0.01, longitudeDelta: 0.01
+                }}
+              >
+                <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
+              </MapView>
+            </View>
+          ) : null}
+
+          {/* US-H1/US-H2 — once the case's report is safe, the claiming rescuer can hand it
+              off, either publicly (adoption listing) or directly to someone they already
+              know. Shown alongside the forward-status options below (a safe case can still be
+              moved on to resolved), not instead of them. */}
+          {report.status === "safe" ? (
+            <View style={styles.handoffRow}>
+              <TouchableOpacity
+                style={[styles.listBtn, styles.handoffBtn]}
+                onPress={() => navigation.navigate("rescueList", { caseId })}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.listBtnText}>List for adoption</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.listBtn, styles.handoffBtn]}
+                onPress={() => navigation.navigate("rescuePlace", { caseId })}
+                activeOpacity={0.9}
+              >
+                <Text style={styles.listBtnText}>Place with someone</Text>
+              </TouchableOpacity>
             </View>
           ) : null}
 
@@ -142,6 +196,10 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                     placeholderTextColor={colors.fine}
                     multiline
                   />
+                  <TouchableOpacity style={styles.photoBtn} onPress={addOutcomePhoto} activeOpacity={0.85}>
+                    {uploadingPhoto ? <ActivityIndicator color={colors.teal} />
+                      : <Text style={styles.photoText}>{outcomePhotoUrl ? "✓ Photo added" : "Add an outcome photo · optional"}</Text>}
+                  </TouchableOpacity>
                 </>
               ) : null}
 
@@ -182,7 +240,13 @@ const styles = StyleSheet.create({
   h1: { color: colors.ink, fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 6, color: colors.muted, fontSize: 16 },
   currentChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
+  mapWrap: { marginTop: 18, height: 150, borderRadius: 20, overflow: "hidden", backgroundColor: "#E7F0EE" },
+  map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { fontSize: 13, fontWeight: "800" },
+  handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
+  listBtn: { height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal, backgroundColor: colors.white },
+  handoffBtn: { flex: 1 },
+  listBtnText: { color: colors.teal, fontSize: 15, fontWeight: "800" },
   resolvedNote: { marginTop: 24, color: colors.muted, fontSize: 16, lineHeight: 22 },
   sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 18, fontWeight: "800" },
   radioList: { gap: 10 },
@@ -194,6 +258,8 @@ const styles = StyleSheet.create({
   radioLabel: { color: colors.ink, fontSize: 16, fontWeight: "700" },
   label: { marginTop: 22, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
   notes: { minHeight: 80, borderRadius: 18, padding: 16, color: colors.ink, fontSize: 16, textAlignVertical: "top", ...card },
+  photoBtn: { marginTop: 14, height: 64, borderRadius: 18, borderWidth: 2, borderColor: colors.line, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitIdle: { backgroundColor: "#7FA8A6" },

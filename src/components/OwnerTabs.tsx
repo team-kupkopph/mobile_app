@@ -46,7 +46,14 @@ export function OwnerTabs({ active }: OwnerTabsProps) {
               activeOpacity={0.75}
               style={styles.tabItem}
               onPress={() => {
-                if (!isActive) navigation.navigate(tab.key);
+                if (isActive) return;
+                // The Volunteer tab opens the Kawang-Gawa hub (US-V8) rather than the old
+                // "volunteer" placeholder route, which stays registered but unreachable from here.
+                if (tab.key === "volunteer") {
+                  navigation.navigate("kawanggawa");
+                  return;
+                }
+                navigation.navigate(tab.key);
               }}
             >
               <View style={[styles.iconSlot, isActive && styles.iconSlotActive]}>{renderIcon(tab.key, color)}</View>
