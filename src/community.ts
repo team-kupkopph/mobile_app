@@ -79,3 +79,24 @@ export function storyTypeChip(type: StoryType): { label: string; tone: StoryTone
       return { label: "General", tone: "muted" };
   }
 }
+
+// US-L3 · turn the §11 per-signal sub-scores (each 0..1) into human reasons — the UI shows WHY
+// two reports matched, never a raw percentage (that was the whole point of transparent scoring).
+export type MatchSignals = { geo: number; time: number; breed: number; color: number; size_sex: number };
+
+export function matchReasons(sig: MatchSignals): string[] {
+  const r: string[] = [];
+  if (sig.geo >= 0.85) r.push("Very close by");
+  else if (sig.geo >= 0.5) r.push("Nearby");
+  if (sig.time >= 0.85) r.push("around the same time");
+  else if (sig.time >= 0.4) r.push("similar dates");
+  if (sig.breed >= 0.3 || sig.color >= 0.3) r.push("description matches");
+  if (sig.size_sex >= 0.5) r.push("same size & sex");
+  return r.length ? r : ["a possible match"];
+}
+
+// A qualitative strength label from the overall [0,1] score — softer than a number, and never
+// overclaims a certainty the heuristic doesn't have.
+export function matchStrength(score: number): { label: string; tone: "ok" | "warn" } {
+  return score >= 0.8 ? { label: "Very likely", tone: "ok" } : { label: "Possible", tone: "warn" };
+}

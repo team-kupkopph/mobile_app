@@ -5,6 +5,18 @@ import { SocialIdentity } from "../auth/socialAuth";
 // POST /verifications (US-C1) can submit the base set + NGO papers in one request.
 export type ShelterDoc = { doc_type: string; file_url: string };
 
+// US-L3 · a lost<->found match, threaded from the matches list to its detail.
+export type MatchShape = {
+  match_id: string;
+  status: string;
+  score: number | null;
+  signals: { geo: number; time: number; breed: number; color: number; size_sex: number } | null;
+  report: {
+    report_id: string; report_type: string; species: string; breed: string | null;
+    color_markings: string | null; city: string | null; created_at: string;
+  };
+};
+
 // US-B2 · a badge, threaded from the impact grid to its detail.
 export type BadgeShape = {
   badge_code: string; name: string; description: string; icon: string; criteria: string;
@@ -120,6 +132,9 @@ export type RootStackParamList = {
   stories: undefined;
   storyCompose: { adoptionListingId?: string } | undefined;
   storyDetail: { storyId: string };
+  // US-L3 · lost & found match surfacing: the reporter's matches + one match's detail.
+  reportMatches: { reportId: string };
+  matchDetail: { reportId: string; match: MatchShape };
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };

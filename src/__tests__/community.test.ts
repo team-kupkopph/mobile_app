@@ -1,6 +1,6 @@
 import {
-  impactTiles, needProgressFraction, needProgressLabel, needStatusChip, pledgeIsCancellable,
-  pledgeStatusChip, storyTypeChip
+  impactTiles, matchReasons, matchStrength, needProgressFraction, needProgressLabel,
+  needStatusChip, pledgeIsCancellable, pledgeStatusChip, storyTypeChip
 } from "../community";
 
 describe("pledgeStatusChip", () => {
@@ -53,5 +53,23 @@ describe("storyTypeChip", () => {
     expect(storyTypeChip("adoption")).toEqual({ label: "Adoption", tone: "ok" });
     expect(storyTypeChip("rescue")).toEqual({ label: "Rescue", tone: "teal" });
     expect(storyTypeChip("general")).toEqual({ label: "General", tone: "muted" });
+  });
+});
+
+describe("matchReasons", () => {
+  it("renders the §11 signals as human reasons, never a percentage", () => {
+    const r = matchReasons({ geo: 0.95, time: 0.9, breed: 0.5, color: 0.6, size_sex: 1 });
+    expect(r).toEqual(["Very close by", "around the same time", "description matches", "same size & sex"]);
+  });
+  it("degrades a weak-but-shown match to a gentle default", () => {
+    expect(matchReasons({ geo: 0.2, time: 0.1, breed: 0, color: 0, size_sex: 0 }))
+      .toEqual(["a possible match"]);
+  });
+});
+
+describe("matchStrength", () => {
+  it("is a soft label, not a number", () => {
+    expect(matchStrength(0.9)).toEqual({ label: "Very likely", tone: "ok" });
+    expect(matchStrength(0.55)).toEqual({ label: "Possible", tone: "warn" });
   });
 });

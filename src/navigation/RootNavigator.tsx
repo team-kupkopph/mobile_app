@@ -16,6 +16,8 @@ import { BadgeComparisonScreen } from "../screens/BadgeComparisonScreen";
 import { StoriesScreen } from "../screens/StoriesScreen";
 import { StoryComposeScreen } from "../screens/StoryComposeScreen";
 import { StoryDetailScreen } from "../screens/StoryDetailScreen";
+import { ReportMatchesScreen } from "../screens/ReportMatchesScreen";
+import { MatchDetailScreen } from "../screens/MatchDetailScreen";
 import { DonationQrScreen } from "../screens/DonationQrScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
 import { HomeGuestScreen } from "../screens/HomeGuestScreen";
@@ -174,6 +176,8 @@ export function RootNavigator() {
       <Stack.Screen name="stories" component={StoriesScreen} />
       <Stack.Screen name="storyCompose" component={StoryComposeScreen} />
       <Stack.Screen name="storyDetail" component={StoryDetailScreen} />
+      <Stack.Screen name="reportMatches" component={ReportMatchesScreen} />
+      <Stack.Screen name="matchDetail" component={MatchDetailScreen} />
       <Stack.Screen name="reportContent" component={ReportContentScreen} />
       {/* US-V8 — the real hub + shift detail/waiver (Task 4), schedule (Task 5),
           check-in/out (Task 6), history (Task 7), and the cancel flow (Task 8). */}
