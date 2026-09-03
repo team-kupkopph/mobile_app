@@ -240,6 +240,16 @@ export function HomeScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         ))}
 
+        {/* US-T2 · the community stories entry point (was a dead 'Community' idea in the design). */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.rescueSectionRow}
+          onPress={() => navigation.navigate("stories")}
+        >
+          <Text style={[styles.sectionTitle, styles.rescueTitle]}>Community stories</Text>
+          <Text style={styles.seeAll}>See all ›</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           activeOpacity={0.7}
           style={styles.rescueSectionRow}

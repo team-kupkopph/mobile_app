@@ -57,4 +57,15 @@ describe("notificationTarget", () => {
     expect(notificationTarget({ type: "signup_requested", data: { signup_id: "x" } })).toBeNull();
     expect(notificationTarget({ type: "signup_requested", data: null })).toBeNull();
   });
+
+  it("routes the Sprint 6 community notifications to their own screens", () => {
+    expect(notificationTarget({ type: "badge_earned", data: { badge_code: "first_shift" } }))
+      .toEqual({ screen: "impact" });
+    expect(notificationTarget({ type: "pledge_confirmed", data: { need_id: "n", pledge_id: "p" } }))
+      .toEqual({ screen: "myDonations" });
+    expect(notificationTarget({ type: "pledge_received", data: { need_id: "n", pledge_id: "p" } }))
+      .toEqual({ screen: "shelterNeeds" });
+    expect(notificationTarget({ type: "match_suggested", data: { report_id: "r" } }))
+      .toEqual({ screen: "reportDetail", reportId: "r" });
+  });
 });

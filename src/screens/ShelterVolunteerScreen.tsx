@@ -31,18 +31,10 @@ const STATUS_CHIP: Record<ShelterShift["status"], { label: string; tone: StatusT
 // not-yet-built US-V9 route names too — RootNavigator points them all at this component so the
 // app compiles before Tasks 6–10 swap in their real screens. The union keeps that placeholder
 // wiring typechecking without an `any` cast; this screen never reads `route.params`.
-type Props = NativeStackScreenProps<
-  RootStackParamList,
-  | "shelterVolunteer"
-  | "shelterVolunteerCreate"
-  | "shelterVolunteerActivity"
-  | "shelterVolunteerRequests"
-  | "shelterVolunteerAttendance"
-  | "shelterVolunteerDetail"
-  | "shelterVolunteerCalendar"
-  | "shelterVolunteerEdit"
-  | "shelterVolunteerCancel"
->;
+// This component only serves the `shelterVolunteer` route; navigating onward to the sibling
+// shelter-volunteer screens needs no union here (navigation.navigate accepts any route). The
+// old wide union was left over from when this file held several screens.
+type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteer">;
 
 export function ShelterVolunteerScreen({ navigation }: Props) {
   const api = useApi();

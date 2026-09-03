@@ -10,10 +10,16 @@ export type NotificationTarget =
   | { screen: "myInquiries" }
   | { screen: "kawanggawaSchedule" }
   | { screen: "kawanggawaHistory" }
-  | { screen: "shelterVolunteerRequests"; shiftId: string };
+  | { screen: "shelterVolunteerRequests"; shiftId: string }
+  // Sprint 6 · community. match_suggested rides the report_id path (reportDetail) until L3's
+  // dedicated matches screen lands; the wishlist/badge types land on their own screens.
+  | { screen: "impact" }
+  | { screen: "myDonations" }
+  | { screen: "shelterNeeds" };
 
 const REPORT_LINKED_TYPES = new Set([
-  "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened"
+  "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened",
+  "match_suggested"   // {report_id} → the report; a possible-matches row lives there (L3)
 ]);
 const VERIFICATION_TYPES = new Set([
   "verification_approved", "verification_rejected", "verification_needs_info"
@@ -59,6 +65,16 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   }
   if (n.type === "signup_requested" && n.data?.shift_id) {
     return { screen: "shelterVolunteerRequests", shiftId: n.data.shift_id };
+  }
+  // Sprint 6 · community notifications route to their own screens (US-B2/W2/W3).
+  if (n.type === "badge_earned") {
+    return { screen: "impact" };
+  }
+  if (n.type === "pledge_confirmed") {
+    return { screen: "myDonations" };
+  }
+  if (n.type === "pledge_received") {
+    return { screen: "shelterNeeds" };
   }
   return null; // unknown type, or a report-linked type missing its report_id — no-op tap
 }

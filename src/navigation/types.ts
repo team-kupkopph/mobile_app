@@ -5,6 +5,30 @@ import { SocialIdentity } from "../auth/socialAuth";
 // POST /verifications (US-C1) can submit the base set + NGO papers in one request.
 export type ShelterDoc = { doc_type: string; file_url: string };
 
+// US-L3 · a lost<->found match, threaded from the matches list to its detail.
+export type MatchShape = {
+  match_id: string;
+  status: string;
+  score: number | null;
+  signals: { geo: number; time: number; breed: number; color: number; size_sex: number } | null;
+  report: {
+    report_id: string; report_type: string; species: string; breed: string | null;
+    color_markings: string | null; city: string | null; created_at: string;
+  };
+};
+
+// US-B2 · a badge, threaded from the impact grid to its detail.
+export type BadgeShape = {
+  badge_code: string; name: string; description: string; icon: string; criteria: string;
+  earned: boolean; earned_at: string | null;
+};
+
+// US-W3 · a shelter need, threaded through the manage/edit/pledges screens.
+export type ShelterNeedShape = {
+  need_id: string; title: string; category: string; description: string;
+  quantity_needed: number; quantity_received: number; status: "open" | "fulfilled" | "closed";
+};
+
 export type RootStackParamList = {
   welcome: undefined;
   // A social identity rides through account-type (US-A2): the provider already asserted a
@@ -94,6 +118,23 @@ export type RootStackParamList = {
   // (public side) renders an org's verified QRs, reached from a listing's poster row.
   donationQr: undefined;
   donate: { accountId: string; orgName: string };
+  // US-W2 · Abot-tulong wishlist (giver side): pledge to a need, then My Donations.
+  donatePledge: { needId: string; needTitle: string; shelterName: string };
+  myDonations: undefined;
+  // US-W3 · Abot-tulong wishlist (shelter side): manage needs, edit/create, confirm pledges.
+  shelterNeeds: undefined;
+  needForm: { need?: ShelterNeedShape } | undefined;
+  needPledges: { need: ShelterNeedShape };
+  // US-B2 · My impact: the badge grid + a single badge's detail.
+  impact: undefined;
+  badgeComparison: { badge: BadgeShape };
+  // US-T2 · success stories: feed, compose (optionally prefilled from an adoption), detail.
+  stories: undefined;
+  storyCompose: { adoptionListingId?: string } | undefined;
+  storyDetail: { storyId: string };
+  // US-L3 · lost & found match surfacing: the reporter's matches + one match's detail.
+  reportMatches: { reportId: string };
+  matchDetail: { reportId: string; match: MatchShape };
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };

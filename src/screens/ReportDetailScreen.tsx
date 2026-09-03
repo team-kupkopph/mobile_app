@@ -133,6 +133,19 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
+          {/* US-L3 · the reporter's entry into possible lost<->found matches (matches are
+              reporter-gated server-side; only show the row on the reporter's own lost/found report). */}
+          {isReporterView && (report.report_type === "lost" || report.report_type === "found") ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.matchesRow}
+              onPress={() => navigation.navigate("reportMatches", { reportId: report.report_id })}
+            >
+              <Text style={styles.matchesLabel}>Possible matches</Text>
+              <Text style={styles.matchesChevron}>›</Text>
+            </TouchableOpacity>
+          ) : null}
+
           {/* US-SEC1 — precise_location only ever appears here when the backend has
               already decided the caller may see it (reporter or active claimer); this
               screen just renders whichever field is present, it doesn't re-derive access. */}
@@ -257,6 +270,9 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13, fontWeight: "800" },
   notesCard: { marginTop: 20, padding: 18, borderRadius: 18, ...card },
   notesText: { color: colors.ink, fontSize: 16, lineHeight: 23 },
+  matchesRow: { marginTop: 16, paddingHorizontal: 18, height: 62, borderRadius: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", ...card },
+  matchesLabel: { color: colors.teal, fontSize: 16.5, fontWeight: "800" },
+  matchesChevron: { color: "#b8b6ad", fontSize: 30, fontWeight: "800" },
   mapWrap: { marginTop: 20, height: 160, borderRadius: 20, overflow: "hidden", backgroundColor: "#E7F0EE" },
   map: { ...StyleSheet.absoluteFillObject },
   mapNote: { marginTop: 8, color: "#9a988f", fontSize: 12, lineHeight: 17 },

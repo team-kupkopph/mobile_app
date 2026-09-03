@@ -97,6 +97,18 @@ export function MyInquiriesScreen({ navigation }: Props) {
                 ) : (
                   <Text style={styles.progress}>{inquiryProgressLabel(iq.stages)}</Text>
                 )}
+                {/* US-T2 · the "Share your adoption story" CTA goes live on an adopted inquiry
+                    (was a dead control), opening compose prefilled with this listing. */}
+                {iq.status === "adopted" ? (
+                  <TouchableOpacity
+                    style={styles.shareStory}
+                    activeOpacity={0.8}
+                    onPress={() => navigation.navigate("storyCompose",
+                      { adoptionListingId: iq.listing.listing_id })}
+                  >
+                    <Text style={styles.shareStoryLabel}>Share your adoption story ›</Text>
+                  </TouchableOpacity>
+                ) : null}
               </TouchableOpacity>
             );
           })
@@ -130,5 +142,7 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13, fontWeight: "800" },
   progress: { marginTop: 12, color: colors.teal, fontSize: 14, fontWeight: "700" },
   placementNote: { marginTop: 12, color: colors.teal, fontSize: 14, fontWeight: "800" },
+  shareStory: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, backgroundColor: "#EAF3DE" },
+  shareStoryLabel: { color: "#27500A", fontSize: 14.5, fontWeight: "700" },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

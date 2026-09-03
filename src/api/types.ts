@@ -39,7 +39,8 @@ export type ReportStatusHistoryEntry = { status: StrayStatus; changed_at: string
 // guests); precise_location appears ONLY for the reporter or the report's active claimer.
 export type LatLng = { lat: number; lng: number };
 export type ReportDetail = {
-  report_id: string; species: string; condition: string; status: StrayStatus;
+  report_id: string; report_type: "stray" | "lost" | "found";
+  species: string; condition: string; status: StrayStatus;
   notes: string | null; city: string | null; reported_at: string; photos: string[];
   approx_location: LatLng; precise_location?: LatLng;
   escalation_level?: number; offers_count?: number;
