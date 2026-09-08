@@ -23,11 +23,18 @@ const tabs: Array<{ key: OwnerTab; label: string }> = [
   { key: "profile", label: "You" }
 ];
 
-const colors = {
+/** Exported so the contrast guard in `__tests__/tabBarContrast.test.ts` measures the colours
+ *  the bar actually renders, rather than a copy that can drift away from them. */
+export const TAB_COLORS = {
+  bar: "#FFFFFF",
   teal: "#1C6B6B",
   tealDark: "#14504F",
   soft: "#E7F0EE",
-  inactive: "#C9CEC7",
+  // Was #C9CEC7 — 1.60:1 on white, against WCAG's 3:1 for meaningful non-text content. The
+  // design system calls inactive tab icons "light grey", but its own accessibility floor wins
+  // where the two disagree: at #C9CEC7 the glyph was decoration, not a way to tell tabs apart.
+  // Matching MUTED also makes the icon and the word beneath it one control instead of two.
+  inactive: "#5F5E5A",
   muted: "#5F5E5A"
 };
 
@@ -39,12 +46,18 @@ export function OwnerTabs({ active }: OwnerTabsProps) {
       <View style={styles.bar}>
         {tabs.map((tab) => {
           const isActive = tab.key === active;
-          const color = isActive ? colors.teal : colors.inactive;
+          const color = isActive ? TAB_COLORS.teal : TAB_COLORS.inactive;
           return (
             <TouchableOpacity
               key={tab.key}
+              testID={`tab.${tab.key}`}
               activeOpacity={0.75}
               style={styles.tabItem}
+              accessibilityRole="tab"
+              accessibilityLabel={tab.label}
+              // A screen-reader user needs to know WHICH tab they are on, not just
+              // which ones exist — selected state is half of what a tab bar means.
+              accessibilityState={{ selected: isActive }}
               onPress={() => {
                 if (isActive) return;
                 // The Volunteer tab opens the Kawang-Gawa hub (US-V8) rather than the old
@@ -106,16 +119,16 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   iconSlotActive: {
-    backgroundColor: colors.soft
+    backgroundColor: TAB_COLORS.soft
   },
   tabText: {
     marginTop: 4,
-    color: colors.muted,
+    color: TAB_COLORS.muted,
     fontSize: 12,
     fontWeight: "600"
   },
   activeTabText: {
-    color: colors.tealDark,
+    color: TAB_COLORS.tealDark,
     fontWeight: "800"
   }
 });

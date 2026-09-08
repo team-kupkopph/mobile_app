@@ -8,6 +8,8 @@ import { useCallback, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { LoadStateView } from "../components/LoadStateView";
+import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { BrowseShift, shiftTypeLabel, slotsLeftLabel } from "../volunteer";
@@ -38,8 +40,12 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   const { shiftId } = route.params;
 
   const [shift, setShift] = useState<BrowseShift | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [loadError, setLoadError] = useState(false);
+  // US-R4 · was three hand-rolled booleans that collapsed offline, 5xx and "deleted"
+  // into one sentence. Keeping the RESULT lets the shared view say which it was — and
+  // a 404 here is ordinary: these routes are reached from a push notification about a
+  // shift that may since have been cancelled.
+  const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+
 
   const [waiverChecked, setWaiverChecked] = useState(false);
   const [contactChecked, setContactChecked] = useState(false);
@@ -49,14 +55,10 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   const [error, setError] = useState<string | undefined>(undefined);
 
   const load = useCallback(() => {
+    setRes(null);
     api.get(`/shifts/${shiftId}`).then((r) => {
-      if (r.ok) {
-        setShift(r.data);
-        setLoadError(false);
-      } else {
-        setLoadError(true);
-      }
-      setLoaded(true);
+      setRes({ ok: r.ok, status: r.status });
+      if (r.ok) setShift(r.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus
   }, [shiftId]);
@@ -98,22 +100,18 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.screen} testID="screen.kawanggawaDetail">
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}>
+        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
+          accessibilityRole="button" accessibilityLabel="Go back">
           <Text style={styles.backGlyph}>‹</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Volunteer</Text>
       </View>
 
-      {!loaded ? (
-        <View style={styles.centerFill}>
-          <ActivityIndicator color={colors.teal} />
-        </View>
-      ) : loadError || !shift ? (
-        <View style={styles.centerFill}>
-          <Text style={styles.empty}>Couldn't load this shift. Pull down or go back and try again.</Text>
-        </View>
+      {!shift ? (
+        <LoadStateView state={loadState(res)} subject="shift" onRetry={load}
+          onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.heroRow}>
@@ -139,6 +137,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           <Text style={styles.sectionLabel}>Before you request</Text>
 
           <TouchableOpacity
+            testID="chk.kawanggawaDetail.waiver"
             activeOpacity={0.85}
             style={[styles.consentRow, waiverHighlight && styles.consentRowAlert]}
             onPress={() => {
@@ -162,6 +161,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           </TouchableOpacity>
 
           <TouchableOpacity
+            testID="chk.kawanggawaDetail.contact"
             activeOpacity={0.85}
             style={styles.consentRow}
             onPress={() => setContactChecked((v) => !v)}
@@ -177,6 +177,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           {!!error && <Text style={styles.formError}>{error}</Text>}
 
           <TouchableOpacity
+            testID="btn.kawanggawaDetail.request"
             activeOpacity={0.85}
             style={[styles.submitButton, !canRequest && styles.submitButtonDisabled]}
             onPress={submit}
@@ -200,8 +201,6 @@ const styles = StyleSheet.create({
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  empty: { color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
   content: { paddingHorizontal: 26, paddingTop: 22, paddingBottom: 60 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   heroIcon: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },

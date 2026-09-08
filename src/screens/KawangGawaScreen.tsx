@@ -6,10 +6,15 @@ import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { LoadStateView } from "../components/LoadStateView";
+import { StaleBanner } from "../components/StaleBanner";
+import { isOffline, loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { RootStackParamList } from "../navigation/types";
+import { useCachedFeed } from "../useCachedFeed";
 import { BrowseShift, ShiftType, shiftTypeLabel, slotsLeftLabel } from "../volunteer";
+import { TAP_SLOP } from "../touch";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -48,36 +53,28 @@ type Props = NativeStackScreenProps<
 
 export function KawangGawaScreen({ navigation }: Props) {
   const api = useApi();
-  const [shifts, setShifts] = useState<BrowseShift[]>([]);
+  const { rows: shifts, res, stale, load: loadFeed } =
+    useCachedFeed<BrowseShift>(api, (d) => d?.results ?? []);
+
   const [type, setType] = useState<"" | ShiftType>("");
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(false);
 
   const load = useCallback(() => {
     const qs = type ? `?type=${type}` : "";
-    api.get(`/shifts${qs}`).then((r) => {
-      if (r.ok) {
-        setShifts(r.data?.results ?? []);
-        setError(false);
-      } else {
-        setError(true);
-      }
-      setLoaded(true);
-    });
+    loadFeed(`/shifts${qs}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter change
   }, [type]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.screen} testID="screen.kawanggawa">
       <View style={styles.header}>
         <Text style={styles.title}>Kawang-Gawa</Text>
         <View style={styles.headerLinks}>
-          <TouchableOpacity onPress={() => navigation.navigate("kawanggawaSchedule")} hitSlop={10}>
+          <TouchableOpacity onPress={() => navigation.navigate("kawanggawaSchedule")} hitSlop={TAP_SLOP}>
             <Text style={styles.headerLink}>My schedule ›</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("kawanggawaHistory")} hitSlop={10}>
+          <TouchableOpacity onPress={() => navigation.navigate("kawanggawaHistory")} hitSlop={TAP_SLOP}>
             <Text style={styles.headerLink}>History ›</Text>
           </TouchableOpacity>
         </View>
@@ -86,7 +83,7 @@ export function KawangGawaScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.filterRow}>
           {FILTERS.map((f) => (
-            <TouchableOpacity
+            <TouchableOpacity hitSlop={TAP_SLOP}
               key={f.key || "all"}
               style={[styles.filterChip, type === f.key && styles.filterChipActive]}
               onPress={() => setType(f.key)}
@@ -97,13 +94,18 @@ export function KawangGawaScreen({ navigation }: Props) {
           ))}
         </View>
 
-        {loaded && error ? (
-          <Text style={styles.empty}>Couldn't load shifts. Pull to refresh or try again shortly.</Text>
-        ) : loaded && shifts.length === 0 ? (
-          <Text style={styles.empty}>No open shifts right now — check back soon.</Text>
+        {loadState(res, shifts?.length).kind !== "ready" ? (
+          <LoadStateView
+            state={loadState(res, shifts?.length)}
+            emptyTitle="No open shifts right now — check back soon."
+            onRetry={load}
+          />
         ) : (
-          shifts.map((s) => (
+          <>
+          {stale ? <StaleBanner offline={isOffline(res)} /> : null}
+          {(shifts ?? []).map((s, i) => (
             <TouchableOpacity
+              testID={`card.kawanggawa.${i}`}
               key={s.shift_id}
               style={styles.card}
               activeOpacity={0.85}
@@ -121,7 +123,8 @@ export function KawangGawaScreen({ navigation }: Props) {
                 <Text style={styles.chipText}>{slotsLeftLabel(s.slots_left, s.capacity)}</Text>
               </View>
             </TouchableOpacity>
-          ))
+          ))}
+          </>
         )}
       </ScrollView>
 

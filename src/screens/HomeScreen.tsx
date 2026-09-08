@@ -9,13 +9,18 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Alert, Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useApi } from "../api/useApi";
+import { LoadStateView } from "../components/LoadStateView";
+import { loadState } from "../net";
 import { Listing, Me } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
+import { TAP_SLOP } from "../touch";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -38,12 +43,27 @@ const quickActions: QuickAction[] = [
 type MapReport = { report_id: string; species: string; condition: string; city: string | null };
 
 export function HomeScreen({ navigation, route }: Props) {
+  // The status bar is real now (App.tsx), so the first thing on screen has to start below
+  // it. This block used to pad 20pt, which was right while the bar was hidden and
+  // put the greeting under the clock once it was not.
+  const insets = useSafeAreaInsets();
   const api = useApi();
   const { city } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
   const [hasUnread, setHasUnread] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [rescues, setRescues] = useState<MapReport[]>([]);
+  // US-R2 · FOUR fetches, and neither list is "the" primary — they are peer panels, so this
+  // screen takes the per-panel branch of the rule rather than the whole-screen one. Blanking
+  // Home because the adoption strip timed out would hide the rescue strip that did load, and
+  // Home is the highest-traffic screen in the app.
+  //
+  // ⚠️ The rescue panel is why this matters most. Its empty copy is "No strays reported
+  // nearby yet." — word for word the statement the 2026-09-04 device walk caught the rescue
+  // MAP making while eight reports sat within 10 km. The same lie was live on Home the whole
+  // time, on a screen far more people see.
+  const [listingsRes, setListingsRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [rescuesRes, setRescuesRes] = useState<{ ok: boolean; status: number } | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -65,11 +85,13 @@ export function HomeScreen({ navigation, route }: Props) {
       // Adoption preview — first 2 available listings near the user's city.
       const cityParam = city ? `&city=${encodeURIComponent(city)}` : "";
       api.get(`/listings?page_size=2${cityParam}`).then((r) => {
+        setListingsRes({ ok: r.ok, status: r.status });
         if (r.ok) setListings(r.data?.results ?? []);
       });
       // Nearby rescues — first 2 reported strays near the user's city.
       const rescueCity = city ?? "Marikina";
       api.get(`/reports/map?city=${encodeURIComponent(rescueCity)}&status=reported`).then((r) => {
+        setRescuesRes({ ok: r.ok, status: r.status });
         if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
@@ -101,8 +123,8 @@ export function HomeScreen({ navigation, route }: Props) {
   const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
 
   return (
-    <View style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <View style={styles.screen} testID="screen.home">
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.headerCopy}>
             <Text style={styles.greeting}>{me?.display_name ? `Kumusta, ${me.display_name}!` : "Kumusta!"}</Text>
@@ -111,7 +133,7 @@ export function HomeScreen({ navigation, route }: Props) {
             ) : (
               <View style={styles.cityRow}>
                 <Text style={styles.cityText}>{city ?? "Set your city"}</Text>
-                <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate("locationPicker")}>
+                <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("locationPicker")}>
                   <Text style={styles.cityChange}>Change ›</Text>
                 </TouchableOpacity>
               </View>
@@ -122,6 +144,8 @@ export function HomeScreen({ navigation, route }: Props) {
             activeOpacity={0.75}
             onPress={() => navigation.navigate("notifications")}
             hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="Notifications"
           >
             <BellIcon color="#12213A" />
             {hasUnread ? <View style={styles.bellDot} /> : null}
@@ -168,9 +192,11 @@ export function HomeScreen({ navigation, route }: Props) {
             <Text style={styles.reportTitle}>Saw a stray?</Text>
             <Text style={styles.reportText}>Report it in seconds — help is near.</Text>
             <TouchableOpacity
+              testID="btn.home.report"
               activeOpacity={0.85}
               style={styles.reportButton}
               onPress={() => navigation.navigate("reportStray")}
+              hitSlop={TAP_SLOP}
             >
               <Text style={styles.reportButtonText}>Report now</Text>
             </TouchableOpacity>
@@ -179,16 +205,16 @@ export function HomeScreen({ navigation, route }: Props) {
         </View>
 
         <View style={styles.sagipLinks}>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("rescueMap")}>
+          <TouchableOpacity testID="btn.home.rescueMap" hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("rescueMap")}>
             <Text style={styles.sagipLink}>See nearby strays ›</Text>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("myReports")}>
+          <TouchableOpacity testID="btn.home.myReports" hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("myReports")}>
             <Text style={styles.sagipLink}>My reports ›</Text>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("myRescues")}>
+          <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("myRescues")}>
             <Text style={styles.sagipLink}>My rescues ›</Text>
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("myOffers")}>
+          <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("myOffers")}>
             <Text style={styles.sagipLink}>My offers ›</Text>
           </TouchableOpacity>
         </View>
@@ -209,7 +235,7 @@ export function HomeScreen({ navigation, route }: Props) {
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Adopt near you</Text>
-          <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate("adopt")}>
+          <TouchableOpacity testID="btn.home.adopt" hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("adopt")}>
             <Text style={styles.seeAll}>See all ›</Text>
           </TouchableOpacity>
         </View>
@@ -507,8 +533,13 @@ const styles = StyleSheet.create({
     fontSize: 13
   },
   reportButton: {
+    // §13.4 · the drawn pill is 38 pt, under the 44 pt minimum. `minHeight` raises the real
+    // target without repainting the design, and TAP_SLOP on the element covers the rest.
+    // This is the control someone uses in a hurry, standing over an animal — the last one
+    // that should be fiddly to press.
     width: 136,
     height: 38,
+    minHeight: 44,
     marginTop: 14,
     borderRadius: 19,
     alignItems: "center",
