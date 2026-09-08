@@ -19,9 +19,14 @@ const tabs: Array<{ key: ShelterTabKey; label: string }> = [
   { key: "profile", label: "You" }
 ];
 
-const colors = {
+/** Exported so the shared contrast guard measures this bar too — see
+ *  `__tests__/tabBarContrast.test.ts`. The shelter shell's bar sits on #F7F7F4, not white. */
+export const SHELTER_TAB_COLORS = {
+  bar: "#F7F7F4",
   teal: "#1C7876",
-  inactive: "#CAD2CF",
+  // Was #CAD2CF — 1.55:1 on this bar. Matched to `muted` below so the shelter bar's icon and
+  // its label carry the same weight, as in the owner bar.
+  inactive: "#62615C",
   muted: "#62615C"
 };
 
@@ -30,7 +35,7 @@ export function ShelterTabs({ active, onTabPress }: ShelterTabsProps) {
     <View style={styles.tabs}>
       {tabs.map((tab) => {
         const isActive = tab.key === active;
-        const color = isActive ? colors.teal : colors.inactive;
+        const color = isActive ? SHELTER_TAB_COLORS.teal : SHELTER_TAB_COLORS.inactive;
         return (
           <TouchableOpacity
             testID={`tab.shelter.${tab.key}`}
@@ -97,11 +102,11 @@ const styles = StyleSheet.create({
   },
   tabText: {
     marginTop: 2,
-    color: colors.muted,
+    color: SHELTER_TAB_COLORS.muted,
     fontSize: 9
   },
   activeTabText: {
-    color: colors.teal,
+    color: SHELTER_TAB_COLORS.teal,
     fontWeight: "800"
   }
 });

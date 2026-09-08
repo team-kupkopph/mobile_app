@@ -15,7 +15,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { Listing } from "../api/types";
-import { AdoptIcon, HomeIcon, ProfileIcon, VolunteerIcon } from "../components/AppIcons";
+import { AdoptIcon, HomeIcon, LocationPinIcon, ProfileIcon, VolunteerIcon } from "../components/AppIcons";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
@@ -114,11 +114,19 @@ export function HomeGuestScreen({ navigation }: Props) {
             above: browsing the map needs no account. Mirrors the owner Home's "See nearby strays"
             link. Closes Sprint 1's last remaining US-A1b Partial (guest home never pointed at it). */}
         <TouchableOpacity hitSlop={TAP_SLOP}
-          activeOpacity={0.7}
-          style={styles.mapLinkRow}
+          activeOpacity={0.85}
+          style={styles.mapCard}
+          accessibilityRole="button"
           onPress={() => navigation.navigate("rescueMap")}
         >
-          <Text style={styles.mapLink}>See nearby strays ›</Text>
+          <View style={styles.mapIconTile}>
+            <LocationPinIcon color={colors.teal} size={20} />
+          </View>
+          <View style={styles.mapCopy}>
+            <Text style={styles.mapTitle}>See nearby strays</Text>
+            <Text style={styles.mapSub}>Live map of reports around you</Text>
+          </View>
+          <Text style={styles.mapChevron}>›</Text>
         </TouchableOpacity>
 
         <View style={styles.sectionHeader}>
@@ -215,6 +223,18 @@ function GuestTabs({ onGated }: { onGated: (action: SignupWallAction) => void })
   );
 }
 
+/** The guest shell draws its own tab bar (see GuestTabs below), so it carries its own copy of
+ *  these values. Exported so the shared contrast guard covers it — three tab bars with three
+ *  private palettes is how the inactive icon stayed at 1.6:1 in two of them. */
+export const GUEST_TAB_COLORS = {
+  bar: "#FFFFFF",
+  teal: "#1C6B6B",
+  soft: "#E7F0EE",
+  // Was #C9CEC7 — 1.60:1. This is the bar a signed-out visitor actually lands on.
+  inactive: "#5F5E5A",
+  muted: "#5F5E5A"
+};
+
 const colors = {
   ink: "#12213A",
   teal: "#1C6B6B",
@@ -223,7 +243,9 @@ const colors = {
   border: "#E3E1D9",
   muted: "#5F5E5A",
   soft: "#E7F0EE",
-  inactive: "#C9CEC7",
+  // Single source: GUEST_TAB_COLORS is what the contrast guard measures, so the bar must draw
+  // from it rather than keep a parallel copy that can quietly diverge.
+  inactive: GUEST_TAB_COLORS.inactive,
   paleTeal: "#E7F0EE"
 };
 
@@ -327,14 +349,14 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   reportCard: {
-    height: 136,
-    marginTop: 16,
+    height: 140,
+    marginTop: 14,
     borderRadius: 18,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingLeft: 20,
     paddingRight: 16,
-    paddingTop: 26,
+    paddingTop: 19,
     backgroundColor: colors.teal
   },
   reportTitle: {
@@ -367,13 +389,53 @@ const styles = StyleSheet.create({
     height: 72,
     marginTop: 4
   },
-  mapLinkRow: {
-    marginTop: 14
+  // Was a bare teal "See nearby strays ›" text link — the one V1 element left between two V2
+  // cards, and the smallest target on the screen. Rebuilt as a V2 raised row: white fill with
+  // the `v2soft` shadow and NO stroke, since in this language the shadow is what says
+  // "tappable" and a border reads as V1. The squircle icon tile matches the guest banner above
+  // it, so the two rows now belong to the same system.
+  mapCard: {
+    marginTop: 14,
+    minHeight: 72,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 18,
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#1F3A5F",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 7,
+    elevation: 2
   },
-  mapLink: {
-    color: colors.teal,
-    fontSize: 14,
+  mapIconTile: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.soft
+  },
+  mapCopy: {
+    flex: 1,
+    marginLeft: 14
+  },
+  mapTitle: {
+    color: colors.ink,
+    fontSize: 15,
     fontWeight: "800"
+  },
+  mapSub: {
+    marginTop: 2,
+    color: colors.muted,
+    fontSize: 13
+  },
+  mapChevron: {
+    marginLeft: 8,
+    color: colors.teal,
+    fontSize: 22,
+    fontWeight: "700"
   },
   sectionHeader: {
     marginTop: 22,
