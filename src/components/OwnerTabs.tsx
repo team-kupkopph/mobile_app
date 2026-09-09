@@ -6,8 +6,11 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { RootStackParamList } from "../navigation/types";
+import { gradients } from "../theme/v3";
+import { GlassSurface } from "./GlassSurface";
 import { AdoptIcon, HomeIcon, ProfileIcon, VolunteerIcon } from "./AppIcons";
 
 export type OwnerTab = "home" | "adopt" | "volunteer" | "profile";
@@ -43,7 +46,7 @@ export function OwnerTabs({ active }: OwnerTabsProps) {
 
   return (
     <View style={styles.wrap} pointerEvents="box-none">
-      <View style={styles.bar}>
+      <GlassSurface raise="float" radius={26} style={styles.bar}>
         {tabs.map((tab) => {
           const isActive = tab.key === active;
           const color = isActive ? TAB_COLORS.teal : TAB_COLORS.inactive;
@@ -69,12 +72,13 @@ export function OwnerTabs({ active }: OwnerTabsProps) {
                 navigation.navigate(tab.key);
               }}
             >
-              <View style={[styles.iconSlot, isActive && styles.iconSlotActive]}>{renderIcon(tab.key, color)}</View>
+              {isActive ? <LinearGradient colors={gradients.activeTab} style={styles.activePill} /> : null}
+              <View style={styles.iconSlot}>{renderIcon(tab.key, color)}</View>
               <Text style={[styles.tabText, isActive && styles.activeTabText]}>{tab.label}</Text>
             </TouchableOpacity>
           );
         })}
-      </View>
+      </GlassSurface>
     </View>
   );
 }
@@ -89,37 +93,38 @@ function renderIcon(tab: OwnerTab, color: string) {
 const styles = StyleSheet.create({
   wrap: {
     position: "absolute",
-    left: 24,
-    right: 24,
-    bottom: 24
+    left: 16,
+    right: 16,
+    bottom: 16
   },
   bar: {
-    height: 84,
-    borderRadius: 30,
+    // 68 rather than 84: the active pill now carries the emphasis, so the bar can be shorter
+    // and sit closer to the edge. Each tab item is still a quarter of ~356 pt by 68 tall, so
+    // the 44 pt target is untouched.
+    height: 68,
     flexDirection: "row",
-    justifyContent: "space-around",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8
+    overflow: "hidden"
   },
   tabItem: {
     flex: 1,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center"
+  },
+  activePill: {
+    // Behind the icon AND its label, rather than a chip behind the icon alone — the whole tab
+    // reads as one selected control instead of two halves that only half agree.
+    position: "absolute",
+    left: 4,
+    right: 4,
+    top: 6,
+    bottom: 6,
+    borderRadius: 20
   },
   iconSlot: {
-    width: 44,
-    height: 34,
-    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center"
-  },
-  iconSlotActive: {
-    backgroundColor: TAB_COLORS.soft
   },
   tabText: {
     marginTop: 4,

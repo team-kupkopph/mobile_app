@@ -22,6 +22,10 @@ import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { pickSpotlight } from "../sagip";
 import { TAP_SLOP } from "../touch";
+import { LinearGradient } from "expo-linear-gradient";
+
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { gradients, heroDirection } from "../theme/v3";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -174,6 +178,7 @@ export function HomeScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.home">
+      <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View style={styles.headerCopy}>
@@ -237,7 +242,12 @@ export function HomeScreen({ navigation, route }: Props) {
           </View>
         )}
 
-        <View style={styles.reportCard}>
+        <LinearGradient
+          colors={gradients.hero}
+          start={heroDirection.start}
+          end={heroDirection.end}
+          style={styles.reportCard}
+        >
           <View>
             <Text style={styles.reportTitle}>Saw a stray?</Text>
             <Text style={styles.reportText}>Report it in seconds — help is near.</Text>
@@ -252,7 +262,7 @@ export function HomeScreen({ navigation, route }: Props) {
             </TouchableOpacity>
           </View>
           <Image source={paw} resizeMode="contain" style={styles.reportPaw} />
-        </View>
+        </LinearGradient>
 
         {spotlight && (
           <TouchableOpacity
@@ -457,7 +467,7 @@ const colors = {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.page
+    backgroundColor: "transparent"
   },
   content: {
     paddingHorizontal: 26,
@@ -584,13 +594,15 @@ const styles = StyleSheet.create({
   reportCard: {
     height: 140,
     marginTop: 14,
-    borderRadius: 18,
+    // V3 radius scale: 26 hero / 24 card / 18 row. The fill is now the three-stop brand
+    // gradient rather than flat colors.teal — overflow hidden so it cannot bleed the corners.
+    borderRadius: 26,
+    overflow: "hidden",
     flexDirection: "row",
     justifyContent: "space-between",
     paddingLeft: 20,
     paddingRight: 16,
-    paddingTop: 15,
-    backgroundColor: colors.teal
+    paddingTop: 15
   },
   reportTitle: {
     color: "#FFFFFF",
@@ -624,7 +636,7 @@ const styles = StyleSheet.create({
   },
   spotCard: {
     marginTop: 18,
-    borderRadius: 18,
+    borderRadius: 24,
     borderLeftWidth: 4, // tone colour supplied inline — see the note at the call site
     paddingVertical: 16,
     paddingHorizontal: 18,
@@ -751,7 +763,7 @@ const styles = StyleSheet.create({
   petCard: {
     height: 68,
     marginTop: 10,
-    borderRadius: 14,
+    borderRadius: 18,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 13,
@@ -814,7 +826,7 @@ const styles = StyleSheet.create({
   rescueCard: {
     height: 68,
     marginTop: 16,
-    borderRadius: 14,
+    borderRadius: 18,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 13,

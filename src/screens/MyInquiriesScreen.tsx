@@ -20,6 +20,7 @@ import { loadState } from "../net";
 import { inquiryProgressLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 
 const colors = {
   ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
@@ -62,6 +63,7 @@ export function MyInquiriesScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.myInquiries">
+      <ScreenBackdrop />
       <View style={styles.header}>
         <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
           accessibilityRole="button" accessibilityLabel="Go back">
@@ -139,7 +141,7 @@ const card = {
 };
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page },
+  screen: { flex: 1, backgroundColor: "transparent" },
   header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },

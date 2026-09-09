@@ -15,6 +15,7 @@ import { OwnerTabs } from "../components/OwnerTabs";
 import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 
 const colors = {
   ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
@@ -52,6 +53,7 @@ export function AdoptScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.adopt">
+      <ScreenBackdrop />
       <View style={styles.header}>
         <Text style={styles.title}>Adopt</Text>
         <View style={styles.headerLinks}>
@@ -135,7 +137,7 @@ const card = {
 };
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page },
+  screen: { flex: 1, backgroundColor: "transparent" },
   header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 4, flexDirection: "row",
             alignItems: "center", justifyContent: "space-between" },
   title: { color: colors.ink, fontSize: 26, fontWeight: "800" },

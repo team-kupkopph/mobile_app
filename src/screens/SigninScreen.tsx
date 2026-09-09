@@ -10,6 +10,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -86,6 +87,7 @@ export function SigninScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.signin">
+      <ScreenBackdrop />
       <SimpleHeader onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
@@ -152,7 +154,7 @@ export function SigninScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: authColors.page
+    backgroundColor: "transparent"
   },
   content: {
     flex: 1,

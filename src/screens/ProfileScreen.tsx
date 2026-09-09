@@ -18,6 +18,7 @@ import { OwnerTabs } from "../components/OwnerTabs";
 import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 
 type Props = NativeStackScreenProps<RootStackParamList, "profile">;
 
@@ -105,6 +106,7 @@ export function ProfileScreen({ navigation }: Props) {
   if (!me && loadState(res).kind !== "ready" && loadState(res).kind !== "empty") {
     return (
       <View style={styles.screen} testID="screen.profile">
+      <ScreenBackdrop />
         <LoadStateView state={loadState(res)} onRetry={load} />
       </View>
     );
@@ -112,6 +114,7 @@ export function ProfileScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.profile">
+      <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>Profile</Text>
 
@@ -246,7 +249,7 @@ const colors = {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.page
+    backgroundColor: "transparent"
   },
   content: {
     paddingHorizontal: 26,
