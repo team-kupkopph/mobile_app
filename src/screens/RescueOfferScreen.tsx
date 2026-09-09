@@ -9,11 +9,8 @@ import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  soft: "#E2EEF0", line: "#E3E1D9", danger: "#B23B3B", fine: "#9a988f"
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
 
@@ -25,7 +22,11 @@ export function RescueOfferScreen({ navigation, route }: Props) {
   const [error, setError] = useState<string | undefined>(undefined);
 
   async function submit() {
-    if (!selected || submitting) return;
+    if (submitting) return;
+    // ⚠️ Explains rather than blocks. This condition used to live in the early return while
+    // the button was also disabled on it, so tapping with nothing chosen did nothing and
+    // said nothing. The fade stays — it is a hint (see colors.tealIdle), not a block.
+    if (!selected) { setError("Choose how you can help first."); return; }
     setSubmitting(true);
     setError(undefined);
     const res = await api.post(`/reports/${reportId}/offers`, { offer_type: selected });
@@ -89,7 +90,8 @@ export function RescueOfferScreen({ navigation, route }: Props) {
           style={[styles.submit, !selected && styles.submitIdle]}
           onPress={submit}
           activeOpacity={0.9}
-          disabled={!selected || submitting}
+          disabled={submitting}
+          accessibilityHint={selected ? undefined : "Choose how you can help first"}
         >
           {submitting ? <ActivityIndicator color={colors.white} />
             : <Text style={styles.submitText}>Send offer</Text>}
@@ -100,7 +102,7 @@ export function RescueOfferScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -116,14 +118,14 @@ const styles = StyleSheet.create({
   cardList: { marginTop: 24, gap: 12 },
   optionCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 18, borderRadius: 20, borderWidth: 2, borderColor: "transparent", ...card },
   optionCardActive: { borderColor: colors.teal },
-  radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.line, alignItems: "center", justifyContent: "center" },
+  radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   radioActive: { borderColor: colors.teal },
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.teal },
   optionTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
   optionHint: { marginTop: 3, color: colors.muted, fontSize: 14 },
-  fine: { marginTop: 18, color: colors.fine, fontSize: 13, lineHeight: 19 },
+  fine: { marginTop: 18, color: colors.muted, fontSize: 13, lineHeight: 19 },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 22, marginBottom: 30, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitIdle: { backgroundColor: "#7FA8A6" },
+  submitIdle: { backgroundColor: colors.tealIdle },
   submitText: { color: colors.white, fontSize: 22, fontWeight: "700" }
 });

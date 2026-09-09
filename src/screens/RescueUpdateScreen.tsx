@@ -14,16 +14,11 @@ import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { advanceableStatuses, sagipTitle, strayChip } from "../sagip";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B", fine: "#9a988f",
-  amberBg: "#FAEEDA", amber: "#633806", tealBg: "#E2EEF0", tealFg: "#14504F",
-  greenBg: "#EAF3DE", green: "#27500A", greyBg: "#ECEAE3", grey: "#5F5E5A"
-};
 const TONE = {
-  amber: { bg: colors.amberBg, fg: colors.amber }, teal: { bg: colors.tealBg, fg: colors.tealFg },
-  green: { bg: colors.greenBg, fg: colors.green }, grey: { bg: colors.greyBg, fg: colors.grey }
+  amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
+  green: { bg: colors.successBg, fg: colors.success }, grey: { bg: colors.greyPill, fg: colors.muted }
 } as const;
 const STATUS_LABEL: Record<StrayStatus, string> = {
   reported: "Reported", claimed: "Claimed", rescued: "Rescued", safe: "Safe", resolved: "Resolved"
@@ -74,7 +69,11 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   }
 
   async function submit() {
-    if (!target || submitting) return;
+    if (submitting) return;
+    // ⚠️ Explains rather than blocks. This condition used to live in the early return while
+    // the button was also disabled on it, so tapping with nothing chosen did nothing and
+    // said nothing. The fade stays — it is a hint (see colors.tealIdle), not a block.
+    if (!target) { setError("Choose the new status first."); return; }
     setSubmitting(true);
     setError(undefined);
     const body: Record<string, string> = { status: target };
@@ -193,7 +192,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                 value={note}
                 onChangeText={setNote}
                 placeholder="What happened at this step?"
-                placeholderTextColor={colors.fine}
+                placeholderTextColor={colors.muted}
                 multiline
               />
 
@@ -205,7 +204,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                     value={outcomeNotes}
                     onChangeText={setOutcomeNotes}
                     placeholder="How this case ended — reunited, adopted, in foster care…"
-                    placeholderTextColor={colors.fine}
+                    placeholderTextColor={colors.muted}
                     multiline
                   />
                   <TouchableOpacity style={styles.photoBtn} onPress={addOutcomePhoto} activeOpacity={0.85}>
@@ -221,7 +220,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                 style={[styles.submit, !target && styles.submitIdle]}
                 onPress={submit}
                 activeOpacity={0.9}
-                disabled={!target || submitting}
+                disabled={submitting}
+                accessibilityHint={target ? undefined : "Choose the new status first"}
               >
                 {submitting ? <ActivityIndicator color={colors.white} />
                   : <Text style={styles.submitText}>
@@ -237,7 +237,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   h1: { color: colors.ink, fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 6, color: colors.muted, fontSize: 16 },
   currentChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
-  mapWrap: { marginTop: 18, height: 150, borderRadius: 20, overflow: "hidden", backgroundColor: "#E7F0EE" },
+  mapWrap: { marginTop: 18, height: 150, borderRadius: 20, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { fontSize: 13, fontWeight: "800" },
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
@@ -263,16 +263,16 @@ const styles = StyleSheet.create({
   radioList: { gap: 10 },
   radioRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: 18, borderWidth: 2, borderColor: "transparent", ...card },
   radioRowActive: { borderColor: colors.teal },
-  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.line, alignItems: "center", justifyContent: "center" },
+  radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   radioActive: { borderColor: colors.teal },
   radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.teal },
   radioLabel: { color: colors.ink, fontSize: 16, fontWeight: "700" },
   label: { marginTop: 22, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
   notes: { minHeight: 80, borderRadius: 18, padding: 16, color: colors.ink, fontSize: 16, textAlignVertical: "top", ...card },
-  photoBtn: { marginTop: 14, height: 64, borderRadius: 18, borderWidth: 2, borderColor: colors.line, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoBtn: { marginTop: 14, height: 64, borderRadius: 18, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitIdle: { backgroundColor: "#7FA8A6" },
+  submitIdle: { backgroundColor: colors.tealIdle },
   submitText: { color: colors.white, fontSize: 19, fontWeight: "700" }
 });
