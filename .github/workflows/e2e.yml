@@ -46,7 +46,7 @@ jobs:
       EXPO_PUBLIC_API_BASE: ${{ github.event.inputs.api_base || vars.E2E_API_BASE }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Fail before spending twenty minutes on a native build if the account was never
       # configured. The alternative is a red run that looks like a product failure.
