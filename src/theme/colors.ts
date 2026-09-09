@@ -21,7 +21,12 @@ export const colors = {
   teal: "#1C6B6B",
   /** TEALDK. Pressed states, dark-on-light labels, gradient end. Absorbs #12524C (3). */
   tealDark: "#14504F",
-  /** Hero gradient mid-stop. Without it a teal→forest fade reads as a flat overlay. */
+  /**
+   * Hero gradient mid-stop. Without it a teal→forest fade reads as a flat overlay.
+   * ⚠️ The one token here that is NOT in screens/user/gen-screens.js: it was added by the V3
+   * canvas (labelled `midteal` on its component sheet) because V2 had no three-stop gradient
+   * to need it. Traceable, but to the newer of the two design sources.
+   */
   tealMid: "#164F4C",
   /** Light end of the button gradient. */
   tealBright: "#238383",
@@ -56,6 +61,8 @@ export const colors = {
   soft: "#E7F0EF",
   /** GREYPILL. Neutral/disabled pill. Absorbs #EDEDE8 (1), #EDECE7 (1). */
   greyPill: "#ECEAE3",
+  /** The sunken track a segmented control's thumb slides in. From v2seg() in the design source. */
+  segmentTrack: "#EAEDE8",
 
   // ---- Status: success ---------------------------------------------------------------
   /** OK. Absorbs #2E5B1E (6), #356A24 (3), #3F6B26 (1), #3F5A2E (1). */

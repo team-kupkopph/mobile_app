@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { Image, ImageBackground, ImageSourcePropType, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
+import { colors } from "../theme";
+
 const meshLight = require("../../assets/mesh-light.jpg") as ImageSourcePropType;
 const meshDeep = require("../../assets/mesh-deep.jpg") as ImageSourcePropType;
 
@@ -44,8 +46,8 @@ const styles = StyleSheet.create({
   // 390 pt width and a bare strip shows down the right edge of any wider device (caught on a
   // 402 pt iPhone 17). Pinning all four edges is what makes resizeMode "cover" actually cover.
   stretch: { width: "100%", height: "100%" },
-  lightFill: { backgroundColor: "#F4F5F2" },
-  deepFill: { backgroundColor: "#164F4C" }
+  lightFill: { backgroundColor: colors.page },
+  deepFill: { backgroundColor: colors.tealMid }
 });
 
 /**
