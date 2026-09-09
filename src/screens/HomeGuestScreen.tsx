@@ -18,6 +18,7 @@ import { Listing } from "../api/types";
 import { AdoptIcon, HomeIcon, LocationPinIcon, ProfileIcon, VolunteerIcon } from "../components/AppIcons";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
+import { TabBar, type TabBarItem } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 
@@ -189,51 +190,26 @@ export function HomeGuestScreen({ navigation }: Props) {
 
 // A guest-only tab bar (not OwnerTabs): OwnerTabs navigates straight to the real Adopt/Volunteer/
 // profile routes, which is exactly what a guest must not do — every non-Home tab here opens the
-// SignupWall instead. Visual language matches OwnerTabs (screen-home.png bottom nav).
+// SignupWall instead. Only the DESTINATIONS differ; the look comes from the shared TabBar.
+//
+// ⚠️ US-CH1 converted this bar. It was an opaque white 84 pt panel whose active state was a tinted
+// chip behind the ICON ALONE, leaving the label outside the selection — the V2 shape. It now uses
+// the same 68 pt glass bar as the other two shells, with the pill behind icon and label together.
+// It also carried its own private colour table (GUEST_TAB_COLORS); the colours now come from the
+// theme, which is the point of the exercise — this is the bar a signed-out visitor actually lands
+// on, and it is the one that kept its 1.60:1 inactive icon the last time only the owner bar
+// was fixed.
 function GuestTabs({ onGated }: { onGated: (action: SignupWallAction) => void }) {
-  return (
-    <View style={styles.tabsWrap} pointerEvents="box-none">
-      <View style={styles.tabsBar}>
-        <View style={styles.tabItem}>
-          <View style={[styles.iconSlot, styles.iconSlotActive]}>
-            <HomeIcon color={colors.teal} size={24} />
-          </View>
-          <Text style={[styles.tabText, styles.activeTabText]}>Home</Text>
-        </View>
-        <TouchableOpacity activeOpacity={0.75} style={styles.tabItem} onPress={() => onGated("adopt")}>
-          <View style={styles.iconSlot}>
-            <AdoptIcon color={colors.inactive} size={24} />
-          </View>
-          <Text style={styles.tabText}>Adopt</Text>
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.75} style={styles.tabItem} onPress={() => onGated("volunteer")}>
-          <View style={styles.iconSlot}>
-            <VolunteerIcon color={colors.inactive} size={24} />
-          </View>
-          <Text style={styles.tabText}>Volunteer</Text>
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.75} style={styles.tabItem} onPress={() => onGated("account")}>
-          <View style={styles.iconSlot}>
-            <ProfileIcon color={colors.inactive} size={24} />
-          </View>
-          <Text style={styles.tabText}>You</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}
+  const items: TabBarItem[] = [
+    // Home is the tab the guest is already on, so TabBar swallows the press.
+    { key: "home", label: "Home", testID: "tab.guest.home", icon: (c, s) => <HomeIcon color={c} size={s} />, onPress: () => {} },
+    { key: "adopt", label: "Adopt", testID: "tab.guest.adopt", icon: (c, s) => <AdoptIcon color={c} size={s} />, onPress: () => onGated("adopt") },
+    { key: "volunteer", label: "Volunteer", testID: "tab.guest.volunteer", icon: (c, s) => <VolunteerIcon color={c} size={s} />, onPress: () => onGated("volunteer") },
+    { key: "profile", label: "You", testID: "tab.guest.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: () => onGated("account") }
+  ];
 
-/** The guest shell draws its own tab bar (see GuestTabs below), so it carries its own copy of
- *  these values. Exported so the shared contrast guard covers it — three tab bars with three
- *  private palettes is how the inactive icon stayed at 1.6:1 in two of them. */
-export const GUEST_TAB_COLORS = {
-  bar: "#FFFFFF",
-  teal: "#1C6B6B",
-  soft: "#E7F0EE",
-  // Was #C9CEC7 — 1.60:1. This is the bar a signed-out visitor actually lands on.
-  inactive: "#5F5E5A",
-  muted: "#5F5E5A"
-};
+  return <TabBar items={items} active="home" />;
+}
 
 const colors = {
   ink: "#12213A",
@@ -243,9 +219,6 @@ const colors = {
   border: "#E3E1D9",
   muted: "#5F5E5A",
   soft: "#E7F0EE",
-  // Single source: GUEST_TAB_COLORS is what the contrast guard measures, so the bar must draw
-  // from it rather than keep a parallel copy that can quietly diverge.
-  inactive: GUEST_TAB_COLORS.inactive,
   paleTeal: "#E7F0EE"
 };
 
@@ -516,48 +489,4 @@ const styles = StyleSheet.create({
     color: "#AAA69D",
     fontSize: 10
   },
-  tabsWrap: {
-    position: "absolute",
-    left: 24,
-    right: 24,
-    bottom: 24
-  },
-  tabsBar: {
-    height: 84,
-    borderRadius: 30,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  iconSlot: {
-    width: 44,
-    height: 34,
-    borderRadius: 17,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  iconSlotActive: {
-    backgroundColor: colors.soft
-  },
-  tabText: {
-    marginTop: 4,
-    color: colors.muted,
-    fontSize: 12,
-    fontWeight: "600"
-  },
-  activeTabText: {
-    color: colors.tealDark,
-    fontWeight: "800"
-  }
 });
