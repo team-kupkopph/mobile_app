@@ -17,11 +17,8 @@ import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", chipBg: "#E7F0EE", chipFg: "#14504F"
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
 
@@ -212,7 +209,7 @@ function capitalize(s: string | null | undefined): string {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -225,14 +222,14 @@ const styles = StyleSheet.create({
   flagLink: { marginLeft: "auto" },
   flagLinkText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
-  photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.line },
+  photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, fontSize: 16 },
   donateLink: { marginTop: 10 },
   donateLinkText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
-  tag: { backgroundColor: colors.chipBg, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
-  tagText: { color: colors.chipFg, fontSize: 13, fontWeight: "700" },
+  tag: { backgroundColor: colors.soft, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
+  tagText: { color: colors.tealDark, fontSize: 13, fontWeight: "700" },
   feeCard: { marginTop: 18, padding: 18, borderRadius: 18, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between", ...card },
   feeLabel: { color: colors.muted, fontSize: 15, fontWeight: "600" },
@@ -240,6 +237,6 @@ const styles = StyleSheet.create({
   sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, fontSize: 18, fontWeight: "800" },
   body: { color: colors.ink, fontSize: 16, lineHeight: 23 },
   inquireBtn: { marginTop: 30, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  inquireBtnIdle: { backgroundColor: "#7FA8A6" },
+  inquireBtnIdle: { backgroundColor: colors.tealIdle },
   inquireText: { color: colors.white, fontSize: 19, fontWeight: "700" }
 });

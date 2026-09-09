@@ -7,3 +7,4 @@
 // sprint11/fd3-primitives, and each lands with its own first consumer.
 export { Field } from "./Field";
 export { Button, type ButtonVariant } from "./Button";
+export { Chip, chipTones, type ChipTone } from "./Chip";

@@ -10,10 +10,8 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF", line: "#E3E1D9"
-};
 
 function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
@@ -81,7 +79,7 @@ export function MyPetsScreen({ navigation }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -94,7 +92,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40 },
   card: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: 20, marginBottom: 12, ...card },
-  thumb: { width: 64, height: 64, borderRadius: 16, backgroundColor: colors.line },
+  thumb: { width: 64, height: 64, borderRadius: 16, backgroundColor: colors.border },
   thumbEmpty: {},
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
