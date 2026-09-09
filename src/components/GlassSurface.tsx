@@ -16,10 +16,20 @@ type GlassSurfaceProps = {
  * Translucent chrome — the tab bar, round icon buttons, sticky headers.
  *
  * NOT a real frosted blur: React Native has no backdrop-filter, and the only route to one is
- * expo-blur, a native module this app does not depend on. What sells the effect instead is the
- * combination the design was built around — a structured backdrop (ScreenBackground), a
- * translucent fill, a bright 1px edge, and the scroll-fade that stops sharp card text reaching
- * the panel. If expo-blur is ever added, this is the single component that changes.
+ * expo-blur, a native module this app does not depend on. What sells the effect instead is a
+ * structured backdrop (ScreenBackground), a translucent fill, and a bright 1px edge.
+ *
+ * ⚠️ US-CH3 decided (2026-09-09) NOT to adopt expo-blur, and corrected two claims this comment
+ * used to make. It named a "scroll-fade that stops sharp card text reaching the panel" — no such
+ * fade exists anywhere in src/; the V2 language specifies one and the V3 pass never built it, so
+ * sharp text does pass under the floating bar mid-scroll. It also claimed to be "the single
+ * component that changes" if blur were added: this component has exactly ONE consumer
+ * (OwnerTabs), while translucency is hand-rolled at 8+ other sites. Neither claim survived
+ * measurement. See dev/HANDOFF.md, US-CH3, in the library repo.
+ *
+ * The blur decision itself was settled by expo-blur's own description: it renders a native blur
+ * on iOS and falls back to a semi-transparent view on Android — i.e. on the majority platform it
+ * degrades to precisely what this component already draws.
  */
 export function GlassSurface({ children, tone = "light", raise = "soft", radius = radii.card, style }: GlassSurfaceProps) {
   const dark = tone === "dark";
