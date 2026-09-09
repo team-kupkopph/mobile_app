@@ -17,11 +17,8 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", chipBg: "#E7F0EE", danger: "#B23B3B", greyBg: "#ECEAE3"
-};
 
 type Decision = "accept" | "decline";
 
@@ -170,7 +167,7 @@ function capitalize(s: string): string {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -181,7 +178,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
-  photo: { width: "100%", height: 220, borderRadius: 22, marginBottom: 18, backgroundColor: colors.line },
+  photo: { width: "100%", height: 220, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 6, color: colors.muted, fontSize: 16 },
   body: { marginTop: 14, color: colors.ink, fontSize: 16, lineHeight: 23 },
