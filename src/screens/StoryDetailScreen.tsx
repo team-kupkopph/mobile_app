@@ -87,12 +87,27 @@ export function StoryDetailScreen({ navigation, route }: Props) {
       res.ok ? "Our team will take a look." : "Please try again.");
   }
 
+  // ⚠️ HOISTED OUT OF BOTH RETURNS ON PURPOSE. The back button does not depend on `story`, and
+  // it is this screen's only way out. It used to live only in the loaded branch, so the offline
+  // state rendered with no exit at all — found on a real device during US-PF3. This is the shape
+  // ListingDetailScreen already uses: chrome outside the conditional, only the body switches.
+  const header = (
+    <View style={styles.header}>
+      <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
+          accessibilityRole="button" accessibilityLabel="Go back">
+        <Text style={styles.backGlyph}>‹</Text>
+      </TouchableOpacity>
+      <Text style={styles.title}>Story</Text>
+    </View>
+  );
+
   if (!story) {
     // No `count` argument: this is a DETAIL route, so `loadState` never returns "empty" —
     // "No stories yet" would be nonsense on a page about one specific story. Loading,
     // offline and error are the only outcomes that can happen here.
     return (
       <View style={styles.screen}>
+        {header}
         <LoadStateView
           state={loadState(res)}
           subject="story"
@@ -104,13 +119,7 @@ export function StoryDetailScreen({ navigation, route }: Props) {
   const chip = storyTypeChip(story.story_type);
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Story</Text>
-      </View>
+      {header}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {story.status === "hidden" ? (
           <View style={styles.hiddenBanner}>
