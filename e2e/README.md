@@ -54,10 +54,21 @@ Every other flow sidesteps it entirely: **sign-in needs no code.**
 
 ## Setup
 
-Maestro is not currently installed on this machine.
+Maestro **is** installed on this machine — 2.10.0, via Homebrew (`/opt/homebrew/bin/maestro`).
+Elsewhere:
 
 ```bash
 curl -Ls "https://get.maestro.mobile.dev" | bash
+```
+
+⚠️ **Maestro needs a JDK on PATH, and `maestro --version` is how you find out it does not have
+one.** It fails with *"Unable to locate a Java Runtime"* — which reads like Maestro is missing
+rather than Java. On this machine `openjdk` is installed but not linked, so every Maestro
+command needs:
+
+```bash
+export JAVA_HOME=/opt/homebrew/opt/openjdk
+export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
 Then build and install the app on a booted simulator once:
@@ -65,6 +76,53 @@ Then build and install the app on a booted simulator once:
 ```bash
 cd mobile_app && npx expo run:ios
 ```
+
+⚠️ **If that fails with *"The sandbox is not in sync with the Podfile.lock"*, run `pod install`
+in `ios/` — and if `pod install` then dies inside its own error reporter with
+`Encoding::CompatibilityError` / "Unicode Normalization not appropriate for ASCII-8BIT", that
+is CocoaPods crashing while formatting the real error, not the real error. Set a UTF-8 locale
+and run it again:**
+
+```bash
+cd ios && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod install
+```
+
+`expo run:ios` produces a **dev client**, so a Metro bundler must be running on 8081 for the
+app to load JS at all. Maestro drives the installed `ph.kupkop.app`, not Expo Go — Expo Go
+cannot be targeted by these flows, because `appId` names the real bundle identifier.
+
+## Last full run — US-PF2, 2026-09-09, against the Sprint 11 converted screens
+
+**8 of 9 flows pass. The ninth cannot run unattended and this is not a new fact** — see
+`40-signup-needs-a-human.yaml`, whose filename has said so since it was written.
+
+| | |
+|---|---|
+| 00-signin | ✅ 17s |
+| 10-report-a-stray | ✅ 30s |
+| 15-owner-profile | ✅ 17s |
+| 20-browse-and-inquire | ✅ 19s |
+| 30-volunteer-signup | ✅ 23s |
+| 50-shelter-shell | ✅ 18s |
+| 60-settings-and-data-rights | ✅ 28s |
+| 70-offline-degradation | ✅ (backend stopped, after a signed-in session) |
+| 40-signup-needs-a-human | ⛔ **not run** — `MAESTRO_OTP` is bound *before* the run, and the code is generated *during* it. No amount of reading the dev server's stdout closes that gap; only the fixed-code backend change this file already describes would, and that needs the owner's sign-off. |
+
+Run on iPhone 17 Pro Max, iOS 26.5, against a local backend on `localhost:8000` with fixtures
+from `backend/dev/e2e_fixtures.py` and a seed of 9 listings / 1 future shift.
+
+**Why this run mattered:** Sprint 11 rewrote the chrome these flows tap. US-CH1 collapsed three
+tab bars into one, moving `tab.adopt` / `tab.volunteer` / `tab.home` out of JSX attributes and
+into item objects; US-CH2 replaced the per-screen headers on 23 screens, moving `btn.back` into
+a shared component. `70-offline-degradation` exercises all four of those selectors **and** the
+assertion the whole of Track R came from — that the rescue map must not say "No strays reported
+near" when it simply could not reach the server. It passed unchanged.
+
+⚠️ **Budget your runs: login is 20/hour per IP** (`login_ip` in `config/settings.py`, alongside
+`login_identifier` at 10/hour). Seven flows sign in, so a full pass costs ~8 attempts and you
+get roughly **two per hour**. Fix things between runs rather than retrying blind — and never
+poll the endpoint to check whether the throttle cleared, because each probe is itself an
+attempt against the same limit.
 
 ## Credentials
 
