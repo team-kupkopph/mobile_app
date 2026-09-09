@@ -89,7 +89,7 @@ const DEFAULT_COPY: WelcomeCopy = {
    * sentence on the screen, and those three sentences are exactly the right copy for the
    * onboarding cards that follow — where there is room to read.
    */
-  pillars: ["Rescue", "Adopt", "Donate"],
+  pillars: ["Rescue", "Adopt", "Volunteer","Donate"],
   getStarted: "Get started",
   continueWithGoogle: "Continue with Google",
   login: "Already have an account? Log in",
