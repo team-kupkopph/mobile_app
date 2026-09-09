@@ -10,7 +10,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { SimpleHeader, authColors } from "./AuthFormKit";
 import { Button, Field } from "../components/ui";
-import { colors, gradients } from "../theme";
+import { colors, gradients, radii } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 
@@ -191,6 +191,15 @@ const styles = StyleSheet.create({
   formError: {
     alignSelf: "stretch",
     marginTop: 12,
+    // ⚠️ ON A SURFACE, not on the raw backdrop. danger (#B23B3B) is 4.34:1 against the
+    // backdrop's darkest content point — below the 4.5 floor — but 5.18:1 on dangerBg. This is
+    // the app's one place where danger text sat on the mesh unsurfaced; the tint fixes it and
+    // also makes the message read as a block rather than a stray red line.
+    backgroundColor: colors.dangerBg,
+    borderRadius: radii.chip,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    overflow: "hidden",
     color: authColors.danger,
     fontSize: 13,
     fontWeight: "700"
