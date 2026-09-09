@@ -87,7 +87,10 @@ export function VerifyPhoneScreen({ navigation }: Props) {
   }, [code]);
 
   async function verify() {
-    if (code.length !== CODE_LENGTH || verifying) return;
+    if (verifying) return;
+      // ⚠️ Explains rather than blocks. This used to be part of the early return while the
+      // button carried `disabled`, so an incomplete code produced a dead tap and no reason.
+    if (code.length !== CODE_LENGTH) { setCodeError(`Enter all ${CODE_LENGTH} digits.`); return; }
     submittedRef.current = true;
     setVerifying(true);
     setCodeError(undefined);
@@ -151,7 +154,6 @@ export function VerifyPhoneScreen({ navigation }: Props) {
             <PrimaryButton
               label="Send code"
               onPress={sendCode}
-              disabled={!phone.trim()}
               loading={sending}
               style={styles.actionButton}
             />
@@ -192,7 +194,6 @@ export function VerifyPhoneScreen({ navigation }: Props) {
             <PrimaryButton
               label="Verify"
               onPress={verify}
-              disabled={code.length !== CODE_LENGTH}
               loading={verifying}
               style={styles.actionButton}
             />
