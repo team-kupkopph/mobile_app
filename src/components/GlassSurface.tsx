@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
 
-import { elevation, v3Colors } from "../theme/v3";
+import { colors, elevation, radii } from "../theme";
 
 type GlassSurfaceProps = {
   children?: ReactNode;
@@ -21,15 +21,15 @@ type GlassSurfaceProps = {
  * translucent fill, a bright 1px edge, and the scroll-fade that stops sharp card text reaching
  * the panel. If expo-blur is ever added, this is the single component that changes.
  */
-export function GlassSurface({ children, tone = "light", raise = "soft", radius = 24, style }: GlassSurfaceProps) {
+export function GlassSurface({ children, tone = "light", raise = "soft", radius = radii.card, style }: GlassSurfaceProps) {
   const dark = tone === "dark";
   return (
     <View
       style={[
         {
-          backgroundColor: dark ? v3Colors.glassOnDark : v3Colors.glass,
+          backgroundColor: dark ? colors.glassOnDark : colors.glass,
           borderWidth: 1,
-          borderColor: dark ? v3Colors.glassOnDarkBorder : v3Colors.glassBorder,
+          borderColor: dark ? colors.glassOnDarkBorder : colors.glassBorder,
           borderRadius: radius
         },
         elevation[raise],

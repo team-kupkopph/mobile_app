@@ -8,7 +8,9 @@ import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
+import { SimpleHeader, authColors } from "./AuthFormKit";
+import { Button, Field } from "../components/ui";
+import { colors, gradients } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 
@@ -92,7 +94,7 @@ export function SigninScreen({ navigation }: Props) {
 
       <View style={styles.content}>
         <View style={styles.logoMark}>
-          <LinearGradient colors={["#1C7876", "#12524C"]} style={styles.logoGradient}>
+          <LinearGradient colors={[colors.teal, colors.tealDark]} style={styles.logoGradient}>
             <Image source={paw} resizeMode="contain" style={styles.logoIcon} />
           </LinearGradient>
         </View>
@@ -100,7 +102,7 @@ export function SigninScreen({ navigation }: Props) {
         <Text style={styles.title}>Welcome back</Text>
         <Text style={styles.caption}>Log in to keep helping.</Text>
 
-        <FormField
+        <Field
           testID="field.signin.email"
           label="Email"
           value={email}
@@ -114,7 +116,7 @@ export function SigninScreen({ navigation }: Props) {
           autoComplete="email"
           error={emailError}
         />
-        <FormField
+        <Field
           testID="field.signin.password"
           label="Password"
           value={password}
@@ -141,7 +143,7 @@ export function SigninScreen({ navigation }: Props) {
           <Text style={styles.forgotText}>Forgot password?</Text>
         </TouchableOpacity>
 
-        <PrimaryButton testID="btn.signin.submit" label="Log in" onPress={onSubmit} loading={submitting} style={styles.submitButton} />
+        <Button testID="btn.signin.submit" label="Log in" onPress={onSubmit} loading={submitting} style={styles.submitButton} />
 
         <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("accountType")}>
           <Text style={styles.linkCentered}>New to Kupkop? Create account</Text>
@@ -198,7 +200,7 @@ const styles = StyleSheet.create({
     marginTop: 14
   },
   forgotText: {
-    color: "#08716D",
+    color: colors.teal,
     fontSize: 13,
     fontWeight: "800"
   },
@@ -208,7 +210,7 @@ const styles = StyleSheet.create({
   },
   linkCentered: {
     marginTop: 22,
-    color: "#08716D",
+    color: colors.teal,
     fontSize: 13,
     fontWeight: "800",
     textAlign: "center"
