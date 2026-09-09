@@ -83,7 +83,15 @@ export function Field({
 }
 
 const styles = StyleSheet.create({
-  group: { alignSelf: "stretch" },
+  group: {
+    alignSelf: "stretch",
+    // ⚠️ The gap between stacked fields lives HERE, not in each screen. AuthFormKit's
+    // FormField carried marginTop: 17 and dropping it on conversion left Sign in's two fields
+    // ~6 pt apart — close enough to read as one control, and close enough that a mis-tap on
+    // the boundary is likely. Owning the gap in the primitive is what stops every adopting
+    // screen having to remember it.
+    marginTop: spacing.sm
+  },
   box: {
     minHeight: 64,
     paddingHorizontal: 18,
