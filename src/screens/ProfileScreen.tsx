@@ -105,8 +105,11 @@ export function ProfileScreen({ navigation }: Props) {
   // "don't state something false" half.)
   if (!me && loadState(res).kind !== "ready" && loadState(res).kind !== "empty") {
     return (
-      <View style={styles.screen} testID="screen.profile">
-      <ScreenBackdrop />
+      <View style={[styles.screen, { paddingTop: insets.top }]} testID="screen.profile">
+        <ScreenBackdrop />
+        {/* The inset belongs here, not in LoadStateView: this branch replaces the whole
+            body, and most LoadStateView call sites are inline placeholders in a ScrollView.
+            See __tests__/safeAreaOnFailure.test.ts. */}
         <LoadStateView state={loadState(res)} onRetry={load} />
       </View>
     );
