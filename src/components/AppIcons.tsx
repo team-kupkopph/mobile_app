@@ -303,6 +303,47 @@ export function DocumentIcon({ color }: { color: string }) {
   );
 }
 
+/**
+ * Envelope, for the shelter shell's Requests tab.
+ *
+ * ⚠️ THIS EXISTS BECAUSE THE CHARACTER DID NOT WORK. That tab used to render the text glyph "✉"
+ * (U+2709), which iOS resolves through its symbol/emoji font — and that font IGNORES the `color`
+ * prop. Measured on an iPhone 17 Pro Max, the four other glyphs in the bar rendered at exactly
+ * #5F5E5A (`colors.tabInactive`, 5.71:1 on the bar) while this one rendered #898A8A at 3.07:1,
+ * a colour nothing in the code asked for. That is the same icon-vs-label split the tab-contrast
+ * guard was written for, and the guard CANNOT see it: the token is correct, the font overrides it.
+ * A drawn glyph is the only kind whose colour the code actually controls.
+ *
+ * Every dimension is a fraction of `size` — see HomeIcon for what happens when they are not.
+ */
+export function MailIcon({ color, size = 28 }: IconProps) {
+  const w = size * 0.86;
+  const h = size * 0.64;
+  const stroke = Math.max(1.5, size * 0.09);
+  return (
+    <View style={[styles.iconBox, { width: size, height: size }]}>
+      <View style={{ width: w, height: h, borderWidth: stroke, borderColor: color, borderRadius: size * 0.1, overflow: "hidden" }}>
+        {/* The flap — two bars meeting at the centre. It is what makes a rounded rectangle read
+            as an envelope rather than a card, and it is clipped by the body's overflow. */}
+        <View
+          style={{
+            position: "absolute", height: stroke, backgroundColor: color,
+            width: w * 0.58, left: -w * 0.06, top: h * 0.16,
+            transform: [{ rotate: "31deg" }]
+          }}
+        />
+        <View
+          style={{
+            position: "absolute", height: stroke, backgroundColor: color,
+            width: w * 0.58, right: -w * 0.06, top: h * 0.16,
+            transform: [{ rotate: "-31deg" }]
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   iconBox: {
     alignItems: "center",

@@ -35,14 +35,24 @@ function sourceFiles(dir: string): string[] {
 const SOURCE = sourceFiles(SRC).map((f) => readFileSync(f, "utf8")).join("\n");
 
 /**
- * testIDs the app defines. Two shapes, and the second is the one a naive scan misses:
- * a literal `testID="screen.home"`, and a template `testID={`card.adopt.${i}`}` whose value
- * is only known at runtime. For templates we keep the static prefix and match on that, or
- * an indexed card selector would look undefined and this guard would cry wolf on every run
- * until someone switched it off.
+ * testIDs the app defines. THREE shapes, and each of the last two is one a naive scan misses:
+ * a JSX literal `testID="screen.home"`; a template `testID={`card.adopt.${i}`}` whose value is
+ * only known at runtime; and an object property `testID: "tab.home"`, for a control described
+ * as data and rendered by a shared component.
+ *
+ * ⚠️ THE THIRD SHAPE WAS ADDED IN US-CH1, AFTER THIS GUARD CAUGHT THE REFACTOR THAT INTRODUCED
+ * IT. Collapsing three hand-drawn tab bars into one `TabBar` moved every tab's testID out of a
+ * JSX attribute and into an item object — so six selectors the flows tap became invisible here
+ * and this suite went red. That is the guard working, not a false alarm: the ids really had
+ * stopped being where it was looking. The fix is to teach it the shape, not to loosen it.
+ *
+ * For templates we keep the static prefix and match on that, or an indexed card selector would
+ * look undefined and this guard would cry wolf on every run until someone switched it off.
  */
-const LITERALS = new Set(
-  [...SOURCE.matchAll(/testID="([^"]+)"/g)].map((m) => m[1]));
+const LITERALS = new Set([
+  ...[...SOURCE.matchAll(/testID="([^"]+)"/g)].map((m) => m[1]),
+  ...[...SOURCE.matchAll(/testID:\s*"([^"]+)"/g)].map((m) => m[1])
+]);
 const PREFIXES = [...SOURCE.matchAll(/testID=\{`([^`$]*)\$\{/g)].map((m) => m[1]);
 
 function isDefined(selector: string): boolean {

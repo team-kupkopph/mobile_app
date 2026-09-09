@@ -1,6 +1,22 @@
-import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+// Shelter shell's floating tab bar. FIVE tabs (Home · Animals · Donate · Requests · You).
+//
+// ⚠️ US-CH1 converted this bar. It used to be a different thing entirely: an OPAQUE #F7F7F4
+// strip, edge-to-edge at `bottom: 0` with a hairline top border — the V1 language, not V3. Two
+// concrete defects came with that shape, and both are gone because the shared TabBar owns the
+// geometry now:
+//   1. Its tab items had no height. They sized to their content — a 28 pt icon slot plus a 9 pt
+//      label — which measured about 41 pt against the 44 pt minimum target. Items are now
+//      `height: "100%"` of a 68 pt bar.
+//   2. Sitting at `bottom: 0`, its labels and icons rendered inside the home-indicator zone.
+//      The bar now floats 16 pt clear of the bottom edge, like the owner's.
+//
+// ⚠️ FIVE tabs, not four — the arithmetic was re-checked rather than copied from the owner bar.
+// On the narrowest screen this app supports (375 pt), 375 - 32 gutters = 343, and 343 / 5 =
+// 68.6 pt per item. That clears 44 pt on both axes. `__tests__/tabBar.test.ts` asserts it.
+import { Image, ImageSourcePropType, StyleSheet, Text } from "react-native";
 
-import { HomeIcon, ProfileIcon } from "./AppIcons";
+import { HomeIcon, MailIcon, ProfileIcon } from "./AppIcons";
+import { TabBar, type TabBarItem } from "./ui";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -11,102 +27,37 @@ type ShelterTabsProps = {
   onTabPress?: (tab: ShelterTabKey) => void;
 };
 
-const tabs: Array<{ key: ShelterTabKey; label: string }> = [
-  { key: "home", label: "Home" },
-  { key: "animals", label: "Animals" },
-  { key: "donate", label: "Donate" },
-  { key: "requests", label: "Requests" },
-  { key: "profile", label: "You" }
-];
-
-/** Exported so the shared contrast guard measures this bar too — see
- *  `__tests__/tabBarContrast.test.ts`. The shelter shell's bar sits on #F7F7F4, not white. */
-export const SHELTER_TAB_COLORS = {
-  bar: "#F7F7F4",
-  teal: "#1C7876",
-  // Was #CAD2CF — 1.55:1 on this bar. Matched to `muted` below so the shelter bar's icon and
-  // its label carry the same weight, as in the owner bar.
-  inactive: "#62615C",
-  muted: "#62615C"
-};
-
 export function ShelterTabs({ active, onTabPress }: ShelterTabsProps) {
-  return (
-    <View style={styles.tabs}>
-      {tabs.map((tab) => {
-        const isActive = tab.key === active;
-        const color = isActive ? SHELTER_TAB_COLORS.teal : SHELTER_TAB_COLORS.inactive;
-        return (
-          <TouchableOpacity
-            testID={`tab.shelter.${tab.key}`}
-            key={tab.key}
-            activeOpacity={0.75}
-            style={styles.tabItem}
-            onPress={() => onTabPress?.(tab.key)}
-            accessibilityRole="tab"
-            accessibilityLabel={tab.label}
-            // A screen-reader user needs to know WHICH tab they are on, not just
-            // which ones exist — selected state is half of what a tab bar means.
-            accessibilityState={{ selected: isActive }}
-          >
-            <View style={styles.iconSlot}>{renderIcon(tab.key, color)}</View>
-            <Text style={[styles.tabText, isActive && styles.activeTabText]}>{tab.label}</Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
+  const press = (key: ShelterTabKey) => () => onTabPress?.(key);
 
-function renderIcon(tab: ShelterTabKey, color: string) {
-  if (tab === "home") return <HomeIcon color={color} size={24} />;
-  if (tab === "animals") return <Image source={paw} resizeMode="contain" style={[styles.pawIcon, { tintColor: color }]} />;
-  if (tab === "donate") return <Text style={[styles.symbolIcon, { color }]}>₱</Text>;
-  if (tab === "requests") return <Text style={[styles.symbolIcon, { color }]}>✉</Text>;
-  return <ProfileIcon color={color} size={24} />;
+  const items: TabBarItem[] = [
+    { key: "home", label: "Home", testID: "tab.shelter.home", icon: (c, s) => <HomeIcon color={c} size={s} />, onPress: press("home") },
+    {
+      key: "animals",
+      label: "Animals",
+      testID: "tab.shelter.animals",
+      icon: (c, s) => <Image source={paw} resizeMode="contain" style={[styles.pawIcon, { width: s - 2, height: s - 2, tintColor: c }]} />,
+      onPress: press("animals")
+    },
+    { key: "donate", label: "Donate", testID: "tab.shelter.donate", icon: (c) => <Text style={[styles.symbolIcon, { color: c }]}>₱</Text>, onPress: press("donate") },
+    { key: "requests", label: "Requests", testID: "tab.shelter.requests", icon: (c, s) => <MailIcon color={c} size={s} />, onPress: press("requests") },
+    { key: "profile", label: "You", testID: "tab.shelter.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: press("profile") }
+  ];
+
+  return <TabBar items={items} active={active} />;
 }
 
 const styles = StyleSheet.create({
-  tabs: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 78,
-    borderTopWidth: 1,
-    borderTopColor: "#E3E1D9",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingTop: 12,
-    backgroundColor: "#F7F7F4"
-  },
-  tabItem: {
-    width: 58,
-    alignItems: "center"
-  },
-  iconSlot: {
-    width: 28,
-    height: 28,
-    alignItems: "center",
-    justifyContent: "center"
-  },
   pawIcon: {
-    width: 22,
-    height: 22,
     transform: [{ translateY: -1 }]
   },
+  // ⚠️ ONE glyph is still a typographic character rather than a drawing: the peso sign. That is
+  // deliberate — measured on device it renders at exactly #5F5E5A, the same token as every drawn
+  // icon in the bar, because iOS resolves "₱" through the normal text font. The envelope did NOT
+  // (see MailIcon), which is why that one was converted and this one was not.
   symbolIcon: {
     fontSize: 20,
     fontWeight: "900",
     lineHeight: 24
-  },
-  tabText: {
-    marginTop: 2,
-    color: SHELTER_TAB_COLORS.muted,
-    fontSize: 9
-  },
-  activeTabText: {
-    color: SHELTER_TAB_COLORS.teal,
-    fontWeight: "800"
   }
 });
