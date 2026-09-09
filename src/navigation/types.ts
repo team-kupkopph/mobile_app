@@ -42,7 +42,10 @@ export type RootStackParamList = {
   signupSuccess: undefined;
   signin: undefined;
   forgotPassword: undefined;
-  resetOtp: { email: string };
+  // `codeError` carries a late code failure back from resetPassword — see the backstop
+  // in ResetPasswordScreen for why the message belongs on the code step, not under the
+  // password field.
+  resetOtp: { email: string; codeError?: string };
   resetPassword: { email: string; code: string };
   passwordChanged: undefined;
   support: undefined;

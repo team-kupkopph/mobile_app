@@ -7,6 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { PASSWORD_RULE, passwordError } from "../passwordRules";
+import { codeCheckOutcome } from "../passwordReset";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
 
@@ -57,19 +58,25 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
     setSubmitting(true);
     try {
       const res = await api.post("/auth/password/reset", { email, code, new_password: password });
-      if (res.status === 400) {
-        setError(res.data?.error?.field === "new_password" ? PASSWORD_RULE : "That code is invalid.");
-        return;
-      }
-      if (res.status === 410) {
-        setError("That code expired.");
-        return;
-      }
       if (res.ok) {
         navigation.navigate("passwordChanged");
         return;
       }
-      setError("Something went wrong. Please try again.");
+      // A rejected PASSWORD belongs here, under the field that is wrong.
+      if (res.status === 400 && res.data?.error?.field === "new_password") {
+        setError(PASSWORD_RULE);
+        return;
+      }
+      // BACKSTOP. The code is checked on the previous screen now, so reaching here means it
+      // went bad in between — almost always expiry while the user was choosing a password.
+      // Send them back to the step that owns the code with the reason attached, rather than
+      // reporting a code problem underneath a password field.
+      const outcome = codeCheckOutcome(res);
+      if (!outcome.ok && res.status !== 0) {
+        navigation.navigate("resetOtp", { email, codeError: outcome.message });
+        return;
+      }
+      setError(outcome.ok ? "Something went wrong. Please try again." : outcome.message);
     } finally {
       setSubmitting(false);
     }

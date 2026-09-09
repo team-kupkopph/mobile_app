@@ -2,8 +2,8 @@
 // screens/user/screen-home-member-pending.png (Verified Member under review).
 // Fetches /me on focus and derives the pending-member banner from capabilities; the city chip
 // routes to locationPicker (M5) and reads the cached city from AuthContext (no GET /me/location
-// exists — see AuthContext.tsx). The "Saw a stray?" hero and quick actions are still static —
-// their destinations land in later sprints.
+// exists — see AuthContext.tsx). The "Saw a stray?" hero is still static — its destination
+// lands in a later sprint.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -14,31 +14,34 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { Listing, Me } from "../api/types";
+import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
+import { pickSpotlight } from "../sagip";
 import { TAP_SLOP } from "../touch";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;
 
-type QuickAction = {
-  label: string;
-  icon: "search" | "heart" | "peso" | "person";
-  dest: keyof RootStackParamList;
-};
-
-const quickActions: QuickAction[] = [
-  { label: "Lost & found", icon: "search", dest: "rescueMap" },
-  { label: "Adopt", icon: "heart", dest: "adopt" },
-  // No generic "browse shelters" screen yet — adopt feed is the nearest landing.
-  { label: "Donate", icon: "peso", dest: "adopt" },
-  { label: "Volunteer", icon: "person", dest: "kawanggawa" },
-];
+// Redesigned 2026-09-09 · Home used to carry a flat row of four teal text links AND a
+// four-tile quick-action grid, and every tile in that grid was already reachable somewhere
+// else: Adopt and Volunteer are bottom tabs, "Lost & found" was the third path to the rescue
+// map, and "Donate" navigated to the ADOPT feed because no generic donate landing exists
+// (`donate` needs { accountId, orgName }). Both blocks are gone.
+//
+// What replaced them (2nd pass): the first rewrite was a list of three labelled rows, which
+// was the same screenful whether you had twelve open reports or none — and structurally the
+// same control as ProfileScreen's `accountCard`, on a different tab. Home now leads with the
+// ONE animal waiting on you (`pickSpotlight`, unit-tested in sagip.ts) and demotes the three
+// destinations to a single quiet line beneath it.
+const TONE = {
+  amber: { bg: "#FAEEDA", fg: "#633806" }, teal: { bg: "#E2EEF0", fg: "#14504F" },
+  green: { bg: "#EAF3DE", fg: "#27500A" }, grey: { bg: "#ECEAE3", fg: "#5F5E5A" }
+} as const;
 
 type MapReport = { report_id: string; species: string; condition: string; city: string | null };
 
@@ -48,11 +51,18 @@ export function HomeScreen({ navigation, route }: Props) {
   // put the greeting under the clock once it was not.
   const insets = useSafeAreaInsets();
   const api = useApi();
-  const { city } = useAuth();
+  const { city, isReady } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
   const [hasUnread, setHasUnread] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [rescues, setRescues] = useState<MapReport[]>([]);
+  // US-X1 redesign · the spotlight's two sources. They are deliberately NOT tracked with a
+  // `{ ok, status }` the way the two panels below are: the spotlight makes no statement when
+  // it has nothing, so a failed fetch and an empty account both land on `null` and render
+  // nothing at all. See the ⚠️ on pickSpotlight — the one behaviour to protect here is that
+  // Home must never say "you're all clear" on the strength of a request that did not arrive.
+  const [myCases, setMyCases] = useState<RescueCaseSummary[]>([]);
+  const [myReports, setMyReports] = useState<MyReport[]>([]);
   // US-R2 · FOUR fetches, and neither list is "the" primary — they are peer panels, so this
   // screen takes the per-panel branch of the rule rather than the whole-screen one. Blanking
   // Home because the adoption strip timed out would hide the rescue strip that did load, and
@@ -82,11 +92,50 @@ export function HomeScreen({ navigation, route }: Props) {
       api.get("/me/notifications").then((r) => {
         if (r.ok) setHasUnread((r.data?.notifications ?? []).some((n: { read: boolean }) => !n.read));
       });
-      // Adoption preview — first 2 available listings near the user's city.
-      const cityParam = city ? `&city=${encodeURIComponent(city)}` : "";
-      api.get(`/listings?page_size=2${cityParam}`).then((r) => {
+      // The spotlight's two sources (see pickSpotlight). Home was already making four
+      // requests per focus and these make six — the cost of the card saying something true
+      // rather than being a static list. There is no summary endpoint to collapse them into.
+      api.get("/me/rescues").then((r) => {
+        if (r.ok) setMyCases(r.data?.cases ?? []);
+      });
+      api.get("/me/reports").then((r) => {
+        // `results`, not `reports` — /me/reports and /reports/map disagree on the key
+        // (views.py:430 vs :417), and MyReportsScreen reads `results`. Getting this wrong
+        // is silent: the spotlight just never appears.
+        if (r.ok) setMyReports(r.data?.results ?? []);
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
+    }, [])
+  );
+
+  // The two CITY-SCOPED panels, split out of the account-scoped effect above and keyed on
+  // `city`.
+  //
+  // ⚠️ WHY THEY CANNOT LIVE IN THAT EFFECT. Its dependency array is `[]`, so its callback
+  // closes over whatever `city` held on the first render of this mount — and AuthContext
+  // loads the cached city ASYNCHRONOUSLY out of SecureStore (see its isReady effect). On a
+  // cold start that read has not landed yet, so both requests went out with city === null:
+  // the adoption feed came back nationwide and the map fell through to its "Marikina"
+  // default, under two headings that say "near you". The greeting above them meanwhile
+  // re-rendered with the real city, so the screen showed one city and queried another.
+  // Found 2026-09-09 on an account set to Pasig City that was served Marikina pets.
+  //
+  // `isReady` is the whole reason this is a gate and not just a dep: it separates "the
+  // city has not been read yet" (wait — firing now is the bug) from "this account genuinely
+  // has no city" (a nationwide feed is then the correct answer).
+  useFocusEffect(
+    useCallback(() => {
+      if (!isReady) return;
+      // Adoption preview — the first 5 available listings in the user's city.
+      //
+      // ⚠️ THE SLICE IS THE LIMIT, not the query string. This used to ask for `page_size=2`
+      // and render whatever came back — but listings/views.py `_paginate` reads only `page`
+      // and slices by its own PAGE_SIZE = 20, so `page_size` has never been honoured. Home
+      // was rendering up to twenty pets under a comment claiming two.
+      const cityParam = city ? `?city=${encodeURIComponent(city)}` : "";
+      api.get(`/listings${cityParam}`).then((r) => {
         setListingsRes({ ok: r.ok, status: r.status });
-        if (r.ok) setListings(r.data?.results ?? []);
+        if (r.ok) setListings((r.data?.results ?? []).slice(0, 5));
       });
       // Nearby rescues — first 2 reported strays near the user's city.
       const rescueCity = city ?? "Marikina";
@@ -94,8 +143,8 @@ export function HomeScreen({ navigation, route }: Props) {
         setRescuesRes({ ok: r.ok, status: r.status });
         if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
-    }, [])
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable; refetch on focus and whenever the city resolves or changes
+    }, [city, isReady])
   );
 
   // US-A1b resume: SignupSuccessScreen's "Start exploring" resets to Home with
@@ -121,6 +170,7 @@ export function HomeScreen({ navigation, route }: Props) {
   // did; this closes the gap the US-D4 audit left open. Mutually exclusive with pendingMember on
   // the same rescuer capability.
   const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
+  const spotlight = pickSpotlight(myCases, myReports);
 
   return (
     <View style={styles.screen} testID="screen.home">
@@ -204,33 +254,71 @@ export function HomeScreen({ navigation, route }: Props) {
           <Image source={paw} resizeMode="contain" style={styles.reportPaw} />
         </View>
 
-        <View style={styles.sagipLinks}>
-          <TouchableOpacity testID="btn.home.rescueMap" hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("rescueMap")}>
-            <Text style={styles.sagipLink}>See nearby strays ›</Text>
+        {spotlight && (
+          <TouchableOpacity
+            testID="card.home.spotlight"
+            activeOpacity={0.85}
+            // The left accent is the one place this card departs from the V2 recipe's
+            // strokeless white. It is not an outline — it carries the status tone, so the
+            // state is readable before you have read a word of it.
+            style={[styles.spotCard, { borderLeftColor: TONE[spotlight.chip.tone].fg }]}
+            accessibilityRole="button"
+            accessibilityLabel={`${spotlight.eyebrow}: ${spotlight.title}, ${spotlight.chip.label}. ${spotlight.nextStep}`}
+            onPress={() =>
+              spotlight.caseId
+                ? navigation.navigate("rescueUpdate", { caseId: spotlight.caseId, reportId: spotlight.reportId })
+                : navigation.navigate("reportDetail", { reportId: spotlight.reportId })
+            }
+          >
+            <View style={styles.spotTop}>
+              <Text style={styles.spotEyebrow}>{spotlight.eyebrow}</Text>
+              <View style={[styles.spotChip, { backgroundColor: TONE[spotlight.chip.tone].bg }]}>
+                <Text style={[styles.spotChipText, { color: TONE[spotlight.chip.tone].fg }]}>
+                  {spotlight.chip.label}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.spotTitle}>{spotlight.title}</Text>
+            <Text style={styles.spotMeta}>{`${spotlight.city ?? "Nearby"} · ${spotlight.since}`}</Text>
+            <View style={styles.spotDivider} />
+            <View style={styles.spotNextRow}>
+              <Text style={styles.spotNext}>{spotlight.nextStep}</Text>
+              <Text style={styles.spotChevron}>›</Text>
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity testID="btn.home.myReports" hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("myReports")}>
-            <Text style={styles.sagipLink}>My reports ›</Text>
-          </TouchableOpacity>
-          <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("myRescues")}>
-            <Text style={styles.sagipLink}>My rescues ›</Text>
-          </TouchableOpacity>
-          <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("myOffers")}>
-            <Text style={styles.sagipLink}>My offers ›</Text>
-          </TouchableOpacity>
-        </View>
+        )}
 
-        <View style={styles.quickGrid}>
-          {quickActions.map((action) => (
-            <TouchableOpacity
-              key={action.label}
-              activeOpacity={0.75}
-              style={styles.quickCard}
-              onPress={() => navigation.navigate(action.dest as never)}
-            >
-              <View style={styles.quickIcon}>{renderQuickIcon(action.icon)}</View>
-              <Text style={styles.quickLabel}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
+        {/* ⚠️ This line renders UNCONDITIONALLY, outside the spotlight. `btn.home.myReports`
+            is tapped by e2e flows 10-report-a-stray and 70-offline-degradation — flow 70 runs
+            offline, where the spotlight has nothing and draws nothing, so parking the selector
+            inside it would break the suite on exactly the branch it was written to test.
+            It is also the only route in the app to myRescues and myOffers. */}
+        <View style={styles.trailRow}>
+          <TouchableOpacity
+            testID="btn.home.myReports"
+            style={styles.trailPill}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            onPress={() => navigation.navigate("myReports")}
+          >
+            <Text style={styles.trailPillText}>My reports</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.trailPill}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            onPress={() => navigation.navigate("myRescues")}
+          >
+            <Text style={styles.trailPillText}>My rescues</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.trailPill}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            onPress={() => navigation.navigate("myOffers")}
+          >
+            <Text style={styles.trailPillText}>My offers</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.sectionHeader}>
@@ -276,7 +364,12 @@ export function HomeScreen({ navigation, route }: Props) {
           <Text style={styles.seeAll}>See all ›</Text>
         </TouchableOpacity>
 
+        {/* `btn.home.rescueMap` used to sit on the "See nearby strays ›" link above, which was
+            the third path from Home to this same map (the fourth being the "Lost & found" grid
+            tile). Both are gone; this row is now the single way there, so the testID e2e flow 70
+            taps — the offline-degradation assertion the whole track exists for — lives here. */}
         <TouchableOpacity
+          testID="btn.home.rescueMap"
           activeOpacity={0.7}
           style={styles.rescueSectionRow}
           onPress={() => navigation.navigate("rescueMap")}
@@ -347,28 +440,6 @@ function intentToast(action: GuestIntentAction): [string, string] {
     default:
       return ["You're in!", "You can now manage your profile."];
   }
-}
-
-function renderQuickIcon(icon: QuickAction["icon"]) {
-  if (icon === "search") {
-    return (
-      <View style={styles.searchIcon}>
-        <View style={styles.searchCircle} />
-        <View style={styles.searchHandle} />
-      </View>
-    );
-  }
-
-  if (icon === "person") {
-    return (
-      <View style={styles.personIcon}>
-        <View style={styles.personHead} />
-        <View style={styles.personBody} />
-      </View>
-    );
-  }
-
-  return <Text style={styles.quickSymbol}>{icon === "heart" ? "♥" : "₱"}</Text>;
 }
 
 const colors = {
@@ -511,14 +582,14 @@ const styles = StyleSheet.create({
     lineHeight: 21
   },
   reportCard: {
-    height: 136,
-    marginTop: 22,
+    height: 140,
+    marginTop: 14,
     borderRadius: 18,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingLeft: 20,
     paddingRight: 16,
-    paddingTop: 26,
+    paddingTop: 15,
     backgroundColor: colors.teal
   },
   reportTitle: {
@@ -551,32 +622,95 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800"
   },
-  sagipLinks: {
-    marginTop: 14,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    columnGap: 18,
-    rowGap: 10
+  spotCard: {
+    marginTop: 18,
+    borderRadius: 18,
+    borderLeftWidth: 4, // tone colour supplied inline — see the note at the call site
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    backgroundColor: "#FFFFFF",
+    // The deeper of the design system's two shadows (dy 10 / blur 16 / 10%) rather than the
+    // dy-4 one the pet + rescue rows use: this is the one card on Home that is about YOUR
+    // animal, and it sits directly under the teal hero.
+    shadowColor: "#1F3A5F",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 4
   },
-  sagipLink: {
-    color: "#1C6B6B",
+  spotTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  spotEyebrow: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    textTransform: "uppercase"
+  },
+  spotChip: {
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12
+  },
+  spotChipText: {
+    fontSize: 12,
+    fontWeight: "800"
+  },
+  spotTitle: {
+    marginTop: 10,
+    color: colors.ink,
+    fontSize: 20,
+    fontWeight: "800"
+  },
+  spotMeta: {
+    marginTop: 4,
+    color: colors.muted,
+    fontSize: 13
+  },
+  spotDivider: {
+    marginTop: 14,
+    height: 1,
+    backgroundColor: colors.border
+  },
+  spotNextRow: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  spotNext: {
+    color: colors.teal,
     fontSize: 14,
     fontWeight: "800"
   },
-  reportPaw: {
-    width: 72,
-    height: 72,
-    marginTop: 4
+  spotChevron: {
+    color: colors.teal,
+    fontSize: 20,
+    fontWeight: "800"
   },
-  quickGrid: {
+  trailRow: {
     marginTop: 16,
     flexDirection: "row",
-    justifyContent: "space-between"
+    gap: 10
   },
-  quickCard: {
-    width: "23%",
-    height: 86,
-    borderRadius: 11,
+  trailPill: {
+    // The V2 secondary-button recipe: white fill + soft shadow, NO stroke — the design
+    // system is explicit that the shadow alone signals "raised/tappable" and that a border
+    // reads as V1. These were 13 pt teal text links separated by dots, which put the only
+    // route to myRescues/myOffers in the quietest type on the screen.
+    //
+    // §13.4 · a 46 pt box clears the 44 pt floor on its own, so there is no hitSlop here —
+    // touch.ts warns that invisible slop between close siblings overlaps, and three pills in
+    // a row 10 pt apart are exactly the case where the first sibling would win every
+    // contested tap.
+    flex: 1,
+    height: 46,
+    borderRadius: 23,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
@@ -586,63 +720,17 @@ const styles = StyleSheet.create({
     shadowRadius: 7,
     elevation: 2
   },
-  quickIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.teal
-  },
-  quickLabel: {
-    marginTop: 8,
+  trailPillText: {
+    // Ink, not teal: the system's outline/secondary button takes a V2INK label, and against
+    // white it is the higher-contrast of the two.
     color: colors.ink,
-    fontSize: 10,
-    fontWeight: "800",
-    textAlign: "center"
+    fontSize: 14,
+    fontWeight: "800"
   },
-  quickSymbol: {
-    color: "#FFFFFF",
-    fontSize: 23,
-    fontWeight: "900"
-  },
-  searchIcon: {
-    width: 25,
-    height: 25
-  },
-  searchCircle: {
-    width: 17,
-    height: 17,
-    borderWidth: 3,
-    borderColor: "#FFFFFF",
-    borderRadius: 9
-  },
-  searchHandle: {
-    position: "absolute",
-    right: 2,
-    bottom: 3,
-    width: 11,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: "#FFFFFF",
-    transform: [{ rotate: "45deg" }]
-  },
-  personIcon: {
-    alignItems: "center"
-  },
-  personHead: {
-    width: 13,
-    height: 13,
-    borderRadius: 7,
-    backgroundColor: "#FFFFFF"
-  },
-  personBody: {
-    width: 23,
-    height: 13,
-    marginTop: 3,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    backgroundColor: "#FFFFFF"
+  reportPaw: {
+    width: 72,
+    height: 72,
+    marginTop: 4
   },
   sectionHeader: {
     marginTop: 18,

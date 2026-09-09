@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingLeft: 20,
     paddingRight: 16,
-    paddingTop: 19,
+    paddingTop: 15,
     backgroundColor: colors.teal
   },
   reportTitle: {
