@@ -7,6 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
 
@@ -46,14 +47,6 @@ export function MemberSubmittedScreen({ navigation }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  tealDark: "#14504F",
-  page: "#F4F5F2",
-  muted: "#5F5E5A",
-  paleTeal: "#E7F0EE"
-};
 
 const styles = StyleSheet.create({
   screen: {
@@ -72,14 +65,14 @@ const styles = StyleSheet.create({
     borderRadius: 48,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#DCEED0"
+    backgroundColor: colors.successBg
   },
   checkMarkStem: {
     position: "absolute",
     width: 5,
     height: 20,
     borderRadius: 3,
-    backgroundColor: "#2E5B1E",
+    backgroundColor: colors.success,
     transform: [{ rotate: "45deg" }, { translateX: 8 }, { translateY: -2 }]
   },
   checkMarkKick: {
@@ -87,7 +80,7 @@ const styles = StyleSheet.create({
     width: 5,
     height: 34,
     borderRadius: 3,
-    backgroundColor: "#2E5B1E",
+    backgroundColor: colors.success,
     transform: [{ rotate: "-45deg" }, { translateX: -2 }, { translateY: -8 }]
   },
   heading: {
@@ -110,7 +103,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     gap: 14,
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   noticeIcon: {
     width: 44,
@@ -118,7 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF"
+    backgroundColor: colors.white
   },
   noticeCopy: {
     flex: 1
@@ -136,7 +129,7 @@ const styles = StyleSheet.create({
   },
   hint: {
     marginTop: 22,
-    color: "#9A988F",
+    color: colors.muted,
     fontSize: 12,
     textAlign: "center"
   },
@@ -150,7 +143,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.teal
   },
   doneText: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "800"
   }

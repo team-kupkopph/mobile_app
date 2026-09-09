@@ -7,6 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { AdoptIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberUpgrade">;
 
@@ -37,7 +38,7 @@ export function MemberUpgradeScreen({ navigation }: Props) {
       <View style={styles.content}>
         <View style={styles.hero}>
           <View style={styles.heroIcon}>
-            <UserBadgeIcon color="#FFFFFF" />
+            <UserBadgeIcon color={colors.white} />
           </View>
           <View style={styles.heroCopy}>
             <Text style={styles.heroTitle}>Become a Verified Member</Text>
@@ -71,15 +72,6 @@ export function MemberUpgradeScreen({ navigation }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  tealDark: "#14504F",
-  page: "#F4F5F2",
-  border: "#E3E1D9",
-  muted: "#5F5E5A",
-  paleTeal: "#E7F0EE"
-};
 
 const styles = StyleSheet.create({
   screen: {
@@ -101,8 +93,8 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowCast,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 7,
@@ -144,13 +136,13 @@ const styles = StyleSheet.create({
     marginLeft: 16
   },
   heroTitle: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontSize: 19,
     fontWeight: "800"
   },
   heroText: {
     marginTop: 8,
-    color: "#D5ECE8",
+    color: colors.soft,
     fontSize: 13,
     lineHeight: 19
   },
@@ -176,7 +168,7 @@ const styles = StyleSheet.create({
     marginTop: 26,
     borderRadius: 16,
     padding: 18,
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   lightTitle: {
     color: colors.tealDark,
@@ -198,14 +190,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.teal
   },
   ctaText: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "800"
   },
   footnote: {
     marginTop: 12,
     marginBottom: 30,
-    color: "#9A988F",
+    color: colors.muted,
     fontSize: 12,
     textAlign: "center"
   }

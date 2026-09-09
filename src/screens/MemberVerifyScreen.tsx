@@ -13,6 +13,7 @@ import { uploadErrorMessage } from "../upload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -137,7 +138,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
           ) : fileUrl ? (
             <View style={styles.docDone}>
               <View style={styles.docCheck}>
-                <CheckIcon color="#FFFFFF" size={12} />
+                <CheckIcon color={colors.white} size={12} />
               </View>
               <Text style={styles.docDoneText}>Uploaded</Text>
             </View>
@@ -152,7 +153,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
             value={socialUrl}
             onChangeText={setSocialUrl}
             placeholder="facebook.com/your.name"
-            placeholderTextColor="#9A988F"
+            placeholderTextColor={colors.muted}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
@@ -166,7 +167,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
           onPress={() => setConsent((v) => !v)}
         >
           <View style={[styles.consentBox, consent && styles.consentBoxChecked]}>
-            {consent && <CheckIcon color="#FFFFFF" size={13} />}
+            {consent && <CheckIcon color={colors.white} size={13} />}
           </View>
           <Text style={styles.consentText}>
             I consent to Kupkop PH collecting these documents solely to verify my identity.
@@ -184,7 +185,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
           disabled={submitting}
         >
           {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.white} />
           ) : (
             <Text style={styles.submitText}>Submit for review</Text>
           )}
@@ -194,16 +195,6 @@ export function MemberVerifyScreen({ navigation }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  tealDark: "#14504F",
-  page: "#F4F5F2",
-  border: "#E3E1D9",
-  muted: "#5F5E5A",
-  danger: "#B23B3B",
-  paleTeal: "#E7F0EE"
-};
 
 const styles = StyleSheet.create({
   screen: {
@@ -225,8 +216,8 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowCast,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 7,
@@ -266,8 +257,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowCast,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 7,
@@ -279,7 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   docCopy: {
     flex: 1,
@@ -309,7 +300,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#5B8A3A"
+    backgroundColor: colors.success
   },
   docDoneText: {
     marginTop: 5,
@@ -329,8 +320,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: "center",
     paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowCast,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 7,
@@ -350,7 +341,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     gap: 14,
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   consentBox: {
     width: 26,
@@ -360,7 +351,7 @@ const styles = StyleSheet.create({
     borderColor: colors.teal,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF"
+    backgroundColor: colors.white
   },
   consentBoxChecked: {
     backgroundColor: colors.teal
@@ -396,7 +387,7 @@ const styles = StyleSheet.create({
     opacity: 0.5
   },
   submitText: {
-    color: "#FFFFFF",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "800"
   }
