@@ -7,6 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScreenHeader } from "../components/ui";
 
 import { ListingDetail } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -96,23 +97,19 @@ export function ListingDetailScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.listingDetail">
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Adopt</Text>
-        {listing ? (
+      <ScreenHeader
+        title="Adopt"
+        onBack={() => navigation.goBack()}
+        right={listing ? (
           <TouchableOpacity
-            style={styles.flagLink}
-            hitSlop={12}
+            hitSlop={TAP_SLOP}
             onPress={() => navigation.navigate("reportContent",
               { targetType: "listing", targetId: listing.listing_id })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
           </TouchableOpacity>
         ) : null}
-      </View>
+      />
 
       {!listing ? (
         <LoadStateView state={loadState(res)} subject="listing" onRetry={load} />
@@ -215,11 +212,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  flagLink: { marginLeft: "auto" },
   flagLinkText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },

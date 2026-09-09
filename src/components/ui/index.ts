@@ -9,3 +9,4 @@ export { Field } from "./Field";
 export { Button, type ButtonVariant } from "./Button";
 export { Chip, chipTones, type ChipTone } from "./Chip";
 export { TabBar, TAB_BAR, type TabBarItem } from "./TabBar";
+export { ScreenHeader, BackButton, BACK_BUTTON_SIZE } from "./ScreenHeader";

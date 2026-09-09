@@ -2,7 +2,7 @@
 // Visual language matches screens/user/screen-{account-type,signup,otp}.png: soft page background,
 // pill status header with back chevron + step dots, 800-weight ink headings, white rounded fields.
 import { LinearGradient } from "expo-linear-gradient";
-import { Button, Field } from "../components/ui";
+import { Button, Field, ScreenHeader } from "../components/ui";
 import {
   ActivityIndicator,
   StyleProp,
@@ -41,26 +41,13 @@ type AuthHeaderProps = {
 
 export function AuthHeader({ title, activeStep, onBack, stepCount = AUTH_STEP_COUNT }: AuthHeaderProps) {
   return (
-    <View style={styles.header}>
-      <TouchableOpacity
-        testID="btn.back"
-        activeOpacity={0.75}
-        onPress={onBack}
-        style={styles.backButton}
-        hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-        accessibilityRole="button"
-        accessibilityLabel="Go back"
-      >
-        <Text style={styles.backText}>‹</Text>
-      </TouchableOpacity>
-      <Text style={styles.headerTitle} accessibilityRole="header">{title}</Text>
-
+    <ScreenHeader title={title} onBack={onBack} align="center">
       <View style={styles.steps}>
         {Array.from({ length: stepCount }).map((_, step) => (
           <View key={step} style={[styles.stepDot, step <= activeStep && styles.stepActive]} />
         ))}
       </View>
-    </View>
+    </ScreenHeader>
   );
 }
 
@@ -74,24 +61,7 @@ type SimpleHeaderProps = {
 // part of the account-type/signup/otp sequence. onBack omitted renders no back button (e.g.
 // passwordChanged, which is a dead-end success screen).
 export function SimpleHeader({ title, onBack }: SimpleHeaderProps) {
-  return (
-    <View style={styles.header}>
-      {!!onBack && (
-        <TouchableOpacity
-          testID="btn.back"
-          activeOpacity={0.75}
-          onPress={onBack}
-          style={styles.backButton}
-          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Text style={styles.backText}>‹</Text>
-        </TouchableOpacity>
-      )}
-      {!!title && <Text style={styles.headerTitle}>{title}</Text>}
-    </View>
-  );
+  return <ScreenHeader title={title} onBack={onBack} align="center" />;
 }
 
 type FormFieldProps = {
@@ -177,38 +147,6 @@ export function PrimaryButton({ label, onPress, loading, style, testID }: Primar
 }
 
 const styles = StyleSheet.create({
-  header: {
-    // Unchanged at 132. This height always reserved a strip for the status bar; it used to
-    // be filled with a drawn one, and is now simply left for the real one to draw into. That
-    // is why removing the fake bar shifts nothing on the 15 screens using these headers.
-    height: 132,
-    paddingHorizontal: 28
-  },
-  backButton: {
-    position: "absolute",
-    left: 25,
-    top: 52,
-    width: 42,
-    height: 42,
-    zIndex: 10,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF"
-  },
-  backText: {
-    color: authColors.ink,
-    fontSize: 26,
-    fontWeight: "700",
-    lineHeight: 28
-  },
-  headerTitle: {
-    marginTop: 58,
-    color: authColors.ink,
-    fontSize: 16,
-    fontWeight: "800",
-    textAlign: "center"
-  },
   steps: {
     marginTop: 26,
     flexDirection: "row",

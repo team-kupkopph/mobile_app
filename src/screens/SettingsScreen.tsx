@@ -5,6 +5,7 @@
 // had no surface at all. YOUR DATA is the pair of RA 10173 rights (§12.7): export and delete.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScreenHeader } from "../components/ui";
 
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
@@ -64,18 +65,7 @@ export function SettingsScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.settings">
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back"
-          onPress={() => navigation.goBack()}
-          style={styles.back}
-          hitSlop={12}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title} accessibilityRole="header">Settings</Text>
-      </View>
+      <ScreenHeader title="Settings" onBack={() => navigation.goBack()} align="center" />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {groups.map((group) => (
@@ -125,10 +115,6 @@ export function SettingsScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 64, paddingHorizontal: 20, paddingBottom: 12, flexDirection: "row", alignItems: "center" },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { fontSize: 26, fontWeight: "700", color: colors.ink, marginTop: -3 },
-  title: { flex: 1, textAlign: "center", fontSize: 20, fontWeight: "800", color: colors.ink, marginRight: 44 },
   content: { padding: 20, paddingBottom: 48 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginBottom: 8, marginTop: 20 },
   card: { borderRadius: 18, ...card },

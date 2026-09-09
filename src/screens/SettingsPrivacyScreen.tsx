@@ -16,6 +16,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { privacyRows, Settings } from "../settings";
+import { ScreenHeader } from "../components/ui";
 
 const colors = {
   ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
@@ -151,25 +152,12 @@ function ToggleRow({
 
 function Header({ navigation }: { navigation: Props["navigation"] }) {
   return (
-    <View style={styles.header}>
-      <Text
- testID="btn.back"        style={styles.back}
-        onPress={() => navigation.goBack()}
-        accessibilityRole="button"
-        accessibilityLabel="Go back"
-      >
-        ‹
-      </Text>
-      <Text style={styles.title} accessibilityRole="header">Privacy</Text>
-    </View>
+    <ScreenHeader title="Privacy" onBack={() => navigation.goBack()} align="center" />
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 64, paddingHorizontal: 20, paddingBottom: 12, flexDirection: "row", alignItems: "center" },
-  back: { width: 44, height: 44, borderRadius: 22, textAlign: "center", lineHeight: 42, fontSize: 26, fontWeight: "700", color: colors.ink, ...card },
-  title: { flex: 1, textAlign: "center", fontSize: 20, fontWeight: "800", color: colors.ink, marginRight: 44 },
   content: { padding: 20, paddingBottom: 48 },
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginBottom: 8, marginTop: 22 },

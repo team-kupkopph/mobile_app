@@ -3,6 +3,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View , Alert } from "react-native";
+import { ScreenHeader } from "../components/ui";
 
 import { MyReport, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -60,13 +61,7 @@ export function MyReportsScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.myReports">
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>My reports</Text>
-      </View>
+      <ScreenHeader title="My reports" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.filterRow}>
           {FILTERS.map((f) => (
@@ -176,10 +171,6 @@ const styles = StyleSheet.create({
   pendingAction: { fontSize: 13, fontWeight: "700", color: colors.teal, marginRight: 18 },
   pendingDiscard: { color: colors.danger },
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   filterRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 },
   filterChip: { paddingHorizontal: 16, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
