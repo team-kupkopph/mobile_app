@@ -17,7 +17,7 @@
  */
 import { colors } from "../theme/colors";
 
-/** Darkest point of the backdrop's CONTENT band (above the tab-bar fade). See the note above. */
+/** Darkest point of the backdrop's CONTENT band (above the tab bar). See the note above. */
 const WORST_CASE_BACKDROP = "#D1E1DE";
 /** For comparison — the two surfaces text more often sits on. */
 const CARD = colors.white;
