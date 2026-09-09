@@ -8,11 +8,8 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B", fine: "#9a988f"
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueList">;
 
@@ -72,7 +69,7 @@ export function RescueListScreen({ navigation, route }: Props) {
           value={name}
           onChangeText={setName}
           placeholder="Bantay"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.muted}
         />
 
         <Text style={styles.label}>City</Text>
@@ -81,7 +78,7 @@ export function RescueListScreen({ navigation, route }: Props) {
           value={city}
           onChangeText={setCity}
           placeholder="Marikina"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.muted}
         />
 
         <Text style={styles.label}>Adoption fee (₱)</Text>
@@ -91,7 +88,7 @@ export function RescueListScreen({ navigation, route }: Props) {
           onChangeText={setFee}
           keyboardType="decimal-pad"
           placeholder="0"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.muted}
         />
         <Text style={styles.fine}>
           Tier-1 rescues and individual Verified Members are capped at ₱500. Registered NGOs aren't capped.
@@ -109,7 +106,7 @@ export function RescueListScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -123,7 +120,7 @@ const styles = StyleSheet.create({
   draftNote: { marginTop: 4, marginBottom: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
   input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, fontSize: 16, ...card },
-  fine: { marginTop: 8, color: colors.fine, fontSize: 13, lineHeight: 18 },
+  fine: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 18 },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }

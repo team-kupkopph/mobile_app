@@ -13,15 +13,11 @@ import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  amberBg: "#FAEEDA", amber: "#633806", tealBg: "#E2EEF0", tealFg: "#14504F",
-  greenBg: "#EAF3DE", green: "#27500A", greyBg: "#ECEAE3", grey: "#5F5E5A"
-};
 const TONE = {
-  amber: { bg: colors.amberBg, fg: colors.amber }, teal: { bg: colors.tealBg, fg: colors.tealFg },
-  green: { bg: colors.greenBg, fg: colors.green }, grey: { bg: colors.greyBg, fg: colors.grey }
+  amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
+  green: { bg: colors.successBg, fg: colors.success }, grey: { bg: colors.greyPill, fg: colors.muted }
 } as const;
 
 const FILTERS: Array<{ key: "all" | StrayStatus; label: string }> = [
@@ -114,8 +110,8 @@ export function MyReportsScreen({ navigation }: Props) {
                   </Text>
                 </View>
               </View>
-              <View style={[styles.chip, { backgroundColor: stuck ? "#FBEEEC" : "#FAEEDA" }]}>
-                <Text style={[styles.chipText, { color: stuck ? "#B23B3B" : "#633806" }]}>
+              <View style={[styles.chip, { backgroundColor: stuck ? colors.dangerBg : colors.warningBg }]}>
+                <Text style={[styles.chipText, { color: stuck ? colors.danger : colors.warningStrong }]}>
                   {pendingLabel(item)}
                 </Text>
               </View>
@@ -170,15 +166,15 @@ export function MyReportsScreen({ navigation }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
 const styles = StyleSheet.create({
-  pendingCard: { borderWidth: 1, borderColor: "#EFE3C9" },
+  pendingCard: { borderWidth: 1, borderColor: colors.warningBg },
   pendingActions: { flexDirection: "row", marginTop: 8 },
-  pendingAction: { fontSize: 13, fontWeight: "700", color: "#1C6B6B", marginRight: 18 },
-  pendingDiscard: { color: "#B23B3B" },
+  pendingAction: { fontSize: 13, fontWeight: "700", color: colors.teal, marginRight: 18 },
+  pendingDiscard: { color: colors.danger },
   screen: { flex: 1, backgroundColor: colors.page },
   header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },

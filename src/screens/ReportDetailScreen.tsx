@@ -14,15 +14,11 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  amberBg: "#FAEEDA", amber: "#633806", tealBg: "#E2EEF0", tealFg: "#14504F",
-  greenBg: "#EAF3DE", green: "#27500A", greyBg: "#ECEAE3", grey: "#5F5E5A", line: "#E3E1D9"
-};
 const TONE = {
-  amber: { bg: colors.amberBg, fg: colors.amber }, teal: { bg: colors.tealBg, fg: colors.tealFg },
-  green: { bg: colors.greenBg, fg: colors.green }, grey: { bg: colors.greyBg, fg: colors.grey }
+  amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
+  green: { bg: colors.successBg, fg: colors.success }, grey: { bg: colors.greyPill, fg: colors.muted }
 } as const;
 const LADDER: StrayStatus[] = ["reported", "claimed", "rescued", "resolved"];
 const LADDER_LABEL: Record<StrayStatus, string> = {
@@ -258,7 +254,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -271,7 +267,7 @@ const styles = StyleSheet.create({
   flagLink: { marginLeft: "auto" },
   flagLinkText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
-  photo: { width: "100%", height: 200, borderRadius: 22, marginBottom: 18, backgroundColor: colors.line },
+  photo: { width: "100%", height: 200, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   h1: { color: colors.ink, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, fontSize: 16 },
   chip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
@@ -280,24 +276,24 @@ const styles = StyleSheet.create({
   notesText: { color: colors.ink, fontSize: 16, lineHeight: 23 },
   matchesRow: { marginTop: 16, paddingHorizontal: 18, height: 62, borderRadius: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", ...card },
   matchesLabel: { color: colors.teal, fontSize: 16.5, fontWeight: "800" },
-  matchesChevron: { color: "#b8b6ad", fontSize: 30, fontWeight: "800" },
-  mapWrap: { marginTop: 20, height: 160, borderRadius: 20, overflow: "hidden", backgroundColor: "#E7F0EE" },
+  matchesChevron: { color: colors.muted, fontSize: 30, fontWeight: "800" },
+  mapWrap: { marginTop: 20, height: 160, borderRadius: 20, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
-  mapNote: { marginTop: 8, color: "#9a988f", fontSize: 12, lineHeight: 17 },
-  waitingCard: { marginTop: 20, padding: 18, borderRadius: 18, backgroundColor: colors.tealBg },
-  waitingLine: { color: colors.tealFg, fontSize: 16, fontWeight: "700" },
-  waitingSub: { marginTop: 6, color: colors.tealFg, fontSize: 14 },
+  mapNote: { marginTop: 8, color: colors.muted, fontSize: 12, lineHeight: 17 },
+  waitingCard: { marginTop: 20, padding: 18, borderRadius: 18, backgroundColor: colors.infoBg },
+  waitingLine: { color: colors.tealDark, fontSize: 16, fontWeight: "700" },
+  waitingSub: { marginTop: 6, color: colors.tealDark, fontSize: 14 },
   sectionTitle: { marginTop: 26, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
   ladder: { paddingLeft: 4 },
   ladderRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 16 },
-  ladderDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: colors.line },
+  ladderDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: colors.border },
   ladderDotDone: { backgroundColor: colors.teal },
   ladderLabel: { color: colors.muted, fontSize: 16 },
   ladderLabelDone: { color: colors.ink, fontWeight: "700" },
   actionRow: { marginTop: 30 },
   claimBtn: { height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   claimBtnText: { color: colors.white, fontSize: 19, fontWeight: "700" },
-  claimFine: { marginTop: 10, color: "#9a988f", fontSize: 13, lineHeight: 18, textAlign: "center" },
+  claimFine: { marginTop: 10, color: colors.muted, fontSize: 13, lineHeight: 18, textAlign: "center" },
   offerBtn: { marginTop: 16, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal },
   offerBtnText: { color: colors.teal, fontSize: 16, fontWeight: "700" }
 });

@@ -32,6 +32,16 @@ export const colors = {
   tealBright: "#238383",
   /** ACCENT. Used in the generated backdrops; no screen uses it directly yet. */
   tealAccent: "#2E8B8B",
+  /**
+   * The faded teal a primary button wears while its input is not yet usable — 6 sites, named
+   * `submitIdle` / `saveIdle` / `inquireBtnIdle`.
+   *
+   * ⚠️ IT IS A HINT, NOT A DISABLE, and the distinction is the whole point. ReportStray shows
+   * the pattern done right: the button is faded but still tappable, with
+   * `accessibilityHint="Waiting for your location"`. Fading a button that is ALSO
+   * `disabled={...}` on a validation state is the anti-pattern this app has removed twice.
+   */
+  tealIdle: "#7FA8A6",
   /** FOREST. Deepest brand tone, far end of the hero gradient. */
   forest: "#11241F",
 
