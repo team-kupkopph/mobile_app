@@ -12,6 +12,49 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     labels: [dependencies, security]
+    # ⚠️ Routine version bumps are suppressed for everything the Expo SDK pins, because for
+    # these packages a Dependabot PR is not merely unactionable — it is actively misleading.
+    #
+    # Measured 2026-09-09, with five such PRs open (#13-#17) and ALL FIVE passing CI:
+    #
+    #   package                                     SDK 54 pins   the PR wanted
+    #   expo-image-picker                           ~17.0.11      57.0.16
+    #   expo-status-bar                             ~3.0.9        57.0.1
+    #   expo-sharing                                ~14.0.8       57.0.18
+    #   @react-native-async-storage/async-storage   2.2.0         3.1.1
+    #   @react-native-community/netinfo             11.4.1        12.0.x
+    #
+    # Every one contradicts expo/bundledNativeModules.json, and every one was green. CI runs
+    # `tsc --noEmit` and `jest` — both JS-only — while these packages ship NATIVE code that has
+    # to match the SDK's native runtime. Nothing in the pipeline builds or runs that native
+    # side, so a green tick says nothing about whether the app still boots on a device.
+    #
+    # A green PR that breaks the app on device is worse than a red one. The remedy for all of
+    # them is one Expo SDK upgrade (`npx expo install --fix`), never an individual merge.
+    #
+    # ⚠️ Only version-update:* types are ignored, so SECURITY advisories for these packages
+    # still open PRs. That is deliberate — an advisory is real information even when the fix
+    # has to ride an SDK upgrade.
+    ignore:
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "expo-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "@expo/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "react-native-*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "@react-native-async-storage/async-storage"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "@react-native-community/netinfo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      # react / react-dom are chosen by the React Native version, not independently.
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
 
   - package-ecosystem: github-actions
     directory: /
