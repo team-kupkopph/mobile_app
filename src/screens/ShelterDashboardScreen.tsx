@@ -94,6 +94,13 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             body, and most LoadStateView call sites are inline placeholders in a ScrollView.
             See __tests__/safeAreaOnFailure.test.ts. */}
         <LoadStateView state={loadState(res)} onRetry={load} />
+        {/* ⚠️ THE TAB BAR BELONGS IN THIS BRANCH TOO. It does not depend on the data this
+            branch is missing, and it is this screen's only VISIBLE way out — the screen is
+            reached by a tab, so there is no back button either. Without it the offline state
+            is a dead end to look at: the iOS edge-swipe still pops the screen, which is why
+            this survived review and every automated check, but a person sees no exit. Found
+            on a real device during US-PF3 by someone who could not get past it. */}
+        <ShelterTabs active="home" onTabPress={(t) => t === "profile" && navigation.navigate("shelterProfile")} />
       </View>
     );
   }
