@@ -12,15 +12,11 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL, offerStatusChip, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  tealBg: "#E2EEF0", tealFg: "#14504F", greenBg: "#EAF3DE", green: "#27500A",
-  greyBg: "#ECEAE3", grey: "#5F5E5A", danger: "#B23B3B"
-};
 const TONE = {
-  teal: { bg: colors.tealBg, fg: colors.tealFg }, green: { bg: colors.greenBg, fg: colors.green },
-  grey: { bg: colors.greyBg, fg: colors.grey }
+  teal: { bg: colors.infoBg, fg: colors.tealDark }, green: { bg: colors.successBg, fg: colors.success },
+  grey: { bg: colors.greyPill, fg: colors.muted }
 } as const;
 
 const GROUPS: Array<{ key: "open" | "matched" | "expired"; label: string }> = [
@@ -133,7 +129,7 @@ export function MyOffersScreen({ navigation }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 

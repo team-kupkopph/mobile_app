@@ -16,11 +16,8 @@ import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", chipBg: "#E7F0EE"
-};
 
 const SPECIES: Array<{ key: string; label: string }> = [
   { key: "", label: "All" }, { key: "dog", label: "Dogs" },
@@ -132,7 +129,7 @@ function capitalize(s: string): string {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -151,7 +148,7 @@ const styles = StyleSheet.create({
   filterTextActive: { color: colors.white },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 130 },
   card: { borderRadius: 22, marginBottom: 14, overflow: "hidden", ...card },
-  cardPhoto: { width: "100%", height: 170, backgroundColor: colors.line },
+  cardPhoto: { width: "100%", height: 170, backgroundColor: colors.border },
   cardPhotoEmpty: { alignItems: "center", justifyContent: "center" },
   cardBody: { padding: 16 },
   cardName: { color: colors.ink, fontSize: 20, fontWeight: "800" },
