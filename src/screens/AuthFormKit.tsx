@@ -2,6 +2,7 @@
 // Visual language matches screens/user/screen-{account-type,signup,otp}.png: soft page background,
 // pill status header with back chevron + step dots, 800-weight ink headings, white rounded fields.
 import { LinearGradient } from "expo-linear-gradient";
+import { Button, Field } from "../components/ui";
 import {
   ActivityIndicator,
   StyleProp,
@@ -123,60 +124,34 @@ type FormFieldProps = {
 };
 
 export function FormField({
-  label,
-  value,
-  onChangeText,
-  secure,
-  onToggleSecure,
-  autoCapitalize,
-  keyboardType,
-  autoComplete,
-  error,
-  testID,
-  returnKeyType,
-  onSubmitEditing
+  label, value, onChangeText, secure, onToggleSecure, autoCapitalize, keyboardType,
+  autoComplete, error, testID, returnKeyType, onSubmitEditing
 }: FormFieldProps) {
+  // ⚠️ A THIN ADAPTER, not a second implementation. Seventeen screens call this; changing them
+  // all at once would be a 17-file diff nobody can review, so the kit keeps its signature and
+  // delegates. Screens migrate to `Field` directly at their own pace, and this disappears when
+  // the last one has.
   return (
-    <View style={styles.fieldGroup}>
-      <Text style={styles.label}>{label}</Text>
-      <View style={[styles.input, error && styles.inputError]}>
-        <TextInput
-          testID={testID}
-          value={value}
-          onChangeText={onChangeText}
-          secureTextEntry={secure}
-          autoCapitalize={autoCapitalize}
-          keyboardType={keyboardType}
-          autoComplete={autoComplete}
-          returnKeyType={returnKeyType}
-          onSubmitEditing={onSubmitEditing}
-          style={[styles.inputText, styles.textInput]}
-        />
-        {onToggleSecure && (
-          <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={onToggleSecure}
-          style={styles.eyeButton}
-          accessibilityRole="button"
-          // The label has to track the state: announcing "show password" while the
-          // password is already visible tells a blind user the opposite of the truth.
-          accessibilityLabel={secure ? "Show password" : "Hide password"}
-        >
-            <View style={styles.eyeIcon}>
-              <View style={styles.eyePupil} />
-            </View>
-          </TouchableOpacity>
-        )}
-      </View>
-      {!!error && <Text style={styles.fieldError}>{error}</Text>}
-    </View>
+    <Field
+      label={label}
+      value={value}
+      onChangeText={onChangeText}
+      secure={secure}
+      onToggleSecure={onToggleSecure}
+      autoCapitalize={autoCapitalize}
+      keyboardType={keyboardType}
+      autoComplete={autoComplete}
+      error={error}
+      testID={testID}
+      returnKeyType={returnKeyType}
+      onSubmitEditing={onSubmitEditing}
+    />
   );
 }
 
 type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
-  disabled?: boolean;
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
   /**
@@ -191,21 +166,14 @@ type PrimaryButtonProps = {
   testID?: string;
 };
 
-export function PrimaryButton({ label, onPress, disabled, loading, style, testID }: PrimaryButtonProps) {
-  const isDisabled = disabled || loading;
-  return (
-    <TouchableOpacity
-      testID={testID}
-      activeOpacity={0.85}
-      onPress={onPress}
-      disabled={isDisabled}
-      style={[styles.primaryButtonWrap, isDisabled && styles.primaryButtonDisabled, style]}
-    >
-      <LinearGradient colors={["#1C7876", "#12524C"]} style={styles.primaryButton}>
-        {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.primaryText}>{label}</Text>}
-      </LinearGradient>
-    </TouchableOpacity>
-  );
+export function PrimaryButton({ label, onPress, loading, style, testID }: PrimaryButtonProps) {
+  // ⚠️ `disabled` IS GONE FROM THE SIGNATURE, ON PURPOSE. A disabled submit gives the user
+  // nothing to press and no reason why; this app already removed that pattern from 8 screens
+  // (f93f74a). Dropping the prop here makes every remaining validation-disable a compile
+  // error rather than a thing someone has to notice in review.
+  //
+  // `loading` stays: "a request is in flight" is a real temporary state the user caused.
+  return <Button label={label} onPress={onPress} loading={loading} style={style} testID={testID} />;
 }
 
 const styles = StyleSheet.create({

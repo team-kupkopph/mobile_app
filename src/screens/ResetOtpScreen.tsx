@@ -71,7 +71,10 @@ export function ResetOtpScreen({ navigation, route }: Props) {
   }
 
   async function onContinue() {
-    if (code.length !== CODE_LENGTH || advancedRef.current || checking) return;
+    if (advancedRef.current || checking) return;
+      // ⚠️ Explains rather than blocks. This used to be part of the early return while the
+      // button carried `disabled`, so an incomplete code produced a dead tap and no reason.
+    if (code.length !== CODE_LENGTH) { setError(`Enter all ${CODE_LENGTH} digits.`); return; }
     advancedRef.current = true;
     setChecking(true);
     setError(undefined);
@@ -159,7 +162,6 @@ export function ResetOtpScreen({ navigation, route }: Props) {
         <PrimaryButton
           label={checking ? "Checking…" : "Verify"}
           onPress={onContinue}
-          disabled={code.length !== CODE_LENGTH || checking}
           style={styles.verifyButton}
         />
 

@@ -65,7 +65,10 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
   }, [code]);
 
   async function onVerify() {
-    if (code.length !== CODE_LENGTH || submitting) return;
+    if (submitting) return;
+      // ⚠️ Explains rather than blocks. This used to be part of the early return while the
+      // button carried `disabled`, so an incomplete code produced a dead tap and no reason.
+    if (code.length !== CODE_LENGTH) { setError(`Enter all ${CODE_LENGTH} digits.`); return; }
     submittedRef.current = true;
     setSubmitting(true);
     setError(undefined);
@@ -144,7 +147,7 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
         </TouchableOpacity>
         {!!resendNotice && <Text style={styles.resendNotice}>{resendNotice}</Text>}
 
-        <PrimaryButton label="Verify" onPress={onVerify} disabled={code.length !== CODE_LENGTH} loading={submitting} style={styles.verifyButton} />
+        <PrimaryButton label="Verify" onPress={onVerify} loading={submitting} style={styles.verifyButton} />
       </View>
     </View>
   );

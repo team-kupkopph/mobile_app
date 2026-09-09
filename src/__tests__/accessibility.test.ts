@@ -345,4 +345,22 @@ describe("submit buttons are not disabled by validation", () => {
   it("disables none of them on validation state", () => {
     expect(files.filter(({ src }) => VALIDATION_FLAG.test(src)).map((f) => f.name)).toEqual([]);
   });
+
+  /**
+   * ⚠️ THE NAMED-FLAG PATTERN ABOVE WAS NOT ENOUGH, and the gap was real rather than
+   * theoretical. `disabled={!canSubmit}` is matched; `disabled={code.length !== CODE_LENGTH}`
+   * is the same rule broken with an inline expression, and it sat in FIVE call sites — Otp,
+   * ResetOtp, VerifyPhone (twice) and ShelterPhoneVerify — passing this suite the whole time.
+   *
+   * They were found by the compiler, not by this file: US-AU1 removed `disabled` from
+   * PrimaryButton's props, which turned all five into type errors. That is the stronger guard
+   * of the two, and it now holds for PrimaryButton and Button by construction. This regex
+   * covers the remaining shape — a raw touchable disabled on the length or emptiness of a
+   * field — which types cannot see.
+   */
+  const INLINE_VALIDATION = /disabled=\{[^}]*?(?:\.length\s*(?:!==|===|<|>)|!\s*\w+\.trim\(\))/;
+
+  it("disables none of them on an inline validation expression either", () => {
+    expect(files.filter(({ src }) => INLINE_VALIDATION.test(src)).map((f) => f.name)).toEqual([]);
+  });
 });
