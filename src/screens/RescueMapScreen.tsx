@@ -6,6 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScreenHeader } from "../components/ui";
 import MapView, { Circle } from "react-native-maps";
 
 import { MapReport } from "../api/types";
@@ -61,13 +62,7 @@ export function RescueMapScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.rescueMap">
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Nearby strays</Text>
-      </View>
+      <ScreenHeader title="Nearby strays" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* City-scoped backdrop: centred on the city + search radius. No per-report pins (§12.5) —
             the strays are in the list below; only rescuers ever see a report's exact spot. */}
@@ -157,10 +152,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   mapWrap: { height: 200, borderRadius: 22, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
