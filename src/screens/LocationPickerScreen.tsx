@@ -11,6 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "locationPicker">;
 
@@ -99,7 +100,7 @@ export function LocationPickerScreen({ navigation }: Props) {
             value={query}
             onChangeText={setQuery}
             placeholder="Search city or barangay"
-            placeholderTextColor="#9A988F"
+            placeholderTextColor={colors.muted}
             style={styles.searchInput}
             autoCapitalize="words"
           />
@@ -121,10 +122,10 @@ export function LocationPickerScreen({ navigation }: Props) {
                     onPress={() => selectCity(city)}
                     disabled={!!saving}
                   >
-                    <LocationPinIcon color={selected ? colors.teal : "#B9B5AA"} size={18} />
+                    <LocationPinIcon color={selected ? colors.teal : colors.muted} size={18} />
                     <Text style={[styles.cityName, selected && styles.cityNameSelected]}>{city}</Text>
                     <View style={[styles.radio, selected && styles.radioSelected]}>
-                      {selected && <CheckIcon color="#FFFFFF" size={12} />}
+                      {selected && <CheckIcon color={colors.white} size={12} />}
                     </View>
                   </TouchableOpacity>
                 );
@@ -141,15 +142,6 @@ export function LocationPickerScreen({ navigation }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  tealDark: "#14504F",
-  page: "#F4F5F2",
-  border: "#E3E1D9",
-  muted: "#5F5E5A",
-  danger: "#B23B3B"
-};
 
 const styles = StyleSheet.create({
   screen: {
@@ -171,8 +163,8 @@ const styles = StyleSheet.create({
     borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowCast,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 7,
@@ -201,15 +193,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 18,
     gap: 10,
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowCast,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 7,
     elevation: 2
   },
   searchIcon: {
-    color: "#9A988F",
+    color: colors.muted,
     fontSize: 17,
     fontWeight: "700"
   },
@@ -231,15 +223,15 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     marginBottom: 10,
-    color: "#9A988F",
+    color: colors.muted,
     fontSize: 11,
     fontWeight: "800",
     letterSpacing: 0.6
   },
   groupCard: {
     borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
+    backgroundColor: colors.white,
+    shadowColor: colors.shadowCast,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 7,
@@ -286,7 +278,7 @@ const styles = StyleSheet.create({
   },
   footnote: {
     marginTop: 26,
-    color: "#9A988F",
+    color: colors.muted,
     fontSize: 11,
     textAlign: "center",
     lineHeight: 16

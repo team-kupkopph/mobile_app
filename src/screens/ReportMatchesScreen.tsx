@@ -11,13 +11,10 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { matchReasons, matchStrength } from "../community";
 import { MatchShape, RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  dim: "#DBE6E2", okBg: "#EAF3DE", ok: "#27500A", warnBg: "#FAEEDA", warn: "#8A5A12"
-};
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -71,7 +68,7 @@ export function ReportMatchesScreen({ navigation, route }: Props) {
             const strength = matchStrength(m.score ?? 0);
             const reasons = m.signals ? matchReasons(m.signals) : ["a possible match"];
             const tone = strength.tone === "ok"
-              ? { bg: colors.okBg, fg: colors.ok } : { bg: colors.warnBg, fg: colors.warn };
+              ? { bg: colors.successBg, fg: colors.success } : { bg: colors.warningBg, fg: colors.warning };
             return (
               <TouchableOpacity key={m.match_id} style={styles.matchCard} activeOpacity={0.85}
                 onPress={() => navigation.navigate("matchDetail", { reportId, match: m })}>
@@ -113,12 +110,12 @@ const styles = StyleSheet.create({
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 23 },
   matchCard: { marginBottom: 14, padding: 16, borderRadius: 22, ...card },
   row: { flexDirection: "row", gap: 14 },
-  photo: { width: 96, height: 96, borderRadius: 16, backgroundColor: colors.dim },
+  photo: { width: 96, height: 96, borderRadius: 16, backgroundColor: colors.soft },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   type: { color: colors.ink, fontSize: 16, fontWeight: "800" },
   chip: { paddingHorizontal: 11, paddingVertical: 4, borderRadius: 11 },
   chipText: { fontSize: 12, fontWeight: "700" },
   reasons: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 19 },
   review: { marginTop: 10, color: colors.teal, fontSize: 14.5, fontWeight: "700" },
-  footnote: { marginTop: 8, color: "#B8B6AD", fontSize: 13.5, textAlign: "center" }
+  footnote: { marginTop: 8, color: colors.muted, fontSize: 13.5, textAlign: "center" }
 });

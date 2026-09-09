@@ -15,12 +15,8 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  soft: "#E2EEF0", line: "#E3E1D9", danger: "#B23B3B", warnBg: "#FAEEDA", warn2: "#633806",
-  white: "#FFFFFF", fine: "#9a988f"
-};
 
 const SPECIES = ["dog", "cat", "other"] as const;
 const CONDITIONS = ["injured", "sick", "healthy", "pregnant"] as const;
@@ -182,7 +178,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           onChangeText={setNotes}
           multiline
           placeholder="Limping, near the sari-sari store — wouldn't let me near."
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.muted}
         />
 
         <View style={styles.locCard}>
@@ -270,7 +266,7 @@ function Segmented({ options, value, onChange }: {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -283,10 +279,10 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, fontSize: 17 },
-  photoBtn: { marginTop: 18, height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.line, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoBtn: { marginTop: 18, height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, fontSize: 16, fontWeight: "700" },
   label: { marginTop: 24, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
-  segTrack: { flexDirection: "row", backgroundColor: "#ECEAE3", borderRadius: 16, padding: 4, gap: 4 },
+  segTrack: { flexDirection: "row", backgroundColor: colors.greyPill, borderRadius: 16, padding: 4, gap: 4 },
   segItem: { flex: 1, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   segItemActive: { ...card },
   segText: { color: colors.muted, fontSize: 15, fontWeight: "700" },
@@ -299,12 +295,12 @@ const styles = StyleSheet.create({
   locFooter: { marginTop: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   locFrom: { color: colors.muted, fontSize: 14, fontWeight: "600" },
   adjust: { color: colors.teal, fontSize: 15, fontWeight: "800" },
-  locDenied: { color: colors.warn2, fontSize: 15, fontWeight: "600" },
-  fine: { marginTop: 12, color: colors.fine, fontSize: 13, lineHeight: 19 },
+  locDenied: { color: colors.warningStrong, fontSize: 15, fontWeight: "600" },
+  fine: { marginTop: 12, color: colors.muted, fontSize: 13, lineHeight: 19 },
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: 18, ...card },
   anonLabel: { color: colors.ink, fontSize: 17, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitIdle: { backgroundColor: "#7FA8A6" },
+  submitIdle: { backgroundColor: colors.tealIdle },
   submitText: { color: colors.white, fontSize: 22, fontWeight: "700" }
 });

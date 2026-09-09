@@ -8,13 +8,10 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 import { useApi } from "../api/useApi";
 import { matchReasons } from "../community";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDk: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", soft: "#E7F0EF", dim: "#DBE6E2", line: "#E3E1D9", danger: "#B23B3B"
-};
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -116,13 +113,13 @@ const styles = StyleSheet.create({
   reportCard: { padding: 18, borderRadius: 22, ...card },
   chip: { alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 13, backgroundColor: colors.soft },
   chipText: { color: colors.teal, fontSize: 13, fontWeight: "700" },
-  photo: { height: 180, borderRadius: 16, backgroundColor: colors.dim, marginTop: 14, marginBottom: 6 },
-  factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line, gap: 16 },
+  photo: { height: 180, borderRadius: 16, backgroundColor: colors.soft, marginTop: 14, marginBottom: 6 },
+  factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 16 },
   factKey: { color: colors.muted, fontSize: 14 },
   factVal: { color: colors.ink, fontSize: 15, fontWeight: "700", flexShrink: 1, textAlign: "right" },
   reasonsCard: { marginTop: 16, padding: 16, borderRadius: 18, backgroundColor: colors.soft },
-  reasonsTitle: { color: colors.tealDk, fontSize: 14, fontWeight: "700" },
-  reasonsText: { marginTop: 6, color: colors.tealDk, fontSize: 14.5, lineHeight: 20 },
+  reasonsTitle: { color: colors.tealDark, fontSize: 14, fontWeight: "700" },
+  reasonsText: { marginTop: 6, color: colors.tealDark, fontSize: 14.5, lineHeight: 20 },
   decidedNote: { marginTop: 24, color: colors.muted, fontSize: 15, textAlign: "center" },
   primaryBtn: { marginTop: 24, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" },

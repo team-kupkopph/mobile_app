@@ -12,11 +12,8 @@ import MapView, { Region } from "react-native-maps";
 
 import { LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2",
-  muted: "#5F5E5A", white: "#FFFFFF", fine: "#9a988f"
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "adjustPin">;
 
@@ -87,7 +84,7 @@ export function AdjustPinScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.12, shadowRadius: 10, elevation: 4
 };
 
@@ -105,6 +102,6 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, fontSize: 19, fontWeight: "800", lineHeight: 25 },
   cardSub: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 20 },
   save: { marginTop: 18, height: 58, borderRadius: 29, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  saveIdle: { backgroundColor: "#7FA8A6" },
+  saveIdle: { backgroundColor: colors.tealIdle },
   saveText: { color: colors.white, fontSize: 21, fontWeight: "700" }
 });

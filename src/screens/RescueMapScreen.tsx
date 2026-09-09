@@ -18,15 +18,11 @@ import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { isOffline, loadState } from "../net";
 import { relTime, sagipTitle, strayChip } from "../sagip";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  amberBg: "#FAEEDA", amber: "#633806", tealBg: "#E2EEF0", tealFg: "#14504F",
-  greenBg: "#EAF3DE", green: "#27500A", greyBg: "#ECEAE3", grey: "#5F5E5A", soft: "#E7F0EE"
-};
 const TONE = {
-  amber: { bg: colors.amberBg, fg: colors.amber }, teal: { bg: colors.tealBg, fg: colors.tealFg },
-  green: { bg: colors.greenBg, fg: colors.green }, grey: { bg: colors.greyBg, fg: colors.grey }
+  amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
+  green: { bg: colors.successBg, fg: colors.success }, grey: { bg: colors.greyPill, fg: colors.muted }
 } as const;
 const RADIUS_KM = 10;
 
@@ -103,9 +99,9 @@ export function RescueMapScreen({ navigation }: Props) {
         <Text style={styles.mapNote}>Shown by city — a report's exact spot goes only to rescuers.</Text>
 
         <View style={styles.legendRow}>
-          <Legend color={colors.amber} label="Needs help" />
-          <Legend color={colors.tealFg} label="Being helped" />
-          <Legend color={colors.green} label="Safe" />
+          <Legend color={colors.warningStrong} label="Needs help" />
+          <Legend color={colors.tealDark} label="Being helped" />
+          <Legend color={colors.success} label="Safe" />
         </View>
 
         {state.kind !== "ready" ? (
@@ -155,7 +151,7 @@ function Legend({ color, label }: { color: string; label: string }) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
+  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 
@@ -169,7 +165,7 @@ const styles = StyleSheet.create({
   mapWrap: { height: 200, borderRadius: 22, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   mapBadge: { position: "absolute", left: 12, bottom: 12, backgroundColor: "rgba(255,255,255,0.94)", paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: "center" },
-  mapBadgeText: { color: colors.tealFg, fontSize: 14, fontWeight: "800" },
+  mapBadgeText: { color: colors.tealDark, fontSize: 14, fontWeight: "800" },
   mapNote: { marginTop: 10, color: colors.muted, fontSize: 13, lineHeight: 18 },
   legendRow: { flexDirection: "row", gap: 18, marginTop: 16, marginBottom: 18 },
   legend: { flexDirection: "row", alignItems: "center", gap: 7 },
