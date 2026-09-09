@@ -82,7 +82,10 @@ export function ShelterProfileScreen({ navigation }: Props) {
   // "don't state something false" half.)
   if (!me && loadState(res).kind !== "ready" && loadState(res).kind !== "empty") {
     return (
-      <View style={styles.screen}>
+      <View style={[styles.screen, { paddingTop: insets.top }]}>
+        {/* The inset belongs here, not in LoadStateView: this branch replaces the whole
+            body, and most LoadStateView call sites are inline placeholders in a ScrollView.
+            See __tests__/safeAreaOnFailure.test.ts. */}
         <LoadStateView state={loadState(res)} onRetry={load} />
       </View>
     );
