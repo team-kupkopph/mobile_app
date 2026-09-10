@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   dangerBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.danger, alignItems: "center", justifyContent: "center" },
   dangerBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
   outlineBtn: { marginTop: 12, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
-  outlineBtnLabel: { fontSize: 16, fontWeight: "700", color: colors.ink },
+  outlineBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
   tealBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   tealBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
   warnCard: { borderRadius: 18, backgroundColor: colors.warningBg, padding: 18 },
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   warnBody: { fontSize: 14, color: colors.warning, marginTop: 6, lineHeight: 20 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginTop: 24, marginBottom: 8 },
   blockerCard: { borderRadius: 18, padding: 16, marginBottom: 12, ...card },
-  blockerTitle: { fontSize: 16, fontWeight: "800", color: colors.ink },
+  blockerTitle: { ...typography.subtitle, fontWeight: "800", color: colors.ink },
   blockerDetail: { ...typography.meta, color: colors.muted, marginTop: 4 },
   blockerAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginTop: 8 },
 });

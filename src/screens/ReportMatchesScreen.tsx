@@ -11,7 +11,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { matchReasons, matchStrength } from "../community";
 import { MatchShape, RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
@@ -112,10 +112,10 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: 14 },
   photo: { width: 96, height: 96, borderRadius: 16, backgroundColor: colors.soft },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  type: { color: colors.ink, fontSize: 16, fontWeight: "800" },
+  type: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 11, paddingVertical: 4, borderRadius: 11 },
-  chipText: { fontSize: 12, fontWeight: "700" },
+  chipText: { ...typography.meta, fontWeight: "700" },
   reasons: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 19 },
   review: { marginTop: 10, color: colors.teal, fontSize: 14.5, fontWeight: "700" },
-  footnote: { marginTop: 8, color: colors.muted, fontSize: 13.5, textAlign: "center" }
+  footnote: { marginTop: 8, color: colors.muted, ...typography.meta, textAlign: "center" }
 });

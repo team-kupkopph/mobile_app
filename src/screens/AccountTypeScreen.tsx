@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, authColors } from "./AuthFormKit";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -195,8 +195,8 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.paleTeal
   },
   providerLetter: { color: authColors.teal, fontSize: 15, fontWeight: "700" },
-  identityEmail: { flex: 1, marginLeft: 12, color: authColors.ink, fontSize: 14, fontWeight: "600" },
-  identitySource: { color: colors.muted, fontSize: 12 },
+  identityEmail: { flex: 1, marginLeft: 12, color: authColors.ink, ...typography.meta, fontWeight: "600" },
+  identitySource: { color: colors.muted, ...typography.meta },
   chevron: {
     color: authColors.muted,
     fontSize: 26,

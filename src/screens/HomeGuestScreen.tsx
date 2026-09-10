@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
   },
   availableText: {
     color: "#356A24",
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   shelterText: {

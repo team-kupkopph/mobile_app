@@ -206,9 +206,41 @@ function stepFor(r: Resolved): string | null {
   return null;
 }
 
+/**
+ * The migration table declared in the header of `src/theme/typography.ts`, which says which
+ * step each stray size belongs to. T2 snapped the subset where the size is the ONLY thing
+ * that moves; a size whose step would also change weight, tracking or leading is a restyle,
+ * not a snap, and is left for a decision rather than swept in here.
+ */
+const MIGRATION: Record<number, string> = {};
+for (const [sizes, step] of [
+  [[30, 28, 27], "display"], [[26, 25, 24], "hero"], [[23, 22, 21], "title"],
+  [[20, 19, 18], "section"], [[17, 16.5, 16], "subtitle"], [[15.5, 15, 14.5], "body"],
+  [[14, 13.5, 13, 12.5, 12], "meta"], [[11, 10, 9], "label"]
+] as [number[], string][]) {
+  for (const s of sizes) MIGRATION[s] = step;
+}
+
+/** What a bind would change besides the size. Empty means it is a pure snap. */
+function sideEffects(r: Resolved, step: string): string[] {
+  const tok = RAMP[step];
+  const out: string[] = [];
+  if (isOpen(step)) {
+    if (r.tracking !== 0) out.push("tracking");
+    if (r.leading !== null) out.push("leading");
+    return out;
+  }
+  if (String(tok.fontWeight ?? "400") !== r.weight) out.push("weight");
+  if (Number(tok.letterSpacing ?? 0) !== r.tracking) out.push("tracking");
+  const tl = tok.lineHeight === undefined ? null : Number(tok.lineHeight);
+  if (tl !== r.leading) out.push("leading");
+  return out;
+}
+
 const bound: string[] = [];
 const rawSites: { file: string; resolved: Resolved }[] = [];
 const bindableButRaw: string[] = [];
+const snappableButRaw: string[] = [];
 
 for (const file of sources(SRC)) {
   const text = readFileSync(file, "utf8");
@@ -229,20 +261,45 @@ for (const file of sources(SRC)) {
     if (!r) continue;
     rawSites.push({ file, resolved: r });
     const step = stepFor(r);
-    if (step) bindableButRaw.push(`${file} -> ${step} ${JSON.stringify(r)}`);
+    if (step) {
+      bindableButRaw.push(`${file} -> ${step} ${JSON.stringify(r)}`);
+      continue;
+    }
+    const target = MIGRATION[r.size];
+    if (target) {
+      const delta = Number(RAMP[target].fontSize) - r.size;
+      if (Math.abs(delta) > 0 && Math.abs(delta) <= 1 && sideEffects(r, target).length === 0) {
+        snappableButRaw.push(`${file} -> ${target} (${delta > 0 ? "+" : ""}${delta}pt) ${JSON.stringify(r)}`);
+      }
+    }
   }
 }
 
 /**
  * ⚠️ THIS NUMBER IS THE REMAINING WORK, NOT A BUDGET. 876 style objects held a literal
- * fontSize before T1; 164 of them already rendered exactly as a ramp step and are now bound,
- * leaving 712 — of which two are `fontSize: Math.round(size * 0.33)` in Avatar, a size
- * computed from a prop, which no fixed ramp can hold. Those are not counted, so 710 is the
- * literal off-ramp population: the ≈1pt band (T2 — 14→15, 16→17, 12→13, 22→21) and the
- * genuinely off sizes (T3). It may fall. It may not rise: a new screen typing `fontSize: 14`
- * is the drift the ramp exists to end.
+ * fontSize before T1. T1 bound the 164 that already rendered exactly as a step, leaving 710
+ * (712 less Avatar's two `fontSize: Math.round(size * 0.33)`, a size computed from a prop,
+ * which no fixed ramp can hold). T2 then snapped the 221 where the SIZE IS THE ONLY THING
+ * THAT MOVES — 16→17 x83, 14→13 x77, 12→13 x49, and four half-point strays. (49, not 50:
+ * the tab label is held back deliberately — see the exemption below.)
+ *
+ * What is left is not more of the same, and should not be described as "the rest of the 1pt
+ * band". It is three groups, each carrying a decision rather than a delta:
+ *
+ *   · 259 sit within 1pt of a step but would ALSO gain the step's tracking, lose an explicit
+ *     line height, or change weight. The largest are 22→title x46 and 20/18→section x43,
+ *     which snap 1pt AND adopt tracking the screens never had.
+ *   · 167 are ALREADY the right size and differ only in the other three properties. 88 of
+ *     these are 15pt at weight 600/700/800 — and `body`, the only 15pt step, is closed at
+ *     400. THE RAMP HAS NO BOLD FIFTEEN. Binding them would de-bold 88 sites, which is the
+ *     regression the ramp was un-pinned to prevent.
+ *   · 60 are further than 1pt away — 58 of them 30pt, the app's most common heading size,
+ *     for which the canvas declares no step at all. That is T3.
+ *
+ * It may fall. It may not rise: a new screen typing `fontSize: 14` is the drift the ramp
+ * exists to end.
  */
-const OFF_RAMP = 710;
+const OFF_RAMP = 490;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
@@ -254,6 +311,21 @@ describe("screens take their text sizes from the ramp", () => {
 
   it("leaves no style that could bind to a step with no pixel change", () => {
     expect(bindableButRaw).toEqual([]);
+  });
+
+  it("leaves no size that could snap to a step with only the size moving", () => {
+    // T2's rule. A size within 1pt of a step whose bind changes nothing else is a snap and
+    // belongs on the ramp; one that would also restyle the text is deliberately still here.
+    //
+    // ⚠️ ONE DELIBERATE EXEMPTION, AND IT IS ASSERTED RATHER THAN ALLOWED. TabBar's label is
+    // 12pt, which the size table maps to `meta` (13) — but the canvas draws that exact
+    // element at 11px, so snapping up would move it AWAY from the design. It fits no step:
+    // the 11pt one is uppercase/800/+0.8, this is sentence case at +0.1 with a weight that
+    // changes on selection. Listing it here (rather than skipping it in the scan) means a
+    // stale exemption fails too: snap it, and this expectation goes red.
+    expect(snappableButRaw.map((s) => s.split(" -> ")[0].replace(/^.*\/src\//, "src/"))).toEqual([
+      "src/components/ui/TabBar.tsx"
+    ]);
   });
 
   it("has not grown a new off-ramp text size", () => {

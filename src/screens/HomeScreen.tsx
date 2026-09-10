@@ -639,7 +639,7 @@ const styles = StyleSheet.create({
   },
   reviewTitle: {
     color: colors.warningStrong,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   reviewText: {
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
   },
   statusLink: {
     color: colors.warningStrong,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   verifiedHero: {
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12
   },
   spotChipText: {
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   spotTitle: {
@@ -773,7 +773,7 @@ const styles = StyleSheet.create({
   },
   spotNext: {
     color: colors.teal,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   spotChevron: {
@@ -812,7 +812,7 @@ const styles = StyleSheet.create({
     // Ink, not teal: the system's outline/secondary button takes a V2INK label, and against
     // white it is the higher-contrast of the two.
     color: colors.ink,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   reportPaw: {
@@ -833,7 +833,7 @@ const styles = StyleSheet.create({
   },
   seeAll: {
     color: "#126B69",
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   petCard: {
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   },
   availableText: {
     color: "#356A24",
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   shelterText: {
@@ -915,7 +915,7 @@ const styles = StyleSheet.create({
   },
   urgentText: {
     color: colors.warningStrong,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   lockedNote: {
@@ -927,7 +927,7 @@ const styles = StyleSheet.create({
   emptyNote: {
     marginTop: 12,
     color: colors.muted,
-    fontSize: 12,
+    ...typography.meta,
     textAlign: "center"
   },
   rescueSectionRow: {
@@ -946,7 +946,7 @@ const styles = StyleSheet.create({
   },
   specialText: {
     color: colors.teal,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   stableBadge: {
@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
   },
   stableText: {
     color: "#356A24",
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   }
 });

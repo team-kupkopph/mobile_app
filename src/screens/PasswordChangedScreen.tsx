@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   subheading: {
     marginTop: 6,
     color: authColors.muted,
-    fontSize: 14
+    ...typography.meta
   },
   noticeBar: {
     width: "100%",
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     color: authColors.ink,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   noticeBody: {

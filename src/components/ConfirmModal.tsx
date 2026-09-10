@@ -3,6 +3,7 @@
 // Kept deliberately generic — no volunteer/cancel-specific copy or logic lives here — so any
 // destructive-action confirm (starting with V9's shelter-cancel confirm) can reuse it as-is.
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { typography } from "../theme";
 
 export type ConfirmModalTone = "neutral" | "danger";
 
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     color: colors.muted,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "700"
   },
   secondaryText: {

@@ -226,9 +226,9 @@ const styles = StyleSheet.create({
     width: "100%", height: 56, marginTop: 36, borderRadius: 28,
     alignItems: "center", justifyContent: "center", backgroundColor: colors.danger
   },
-  cancelButtonText: { color: colors.white, fontSize: 16, fontWeight: "800" },
+  cancelButtonText: { color: colors.white, ...typography.subtitle, fontWeight: "800" },
   keepLink: { marginTop: 16, height: 40, alignItems: "center", justifyContent: "center" },
-  keepLinkText: { color: colors.teal, fontSize: 14, fontWeight: "800" },
+  keepLinkText: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, fontSize: 24, fontWeight: "800" },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
@@ -236,5 +236,5 @@ const styles = StyleSheet.create({
     width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",
     justifyContent: "center", backgroundColor: colors.teal
   },
-  primaryText: { color: colors.white, fontSize: 16, fontWeight: "800" }
+  primaryText: { color: colors.white, ...typography.subtitle, fontWeight: "800" }
 });

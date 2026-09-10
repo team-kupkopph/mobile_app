@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   docDone: { alignItems: "center" },
   docCheck: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#5B8A3A" },
   docDoneText: { marginTop: 5, color: colors.muted, fontSize: 10, fontWeight: "700" },
-  fieldLabel: { marginTop: 22, marginBottom: 8, color: colors.muted, fontSize: 12, fontWeight: "800" },
+  fieldLabel: { marginTop: 22, marginBottom: 8, color: colors.muted, ...typography.meta, fontWeight: "800" },
   socialField: {
     height: 54,
     borderRadius: 14,
@@ -283,6 +283,6 @@ const styles = StyleSheet.create({
   formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 54, marginTop: 20, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
   submitButtonDisabled: { opacity: 0.5 },
-  submitText: { color: "#FFFFFF", fontSize: 16, fontWeight: "800" },
+  submitText: { color: "#FFFFFF", ...typography.subtitle, fontWeight: "800" },
   deferLink: { marginTop: 18, color: "#08716D", ...typography.meta, fontWeight: "800", textAlign: "center" }
 });

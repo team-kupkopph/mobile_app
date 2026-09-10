@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { colors, gradients, motion } from "../../theme";
+import { colors, gradients, motion, typography } from "../../theme";
 import { GlassSurface } from "../GlassSurface";
 import { PressScale } from "./PressScale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -187,6 +187,13 @@ const styles = StyleSheet.create({
   tabText: {
     marginTop: 4,
     color: colors.tabInactive,
+    // ⚠️ NOT SNAPPED TO THE RAMP, DELIBERATELY. The size table maps 12 -> meta (13), but the
+    // canvas draws this exact element at 11px (Main.dc.html: the tab label span is
+    // `font-size: 11px; letter-spacing: .1px; font-weight: {{tab.weight}}`). Snapping up to
+    // 13 would move the tab label AWAY from the design, not toward it. It does not fit the
+    // 11pt `label` step either — that step is uppercase, 800, +0.8 tracking, while this is
+    // sentence case at +0.1 with a weight that changes on selection. The 1pt gap between
+    // this and the canvas is a real finding, not drift to absorb; see the T2 PR.
     fontSize: 12,
     fontWeight: "600"
   },

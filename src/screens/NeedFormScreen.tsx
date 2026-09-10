@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -153,13 +153,13 @@ const styles = StyleSheet.create({
   fieldError: { borderWidth: 1.5, borderColor: colors.danger },
   fieldLabel: { color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
   input: { color: colors.ink, fontSize: 18, fontWeight: "700", paddingVertical: 6 },
-  multiline: { minHeight: 72, textAlignVertical: "top", fontWeight: "400", fontSize: 16 },
-  error: { marginTop: 8, color: colors.danger, fontSize: 14, fontWeight: "600" },
+  multiline: { minHeight: 72, textAlignVertical: "top", fontWeight: "400", ...typography.subtitle },
+  error: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "600" },
   groupLabel: { marginTop: 22, marginBottom: 10, color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
   segments: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   segment: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, ...card },
   segmentOn: { backgroundColor: colors.teal },
-  segmentText: { color: colors.ink, fontSize: 14, fontWeight: "700", textTransform: "capitalize" },
+  segmentText: { color: colors.ink, ...typography.meta, fontWeight: "700", textTransform: "capitalize" },
   segmentTextOn: { color: colors.white },
   stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", padding: 8, borderRadius: 22, ...card },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },

@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 28, paddingBottom: 60 },
   title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, fontSize: 14, lineHeight: 20 },
-  groupLabel: { marginTop: 20, marginBottom: 4, color: authColors.ink, fontSize: 12, fontWeight: "800" },
+  groupLabel: { marginTop: 20, marginBottom: 4, color: authColors.ink, ...typography.meta, fontWeight: "800" },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
     paddingHorizontal: 18,
@@ -176,5 +176,5 @@ const styles = StyleSheet.create({
   chipTextActive: { color: authColors.tealDark },
   formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submit: { marginTop: 26 },
-  next: { marginTop: 14, color: "#9A988F", fontSize: 12, textAlign: "center" }
+  next: { marginTop: 14, color: "#9A988F", ...typography.meta, textAlign: "center" }
 });

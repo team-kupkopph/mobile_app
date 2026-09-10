@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   resendHint: {
     marginTop: 26,
     color: authColors.muted,
-    fontSize: 12,
+    ...typography.meta,
     textAlign: "center"
   },
   resendAction: {
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   resendNotice: {
     marginTop: 6,
     color: authColors.teal,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "700",
     textAlign: "center"
   },

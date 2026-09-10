@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   statDivider: { width: 1, height: 40, backgroundColor: colors.border },
   statValue: { color: colors.ink, fontSize: 24, fontWeight: "800" },
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "700" },
-  sectionLabel: { marginTop: 4, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
+  sectionLabel: { marginTop: 4, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },

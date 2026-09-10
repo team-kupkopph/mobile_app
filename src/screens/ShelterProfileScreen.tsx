@@ -339,8 +339,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.warningBg
   },
   accentCopy: { flex: 1 },
-  accentWarnTitle: { color: colors.warningStrong, fontSize: 16, fontWeight: "800" },
-  accentWarnBody: { marginTop: 3, color: "#8a6d3b", fontSize: 12 },
+  accentWarnTitle: { color: colors.warningStrong, ...typography.subtitle, fontWeight: "800" },
+  accentWarnBody: { marginTop: 3, color: "#8a6d3b", ...typography.meta },
   accentWarnChev: { color: colors.warningStrong, fontSize: 22, fontWeight: "800" },
   accentTeal: {
     margin: 12,
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     backgroundColor: colors.infoBg
   },
-  accentTealTitle: { color: colors.tealDark, fontSize: 16, fontWeight: "800" },
-  accentTealBody: { marginTop: 3, color: "#5f6b6a", fontSize: 12 },
+  accentTealTitle: { color: colors.tealDark, ...typography.subtitle, fontWeight: "800" },
+  accentTealBody: { marginTop: 3, color: "#5f6b6a", ...typography.meta },
   accentTealChev: { color: colors.tealDark, fontSize: 22, fontWeight: "800" }
 });

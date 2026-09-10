@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   caption: {
     marginTop: 5,
     color: authColors.muted,
-    fontSize: 14
+    ...typography.meta
   },
   formError: {
     alignSelf: "stretch",

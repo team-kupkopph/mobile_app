@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   unlockText: {
     flex: 1,
     color: colors.ink,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "600"
   },
   lightCard: {
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   lightTitle: {
     color: colors.tealDark,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   lightText: {
@@ -191,14 +191,14 @@ const styles = StyleSheet.create({
   },
   ctaText: {
     color: colors.white,
-    fontSize: 16,
+    ...typography.subtitle,
     fontWeight: "800"
   },
   footnote: {
     marginTop: 12,
     marginBottom: 30,
     color: colors.muted,
-    fontSize: 12,
+    ...typography.meta,
     textAlign: "center"
   }
 });

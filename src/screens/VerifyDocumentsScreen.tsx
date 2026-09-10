@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   docMeta: { flex: 1, gap: 8 },
   docName: { color: colors.ink, fontSize: 18, fontWeight: "700" },
-  docCount: { color: colors.muted, fontSize: 14, fontWeight: "600", marginTop: -4 },
+  docCount: { color: colors.muted, ...typography.meta, fontWeight: "600", marginTop: -4 },
   chip: { alignSelf: "flex-start", paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   reviewNote: { marginTop: 12, color: colors.danger, ...typography.body },
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.dangerBg
   },
-  replaceBtnText: { color: colors.danger, fontSize: 16, fontWeight: "800" },
+  replaceBtnText: { color: colors.danger, ...typography.subtitle, fontWeight: "800" },
   approvedCard: {
     marginTop: 8,
     flexDirection: "row",
@@ -292,6 +292,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.success
   },
   approvedTitle: { color: colors.success, ...typography.subtitle, fontWeight: "800" },
-  approvedSub: { marginTop: 4, color: "#3f5a2e", fontSize: 14 },
-  allGood: { marginTop: 24, color: colors.muted, fontSize: 16, textAlign: "center" }
+  approvedSub: { marginTop: 4, color: "#3f5a2e", ...typography.meta },
+  allGood: { marginTop: 24, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });

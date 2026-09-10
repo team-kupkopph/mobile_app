@@ -5,7 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   description: { marginTop: 10, color: colors.muted, fontSize: 15.5, lineHeight: 22, textAlign: "center" },
   criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18, borderRadius: 22, ...card },
   criteriaLabel: { color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
-  criteriaText: { marginTop: 6, color: colors.ink, fontSize: 16, fontWeight: "600" },
+  criteriaText: { marginTop: 6, color: colors.ink, ...typography.subtitle, fontWeight: "600" },
   earnedPill: { marginTop: 22, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 16, backgroundColor: colors.successBg },
   earnedText: { color: colors.success, fontSize: 15, fontWeight: "700" },
   lockedText: { marginTop: 22, color: colors.muted, fontSize: 15, fontWeight: "600" }

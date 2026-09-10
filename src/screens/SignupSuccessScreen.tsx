@@ -158,13 +158,13 @@ const styles = StyleSheet.create({
   subheading: {
     marginTop: 6,
     color: authColors.muted,
-    fontSize: 14
+    ...typography.meta
   },
   sectionTitle: {
     alignSelf: "flex-start",
     marginTop: 34,
     color: authColors.ink,
-    fontSize: 16,
+    ...typography.subtitle,
     fontWeight: "800"
   },
   stepCard: {
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   stepBody: {
     marginTop: 3,
     color: authColors.muted,
-    fontSize: 12
+    ...typography.meta
   },
   verifyBadge: {
     marginLeft: 8,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   verifyText: {
     color: "#7A5310",
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   noticeBar: {

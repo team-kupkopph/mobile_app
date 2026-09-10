@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: "100%",
     color: colors.ink,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "600"
   },
   formError: {

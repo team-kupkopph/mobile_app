@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignSelf: "flex-start",
     color: authColors.muted,
-    fontSize: 12
+    ...typography.meta
   },
   submitButton: {
     alignSelf: "stretch",

@@ -13,6 +13,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
+import { typography } from "../theme";
 
 const CODE_LENGTH = 6;
 
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     color: authColors.danger,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   noticeBody: {
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
   capHint: {
     marginTop: 16,
     color: "#9A988F",
-    fontSize: 12,
+    ...typography.meta,
     textAlign: "center"
   }
 });

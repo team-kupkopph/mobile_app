@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   loginLink: {
     marginTop: 18,
     color: authColors.teal,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   laterPressable: {

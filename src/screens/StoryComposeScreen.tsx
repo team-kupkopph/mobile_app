@@ -10,7 +10,7 @@ import {
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -103,13 +103,13 @@ const styles = StyleSheet.create({
   h1: { color: colors.ink, fontSize: 24, fontWeight: "800", marginBottom: 14 },
   photoTile: { height: 150, borderRadius: 20, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
   photoTileSet: { borderStyle: "solid", borderColor: colors.teal, backgroundColor: colors.soft },
-  photoLabel: { color: colors.teal, fontSize: 16, fontWeight: "700" },
+  photoLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   linkedPill: { alignSelf: "flex-start", marginTop: 16, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, backgroundColor: "#EAF3DE" },
-  linkedText: { color: "#27500A", fontSize: 13.5, fontWeight: "700" },
+  linkedText: { color: "#27500A", ...typography.meta, fontWeight: "700" },
   label: { marginTop: 24, marginBottom: 10, color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
   field: { padding: 16, borderRadius: 20, ...card },
-  input: { color: colors.ink, fontSize: 16, minHeight: 96, textAlignVertical: "top" },
-  error: { marginTop: 10, color: colors.danger, fontSize: 14, fontWeight: "600" },
+  input: { color: colors.ink, ...typography.subtitle, minHeight: 96, textAlignVertical: "top" },
+  error: { marginTop: 10, color: colors.danger, ...typography.meta, fontWeight: "600" },
   primaryBtn: { marginTop: 28, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" }
 });

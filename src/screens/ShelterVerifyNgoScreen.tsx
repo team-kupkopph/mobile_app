@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   },
   consentBoxChecked: { backgroundColor: authColors.teal },
   pendingText: { flex: 1, color: "#633806", fontSize: 13, fontWeight: "700", lineHeight: 19 },
-  fieldLabel: { marginTop: 20, marginBottom: 8, color: colors.muted, fontSize: 12, fontWeight: "800" },
+  fieldLabel: { marginTop: 20, marginBottom: 8, color: colors.muted, ...typography.meta, fontWeight: "800" },
   field: {
     height: 54,
     borderRadius: 14,
@@ -294,5 +294,5 @@ const styles = StyleSheet.create({
   formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 54, marginTop: 22, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
   submitButtonDisabled: { opacity: 0.5 },
-  submitText: { color: "#FFFFFF", fontSize: 16, fontWeight: "800" }
+  submitText: { color: "#FFFFFF", ...typography.subtitle, fontWeight: "800" }
 });
