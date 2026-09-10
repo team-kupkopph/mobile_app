@@ -13,6 +13,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone } from "../shelterVolunteer";
+import { colors } from "../theme";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -162,17 +163,12 @@ function initials(name: string): string {
   return (parts[0][0] + (parts[1]?.[0] ?? "")).toUpperCase();
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", chipBg: "#E7F0EE", amberBg: "#FAEEDA", amber: "#633806",
-  greyBg: "#ECEAE3", grey: "#5F5E5A", danger: "#B23B3B", dangerBg: "#FBEAEA", line: "#E3E1D9"
-};
 
 const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = {
-  done: { backgroundColor: colors.chipBg }, muted: { backgroundColor: colors.greyBg }, danger: { backgroundColor: colors.dangerBg }
+  done: { backgroundColor: colors.soft }, muted: { backgroundColor: colors.greyPill }, danger: { backgroundColor: colors.dangerBg }
 };
 const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
-  done: { color: colors.tealDark }, muted: { color: colors.grey }, danger: { color: colors.danger }
+  done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.danger }
 };
 
 const card = {
@@ -196,13 +192,13 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, fontSize: 13, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: 20, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
+  avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   avatarText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
   name: { color: colors.ink, fontSize: 17, fontWeight: "800" },
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { fontSize: 12, fontWeight: "800" },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
-  noShowBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.greyBg },
+  noShowBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.greyPill },
   noShowText: { color: colors.ink, fontSize: 14, fontWeight: "800" },
   attendedBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   attendedText: { color: colors.white, fontSize: 14, fontWeight: "800" },

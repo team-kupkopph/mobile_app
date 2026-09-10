@@ -16,18 +16,14 @@ import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { CardTone, historyHours, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  chipBg: "#E7F0EE", greenBg: "#EAF3DE", green: "#27500A", amberBg: "#FAEEDA", amber: "#633806",
-  pinkBg: "#FBECEC", pink: "#B23B3B", line: "#E3E1D9"
-};
 
 const TONE: Record<CardTone, { bg: string; fg: string }> = {
-  active: { bg: colors.greenBg, fg: colors.green },
-  done: { bg: colors.chipBg, fg: colors.teal },
-  muted: { bg: colors.amberBg, fg: colors.amber },
-  danger: { bg: colors.pinkBg, fg: colors.pink }
+  active: { bg: colors.successBg, fg: colors.success },
+  done: { bg: colors.soft, fg: colors.teal },
+  muted: { bg: colors.warningBg, fg: colors.warningStrong },
+  danger: { bg: colors.dangerBg, fg: colors.danger }
 };
 
 const card = {
@@ -169,12 +165,12 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", borderRadius: 20, paddingVertical: 20, marginBottom: 18, ...card
   },
   statCol: { flex: 1, alignItems: "center" },
-  statDivider: { width: 1, height: 40, backgroundColor: colors.line },
+  statDivider: { width: 1, height: 40, backgroundColor: colors.border },
   statValue: { color: colors.ink, fontSize: 24, fontWeight: "800" },
   statLabel: { marginTop: 4, color: colors.muted, fontSize: 13, fontWeight: "700" },
   sectionLabel: { marginTop: 4, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
-  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.chipBg,
+  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.muted, fontSize: 13, fontWeight: "700" },

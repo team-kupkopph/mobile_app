@@ -14,6 +14,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
+import { colors } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -141,21 +142,16 @@ function ActionRow({ label, onPress, last }: { label: string; onPress: () => voi
   );
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", chipBg: "#E7F0EE", amberBg: "#FAEEDA", amber: "#633806",
-  greyBg: "#ECEAE3", grey: "#5F5E5A", danger: "#B23B3B", dangerBg: "#FBEAEA", line: "#E3E1D9"
-};
 
 const STATUS_STYLE: Record<StatusTone, { backgroundColor: string }> = {
-  active: { backgroundColor: colors.chipBg },
-  muted: { backgroundColor: colors.greyBg },
-  danger: { backgroundColor: colors.amberBg }
+  active: { backgroundColor: colors.soft },
+  muted: { backgroundColor: colors.greyPill },
+  danger: { backgroundColor: colors.warningBg }
 };
 const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
   active: { color: colors.tealDark },
-  muted: { color: colors.grey },
-  danger: { color: colors.amber }
+  muted: { color: colors.muted },
+  danger: { color: colors.warningStrong }
 };
 
 const card = {
@@ -174,7 +170,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 20, paddingBottom: 60 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
-  heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
+  heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   heroTitle: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   heroWhen: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
   heroOrg: { marginTop: 2, color: colors.muted, fontSize: 13 },
@@ -189,7 +185,7 @@ const styles = StyleSheet.create({
   sectionLabel: { marginTop: 28, marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
   actionCard: { borderRadius: 20, overflow: "hidden", ...card },
   actionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, height: 60 },
-  actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.line },
+  actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
   actionRowText: { color: colors.ink, fontSize: 16, fontWeight: "800" },
   actionRowGlyph: { color: colors.muted, fontSize: 20, fontWeight: "700" },
   cancelButton: {

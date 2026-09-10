@@ -9,6 +9,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaRequested">;
 
@@ -49,17 +50,13 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", paleTeal: "#E7F0EE",
-  white: "#FFFFFF"
-};
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { flex: 1, paddingHorizontal: 28, paddingTop: 100, alignItems: "center" },
   iconCircle: {
     width: 108, height: 108, borderRadius: 54, alignItems: "center", justifyContent: "center",
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   heading: { marginTop: 24, color: colors.ink, fontSize: 28, fontWeight: "800" },
   subheading: { marginTop: 10, color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },

@@ -15,13 +15,10 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { ShiftType, shiftTypeLabel } from "../volunteer";
+import { colors } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B", fine: "#9a988f", chipBg: "#E7F0EE"
-};
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -92,7 +89,7 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
           value={startsAt}
           onChangeText={setStartsAt}
           placeholder="2026-08-30T09:00"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.faintDeprecated}
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -103,7 +100,7 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
           value={endsAt}
           onChangeText={setEndsAt}
           placeholder="2026-08-30T11:00"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.faintDeprecated}
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -114,7 +111,7 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
           value={capacity}
           onChangeText={setCapacity}
           placeholder="1"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.faintDeprecated}
           keyboardType="number-pad"
         />
 
@@ -162,7 +159,7 @@ const styles = StyleSheet.create({
     minWidth: "47%", height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center",
     paddingHorizontal: 12, ...card
   },
-  chipActive: { backgroundColor: colors.chipBg },
+  chipActive: { backgroundColor: colors.soft },
   chipText: { color: colors.muted, fontSize: 14, fontWeight: "700" },
   chipTextActive: { color: colors.teal },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },

@@ -14,11 +14,8 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { BrowseShift, shiftDurationLabel, shiftSlotsChip, shiftTimeRange, shiftTypeLabel } from "../volunteer";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", chipBg: "#E7F0EE", danger: "#B23B3B", line: "#E3E1D9"
-};
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -252,13 +249,13 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 22, paddingBottom: 60 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   // Squircle, matching the hub card's tile — V2 replaced round tiles with rounded squares.
-  heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
+  heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   heroTitle: { flex: 1, color: colors.ink, fontSize: 24, fontWeight: "800" },
   orgName: { marginTop: 14, color: colors.ink, fontSize: 16, fontWeight: "800" },
   infoCard: { marginTop: 16, borderRadius: 18, paddingHorizontal: 18, paddingVertical: 16, ...card },
   infoDate: { color: colors.ink, fontSize: 17, fontWeight: "800" },
   infoWhen: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
-  infoDivider: { marginTop: 14, height: 1, backgroundColor: colors.line },
+  infoDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },
   infoChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 12, height: 28,
               borderRadius: 14, justifyContent: "center" },
   infoChipText: { fontSize: 13, fontWeight: "800" },
@@ -266,9 +263,9 @@ const styles = StyleSheet.create({
   sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   consentRow: {
     marginBottom: 14, borderRadius: 14, flexDirection: "row", alignItems: "flex-start",
-    paddingHorizontal: 16, paddingVertical: 16, gap: 14, backgroundColor: colors.chipBg
+    paddingHorizontal: 16, paddingVertical: 16, gap: 14, backgroundColor: colors.soft
   },
-  consentRowAlert: { backgroundColor: "#FBEAEA" },
+  consentRowAlert: { backgroundColor: "#FBEEEC" },
   consentBox: {
     width: 26, height: 26, borderRadius: 7, borderWidth: 1.5, borderColor: colors.teal,
     alignItems: "center", justifyContent: "center", backgroundColor: colors.white, marginTop: 1

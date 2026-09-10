@@ -24,6 +24,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift, blastRadiusCopy } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -120,8 +121,8 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
 
       {phase === "done" ? (
         <View style={styles.content}>
-          <View style={[styles.iconCircle, { backgroundColor: colors.greenBg }]}>
-            <CheckIcon color={colors.green} size={32} />
+          <View style={[styles.iconCircle, { backgroundColor: colors.successBg }]}>
+            <CheckIcon color={colors.success} size={32} />
           </View>
           <Text style={styles.heading}>Activity cancelled</Text>
           <Text style={styles.subheading}>
@@ -192,10 +193,6 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  greenBg: "#EAF3DE", green: "#27500A", chipBg: "#E7F0EE", danger: "#B23B3B", dangerBg: "#FBEAEA"
-};
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -217,7 +214,7 @@ const styles = StyleSheet.create({
     width: "100%", flexDirection: "row", alignItems: "center", gap: 14,
     borderRadius: 20, padding: 18, ...card
   },
-  summaryIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
+  summaryIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   summaryTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
   summaryWhen: { marginTop: 3, color: colors.teal, fontSize: 13, fontWeight: "700" },
   summarySub: { marginTop: 3, color: colors.muted, fontSize: 13 },

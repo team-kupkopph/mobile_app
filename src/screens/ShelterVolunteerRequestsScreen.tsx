@@ -19,6 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -256,7 +257,7 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
 
                   {row.reliability.needs_reapproval && (
                     <View style={styles.flagStrip}>
-                      <AlertIcon color={colors.amber} size={26} />
+                      <AlertIcon color={colors.warningStrong} size={26} />
                       <View style={{ flex: 1 }}>
                         <Text style={styles.flagTitle}>Needs re-approval</Text>
                         <Text style={styles.flagSub}>
@@ -374,17 +375,12 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", chipBg: "#E7F0EE", amberBg: "#FAEEDA", amber: "#633806",
-  greyBg: "#ECEAE3", grey: "#5F5E5A", danger: "#B23B3B", dangerBg: "#FBEAEA", line: "#E3E1D9"
-};
 
 const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = {
-  done: { backgroundColor: colors.chipBg }, muted: { backgroundColor: colors.greyBg }, danger: { backgroundColor: colors.amberBg }
+  done: { backgroundColor: colors.soft }, muted: { backgroundColor: colors.greyPill }, danger: { backgroundColor: colors.warningBg }
 };
 const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
-  done: { color: colors.tealDark }, muted: { color: colors.grey }, danger: { color: colors.amber }
+  done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.warningStrong }
 };
 
 const card = {
@@ -410,7 +406,7 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, fontSize: 13, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: 20, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
+  avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   avatarText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
   name: { color: colors.ink, fontSize: 17, fontWeight: "800" },
   requestedAt: { marginTop: 2, color: colors.muted, fontSize: 12 },
@@ -418,12 +414,12 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 12, fontWeight: "800" },
   flagStrip: {
     marginTop: 12, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 12,
-    flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: colors.amberBg
+    flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: colors.warningBg
   },
-  flagTitle: { color: colors.amber, fontSize: 14, fontWeight: "800" },
-  flagSub: { marginTop: 1, color: colors.amber, fontSize: 12 },
+  flagTitle: { color: colors.warningStrong, fontSize: 14, fontWeight: "800" },
+  flagSub: { marginTop: 1, color: colors.warningStrong, fontSize: 12 },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
-  declineBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.greyBg },
+  declineBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.greyPill },
   declineText: { color: colors.ink, fontSize: 14, fontWeight: "800" },
   approveBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   approveText: { color: colors.white, fontSize: 14, fontWeight: "800" },
@@ -437,9 +433,9 @@ const styles = StyleSheet.create({
   pickerList: { marginTop: 14 },
   animalCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, marginBottom: 10, ...card },
   animalPhoto: { width: 52, height: 52, borderRadius: 12 },
-  animalPhotoEmpty: { backgroundColor: colors.greyBg },
+  animalPhotoEmpty: { backgroundColor: colors.greyPill },
   animalName: { color: colors.ink, fontSize: 15, fontWeight: "800" },
   animalSpecies: { marginTop: 2, color: colors.muted, fontSize: 12 },
-  skipBtn: { marginTop: 8, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: colors.chipBg },
+  skipBtn: { marginTop: 8, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   skipText: { color: colors.tealDark, fontSize: 14, fontWeight: "800" }
 });

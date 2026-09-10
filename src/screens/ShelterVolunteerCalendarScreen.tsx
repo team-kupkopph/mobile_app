@@ -14,6 +14,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
+import { colors } from "../theme";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -134,21 +135,16 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", chipBg: "#E7F0EE", amberBg: "#FAEEDA", amber: "#633806",
-  greyBg: "#ECEAE3", grey: "#5F5E5A"
-};
 
 const STATUS_STYLE: Record<StatusTone, { backgroundColor: string }> = {
-  active: { backgroundColor: colors.chipBg },
-  muted: { backgroundColor: colors.greyBg },
-  danger: { backgroundColor: colors.amberBg }
+  active: { backgroundColor: colors.soft },
+  muted: { backgroundColor: colors.greyPill },
+  danger: { backgroundColor: colors.warningBg }
 };
 const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
   active: { color: colors.tealDark },
-  muted: { color: colors.grey },
-  danger: { color: colors.amber }
+  muted: { color: colors.muted },
+  danger: { color: colors.warningStrong }
 };
 
 const card = {
@@ -171,7 +167,7 @@ const styles = StyleSheet.create({
   section: { marginBottom: 22 },
   sectionHeading: { marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 18, marginBottom: 10, ...card },
-  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
+  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 16, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.muted, fontSize: 13 },
   statusChip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },

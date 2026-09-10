@@ -12,12 +12,8 @@ import { AlertIcon, CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { RootStackParamList } from "../navigation/types";
 import { lateCancelCopy } from "../volunteer";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  greenBg: "#EAF3DE", green: "#27500A", amberBg: "#FAEEDA", amber: "#633806",
-  pinkBg: "#FBECEC", pink: "#B23B3B"
-};
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -55,8 +51,8 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
   }
 
   const resultTone = wasLate
-    ? { bg: colors.amberBg, fg: colors.amber }
-    : { bg: colors.greenBg, fg: colors.green };
+    ? { bg: colors.warningBg, fg: colors.warningStrong }
+    : { bg: colors.successBg, fg: colors.success };
 
   return (
     <View style={styles.screen}>
@@ -97,8 +93,8 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
 
       {phase === "confirm" && !!errorMessage && (
         <View style={styles.content}>
-          <View style={[styles.iconCircle, { backgroundColor: colors.pinkBg }]}>
-            <AlertIcon color={colors.pink} size={40} />
+          <View style={[styles.iconCircle, { backgroundColor: colors.dangerBg }]}>
+            <AlertIcon color={colors.danger} size={40} />
           </View>
           <Text style={styles.heading}>Couldn't cancel</Text>
           <Text style={styles.subheading}>{errorMessage}</Text>

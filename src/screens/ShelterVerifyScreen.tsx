@@ -14,6 +14,7 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
 const MIN_PHOTOS = 3;
 
@@ -195,7 +196,6 @@ function DocSlot({
   );
 }
 
-const colors = { ink: "#12213A", muted: "#5F5E5A", tealDark: "#14504F", paleTeal: "#E7F0EE" };
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F5F2" },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     shadowRadius: 7,
     elevation: 2
   },
-  docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.paleTeal },
+  docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   docCopy: { flex: 1, marginLeft: 14 },
   docTitle: { color: colors.ink, fontSize: 15, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, fontSize: 11 },
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     gap: 14,
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   consentBox: {
     width: 26,

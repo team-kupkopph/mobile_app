@@ -12,6 +12,7 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
+import { colors } from "../theme";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -204,7 +205,6 @@ function DocSlot({
   );
 }
 
-const colors = { ink: "#12213A", muted: "#5F5E5A", tealDark: "#14504F", paleTeal: "#E7F0EE" };
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F5F2" },
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   docCardDisabled: { opacity: 0.55 },
-  docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.paleTeal },
+  docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   docCopy: { flex: 1, marginLeft: 14 },
   docTitle: { color: colors.ink, fontSize: 15, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, fontSize: 11 },

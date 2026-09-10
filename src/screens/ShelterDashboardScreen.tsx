@@ -18,6 +18,7 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -200,16 +201,6 @@ function Stat({ n, label }: { n: number; label: string }) {
   );
 }
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  page: "#F4F5F2",
-  muted: "#5F5E5A",
-  warnBg: "#FAEEDA",
-  warn2: "#633806",
-  paleTeal: "#E7F0EE",
-  grey: "#ECEAE3"
-};
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
@@ -223,13 +214,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     height: 34,
     borderRadius: 17,
-    backgroundColor: colors.grey
+    backgroundColor: colors.greyPill
   },
   pillDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: colors.muted },
   pillText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
   verifiedPill: {
     flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 14, height: 34,
-    borderRadius: 17, backgroundColor: colors.paleTeal
+    borderRadius: 17, backgroundColor: colors.soft
   },
   verifiedPillDot: {
     width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center",
@@ -255,7 +246,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 18,
     paddingVertical: 16,
-    backgroundColor: colors.warnBg
+    backgroundColor: colors.warningBg
   },
   bannerIcon: {
     width: 46,
@@ -266,9 +257,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3E1BE"
   },
   bannerCopy: { flex: 1, marginLeft: 18 },
-  bannerTitle: { color: colors.warn2, fontSize: 19, fontWeight: "800" },
+  bannerTitle: { color: colors.warningStrong, fontSize: 19, fontWeight: "800" },
   bannerBody: { marginTop: 2, color: "#8a6d3b", fontSize: 13 },
-  bannerCta: { color: colors.warn2, fontSize: 15, fontWeight: "700" },
+  bannerCta: { color: colors.warningStrong, fontSize: 15, fontWeight: "700" },
   statRow: { marginTop: 22, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
     width: "31%",
@@ -303,7 +294,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 24,
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   footCopy: { flex: 1 },
   footTitle: { color: "#14504F", fontSize: 17, fontWeight: "800" },
