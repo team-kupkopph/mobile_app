@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { InquiryList } from "../components/InquiryList";
 import { PressScale, SegmentedControl } from "../components/ui";
-import { motion, typography } from "../theme";
+import { elevation, motion, typography } from "../theme";
 
 import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -157,8 +157,7 @@ function capitalize(s: string): string {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

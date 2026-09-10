@@ -16,7 +16,7 @@ import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { CardTone, historyHours, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 const TONE: Record<CardTone, { bg: string; fg: string }> = {
@@ -27,8 +27,7 @@ const TONE: Record<CardTone, { bg: string; fg: string }> = {
 };
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 function shiftDateLabel(iso: string): string {

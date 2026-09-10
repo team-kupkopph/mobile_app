@@ -19,7 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -384,8 +384,7 @@ const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
 };
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

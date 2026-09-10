@@ -15,7 +15,7 @@ import { loadState } from "../net";
 import { AlertIcon, CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docChip, docLabel, groupAttention, splitDocs } from "../verifications";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyDocuments">;
@@ -200,11 +200,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
@@ -218,11 +214,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 40,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   noteBanner: {
     marginTop: 22,
@@ -244,11 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     padding: 18,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   docRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   docIconTile: {

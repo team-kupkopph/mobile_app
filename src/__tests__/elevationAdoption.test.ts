@@ -1,0 +1,267 @@
+/**
+ * Screens take depth from `src/theme/elevation.ts`, not from a shadow they typed themselves.
+ *
+ * ⚠️ WHAT MADE THIS TRACK SAFE TO RUN AS A MECHANICAL BIND. Unlike the type ramp, the
+ * elevation token needed no correction first: its three steps translate the canvas honestly.
+ * The canvas layers TWO shadows per surface (`--sh-soft: 0 1px 2px rgba(31,58,95,.04),
+ * 0 4px 10px -3px rgba(31,58,95,.10)`), React Native gives a View exactly one, and the token
+ * says so in its own header rather than pretending otherwise — it keeps the ambient half and
+ * drops the contact half. The offsets carry straight across (4 / 10 / 16), the cast colour is
+ * the canvas's rgba(31,58,95) exactly, and blur and opacity are scaled consistently because
+ * CSS's negative spread has no RN equivalent. So a bind here reproduces what already renders.
+ *
+ * The guard resolves each shadow rather than matching text, for the same reason the type one
+ * does: `shadowColor: colors.shadowCast` and `shadowColor: "#1F3A5F"` are the same pixel, and
+ * a scan that compares source strings would call 62 sites conforming and 32 not.
+ *
+ * A RATCHET, in the shape of themeAdoption.test.ts.
+ */
+import { readdirSync, readFileSync, statSync } from "fs";
+import { join } from "path";
+
+import { colors, elevation } from "../theme";
+
+const SRC = join(__dirname, "..");
+const STEPS = elevation as Record<
+  string,
+  { shadowColor: string; shadowOffset: { width: number; height: number };
+    shadowOpacity: number; shadowRadius: number; elevation: number }
+>;
+const KEYS = ["shadowColor", "shadowOffset", "shadowOpacity", "shadowRadius", "elevation"];
+
+function sources(dir: string, out: string[] = []): string[] {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      if (entry !== "__tests__" && entry !== "node_modules") sources(full, out);
+    } else if (/\.tsx?$/.test(entry) && !/\.test\.tsx?$/.test(entry)) {
+      // A token file defines the steps; it does not bind to them. Without this the binder
+      // rewrote elevation.ts into `soft: { ...elevation.soft }` and TypeScript reported a
+      // block-scoped variable used before its own declaration.
+      if (full !== join(SRC, "theme", "elevation.ts")) out.push(full);
+    }
+  }
+  return out;
+}
+
+/** Comments and double-quoted strings blanked inside one object; see typeRampAdoption. */
+function maskBlock(text: string, lo: number, hi: number): string {
+  const out = text.split("");
+  const blank = (a: number, b: number) => {
+    for (let k = a; k < b; k++) if (out[k] !== "\n") out[k] = " ";
+  };
+  let i = lo;
+  const n = hi + 1;
+  while (i < n) {
+    const c = text[i];
+    const nx = i + 1 < n ? text[i + 1] : "";
+    if (c === "/" && nx === "/") {
+      let j = text.indexOf("\n", i);
+      if (j === -1 || j > n) j = n;
+      blank(i, j); i = j;
+    } else if (c === "/" && nx === "*") {
+      let j = text.indexOf("*/", i + 2);
+      j = j === -1 || j + 2 > n ? n : j + 2;
+      blank(i, j); i = j;
+    } else if (c === '"') {
+      let j = i + 1;
+      while (j < n && text[j] !== '"') {
+        if (text[j] === "\\") j++;
+        j++;
+      }
+      blank(i, Math.min(j + 1, n)); i = Math.min(j + 1, n);
+    } else i++;
+  }
+  return out.join("");
+}
+
+function enclosingBlock(text: string, idx: number): [number, number] | null {
+  let depth = 0;
+  let start = -1;
+  for (let i = idx; i >= 0; i--) {
+    const c = text[i];
+    if (c === "}") depth++;
+    else if (c === "{") {
+      if (depth === 0) { start = i; break; }
+      depth--;
+    }
+  }
+  if (start < 0) return null;
+  depth = 0;
+  for (let j = start; j < text.length; j++) {
+    if (text[j] === "{") depth++;
+    else if (text[j] === "}") {
+      depth--;
+      if (depth === 0) return [start, j];
+    }
+  }
+  return null;
+}
+
+type Shadow = {
+  color: string | null; dy: number | null; opacity: number | null;
+  radius: number | null; android: number | null;
+};
+
+/** Resolve to rendered values: the token alias and the literal are the same pixel. */
+function readShadow(text: string, lo: number, hi: number): { s: Shadow; spread: string | null } {
+  const masked = maskBlock(text, lo, hi);
+  let depth = 0;
+  const cuts: number[] = [];
+  for (let i = lo; i <= hi; i++) {
+    const c = masked[i];
+    if (c === "{" || c === "[" || c === "(") depth++;
+    else if (c === "}" || c === "]" || c === ")") depth--;
+    else if (c === "," && depth === 1) cuts.push(i);
+  }
+  const props: Record<string, string> = {};
+  let spread: string | null = null;
+  let prev = lo + 1;
+  for (const cut of [...cuts, hi]) {
+    const segM = masked.slice(prev, cut);
+    if (segM.trim()) {
+      const sp = /\.\.\.\s*elevation\s*\.\s*(\w+)/.exec(segM);
+      if (sp && STEPS[sp[1]]) {
+        spread = sp[1];
+        const t = STEPS[sp[1]];
+        props.shadowColor = t.shadowColor;
+        props.shadowOffset = `height: ${t.shadowOffset.height}`;
+        props.shadowOpacity = String(t.shadowOpacity);
+        props.shadowRadius = String(t.shadowRadius);
+        props.elevation = String(t.elevation);
+      } else {
+        const mm = new RegExp(`(?:["']?)(${KEYS.join("|")})(?:["']?)\\s*:`).exec(segM);
+        if (mm) {
+          let v = prev + mm.index + mm[0].length;
+          while (v < cut && (text[v] === " " || text[v] === "\t")) v++;
+          props[mm[1]] = text.slice(v, cut).replace(/\/\/.*$/gm, "").trim();
+        }
+      }
+    }
+    prev = cut + 1;
+  }
+  const numOf = (v?: string) => {
+    if (v === undefined) return null;
+    return /^-?\d+(\.\d+)?$/.test(v.trim()) ? Number(v) : null;
+  };
+  const colorOf = (v?: string) => {
+    if (v === undefined) return null;
+    const s = v.trim();
+    if (s === "colors.shadowCast" || s === colors.shadowCast) return colors.shadowCast;
+    const m = /^"(#[0-9A-Fa-f]{6})"$/.exec(s);
+    return m ? m[1].toUpperCase() : s;
+  };
+  const dy = props.shadowOffset ? /height\s*:\s*(-?[\d.]+)/.exec(props.shadowOffset) : null;
+  return {
+    spread,
+    s: {
+      color: colorOf(props.shadowColor),
+      dy: dy ? Number(dy[1]) : null,
+      opacity: numOf(props.shadowOpacity),
+      radius: numOf(props.shadowRadius),
+      android: numOf(props.elevation)
+    }
+  };
+}
+
+/** The step this shadow reproduces exactly, if any. */
+function stepFor(s: Shadow): string | null {
+  if (s.color !== colors.shadowCast) return null;
+  for (const [name, t] of Object.entries(STEPS)) {
+    if (s.dy === t.shadowOffset.height && s.opacity === t.shadowOpacity &&
+        s.radius === t.shadowRadius && s.android === t.elevation) {
+      return name;
+    }
+  }
+  return null;
+}
+
+const bound: string[] = [];
+const handRolled: string[] = [];
+const reproducesAStep: string[] = [];
+
+for (const file of sources(SRC)) {
+  const text = readFileSync(file, "utf8");
+  const seen = new Set<number>();
+  const re = /\bshadow(?:Color|Opacity|Radius)\s*:|\.\.\.\s*elevation\s*\./g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text))) {
+    const blk = enclosingBlock(text, m.index);
+    if (!blk || seen.has(blk[0])) continue;
+    seen.add(blk[0]);
+    const { s, spread } = readShadow(text, blk[0], blk[1]);
+    if (spread) { bound.push(`${file}:${spread}`); continue; }
+    if (s.color === null && s.opacity === null && s.radius === null) continue;
+    handRolled.push(file);
+    const step = stepFor(s);
+    if (step) reproducesAStep.push(`${file} -> ${step} ${JSON.stringify(s)}`);
+  }
+}
+
+/**
+ * ⚠️ THESE THIRTEEN ARE NOT A BACKLOG OF THE SAME THING. Every shadow that reproduced a step
+ * is bound; what is left genuinely differs, and two of them differ by almost nothing:
+ *
+ *   · WelcomeScreen `secondary` is `soft` in EVERY value except the cast colour — #12213A
+ *     where every other shadow in the app casts #1F3A5F. That is a one-off colour, the same
+ *     shape as the seven one-off greys, not a one-off depth.
+ *   · ProfileScreen `card` is `card` except `elevation: 4` against the step's 6 — an
+ *     Android-only difference, invisible on iOS, which is why it survived this long.
+ *
+ * Two more are shared pairs that could earn a step if the design wants them: AccountType and
+ * ShelterTier both use (0,4)/.06/10, and SignupSuccess and PasswordChanged both use
+ * (0,3)/.05/8. Two are deliberate suppressions (`shadowOpacity: 0`) and are correct as they
+ * are. The rest are single-use. Absorbing any of them is a design call, not a bind.
+ *
+ * It may fall. It may not rise: a new screen typing its own shadow is the drift the token
+ * exists to end.
+ */
+const ONE_OFFS = 13;
+
+describe("screens take depth from the theme", () => {
+  it("found shadows to classify", () => {
+    // Guard the guard: scans in this repo have reported a plausible smaller number more
+    // than once, and a guard that matches nothing passes forever.
+    expect(bound.length).toBeGreaterThan(80);
+    expect(bound.length + handRolled.length).toBeGreaterThan(95);
+  });
+
+  it("leaves no hand-rolled shadow that reproduces a step exactly", () => {
+    expect(reproducesAStep).toEqual([]);
+  });
+
+  it("has not grown a new one-off shadow", () => {
+    expect(handRolled.length).toBeLessThanOrEqual(ONE_OFFS);
+  });
+
+  it("records the remaining one-offs rather than absorbing them", () => {
+    expect(handRolled.length).toBe(ONE_OFFS);
+  });
+
+  it("counts the call, not the import", () => {
+    // ⚠️ Two guards this sprint passed on an unused import.
+    const importOnly =
+      'import { elevation } from "../theme";\nconst s = { shadowOpacity: 0.08 };';
+    const blk = enclosingBlock(importOnly, importOnly.indexOf("shadowOpacity"))!;
+    expect(readShadow(importOnly, blk[0], blk[1]).spread).toBeNull();
+  });
+
+  it("reads the alias and the literal as the same pixel", () => {
+    const viaToken = '{ shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 7, elevation: 2 }';
+    const viaHex = '{ shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08, shadowRadius: 7, elevation: 2 }';
+    const read = (src: string) => {
+      const blk = enclosingBlock(src, src.indexOf("shadowColor"))!;
+      return readShadow(src, blk[0], blk[1]).s;
+    };
+    expect(read(viaToken)).toEqual(read(viaHex));
+    expect(stepFor(read(viaHex))).toBe("soft");
+  });
+
+  it("does not mistake a near miss for the step", () => {
+    // ProfileScreen's card: right on iOS, one step off on Android. A textual scan that
+    // ignored `elevation` would have bound it and changed how it renders on Android.
+    const near = '{ shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 4 }';
+    const blk = enclosingBlock(near, near.indexOf("shadowColor"))!;
+    expect(stepFor(readShadow(near, blk[0], blk[1]).s)).toBeNull();
+  });
+});

@@ -22,7 +22,7 @@ import { loadState } from "../net";
 import { inquiryProgressLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 import { Chip, type ChipTone } from "./ui";
 
 // inquiry_status (not stage state): active/adopted/declined/withdrawn.
@@ -129,8 +129,7 @@ export function InquiryList() {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

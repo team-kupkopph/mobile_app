@@ -23,7 +23,7 @@ import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -250,11 +250,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 26,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   avatar: {
     width: 96,
@@ -296,11 +292,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 18,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   statNum: { color: colors.ink, fontSize: 25, fontWeight: "800" },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
@@ -309,11 +301,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: "hidden",
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   row: {
     minHeight: 58,

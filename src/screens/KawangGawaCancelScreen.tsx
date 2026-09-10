@@ -12,12 +12,11 @@ import { AlertIcon, CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { RootStackParamList } from "../navigation/types";
 import { lateCancelCopy } from "../volunteer";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 type Phase = "confirm" | "submitting" | "result";

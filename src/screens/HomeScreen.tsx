@@ -28,7 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { gradients, heroDirection } from "../theme/v3";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -802,11 +802,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   trailPillText: {
     // Ink, not teal: the system's outline/secondary button takes a V2INK label, and against
@@ -844,11 +840,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 13,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   avatarPaw: {
     width: 24,
@@ -899,11 +891,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 13,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   urgentBadge: {
     width: 68,

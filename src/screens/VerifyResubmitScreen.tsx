@@ -10,7 +10,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docLabel } from "../verifications";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyResubmit">;
@@ -133,8 +133,7 @@ const styles = StyleSheet.create({
   },
   back: {
     width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center",
-    backgroundColor: "#FFFFFF", shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+    backgroundColor: "#FFFFFF", ...elevation.soft
   },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
@@ -149,8 +148,7 @@ const styles = StyleSheet.create({
   fileCard: {
     marginTop: 20, padding: 20, borderRadius: 22, backgroundColor: "#FFFFFF",
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-    shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.08,
-    shadowRadius: 7, elevation: 2
+    ...elevation.soft
   },
   fileName: { color: colors.ink, fontSize: 18, fontWeight: "700", flex: 1 },
   replaceBtn: {

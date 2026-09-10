@@ -21,11 +21,10 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2,
+  backgroundColor: colors.white, ...elevation.soft,
 };
 
 const REMOVED = ["Your name and photo", "Phone, email and address", "Your pets and listings", "Saved places"];
