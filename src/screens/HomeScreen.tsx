@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import { Avatar, Card, PressScale, SectionHeader } from "../components/ui";
 import type { StoryCard } from "./StoriesScreen";
 import { loadState } from "../net";
 import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
@@ -317,13 +318,14 @@ export function HomeScreen({ navigation, route }: Props) {
         </LinearGradient>
 
         {spotlight && (
-          <TouchableOpacity
+          // The left accent is the one place this card departs from the V2 recipe's strokeless
+          // white. It is not an outline — it carries the status tone, so the state is readable
+          // before you have read a word of it. That is exactly Card's `accent`, so the surface
+          // (fill, radius, the deeper of the two shadows) now comes from the primitive and only
+          // the layout stays here.
+          <PressScale
             testID="card.home.spotlight"
-            activeOpacity={0.85}
-            // The left accent is the one place this card departs from the V2 recipe's
-            // strokeless white. It is not an outline — it carries the status tone, so the
-            // state is readable before you have read a word of it.
-            style={[styles.spotCard, { borderLeftColor: TONE[spotlight.chip.tone].fg }]}
+            style={styles.spotCardLayout}
             accessibilityRole="button"
             accessibilityLabel={`${spotlight.eyebrow}: ${spotlight.title}, ${spotlight.chip.label}. ${spotlight.nextStep}`}
             onPress={() =>
@@ -332,6 +334,7 @@ export function HomeScreen({ navigation, route }: Props) {
                 : navigation.navigate("reportDetail", { reportId: spotlight.reportId })
             }
           >
+            <Card accent={TONE[spotlight.chip.tone].fg} style={styles.spotCardInner}>
             <View style={styles.spotTop}>
               <Text style={styles.spotEyebrow}>{spotlight.eyebrow}</Text>
               <View style={[styles.spotChip, { backgroundColor: TONE[spotlight.chip.tone].bg }]}>
@@ -347,7 +350,8 @@ export function HomeScreen({ navigation, route }: Props) {
               <Text style={styles.spotNext}>{spotlight.nextStep}</Text>
               <Text style={styles.spotChevron}>›</Text>
             </View>
-          </TouchableOpacity>
+            </Card>
+          </PressScale>
         )}
 
         {/* ⚠️ This line renders UNCONDITIONALLY, outside the spotlight. `btn.home.myReports`
@@ -387,12 +391,13 @@ export function HomeScreen({ navigation, route }: Props) {
           <LoadStateView state={{ kind: "offline" }} onRetry={reloadPanels} />
         ) : (
         <>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Adopt near you</Text>
-          <TouchableOpacity testID="btn.home.adopt" hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("adopt")}>
-            <Text style={styles.seeAll}>See all ›</Text>
-          </TouchableOpacity>
-        </View>
+        <SectionHeader
+          title="Adopt near you"
+          actionLabel="See all ›"
+          onAction={() => navigation.navigate("adopt")}
+          testID="btn.home.adopt"
+          style={styles.sectionHeader}
+        />
 
         {listingsPanel.kind !== "ready" && listingsPanel.kind !== "empty" ? (
           <LoadStateView state={listingsPanel} onRetry={loadCityPanels} />
@@ -405,9 +410,14 @@ export function HomeScreen({ navigation, route }: Props) {
             style={styles.petCard}
             onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
           >
-            <View style={styles.avatarCircle}>
+            {/* ⚠️ SQUIRCLE, NOT A CIRCLE. The design system calls the rounded square "a
+                deliberate V2 replacement for the old circular avatar", and these two rows were
+                the last circles left on Home — sitting directly under the squircle story
+                avatars, which made the inconsistency impossible to miss once both were on
+                screen together. */}
+            <Avatar size={52}>
               <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
-            </View>
+            </Avatar>
             <View style={styles.petCopy}>
               <Text style={styles.petName}>{listing.pet.name}</Text>
               <Text style={styles.petDetails}>
@@ -423,14 +433,12 @@ export function HomeScreen({ navigation, route }: Props) {
         ))}
 
         {/* US-T2 · the community stories entry point (was a dead 'Community' idea in the design). */}
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.rescueSectionRow}
+        <SectionHeader
+          title="Community stories"
+          actionLabel="See all ›"
           onPress={() => navigation.navigate("stories")}
-        >
-          <Text style={[styles.sectionTitle, styles.rescueTitle]}>Community stories</Text>
-          <Text style={styles.seeAll}>See all ›</Text>
-        </TouchableOpacity>
+          style={styles.rescueSectionRow}
+        />
 
         {storiesPanel.kind !== "ready" && storiesPanel.kind !== "empty" ? (
           <LoadStateView state={storiesPanel} onRetry={loadStories} />
@@ -443,9 +451,9 @@ export function HomeScreen({ navigation, route }: Props) {
             style={styles.rescueCard}
             onPress={() => navigation.navigate("storyDetail", { storyId: story.story_id })}
           >
-            <View style={styles.avatarCircle}>
-              <Text style={styles.storyInitials}>{storyInitials(story.author.name)}</Text>
-            </View>
+            {/* Tinted: a story's author is shown as an organisation-style tile, so the same
+                person keeps the same colour across Home, Stories and a story's detail. */}
+            <Avatar initials={storyInitials(story.author.name)} tinted size={44} />
             <View style={styles.petCopy}>
               <Text style={styles.petName} numberOfLines={1}>{story.caption}</Text>
               <Text style={styles.petDetails} numberOfLines={1}>
@@ -459,15 +467,13 @@ export function HomeScreen({ navigation, route }: Props) {
             the third path from Home to this same map (the fourth being the "Lost & found" grid
             tile). Both are gone; this row is now the single way there, so the testID e2e flow 70
             taps — the offline-degradation assertion the whole track exists for — lives here. */}
-        <TouchableOpacity
+        <SectionHeader
           testID="btn.home.rescueMap"
-          activeOpacity={0.7}
-          style={styles.rescueSectionRow}
+          title="Nearby rescues"
+          actionLabel="See map ›"
           onPress={() => navigation.navigate("rescueMap")}
-        >
-          <Text style={[styles.sectionTitle, styles.rescueTitle]}>Nearby rescues</Text>
-          <Text style={styles.seeAll}>See map ›</Text>
-        </TouchableOpacity>
+          style={styles.rescueSectionRow}
+        />
 
         {rescuesPanel.kind !== "ready" && rescuesPanel.kind !== "empty" ? (
           <LoadStateView state={rescuesPanel} onRetry={loadCityPanels} />
@@ -480,9 +486,14 @@ export function HomeScreen({ navigation, route }: Props) {
             style={styles.rescueCard}
             onPress={() => navigation.navigate("reportDetail", { reportId: report.report_id })}
           >
-            <View style={styles.avatarCircle}>
+            {/* ⚠️ SQUIRCLE, NOT A CIRCLE. The design system calls the rounded square "a
+                deliberate V2 replacement for the old circular avatar", and these two rows were
+                the last circles left on Home — sitting directly under the squircle story
+                avatars, which made the inconsistency impossible to miss once both were on
+                screen together. */}
+            <Avatar size={52}>
               <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
-            </View>
+            </Avatar>
             <View style={styles.petCopy}>
               <Text style={styles.petName}>{report.species} · {report.city ?? "Nearby"}</Text>
               <Text style={styles.petDetails}>{report.condition} · needs pickup</Text>
@@ -725,22 +736,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800"
   },
-  spotCard: {
-    marginTop: 18,
-    borderRadius: 24,
-    borderLeftWidth: 4, // tone colour supplied inline — see the note at the call site
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    backgroundColor: "#FFFFFF",
-    // The deeper of the design system's two shadows (dy 10 / blur 16 / 10%) rather than the
-    // dy-4 one the pet + rescue rows use: this is the one card on Home that is about YOUR
-    // animal, and it sits directly under the teal hero.
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4
-  },
+  /** Layout only — the fill, radius, accent bar and shadow are Card's. */
+  spotCardLayout: { marginTop: 18 },
+  spotCardInner: { paddingVertical: 16, paddingHorizontal: 18 },
   spotTop: {
     flexDirection: "row",
     alignItems: "center",
@@ -865,14 +863,6 @@ const styles = StyleSheet.create({
     shadowRadius: 7,
     elevation: 2
   },
-  avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.paleTeal
-  },
   avatarPaw: {
     width: 24,
     height: 24,
@@ -946,11 +936,6 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 11,
     textAlign: "center"
-  },
-  storyInitials: {
-    color: colors.teal,
-    fontSize: 15,
-    fontWeight: "800"
   },
   emptyNote: {
     marginTop: 12,

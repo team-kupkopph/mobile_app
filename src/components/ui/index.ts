@@ -11,3 +11,6 @@ export { Chip, chipTones, type ChipTone } from "./Chip";
 export { TabBar, TAB_BAR, type TabBarItem } from "./TabBar";
 export { ScreenHeader, BackButton, BACK_BUTTON_SIZE } from "./ScreenHeader";
 export { PressScale } from "./PressScale";
+export { Avatar } from "./Avatar";
+export { Card } from "./Card";
+export { SectionHeader } from "./SectionHeader";
