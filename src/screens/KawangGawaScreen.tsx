@@ -28,7 +28,7 @@ import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
   shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   headerPillText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 130 },
-  impact: { borderRadius: 18, paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18, ...card },
+  impact: { borderRadius: radii.tile, paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18, ...card },
   impactTotals: { color: colors.ink, fontSize: 19, fontWeight: "800" },
   impactDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },
   impactNext: { marginTop: 12, flexDirection: "row", alignItems: "center" },
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   filterTextActive: { color: colors.white },
   groupHead: { marginTop: 4, marginBottom: 10, color: colors.muted, fontSize: 12,
                fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardIconFull: { backgroundColor: "#ECEAE3" },

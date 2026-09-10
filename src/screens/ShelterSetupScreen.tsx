@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterSetup">;
 
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   chip: {
     paddingHorizontal: 18,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: radii.field,
     borderWidth: 1,
     borderColor: authColors.border,
     backgroundColor: "#FFFFFF"

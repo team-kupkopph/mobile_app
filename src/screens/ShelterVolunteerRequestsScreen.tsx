@@ -19,7 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   sectionLabel: { marginBottom: 12, color: colors.ink, fontSize: 15, fontWeight: "800" },
   bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
-  card: { borderRadius: 20, padding: 16, marginBottom: 14, ...card },
+  card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   avatarText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },

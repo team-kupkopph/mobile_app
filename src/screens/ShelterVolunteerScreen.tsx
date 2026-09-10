@@ -13,7 +13,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   sectionTitle: { color: colors.ink, fontSize: 24, fontWeight: "800" },
   sectionSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   calendarLink: { color: colors.teal, fontSize: 15, fontWeight: "800", marginTop: 4 },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },

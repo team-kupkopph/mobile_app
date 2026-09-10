@@ -17,7 +17,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { privacyRows, Settings } from "../settings";
 import { ScreenHeader } from "../components/ui";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 48 },
   loading: { flex: 1, alignItems: "center", justifyContent: "center" },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginBottom: 8, marginTop: 22 },
-  card: { borderRadius: 18, ...card },
+  card: { borderRadius: radii.tile, ...card },
   toggleRow: { paddingHorizontal: 18, paddingVertical: 16, flexDirection: "row", alignItems: "center" },
   toggleText: { flex: 1, paddingRight: 14 },
   toggleLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },

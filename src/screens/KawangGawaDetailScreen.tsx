@@ -14,7 +14,7 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { BrowseShift, shiftDurationLabel, shiftSlotsChip, shiftTimeRange, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 const card = {
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   heroTitle: { flex: 1, color: colors.ink, fontSize: 24, fontWeight: "800" },
   orgName: { marginTop: 14, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  infoCard: { marginTop: 16, borderRadius: 18, paddingHorizontal: 18, paddingVertical: 16, ...card },
+  infoCard: { marginTop: 16, borderRadius: radii.tile, paddingHorizontal: 18, paddingVertical: 16, ...card },
   infoDate: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoWhen: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
   infoDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },

@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL, offerStatusChip, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const TONE = {
   teal: { bg: colors.infoBg, fg: colors.tealDark }, green: { bg: colors.successBg, fg: colors.success },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   section: { marginBottom: 22 },
   sectionTitle: { marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   rightCol: { alignItems: "flex-end", gap: 8 },

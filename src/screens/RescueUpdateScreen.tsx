@@ -14,7 +14,7 @@ import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { advanceableStatuses, sagipTitle, strayChip } from "../sagip";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   h1: { color: colors.ink, fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   currentChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
-  mapWrap: { marginTop: 18, height: 150, borderRadius: 20, overflow: "hidden", backgroundColor: colors.soft },
+  mapWrap: { marginTop: 18, height: 150, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { ...typography.meta, fontWeight: "800" },
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
@@ -260,15 +260,15 @@ const styles = StyleSheet.create({
   resolvedNote: { marginTop: 24, color: colors.muted, fontSize: 16, lineHeight: 22 },
   sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 18, fontWeight: "800" },
   radioList: { gap: 10 },
-  radioRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: 18, borderWidth: 2, borderColor: "transparent", ...card },
+  radioRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: radii.tile, borderWidth: 2, borderColor: "transparent", ...card },
   radioRowActive: { borderColor: colors.teal },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   radioActive: { borderColor: colors.teal },
   radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.teal },
   radioLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   label: { marginTop: 22, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
-  notes: { minHeight: 80, borderRadius: 18, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
-  photoBtn: { marginTop: 14, height: 64, borderRadius: 18, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  notes: { minHeight: 80, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
+  photoBtn: { marginTop: 14, height: 64, borderRadius: radii.tile, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },

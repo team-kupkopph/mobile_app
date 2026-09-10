@@ -6,7 +6,7 @@ import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportContent">;
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 20 },
   label: { marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
-  notes: { minHeight: 120, borderRadius: 18, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
+  notes: { minHeight: 120, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   error: { marginTop: 14, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }

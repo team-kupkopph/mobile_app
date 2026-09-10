@@ -8,7 +8,7 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 import { useApi } from "../api/useApi";
 import { matchReasons } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 16 },
   factKey: { color: colors.muted, ...typography.meta },
   factVal: { color: colors.ink, fontSize: 15, fontWeight: "700", flexShrink: 1, textAlign: "right" },
-  reasonsCard: { marginTop: 16, padding: 16, borderRadius: 18, backgroundColor: colors.soft },
+  reasonsCard: { marginTop: 16, padding: 16, borderRadius: radii.tile, backgroundColor: colors.soft },
   reasonsTitle: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   reasonsText: { marginTop: 6, color: colors.tealDark, fontSize: 14.5, lineHeight: 20 },
   decidedNote: { marginTop: 24, color: colors.muted, fontSize: 15, textAlign: "center" },

@@ -15,7 +15,7 @@ import {
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   otpRow: { marginTop: 30, flexDirection: "row", justifyContent: "space-between" },
   otpBox: {
     width: 46, height: 56, alignItems: "center", justifyContent: "center", borderWidth: 1,
-    borderColor: authColors.border, borderRadius: 12, padding: 0, backgroundColor: "#FFFFFF",
+    borderColor: authColors.border, borderRadius: radii.chip, padding: 0, backgroundColor: "#FFFFFF",
     color: authColors.ink, fontSize: 22, fontWeight: "800"
   },
   otpBoxError: { borderColor: authColors.danger },

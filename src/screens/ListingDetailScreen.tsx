@@ -18,7 +18,7 @@ import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
   tag: { backgroundColor: colors.soft, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   tagText: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
-  feeCard: { marginTop: 18, padding: 18, borderRadius: 18, flexDirection: "row",
+  feeCard: { marginTop: 18, padding: 18, borderRadius: radii.tile, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between", ...card },
   feeLabel: { color: colors.muted, fontSize: 15, fontWeight: "600" },
   feeValue: { color: colors.ink, fontSize: 20, fontWeight: "800" },

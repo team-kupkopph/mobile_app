@@ -21,7 +21,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -214,14 +214,14 @@ const styles = StyleSheet.create({
   h1: { fontSize: 26, fontWeight: "800", color: colors.ink, letterSpacing: -0.4 },
   lede: { ...typography.body, color: colors.muted, marginTop: 8 },
   columns: { flexDirection: "row", gap: 12, marginTop: 20 },
-  column: { flex: 1, borderRadius: 18, padding: 16, ...card },
+  column: { flex: 1, borderRadius: radii.tile, padding: 16, ...card },
   columnHeading: { fontSize: 12, fontWeight: "800", letterSpacing: 0.6, marginBottom: 12 },
   bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 10 },
   bullet: { width: 6, height: 6, borderRadius: 3, marginTop: 6, marginRight: 8 },
   bulletText: { flex: 1, fontSize: 13, color: colors.ink, lineHeight: 18 },
   reason: { fontSize: 13, color: colors.muted, marginTop: 16, lineHeight: 19 },
   fieldLabel: { fontSize: 11, fontWeight: "700", color: colors.muted, letterSpacing: 1.2, marginTop: 26 },
-  field: { borderRadius: 18, paddingHorizontal: 18, paddingVertical: 12, marginTop: 8, ...card },
+  field: { borderRadius: radii.tile, paddingHorizontal: 18, paddingVertical: 12, marginTop: 8, ...card },
   fieldCaption: { fontSize: 11, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 },
   input: { fontSize: 18, fontWeight: "700", color: colors.ink, paddingVertical: 4 },
   error: { ...typography.meta, color: colors.danger, marginTop: 8 },
@@ -231,11 +231,11 @@ const styles = StyleSheet.create({
   outlineBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
   tealBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   tealBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
-  warnCard: { borderRadius: 18, backgroundColor: colors.warningBg, padding: 18 },
+  warnCard: { borderRadius: radii.tile, backgroundColor: colors.warningBg, padding: 18 },
   warnTitle: { ...typography.subtitle, fontWeight: "800", color: colors.warning },
   warnBody: { fontSize: 14, color: colors.warning, marginTop: 6, lineHeight: 20 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginTop: 24, marginBottom: 8 },
-  blockerCard: { borderRadius: 18, padding: 16, marginBottom: 12, ...card },
+  blockerCard: { borderRadius: radii.tile, padding: 16, marginBottom: 12, ...card },
   blockerTitle: { ...typography.subtitle, fontWeight: "800", color: colors.ink },
   blockerDetail: { ...typography.meta, color: colors.muted, marginTop: 4 },
   blockerAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginTop: 8 },

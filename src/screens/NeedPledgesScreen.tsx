@@ -15,7 +15,7 @@ import { loadState } from "../net";
 import { ChipTone, needProgressLabel, pledgeStatusChip, PledgeStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   pledgeCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   pledger: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
+  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, fontSize: 14.5 },
   receiveBtn: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 18, paddingVertical: 10, borderRadius: 14, backgroundColor: colors.soft },

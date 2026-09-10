@@ -3,7 +3,7 @@
 // Kept deliberately generic — no volunteer/cancel-specific copy or logic lives here — so any
 // destructive-action confirm (starting with V9's shelter-cancel confirm) can reuse it as-is.
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 export type ConfirmModalTone = "neutral" | "danger";
 
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    borderRadius: 24,
+    borderRadius: radii.card,
     paddingHorizontal: 24,
     paddingTop: 26,
     paddingBottom: 22,

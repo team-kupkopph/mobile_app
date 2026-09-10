@@ -23,7 +23,7 @@ import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 20, fontWeight: "800" },
   group: {
-    borderRadius: 24,
+    borderRadius: radii.card,
     overflow: "hidden",
     backgroundColor: "#FFFFFF",
     ...elevation.soft

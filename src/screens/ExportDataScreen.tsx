@@ -17,7 +17,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { exportFilename, humanSize } from "../settings";
 import { ScreenHeader } from "../components/ui";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -167,11 +167,11 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 48 },
   h1: { fontSize: 26, fontWeight: "800", color: colors.ink, letterSpacing: -0.4, marginTop: 8 },
   lede: { ...typography.body, color: colors.muted, marginTop: 8 },
-  fileCard: { borderRadius: 18, padding: 16, marginTop: 20, ...card },
+  fileCard: { borderRadius: radii.tile, padding: 16, marginTop: 20, ...card },
   fileName: { fontSize: 15, fontWeight: "700", color: colors.ink },
   fileMeta: { ...typography.meta, color: colors.muted, marginTop: 4 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginTop: 26, marginBottom: 8 },
-  card: { borderRadius: 18, paddingVertical: 8, ...card },
+  card: { borderRadius: radii.tile, paddingVertical: 8, ...card },
   bulletRow: { flexDirection: "row", alignItems: "flex-start", paddingHorizontal: 18, paddingVertical: 10 },
   bullet: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.teal, marginTop: 7, marginRight: 10 },
   bulletText: { flex: 1, fontSize: 14, color: colors.ink, lineHeight: 19 },

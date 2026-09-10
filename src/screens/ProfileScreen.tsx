@@ -19,7 +19,7 @@ import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "profile">;
 
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginTop: 18,
-    borderRadius: 18,
+    borderRadius: radii.tile,
     alignItems: "center",
     paddingVertical: 26,
     paddingHorizontal: 20,
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     height: 46,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 12,
+    borderRadius: radii.chip,
     paddingHorizontal: 14,
     color: colors.ink,
     fontSize: 15,

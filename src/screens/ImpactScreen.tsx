@@ -11,7 +11,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { impactTiles, Impact } from "../community";
 import { BadgeShape, RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, squircle, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -99,14 +99,14 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   statRow: { flexDirection: "row", gap: 10 },
-  statTile: { flex: 1, paddingVertical: 16, borderRadius: 18, alignItems: "center", ...card },
+  statTile: { flex: 1, paddingVertical: 16, borderRadius: radii.tile, alignItems: "center", ...card },
   statValue: { color: colors.teal, fontSize: 26, fontWeight: "800" },
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "600" },
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   badgeTile: { width: "48%", marginBottom: 14, padding: 16, borderRadius: 22, alignItems: "center", ...card },
   badgeTileDim: { backgroundColor: colors.greyPill, shadowOpacity: 0 },
-  medal: { width: 56, height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+  medal: { width: 56, height: 56, borderRadius: squircle(56), alignItems: "center", justifyContent: "center" },
   medalOn: { backgroundColor: colors.soft },
   medalOff: { backgroundColor: "#E0DFD9" },
   medalGlyph: { color: colors.teal, fontSize: 28, fontWeight: "800" },

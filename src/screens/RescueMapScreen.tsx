@@ -19,7 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { isOffline, loadState } from "../net";
 import { relTime, sagipTitle, strayChip } from "../sagip";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   legend: { flexDirection: "row", alignItems: "center", gap: 7 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { color: colors.muted, ...typography.meta, fontWeight: "600" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
