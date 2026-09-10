@@ -14,7 +14,7 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { BrowseShift, shiftDurationLabel, shiftSlotsChip, shiftTimeRange, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 
 const card = {
@@ -245,7 +245,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { paddingHorizontal: 26, paddingTop: 22, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 22, paddingBottom: 60 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   // Squircle, matching the hub card's tile — V2 replaced round tiles with rounded squares.
   heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },

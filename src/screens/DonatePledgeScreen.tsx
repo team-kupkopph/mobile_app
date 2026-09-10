@@ -8,7 +8,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, spacing, typography } from "../theme";
 
 
 const card = {
@@ -107,11 +107,11 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   needTitle: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   shelter: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
   note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" },
   secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
   secondaryLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
-  confirmWrap: { flexGrow: 1, paddingHorizontal: 26, paddingTop: 140, paddingBottom: 60, alignItems: "center" },
+  confirmWrap: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 140, paddingBottom: 60, alignItems: "center" },
   checkTile: { width: 84, height: 84, borderRadius: 26, backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
   checkGlyph: { color: colors.success, fontSize: 44, fontWeight: "800" },
   confirmTitle: { marginTop: 22, color: colors.ink, fontSize: 26, fontWeight: "800" },

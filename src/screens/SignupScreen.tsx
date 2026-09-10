@@ -10,7 +10,7 @@ import { passwordError } from "../passwordRules";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signup">;
 
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28
+    paddingHorizontal: spacing.lg
   },
   title: {
     color: authColors.ink,

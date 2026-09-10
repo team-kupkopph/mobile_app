@@ -12,7 +12,7 @@ import { AlertIcon, CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { RootStackParamList } from "../navigation/types";
 import { lateCancelCopy } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, spacing, typography } from "../theme";
 
 
 const card = {
@@ -119,12 +119,12 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  content: { flex: 1, paddingHorizontal: 28, paddingTop: 60, alignItems: "center" },
+  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 60, alignItems: "center" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, fontSize: 24, fontWeight: "800" },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },

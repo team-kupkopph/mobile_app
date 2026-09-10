@@ -10,6 +10,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
+import { spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterTier">;
 
@@ -92,7 +93,7 @@ export function ShelterTierScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
-  content: { flex: 1, paddingHorizontal: 28 },
+  content: { flex: 1, paddingHorizontal: spacing.lg },
   title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
   caption: { marginTop: 6, color: authColors.muted, fontSize: 14, lineHeight: 20 },
   card: {

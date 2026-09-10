@@ -23,7 +23,7 @@ import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -242,7 +242,7 @@ function Row({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { paddingHorizontal: 26, paddingTop: 24, paddingBottom: 120 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 120 },
   pageTitle: { color: colors.ink, fontSize: 27, fontWeight: "800" },
   identityCard: {
     marginTop: 16,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 26
+    paddingHorizontal: spacing.lg
   },
   rowRule: { borderBottomWidth: 1.5, borderBottomColor: colors.border },
   rowLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "600" },

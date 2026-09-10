@@ -13,7 +13,7 @@ import { uploadErrorMessage } from "../upload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   content: {
-    paddingHorizontal: 26,
+    paddingHorizontal: spacing.lg,
     paddingBottom: 60
   },
   heading: {

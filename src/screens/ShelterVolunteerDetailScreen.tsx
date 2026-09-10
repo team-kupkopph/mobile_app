@@ -12,7 +12,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone, VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 function formatAddress(addr: { line1: string; barangay: string; city: string; province: string }): string {
   return [addr.line1, addr.barangay, addr.city, addr.province].filter(Boolean).join(", ");
@@ -120,7 +120,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: {
-    paddingTop: 58, paddingHorizontal: 20, paddingBottom: 10,
+    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
     flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
   },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },

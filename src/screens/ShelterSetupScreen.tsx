@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { radii, typography } from "../theme";
+import { radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterSetup">;
 
@@ -158,7 +158,7 @@ function ChipRow({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
-  content: { paddingHorizontal: 28, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
   title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, fontSize: 14, lineHeight: 20 },
   groupLabel: { marginTop: 20, marginBottom: 4, color: authColors.ink, ...typography.meta, fontWeight: "800" },

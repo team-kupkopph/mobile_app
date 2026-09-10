@@ -14,7 +14,7 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, spacing, typography } from "../theme";
 
 const MIN_PHOTOS = 3;
 
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   backText: { color: colors.ink, fontSize: 26, fontWeight: "700", lineHeight: 28 },
   headerTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
   heading: { marginTop: 6, color: colors.ink, fontSize: 24, fontWeight: "800" },
   subheading: { marginTop: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
   docCard: {

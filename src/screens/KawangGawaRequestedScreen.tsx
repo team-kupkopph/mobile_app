@@ -9,7 +9,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaRequested">;
 
@@ -53,7 +53,7 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { flex: 1, paddingHorizontal: 28, paddingTop: 100, alignItems: "center" },
+  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 100, alignItems: "center" },
   iconCircle: {
     width: 108, height: 108, borderRadius: 54, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.soft

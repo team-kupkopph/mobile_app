@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "forgotPassword">;
 
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: spacing.lg,
     alignItems: "center"
   },
   iconCircle: {

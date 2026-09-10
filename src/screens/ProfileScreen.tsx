@@ -19,7 +19,7 @@ import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "profile">;
 
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent"
   },
   content: {
-    paddingHorizontal: 26,
+    paddingHorizontal: spacing.lg,
     paddingTop: 20,
     paddingBottom: 156
   },

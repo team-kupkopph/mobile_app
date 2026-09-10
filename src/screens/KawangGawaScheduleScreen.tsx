@@ -15,7 +15,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { CardTone, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 
 const TONE: Record<CardTone, { bg: string; fg: string }> = {
@@ -191,13 +191,13 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
-  content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   sectionLabel: { marginTop: 18, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardColumn: { flexDirection: "column", alignItems: "stretch" },

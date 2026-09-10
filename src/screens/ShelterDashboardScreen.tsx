@@ -18,7 +18,7 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -204,7 +204,7 @@ function Stat({ n, label }: { n: number; label: string }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { paddingHorizontal: 26, paddingTop: 24, paddingBottom: 120 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 120 },
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   orgName: { flex: 1, color: colors.ink, fontSize: 26, fontWeight: "800" },
   unverifiedPill: {

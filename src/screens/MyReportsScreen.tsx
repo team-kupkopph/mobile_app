@@ -14,7 +14,7 @@ import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   pendingAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginRight: 18 },
   pendingDiscard: { color: colors.danger },
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   filterRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 },
   filterChip: { paddingHorizontal: 16, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
   filterChipActive: { backgroundColor: colors.teal },

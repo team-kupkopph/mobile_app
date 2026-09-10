@@ -17,7 +17,7 @@ import { PrefillWarning } from "../components/PrefillWarning";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -299,11 +299,11 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   draftNote: { marginTop: 4, marginBottom: 6, color: colors.teal, fontSize: 13, fontWeight: "600", lineHeight: 19 },
   statusNote: { marginTop: 4, marginBottom: 6, padding: 14, borderRadius: 14, backgroundColor: colors.warningBg },
   statusNoteText: { color: colors.warningStrong, fontSize: 13, fontWeight: "600", lineHeight: 18 },

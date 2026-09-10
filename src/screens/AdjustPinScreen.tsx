@@ -12,7 +12,7 @@ import MapView, { Region } from "react-native-maps";
 
 import { LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, radii } from "../theme";
+import { colors, radii, spacing } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "adjustPin">;
@@ -90,7 +90,7 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { position: "absolute", top: 0, left: 0, right: 0, paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { position: "absolute", top: 0, left: 0, right: 0, paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800", textShadowColor: "rgba(244,245,242,0.9)", textShadowRadius: 6 },
