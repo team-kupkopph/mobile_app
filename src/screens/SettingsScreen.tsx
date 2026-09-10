@@ -10,11 +10,8 @@ import { ScreenHeader } from "../components/ui";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { privacySummary } from "../settings";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B", chevron: "#B8B6AD",
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2,
@@ -119,13 +116,13 @@ const styles = StyleSheet.create({
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginBottom: 8, marginTop: 20 },
   card: { borderRadius: 18, ...card },
   row: { minHeight: 56, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  rowDivided: { borderBottomWidth: 1, borderBottomColor: colors.line },
+  rowDivided: { borderBottomWidth: 1, borderBottomColor: colors.border },
   rowLabel: { fontSize: 16, fontWeight: "600", color: colors.ink },
   rowLabelDanger: { color: colors.danger },
   rowRight: { flexDirection: "row", alignItems: "center" },
   rowValue: { fontSize: 14, color: colors.muted, marginRight: 8 },
-  chevron: { fontSize: 22, color: colors.chevron },
+  chevron: { fontSize: 22, color: colors.muted },
   logoutCard: { marginTop: 28, minHeight: 56, alignItems: "center", justifyContent: "center" },
   logoutLabel: { fontSize: 16, fontWeight: "700", color: colors.danger },
-  version: { textAlign: "center", fontSize: 13, color: "#B8B6AD", marginTop: 24 },
+  version: { textAlign: "center", fontSize: 13, color: colors.muted, marginTop: 24 },
 });

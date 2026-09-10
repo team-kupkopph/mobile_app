@@ -11,11 +11,8 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { impactTiles, Impact } from "../community";
 import { BadgeShape, RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDk: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", soft: "#E7F0EF", dim: "#EDEDE8", dimInk: "#A6A49C"
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
@@ -109,13 +106,13 @@ const styles = StyleSheet.create({
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   badgeTile: { width: "48%", marginBottom: 14, padding: 16, borderRadius: 22, alignItems: "center", ...card },
-  badgeTileDim: { backgroundColor: colors.dim, shadowOpacity: 0 },
+  badgeTileDim: { backgroundColor: colors.greyPill, shadowOpacity: 0 },
   medal: { width: 56, height: 56, borderRadius: 18, alignItems: "center", justifyContent: "center" },
   medalOn: { backgroundColor: colors.soft },
   medalOff: { backgroundColor: "#E0DFD9" },
   medalGlyph: { color: colors.teal, fontSize: 28, fontWeight: "800" },
-  medalGlyphOff: { color: colors.dimInk, fontSize: 22 },
+  medalGlyphOff: { color: colors.muted, fontSize: 22 },
   badgeName: { marginTop: 12, color: colors.ink, fontSize: 15, fontWeight: "800", textAlign: "center" },
   badgeCriteria: { marginTop: 6, color: colors.muted, fontSize: 12.5, textAlign: "center", lineHeight: 17 },
-  dimText: { color: colors.dimInk }
+  dimText: { color: colors.muted }
 });

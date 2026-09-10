@@ -16,13 +16,8 @@ import { AlertIcon, CheckIcon, ClockIcon, UserBadgeIcon, XIcon } from "../compon
 import { RootStackParamList } from "../navigation/types";
 import { notificationTarget } from "../notifications";
 import { relTime } from "../sagip";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", unreadBg: "#EAF3F2",
-  chipBg: "#E7F0EF", greenBg: "#EAF3DE", green: "#27500A", amberBg: "#FAEEDA", amber: "#633806",
-  pinkBg: "#FBEEEC", pink: "#B23B3B"
-};
 
 // US-V8 · the four volunteer notification types get a dedicated icon + tone, matching the
 // vocabulary already used on the schedule/history cards (green = good news, soft-red = a
@@ -33,11 +28,11 @@ const colors = {
 // joins the same map — teal heads-up tone, same as shift_reminder, since it's an FYI that
 // needs the shelter's attention rather than good/bad news about something already decided.
 const VOLUNTEER_ICON: Record<string, { bg: string; fg: string; Icon: (p: { color: string; size?: number }) => ReactElement }> = {
-  shift_confirmed: { bg: colors.greenBg, fg: colors.green, Icon: CheckIcon },
-  signup_declined: { bg: colors.pinkBg, fg: colors.pink, Icon: XIcon },
-  shift_reminder: { bg: colors.chipBg, fg: colors.teal, Icon: ClockIcon },
-  shift_cancelled_by_shelter: { bg: colors.amberBg, fg: colors.amber, Icon: AlertIcon },
-  signup_requested: { bg: colors.chipBg, fg: colors.teal, Icon: UserBadgeIcon }
+  shift_confirmed: { bg: colors.successBg, fg: colors.success, Icon: CheckIcon },
+  signup_declined: { bg: colors.dangerBg, fg: colors.danger, Icon: XIcon },
+  shift_reminder: { bg: colors.soft, fg: colors.teal, Icon: ClockIcon },
+  shift_cancelled_by_shelter: { bg: colors.warningBg, fg: colors.warningStrong, Icon: AlertIcon },
+  signup_requested: { bg: colors.soft, fg: colors.teal, Icon: UserBadgeIcon }
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, "notifications">;
@@ -151,7 +146,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   card: { flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
-  cardUnread: { backgroundColor: colors.unreadBg },
+  cardUnread: { backgroundColor: colors.soft },
   dot: { marginTop: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.teal },
   cardIcon: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 16, fontWeight: "800" },

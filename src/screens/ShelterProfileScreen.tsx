@@ -23,6 +23,7 @@ import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -114,7 +115,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
           {gated ? (
             <View style={[styles.chip, styles.chipWarn]}>
-              <ClockIcon color={colors.warn2} size={16} />
+              <ClockIcon color={colors.warningStrong} size={16} />
               <Text style={styles.chipWarnText}>Under review</Text>
             </View>
           ) : (
@@ -227,7 +228,7 @@ function Row({
       <Text style={[styles.rowLabel, locked && styles.rowLabelLocked]}>{label}</Text>
       {locked ? (
         // Locked, not hidden: a row that vanishes can't tell the shelter *why* it's unavailable.
-        <LockIcon color={colors.lockGrey} size={15} />
+        <LockIcon color={colors.muted} size={15} />
       ) : (
         <View style={styles.rowRight}>
           {!!value && <Text style={styles.rowValue}>{value}</Text>}
@@ -238,19 +239,6 @@ function Row({
   );
 }
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  tealDark: "#14504F",
-  page: "#F4F5F2",
-  muted: "#5F5E5A",
-  line: "#E3E1D9",
-  warnBg: "#FAEEDA",
-  warn2: "#633806",
-  paleTeal: "#E2EEF0",
-  danger: "#B23B3B",
-  lockGrey: "#9A9E96"
-};
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
@@ -287,9 +275,9 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19
   },
-  chipWarn: { backgroundColor: colors.warnBg },
-  chipWarnText: { color: colors.warn2, fontSize: 15, fontWeight: "800" },
-  chipVerified: { backgroundColor: colors.paleTeal },
+  chipWarn: { backgroundColor: colors.warningBg },
+  chipWarnText: { color: colors.warningStrong, fontSize: 15, fontWeight: "800" },
+  chipVerified: { backgroundColor: colors.infoBg },
   verifiedDot: {
     width: 18,
     height: 18,
@@ -334,9 +322,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 26
   },
-  rowRule: { borderBottomWidth: 1.5, borderBottomColor: colors.line },
+  rowRule: { borderBottomWidth: 1.5, borderBottomColor: colors.border },
   rowLabel: { color: colors.ink, fontSize: 17, fontWeight: "600" },
-  rowLabelLocked: { color: colors.lockGrey },
+  rowLabelLocked: { color: colors.muted },
   rowDanger: { color: colors.danger, fontSize: 17, fontWeight: "600" },
   rowRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   rowValue: { color: colors.muted, fontSize: 15, fontWeight: "600" },
@@ -348,12 +336,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    backgroundColor: colors.warnBg
+    backgroundColor: colors.warningBg
   },
   accentCopy: { flex: 1 },
-  accentWarnTitle: { color: colors.warn2, fontSize: 16, fontWeight: "800" },
+  accentWarnTitle: { color: colors.warningStrong, fontSize: 16, fontWeight: "800" },
   accentWarnBody: { marginTop: 3, color: "#8a6d3b", fontSize: 12 },
-  accentWarnChev: { color: colors.warn2, fontSize: 22, fontWeight: "800" },
+  accentWarnChev: { color: colors.warningStrong, fontSize: 22, fontWeight: "800" },
   accentTeal: {
     margin: 12,
     minHeight: 52,
@@ -361,7 +349,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.infoBg
   },
   accentTealTitle: { color: colors.tealDark, fontSize: 16, fontWeight: "800" },
   accentTealBody: { marginTop: 3, color: "#5f6b6a", fontSize: 12 },

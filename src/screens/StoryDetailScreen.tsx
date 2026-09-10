@@ -12,18 +12,14 @@ import { Avatar } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  soft: "#E7F0EF", line: "#E3E1D9", dim: "#DBE6E2", okBg: "#EAF3DE", ok: "#27500A",
-  greyPill: "#ECEAE3"
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 const CHIP: Record<"ok" | "teal" | "muted", { bg: string; fg: string }> = {
-  ok: { bg: colors.okBg, fg: colors.ok },
+  ok: { bg: colors.successBg, fg: colors.success },
   teal: { bg: colors.soft, fg: colors.teal },
   muted: { bg: colors.greyPill, fg: colors.muted }
 };
@@ -165,7 +161,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: 16, backgroundColor: "#FAEEDA" },
   hiddenText: { color: "#8A5A12", fontSize: 14, fontWeight: "600" },
-  photo: { height: 280, borderRadius: 20, backgroundColor: colors.dim },
+  photo: { height: 280, borderRadius: 20, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
   authorName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   city: { color: colors.muted, fontSize: 14, marginTop: 2 },
