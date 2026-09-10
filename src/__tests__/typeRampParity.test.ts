@@ -65,4 +65,36 @@ describeParity("parity with the approved canvas", () => {
     "the canvas tracks %spt at %s", (size, ls) => {
       expect(canvas).toContain(`${size} / 800 / ${ls}`);
     });
+
+  it("declares 17 and 13 as weight RANGES, and gives neither a tracking value", () => {
+    // "Card title, button, field | 17 / 700-800" and "Meta, helper, chip | 13 / 400-800".
+    // Three fields would mean a tracking value; these have two, and the second is a range.
+    expect(canvas).toContain("17 / 700-800");
+    expect(canvas).toContain("13 / 400-800");
+    expect(canvas).not.toContain("17 / 700 / -0.2");
+  });
+
+  it("spells the field label uppercase", () => {
+    expect(canvas).toContain("11 / 800 / +0.8 / upper");
+  });
+});
+
+describe("the two range steps", () => {
+  /**
+   * ⚠️ A RANGE CANNOT BE PINNED. Collapsing "13 / 400-800" to 400 picked the weight the app
+   * uses least — 800x44 and 700x39 against 400x25 — so spreading the token would have
+   * de-bolded the majority. Size only; the caller brings the weight.
+   */
+  it.each(["subtitle", "meta"] as const)("%s names no fontWeight", (step) => {
+    expect(typography[step]).not.toHaveProperty("fontWeight");
+  });
+
+  it("gives subtitle no letterSpacing — the panel names none at 17pt", () => {
+    expect(typography.subtitle).not.toHaveProperty("letterSpacing");
+  });
+
+  it("still pins a weight on the six steps the panel pins", () => {
+    const pinned = STEPS.filter(([, s]) => s.fontWeight !== undefined).map(([n]) => n);
+    expect(pinned).toEqual(["display", "hero", "title", "section", "body", "label"]);
+  });
 });
