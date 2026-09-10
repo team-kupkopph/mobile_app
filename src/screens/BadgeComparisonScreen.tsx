@@ -5,11 +5,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  soft: "#E7F0EF", dim: "#E0DFD9", dimInk: "#A6A49C", ok: "#27500A", okBg: "#EAF3DE"
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
@@ -74,16 +71,16 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 24, paddingBottom: 60, alignItems: "center" },
   medal: { width: 108, height: 108, borderRadius: 32, alignItems: "center", justifyContent: "center" },
   medalOn: { backgroundColor: colors.soft },
-  medalOff: { backgroundColor: colors.dim },
+  medalOff: { backgroundColor: colors.greyPill },
   medalGlyph: { color: colors.teal, fontSize: 54, fontWeight: "800" },
-  medalGlyphOff: { color: colors.dimInk },
+  medalGlyphOff: { color: colors.muted },
   name: { marginTop: 20, color: colors.ink, fontSize: 26, fontWeight: "800", textAlign: "center" },
-  dimText: { color: colors.dimInk },
+  dimText: { color: colors.muted },
   description: { marginTop: 10, color: colors.muted, fontSize: 15.5, lineHeight: 22, textAlign: "center" },
   criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18, borderRadius: 22, ...card },
   criteriaLabel: { color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
   criteriaText: { marginTop: 6, color: colors.ink, fontSize: 16, fontWeight: "600" },
-  earnedPill: { marginTop: 22, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 16, backgroundColor: colors.okBg },
-  earnedText: { color: colors.ok, fontSize: 15, fontWeight: "700" },
+  earnedPill: { marginTop: 22, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 16, backgroundColor: colors.successBg },
+  earnedText: { color: colors.success, fontSize: 15, fontWeight: "700" },
   lockedText: { marginTop: 22, color: colors.muted, fontSize: 15, fontWeight: "600" }
 });

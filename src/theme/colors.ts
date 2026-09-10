@@ -125,6 +125,17 @@ export const colors = {
    * the guard that should have caught it had stopped testing anything. tabBarContrast.test.ts
    * now asserts on this token directly.
    */
+  /**
+   * PLACEHOLDER. The pale teal-grey a photo occupies before it loads, or where a story has
+   * none. The only genuinely new value from the one-off-grey sweep: every other stray grey
+   * was within a few units of an existing token and was absorbed, but this one is 9 units
+   * from its nearest (`border`) and means something none of them mean — "content belongs
+   * here and is not here yet". Absorbs #DBE6E2 (2).
+   *
+   * ⚠️ A SURFACE, NEVER AN INK. Nothing legible should be drawn in it.
+   */
+  placeholder: "#DBE6E2",
+
   tabInactive: "#5F5E5A"
 } as const;
 

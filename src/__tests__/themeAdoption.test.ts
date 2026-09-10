@@ -31,12 +31,17 @@ const HOLDOUTS = files.filter((f) => OWN_TABLE.test(read(f)));
 const IMPORTERS = files.filter((f) => /from "\.\.\/theme"/.test(read(f)));
 
 /**
- * ⚠️ LOWER THIS WHEN YOU CONVERT MORE; NEVER RAISE IT. Each remaining screen holds at least one
- * colour that is NOT in the theme — a one-off grey or tint with no token. Those are a design
- * decision (promote to a token, or accept as local), not a mechanical sweep, which is why they
- * were not swept.
+ * ⚠️ ZERO, AND IT IS NO LONGER A RATCHET. Every screen now takes colour from the theme, so
+ * this stops being "how many are left" and becomes a flat rule: a screen may not declare its
+ * own palette. Raising this number is not "recording progress" — it is reintroducing the drift
+ * `colors.ts` was written to end.
+ *
+ * The last seven each held a grey with no token. Six were within a few units of an existing
+ * one and were absorbed; one — the photo placeholder — earned a token of its own. Three of
+ * those greys turned out not to be a naming problem at all: they were text and meaningful
+ * glyphs below the contrast floor. See the commit.
  */
-const REMAINING = 7;
+const REMAINING = 0;
 
 describe("screens take colour from the theme", () => {
   it("found screens to classify", () => {
@@ -49,8 +54,8 @@ describe("screens take colour from the theme", () => {
     expect(HOLDOUTS.length).toBeLessThanOrEqual(REMAINING);
   });
 
-  it("records the remaining count honestly", () => {
-    expect(HOLDOUTS.length).toBe(REMAINING);
+  it("has no screen left holding its own palette", () => {
+    expect(HOLDOUTS).toEqual([]);
   });
 
   it("sees a single-line table as well as a block one", () => {
