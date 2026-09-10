@@ -10,7 +10,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docLabel } from "../verifications";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyResubmit">;
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
-  sub: { marginTop: 8, color: colors.muted, fontSize: 17 },
+  sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   noteBox: {
     marginTop: 22, padding: 18, borderRadius: 20, backgroundColor: colors.warningBg
   },

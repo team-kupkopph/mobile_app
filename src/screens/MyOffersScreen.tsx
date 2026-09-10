@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL, offerStatusChip, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const TONE = {
   teal: { bg: colors.infoBg, fg: colors.tealDark }, green: { bg: colors.successBg, fg: colors.success },
@@ -147,8 +147,8 @@ const styles = StyleSheet.create({
   cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
   rightCol: { alignItems: "flex-end", gap: 8 },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" },
+  chipText: { ...typography.meta, fontWeight: "800" },
   withdrawBtn: { paddingVertical: 2 },
-  withdrawText: { color: colors.danger, fontSize: 13, fontWeight: "700" },
+  withdrawText: { color: colors.danger, ...typography.meta, fontWeight: "700" },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

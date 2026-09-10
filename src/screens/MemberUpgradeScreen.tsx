@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { AdoptIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberUpgrade">;
 
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginTop: 26,
     color: colors.ink,
-    fontSize: 17,
+    ...typography.subtitle,
     fontWeight: "800"
   },
   unlockRow: {

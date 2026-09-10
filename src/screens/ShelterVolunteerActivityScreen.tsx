@@ -14,7 +14,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -173,15 +173,15 @@ const styles = StyleSheet.create({
   heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   heroTitle: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   heroWhen: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
-  heroOrg: { marginTop: 2, color: colors.muted, fontSize: 13 },
+  heroOrg: { marginTop: 2, color: colors.muted, ...typography.meta },
   infoCard: {
     marginTop: 24, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 18,
     flexDirection: "row", alignItems: "center", gap: 12, ...card
   },
-  infoTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
-  infoSub: { marginTop: 4, color: colors.muted, fontSize: 13 },
+  infoTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  infoSub: { marginTop: 4, color: colors.muted, ...typography.meta },
   statusChip: { paddingHorizontal: 14, height: 32, borderRadius: 16, justifyContent: "center" },
-  statusChipText: { fontSize: 13, fontWeight: "800" },
+  statusChipText: { ...typography.meta, fontWeight: "800" },
   sectionLabel: { marginTop: 28, marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
   actionCard: { borderRadius: 20, overflow: "hidden", ...card },
   actionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, height: 60 },

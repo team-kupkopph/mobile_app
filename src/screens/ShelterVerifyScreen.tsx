@@ -14,7 +14,7 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const MIN_PHOTOS = 3;
 
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   docCopy: { flex: 1, marginLeft: 14 },
   docTitle: { color: colors.ink, fontSize: 15, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, fontSize: 11 },
-  docUploadLink: { color: authColors.teal, fontSize: 13, fontWeight: "800" },
+  docUploadLink: { color: authColors.teal, ...typography.meta, fontWeight: "800" },
   docDone: { alignItems: "center" },
   docCheck: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#5B8A3A" },
   docDoneText: { marginTop: 5, color: colors.muted, fontSize: 10, fontWeight: "700" },
@@ -280,9 +280,9 @@ const styles = StyleSheet.create({
   },
   consentBoxChecked: { backgroundColor: authColors.teal },
   consentText: { flex: 1, color: colors.tealDark, fontSize: 13, fontWeight: "700", lineHeight: 19 },
-  formError: { marginTop: 14, color: authColors.danger, fontSize: 13, fontWeight: "700" },
+  formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 54, marginTop: 20, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
   submitButtonDisabled: { opacity: 0.5 },
   submitText: { color: "#FFFFFF", fontSize: 16, fontWeight: "800" },
-  deferLink: { marginTop: 18, color: "#08716D", fontSize: 13, fontWeight: "800", textAlign: "center" }
+  deferLink: { marginTop: 18, color: "#08716D", ...typography.meta, fontWeight: "800", textAlign: "center" }
 });

@@ -10,6 +10,7 @@ import { passwordError } from "../passwordRules";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signup">;
 
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   formError: {
     marginTop: 14,
     color: authColors.danger,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   submitButton: {
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   linkCentered: {
     marginTop: 20,
     color: "#08716D",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center"
   },

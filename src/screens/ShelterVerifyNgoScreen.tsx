@@ -12,7 +12,7 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -250,8 +250,8 @@ const styles = StyleSheet.create({
   docCopy: { flex: 1, marginLeft: 14 },
   docTitle: { color: colors.ink, fontSize: 15, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, fontSize: 11 },
-  docUploadLink: { color: authColors.teal, fontSize: 13, fontWeight: "800" },
-  docMuted: { color: "#9A988F", fontSize: 13, fontWeight: "800" },
+  docUploadLink: { color: authColors.teal, ...typography.meta, fontWeight: "800" },
+  docMuted: { color: "#9A988F", ...typography.meta, fontWeight: "800" },
   docDone: { alignItems: "center" },
   docCheck: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#5B8A3A" },
   docDoneText: { marginTop: 5, color: colors.muted, fontSize: 10, fontWeight: "700" },
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   input: { color: colors.ink, fontSize: 15, fontWeight: "800", padding: 0 },
-  formError: { marginTop: 12, color: authColors.danger, fontSize: 13, fontWeight: "700" },
+  formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 54, marginTop: 22, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
   submitButtonDisabled: { opacity: 0.5 },
   submitText: { color: "#FFFFFF", fontSize: 16, fontWeight: "800" }

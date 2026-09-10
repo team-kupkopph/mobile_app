@@ -9,6 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterSetup">;
 
@@ -171,9 +172,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF"
   },
   chipActive: { borderColor: authColors.teal, backgroundColor: authColors.paleTeal },
-  chipText: { color: authColors.muted, fontSize: 13, fontWeight: "800" },
+  chipText: { color: authColors.muted, ...typography.meta, fontWeight: "800" },
   chipTextActive: { color: authColors.tealDark },
-  formError: { marginTop: 14, color: authColors.danger, fontSize: 13, fontWeight: "700" },
+  formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submit: { marginTop: 26 },
   next: { marginTop: 14, color: "#9A988F", fontSize: 12, textAlign: "center" }
 });

@@ -13,7 +13,7 @@ import { uploadErrorMessage } from "../upload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
   docUploadLink: {
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   docDone: {
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   formError: {
     marginTop: 14,
     color: colors.danger,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   reviewNote: {

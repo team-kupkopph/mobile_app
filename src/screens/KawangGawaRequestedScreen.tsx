@@ -9,7 +9,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaRequested">;
 
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.soft
   },
   heading: { marginTop: 24, color: colors.ink, fontSize: 28, fontWeight: "800" },
-  subheading: { marginTop: 10, color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
+  subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
   hint: { marginTop: 26, color: colors.muted, fontSize: 13, textAlign: "center", lineHeight: 19 },
   primaryButton: {
     width: "100%", height: 56, marginTop: 34, borderRadius: 28, alignItems: "center",

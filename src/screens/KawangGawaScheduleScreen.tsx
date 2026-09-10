@@ -15,7 +15,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { CardTone, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const TONE: Record<CardTone, { bg: string; fg: string }> = {
@@ -197,19 +197,19 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  empty: { color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
+  empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   sectionLabel: { marginTop: 18, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardColumn: { flexDirection: "column", alignItems: "stretch" },
   cardRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   cancelLink: { alignSelf: "flex-end", marginTop: 10, paddingVertical: 4, paddingHorizontal: 4 },
-  cancelLinkText: { color: colors.danger, fontSize: 13, fontWeight: "800" },
+  cancelLinkText: { color: colors.danger, ...typography.meta, fontWeight: "800" },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
-  cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
-  cardOrg: { marginTop: 2, color: colors.muted, fontSize: 13, fontWeight: "700" },
+  cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, fontSize: 14, fontWeight: "700" },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" }
+  chipText: { ...typography.meta, fontWeight: "800" }
 });

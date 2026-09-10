@@ -24,7 +24,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift, blastRadiusCopy } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -215,13 +215,13 @@ const styles = StyleSheet.create({
     borderRadius: 20, padding: 18, ...card
   },
   summaryIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  summaryTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
-  summaryWhen: { marginTop: 3, color: colors.teal, fontSize: 13, fontWeight: "700" },
-  summarySub: { marginTop: 3, color: colors.muted, fontSize: 13 },
+  summaryTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  summaryWhen: { marginTop: 3, color: colors.teal, ...typography.meta, fontWeight: "700" },
+  summarySub: { marginTop: 3, color: colors.muted, ...typography.meta },
   question: { alignSelf: "flex-start", marginTop: 26, color: colors.ink, fontSize: 24, fontWeight: "800" },
-  body: { alignSelf: "flex-start", marginTop: 10, color: colors.muted, fontSize: 15, lineHeight: 21 },
+  body: { alignSelf: "flex-start", marginTop: 10, color: colors.muted, ...typography.body },
   bannerBox: { width: "100%", marginTop: 18, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
-  bannerText: { color: colors.danger, fontSize: 13, fontWeight: "700", textAlign: "center" },
+  bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   cancelButton: {
     width: "100%", height: 56, marginTop: 36, borderRadius: 28,
     alignItems: "center", justifyContent: "center", backgroundColor: colors.danger
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   keepLinkText: { color: colors.teal, fontSize: 14, fontWeight: "800" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, fontSize: 24, fontWeight: "800" },
-  subheading: { marginTop: 10, color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
+  subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
   primaryButton: {
     width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",
     justifyContent: "center", backgroundColor: colors.teal

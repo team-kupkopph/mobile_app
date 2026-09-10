@@ -18,7 +18,7 @@ import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
@@ -212,7 +212,7 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  flagLinkText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
+  flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   donateLinkText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
   tag: { backgroundColor: colors.soft, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
-  tagText: { color: colors.tealDark, fontSize: 13, fontWeight: "700" },
+  tagText: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   feeCard: { marginTop: 18, padding: 18, borderRadius: 18, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between", ...card },
   feeLabel: { color: colors.muted, fontSize: 15, fontWeight: "600" },

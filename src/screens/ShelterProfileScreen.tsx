@@ -23,7 +23,7 @@ import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   statNum: { color: colors.ink, fontSize: 25, fontWeight: "800" },
-  statLabel: { marginTop: 6, color: colors.muted, fontSize: 13 },
+  statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 20, fontWeight: "800" },
   group: {
     borderRadius: 24,
@@ -323,9 +323,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26
   },
   rowRule: { borderBottomWidth: 1.5, borderBottomColor: colors.border },
-  rowLabel: { color: colors.ink, fontSize: 17, fontWeight: "600" },
+  rowLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "600" },
   rowLabelLocked: { color: colors.muted },
-  rowDanger: { color: colors.danger, fontSize: 17, fontWeight: "600" },
+  rowDanger: { color: colors.danger, ...typography.subtitle, fontWeight: "600" },
   rowRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   rowValue: { color: colors.muted, fontSize: 15, fontWeight: "600" },
   chev: { color: "#C9CEC7", fontSize: 22, fontWeight: "700" },

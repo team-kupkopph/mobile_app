@@ -21,7 +21,7 @@ import { setIntent } from "../guestIntent";
 import { TabBar, type TabBarItem } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   },
   cityChange: {
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   loginPill: {
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   loginPillText: {
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   guestBanner: {
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   guestTitle: {
     color: colors.ink,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   guestBody: {
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   guestLink: {
     marginLeft: 8,
     color: colors.tealDark,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   reportCard: {
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   reportText: {
     marginTop: 9,
     color: "#D5ECE8",
-    fontSize: 13
+    ...typography.meta
   },
   reportButton: {
     width: 136,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
   },
   reportButtonText: {
     color: "#126B69",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   reportPaw: {
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
   mapSub: {
     marginTop: 2,
     color: colors.muted,
-    fontSize: 13
+    ...typography.meta
   },
   mapChevron: {
     marginLeft: 8,
@@ -409,13 +409,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: colors.ink,
-    fontSize: 17,
+    ...typography.subtitle,
     fontWeight: "800"
   },
   emptyText: {
     marginTop: 14,
     color: colors.muted,
-    fontSize: 13,
+    ...typography.meta,
     textAlign: "center"
   },
   petCard: {
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   petName: {
     color: colors.ink,
-    fontSize: 17,
+    ...typography.subtitle,
     fontWeight: "800"
   },
   petDetails: {

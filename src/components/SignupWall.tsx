@@ -12,6 +12,7 @@ import { GuestIntentAction } from "../guestIntent";
 import { CheckIcon, ProfileIcon, VolunteerIcon } from "./AppIcons";
 import { PrimaryButton, authColors } from "../screens/AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { typography } from "../theme";
 
 export type SignupWallAction = GuestIntentAction;
 
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   },
   laterLink: {
     color: "#AAA69D",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   houseIconBox: {

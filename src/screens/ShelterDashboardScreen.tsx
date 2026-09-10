@@ -18,7 +18,7 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.greyPill
   },
   pillDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: colors.muted },
-  pillText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
+  pillText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   verifiedPill: {
     flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 14, height: 34,
     borderRadius: 17, backgroundColor: colors.soft
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.teal
   },
-  verifiedPillText: { color: "#14504F", fontSize: 13, fontWeight: "800" },
+  verifiedPillText: { color: "#14504F", ...typography.meta, fontWeight: "800" },
   verifiedHero: {
     marginTop: 20, flexDirection: "row", alignItems: "center", gap: 16, padding: 20,
     borderRadius: 24, backgroundColor: colors.teal
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.18)"
   },
   verifiedHeroTitle: { color: "#FFFFFF", fontSize: 21, fontWeight: "800" },
-  verifiedHeroBody: { marginTop: 4, color: "#DCEDEB", fontSize: 15, lineHeight: 21 },
+  verifiedHeroBody: { marginTop: 4, color: "#DCEDEB", ...typography.body },
   subLabel: { marginTop: 6, color: colors.muted, fontSize: 16 },
   banner: {
     minHeight: 108,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   },
   bannerCopy: { flex: 1, marginLeft: 18 },
   bannerTitle: { color: colors.warningStrong, fontSize: 19, fontWeight: "800" },
-  bannerBody: { marginTop: 2, color: "#8a6d3b", fontSize: 13 },
+  bannerBody: { marginTop: 2, color: "#8a6d3b", ...typography.meta },
   bannerCta: { color: colors.warningStrong, fontSize: 15, fontWeight: "700" },
   statRow: { marginTop: 22, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   statNum: { color: colors.ink, fontSize: 26, fontWeight: "800" },
-  statLabel: { marginTop: 6, color: colors.muted, fontSize: 13 },
+  statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
   primaryButton: {
     height: 56,
     marginTop: 22,
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.soft
   },
   footCopy: { flex: 1 },
-  footTitle: { color: "#14504F", fontSize: 17, fontWeight: "800" },
-  footBody: { marginTop: 6, color: "#5f6b6a", fontSize: 13 },
+  footTitle: { color: "#14504F", ...typography.subtitle, fontWeight: "800" },
+  footBody: { marginTop: 6, color: "#5f6b6a", ...typography.meta },
   footCta: { color: "#14504F", fontSize: 16, fontWeight: "800", marginLeft: 12 }
 });

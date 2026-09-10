@@ -9,6 +9,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { useConnectivity } from "../net/ConnectivityProvider";
+import { typography } from "../theme";
 
 const colors = { warnBg: "#FAEEDA", warn: "#633806" };
 
@@ -33,5 +34,5 @@ const styles = StyleSheet.create({
     position: "absolute", left: 16, right: 16, borderRadius: 14,
     backgroundColor: colors.warnBg, paddingVertical: 10, paddingHorizontal: 14,
   },
-  text: { fontSize: 13, fontWeight: "600", color: colors.warn, textAlign: "center" },
+  text: { ...typography.meta, fontWeight: "600", color: colors.warn, textAlign: "center" },
 });

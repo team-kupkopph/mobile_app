@@ -28,7 +28,7 @@ import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
   shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   impactNext: { marginTop: 12, flexDirection: "row", alignItems: "center" },
   impactNextCopy: { flex: 1 },
   impactNextLabel: { color: colors.teal, fontSize: 14, fontWeight: "800" },
-  impactNextWhen: { marginTop: 3, color: colors.muted, fontSize: 13 },
+  impactNextWhen: { marginTop: 3, color: colors.muted, ...typography.meta },
   impactChevron: { marginLeft: 10, color: colors.teal, fontSize: 20, fontWeight: "800" },
   filterRow: { gap: 8, paddingRight: 26, marginBottom: 18 },
   filterChip: { paddingHorizontal: 16, height: 44, borderRadius: 22, alignItems: "center",
@@ -265,9 +265,9 @@ const styles = StyleSheet.create({
   cardIconFull: { backgroundColor: "#ECEAE3" },
   cardCopy: { flex: 1 },
   cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
-  cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
-  cardOrg: { marginTop: 2, color: colors.muted, fontSize: 13, fontWeight: "700" },
+  cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, fontSize: 14, fontWeight: "700" },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" }
+  chipText: { ...typography.meta, fontWeight: "800" }
 });

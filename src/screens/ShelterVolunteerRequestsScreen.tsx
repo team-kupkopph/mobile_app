@@ -19,7 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -399,16 +399,16 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 19, fontWeight: "800", textAlign: "center" },
   subtitle: { marginTop: 3, color: colors.muted, fontSize: 12, textAlign: "center" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  empty: { color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21, marginTop: 8 },
+  empty: { color: colors.muted, ...typography.body, textAlign: "center", marginTop: 8 },
   content: { paddingHorizontal: 22, paddingTop: 16, paddingBottom: 60 },
   sectionLabel: { marginBottom: 12, color: colors.ink, fontSize: 15, fontWeight: "800" },
   bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
-  bannerText: { color: colors.danger, fontSize: 13, fontWeight: "700", textAlign: "center" },
+  bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: 20, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   avatarText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
-  name: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   requestedAt: { marginTop: 2, color: colors.muted, fontSize: 12 },
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { fontSize: 12, fontWeight: "800" },
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
   pickerHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   pickerTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   pickerClose: { color: colors.teal, fontSize: 14, fontWeight: "800" },
-  pickerSub: { marginTop: 6, color: colors.muted, fontSize: 13 },
+  pickerSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   pickerList: { marginTop: 14 },
   animalCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, marginBottom: 10, ...card },
   animalPhoto: { width: 52, height: 52, borderRadius: 12 },

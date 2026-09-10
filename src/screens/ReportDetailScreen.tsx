@@ -14,7 +14,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -265,13 +265,13 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   flagLink: { marginLeft: "auto" },
-  flagLinkText: { color: colors.muted, fontSize: 13, fontWeight: "700" },
+  flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 200, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   h1: { color: colors.ink, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, fontSize: 16 },
   chip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" },
+  chipText: { ...typography.meta, fontWeight: "800" },
   notesCard: { marginTop: 20, padding: 18, borderRadius: 18, ...card },
   notesText: { color: colors.ink, fontSize: 16, lineHeight: 23 },
   matchesRow: { marginTop: 16, paddingHorizontal: 18, height: 62, borderRadius: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", ...card },

@@ -14,7 +14,7 @@ import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -168,7 +168,7 @@ const card = {
 const styles = StyleSheet.create({
   pendingCard: { borderWidth: 1, borderColor: colors.warningBg },
   pendingActions: { flexDirection: "row", marginTop: 8 },
-  pendingAction: { fontSize: 13, fontWeight: "700", color: colors.teal, marginRight: 18 },
+  pendingAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginRight: 18 },
   pendingDiscard: { color: colors.danger },
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
@@ -181,6 +181,6 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" },
+  chipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

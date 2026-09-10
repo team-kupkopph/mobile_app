@@ -10,6 +10,7 @@ import { PASSWORD_RULE, passwordError } from "../passwordRules";
 import { codeCheckOutcome } from "../passwordReset";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "resetPassword">;
 
@@ -201,7 +202,7 @@ const styles = StyleSheet.create({
   },
   ruleText: {
     color: authColors.muted,
-    fontSize: 13
+    ...typography.meta
   },
   ruleTextMet: {
     color: authColors.ink,
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
   formError: {
     marginTop: 14,
     color: authColors.danger,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   submitButton: {
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   linkCentered: {
     marginTop: 22,
     color: "#08716D",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center"
   }

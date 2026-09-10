@@ -10,7 +10,7 @@ import { ScreenHeader } from "../components/ui";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { privacySummary } from "../settings";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -124,5 +124,5 @@ const styles = StyleSheet.create({
   chevron: { fontSize: 22, color: colors.muted },
   logoutCard: { marginTop: 28, minHeight: 56, alignItems: "center", justifyContent: "center" },
   logoutLabel: { fontSize: 16, fontWeight: "700", color: colors.danger },
-  version: { textAlign: "center", fontSize: 13, color: colors.muted, marginTop: 24 },
+  version: { textAlign: "center", ...typography.meta, color: colors.muted, marginTop: 24 },
 });

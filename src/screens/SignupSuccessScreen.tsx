@@ -8,6 +8,7 @@ import { AdoptIcon, VolunteerIcon } from "../components/AppIcons";
 import { TopStatus } from "../components/TopStatus";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, authColors } from "./AuthFormKit";
+import { typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signupSuccess">;
 
@@ -248,7 +249,7 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     color: authColors.tealDark,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   noticeBody: {
