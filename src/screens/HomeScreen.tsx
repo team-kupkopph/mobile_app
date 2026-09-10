@@ -127,8 +127,10 @@ export function HomeScreen({ navigation, route }: Props) {
   // `isReady` is the whole reason this is a gate and not just a dep: it separates "the
   // city has not been read yet" (wait — firing now is the bug) from "this account genuinely
   // has no city" (a nationwide feed is then the correct answer).
-  useFocusEffect(
-    useCallback(() => {
+  // ⚠️ NAMED, not inlined into useFocusEffect, because a failed panel needs something to
+  // retry WITH. Before this, the two panels below had no retry at all — they rendered a
+  // sentence claiming there was nothing to show.
+  const loadCityPanels = useCallback(() => {
       if (!isReady) return;
       // Adoption preview — the first 5 available listings in the user's city.
       //
@@ -148,8 +150,22 @@ export function HomeScreen({ navigation, route }: Props) {
         if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable; refetch on focus and whenever the city resolves or changes
-    }, [city, isReady])
-  );
+  }, [city, isReady]);
+
+  useFocusEffect(loadCityPanels);
+
+  /**
+   * ⚠️ PER-PANEL STATE — the US-R2 rule this screen's own comment says it follows, now
+   * actually applied. `loadState` separates "the server said there are none" from "we never
+   * reached the server"; `listings.length === 0` cannot tell them apart, and the sentence it
+   * used to render — "No strays reported nearby yet." — is word for word the statement the
+   * 2026-09-04 device walk caught the rescue MAP making while eight reports sat within 10 km.
+   * The same lie was live here the whole time, on the screen far more people see, and it took
+   * the US-PF3 walk to catch it because the guard that should have was satisfied by an
+   * unused import.
+   */
+  const listingsPanel = loadState(listingsRes, listings.length);
+  const rescuesPanel = loadState(rescuesRes, rescues.length);
 
   // US-A1b resume: SignupSuccessScreen's "Start exploring" resets to Home with
   // params.justSignedUp = true, and ONLY that route sets the flag (SigninScreen's plain-login
@@ -338,7 +354,9 @@ export function HomeScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
 
-        {listings.length === 0 ? (
+        {listingsPanel.kind !== "ready" && listingsPanel.kind !== "empty" ? (
+          <LoadStateView state={listingsPanel} onRetry={loadCityPanels} />
+        ) : listingsPanel.kind === "empty" ? (
           <Text style={styles.emptyNote}>No pets listed near you yet.</Text>
         ) : listings.map((listing) => (
           <TouchableOpacity
@@ -388,7 +406,9 @@ export function HomeScreen({ navigation, route }: Props) {
           <Text style={styles.seeAll}>See map ›</Text>
         </TouchableOpacity>
 
-        {rescues.length === 0 ? (
+        {rescuesPanel.kind !== "ready" && rescuesPanel.kind !== "empty" ? (
+          <LoadStateView state={rescuesPanel} onRetry={loadCityPanels} />
+        ) : rescuesPanel.kind === "empty" ? (
           <Text style={styles.emptyNote}>No strays reported nearby yet.</Text>
         ) : rescues.map((report) => (
           <TouchableOpacity

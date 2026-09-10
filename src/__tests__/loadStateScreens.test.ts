@@ -117,9 +117,22 @@ const MAX_EXEMPT = 2;
  * Same failure as the exemptions, one story later: the guard describing the fix too
  * narrowly, and the number quietly meaning something other than what it says.
  */
-const USES_VIEW = FETCHING.filter((f) => readCode(f).includes("LoadStateView"));
+/**
+ * ⚠️ `<LoadStateView`, NOT `"LoadStateView"`. THIS GUARD USED TO PASS ON AN UNUSED IMPORT.
+ *
+ * The old test was `readCode(f).includes("LoadStateView")` — which the IMPORT LINE satisfies.
+ * HomeScreen imported both `LoadStateView` and `loadState`, rendered neither, and counted as
+ * converted; this file reported `REMAINING: 0` while Home's two panels said "No pets listed
+ * near you yet." and "No strays reported nearby yet." with the backend unreachable. That is
+ * the 2026-09-04 rescue-map lie, on the highest-traffic screen in the app, sitting behind a
+ * green guard. Found on the US-PF3 device walk, not here.
+ *
+ * Requiring the ANGLE BRACKET means the file has to actually render the thing. Measured when
+ * this was tightened: 39 screens rendered it, 1 only imported it — Home.
+ */
+const USES_VIEW = FETCHING.filter((f) => /<LoadStateView/.test(readCode(f)));
 const USES_WARNING = FETCHING.filter(
-  (f) => readCode(f).includes("PrefillWarning") && !readCode(f).includes("LoadStateView"));
+  (f) => /<PrefillWarning/.test(readCode(f)) && !/<LoadStateView/.test(readCode(f)));
 
 /** Derived by subtraction: converting a screen moves it here with no edit to this file. */
 const CONVERTED = [...USES_VIEW, ...USES_WARNING];

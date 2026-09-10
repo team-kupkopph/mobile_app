@@ -40,6 +40,14 @@ appId: ph.kupkop.app
       id: "screen.home"
     timeout: 30000
 
+# ── home itself · added after the US-PF3 walk found the lie living HERE ────────────
+# This flow always passed THROUGH Home and never asserted on it, so Home kept saying
+# "No strays reported nearby yet." and "No pets listed near you yet." with the backend
+# unreachable — the same sentence the rescue map was caught making on 2026-09-04, on the
+# screen far more people see. Plain ASCII, per the note at the bottom of e2e/README.md.
+- assertNotVisible: "No strays reported nearby"
+- assertNotVisible: "No pets listed near you"
+
 # ── the rescue map · the screen the entire track came from ─────────────────────────
 - tapOn:
     id: "btn.home.rescueMap"
