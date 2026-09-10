@@ -46,12 +46,38 @@ describe("tab bar geometry", () => {
     expect(TAB_BAR.inset).toBeGreaterThan(0);
   });
 
+  /**
+   * ⚠️ THIS ASSERTION EXISTS BECAUSE THE ONE ABOVE WAS NOT ENOUGH, and the gap cost a device
+   * walk. `TAB_BAR.inset` is 16 and the test only asked for "greater than 0", so it passed
+   * happily while the bar's lower third sat inside the 34 pt home-indicator zone on every
+   * notched iPhone — the system's swipe-up winning taps meant for the tabs.
+   *
+   * Nothing here could have caught it by measurement: it is not a contrast figure and not a
+   * target size, and it is invisible in a screenshot because the indicator is drawn by the OS
+   * ON TOP of the capture. A thumb found it. What a test CAN do is require the bar to read the
+   * inset at all, rather than hard-coding a number that happens to be smaller than it.
+   */
+  it("positions itself from the safe-area inset, not a fixed number", () => {
+    const src = readFileSync(join(__dirname, "..", "components", "ui", "TabBar.tsx"), "utf8");
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "").replace(/^import[\s\S]*?;$/gm, "");
+    // The CALL, not the import — an import alone satisfied a sibling guard once already.
+    expect(code).toMatch(/useSafeAreaInsets\(\)/);
+    expect(code).toMatch(/bottom:\s*Math\.max\(\s*insets\.bottom/);
+    // And the fixed value must not still be the bar's own bottom.
+    expect(code).not.toMatch(/bottom:\s*TAB_BAR\.inset/);
+  });
+
+  /** The deepest bottom inset iOS reports today — iPhone with a home indicator. */
+  const DEEPEST_HOME_INDICATOR = 34;
+
   it("keeps tabBarClearance consistent with the bar it is meant to clear", () => {
     // spacing.tabBarClearance is what scrolling screens pad by. If the bar's height or inset
     // changes and this does not, content gets trapped behind it — the comment on that token
     // says it "tracks OwnerTabs' geometry", so make that a check rather than a hope.
     const { tabBarClearance } = require("../theme/spacing");
-    expect(tabBarClearance).toBeGreaterThanOrEqual(TAB_BAR.height + TAB_BAR.inset);
+    // ⚠️ The WORST case, not the nominal one: once the bar sits on the safe-area inset, the
+    // space it occupies is its height plus the DEEPEST inset, not plus the designed 16.
+    expect(tabBarClearance).toBeGreaterThanOrEqual(TAB_BAR.height + DEEPEST_HOME_INDICATOR);
   });
 });
 

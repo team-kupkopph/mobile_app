@@ -5,6 +5,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { colors, gradients, motion } from "../../theme";
 import { GlassSurface } from "../GlassSurface";
 import { PressScale } from "./PressScale";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useReducedMotion } from "../../useReducedMotion";
 
 export type TabBarItem = {
@@ -50,6 +52,7 @@ export const TAB_BAR = {
  * that matters, and it is not the 6.49:1 the icon scores on white.
  */
 export function TabBar({ items, active }: { items: TabBarItem[]; active: string }) {
+  const insets = useSafeAreaInsets();
   const reduced = useReducedMotion();
   const [barWidth, setBarWidth] = useState(0);
   const index = Math.max(0, items.findIndex((item) => item.key === active));
@@ -83,7 +86,20 @@ export function TabBar({ items, active }: { items: TabBarItem[]; active: string 
   }, [index, slot, reduced, x]);
 
   return (
-    <View style={styles.wrap} pointerEvents="box-none">
+    /**
+     * ⚠️ `insets.bottom`, NOT A FIXED 16 — AND A REAL THUMB IS WHAT SETTLED IT.
+     *
+     * The bar shipped at a flat `bottom: 16`, which puts its lower third inside the 34 pt
+     * home-indicator zone on every notched iPhone. Nothing measured it: it is not a contrast
+     * figure, not a touch-target size, and every screenshot looked correct because the
+     * indicator is drawn by the OS on top and simply does not appear in a capture. It was
+     * flagged as the first thing to judge on the device walk (US-PF3) and came back confirmed
+     * — the system's swipe-up was winning taps meant for the tabs.
+     *
+     * `Math.max` rather than a sum: on a device with no indicator the inset is 0, and the bar
+     * should still float clear of the edge by the designed 16.
+     */
+    <View style={[styles.wrap, { bottom: Math.max(insets.bottom, TAB_BAR.inset) }]} pointerEvents="box-none">
       <GlassSurface raise="float" radius={TAB_BAR.radius} style={styles.bar}>
         <View style={StyleSheet.absoluteFill} onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)} pointerEvents="none">
           {slot ? (
@@ -129,8 +145,8 @@ const styles = StyleSheet.create({
   wrap: {
     position: "absolute",
     left: TAB_BAR.gutter,
-    right: TAB_BAR.gutter,
-    bottom: TAB_BAR.inset
+    right: TAB_BAR.gutter
+    // `bottom` is set at render time from the safe-area inset — see the note at the call site.
   },
   bar: {
     // 68 rather than 84: the active pill carries the emphasis, so the bar can be shorter and
