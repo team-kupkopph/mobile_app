@@ -46,7 +46,9 @@ const HAND_ROLLED = files.filter(
  * without this number being updated — deliberately, so that finishing the job is recorded here
  * rather than silently absorbed. Lower it when you convert more; never raise it.
  */
-const REMAINING_HAND_ROLLED = 51;
+// 51 -> 50: MyInquiriesScreen moved to ScreenHeader when its list was extracted so
+// Adopt's segmented control could render the same list in place.
+const REMAINING_HAND_ROLLED = 50;
 
 describe("the header primitives", () => {
   it("pads by the safe-area inset rather than a magic number", () => {
