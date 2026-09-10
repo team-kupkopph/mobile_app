@@ -13,6 +13,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -124,21 +125,16 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", chipBg: "#E7F0EE", amberBg: "#FAEEDA", amber: "#633806",
-  greyBg: "#ECEAE3", grey: "#5F5E5A"
-};
 
 const STATUS_STYLE: Record<StatusTone, { backgroundColor: string }> = {
-  active: { backgroundColor: colors.chipBg },
-  muted: { backgroundColor: colors.greyBg },
-  danger: { backgroundColor: colors.amberBg }
+  active: { backgroundColor: colors.soft },
+  muted: { backgroundColor: colors.greyPill },
+  danger: { backgroundColor: colors.warningBg }
 };
 const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
   active: { color: colors.tealDark },
-  muted: { color: colors.grey },
-  danger: { color: colors.amber }
+  muted: { color: colors.muted },
+  danger: { color: colors.warningStrong }
 };
 
 const card = {
@@ -163,7 +159,7 @@ const styles = StyleSheet.create({
   sectionSub: { marginTop: 6, color: colors.muted, fontSize: 14 },
   calendarLink: { color: colors.teal, fontSize: 15, fontWeight: "800", marginTop: 4 },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
-  cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.chipBg, alignItems: "center", justifyContent: "center" },
+  cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
   cardSignedUp: { marginTop: 4, color: colors.muted, fontSize: 13 },

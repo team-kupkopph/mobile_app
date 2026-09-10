@@ -28,6 +28,7 @@ import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
   shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
+import { colors } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -35,10 +36,6 @@ const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
   ...SHIFT_TYPES.map((t) => ({ key: t, label: shiftTypeLabel(t) }))
 ];
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  chipBg: "#E7F0EE", line: "#E3E1D9"
-};
 const TONE = {
   amber: { bg: "#FAEEDA", fg: "#633806" }, teal: { bg: "#E2EEF0", fg: "#14504F" },
   green: { bg: "#EAF3DE", fg: "#27500A" }, grey: { bg: "#ECEAE3", fg: "#5F5E5A" }
@@ -248,7 +245,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 130 },
   impact: { borderRadius: 18, paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18, ...card },
   impactTotals: { color: colors.ink, fontSize: 19, fontWeight: "800" },
-  impactDivider: { marginTop: 14, height: 1, backgroundColor: colors.line },
+  impactDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },
   impactNext: { marginTop: 12, flexDirection: "row", alignItems: "center" },
   impactNextCopy: { flex: 1 },
   impactNextLabel: { color: colors.teal, fontSize: 14, fontWeight: "800" },
@@ -263,7 +260,7 @@ const styles = StyleSheet.create({
   groupHead: { marginTop: 4, marginBottom: 10, color: colors.muted, fontSize: 12,
                fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
-  cardIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.chipBg,
+  cardIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardIconFull: { backgroundColor: "#ECEAE3" },
   cardCopy: { flex: 1 },

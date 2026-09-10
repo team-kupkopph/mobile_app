@@ -28,6 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { gradients, heroDirection } from "../theme/v3";
+import { colors } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -554,17 +555,6 @@ function intentToast(action: GuestIntentAction): [string, string] {
   }
 }
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  page: "#F4F5F2",
-  border: "#E3E1D9",
-  muted: "#5F5E5A",
-  warnBg: "#FAEEDA",
-  warn: "#8A5A12",
-  warn2: "#633806",
-  paleTeal: "#E7F0EE"
-};
 
 const styles = StyleSheet.create({
   screen: {
@@ -641,24 +631,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.warnBg
+    backgroundColor: colors.warningBg
   },
   reviewCopy: {
     flex: 1,
     marginLeft: 14
   },
   reviewTitle: {
-    color: colors.warn2,
+    color: colors.warningStrong,
     fontSize: 14,
     fontWeight: "800"
   },
   reviewText: {
     marginTop: 5,
-    color: colors.warn,
+    color: colors.warning,
     fontSize: 11
   },
   statusLink: {
-    color: colors.warn2,
+    color: colors.warningStrong,
     fontSize: 12,
     fontWeight: "800"
   },
@@ -924,10 +914,10 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.warnBg
+    backgroundColor: colors.warningBg
   },
   urgentText: {
-    color: colors.warn2,
+    color: colors.warningStrong,
     fontSize: 12,
     fontWeight: "800"
   },
@@ -955,7 +945,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.paleTeal
+    backgroundColor: colors.soft
   },
   specialText: {
     color: colors.teal,

@@ -13,12 +13,8 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { MySignupItem, MySignups, shiftTypeLabel } from "../volunteer";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  chipBg: "#E7F0EE", greenBg: "#EAF3DE", green: "#27500A", amberBg: "#FAEEDA", amber: "#633806",
-  line: "#E3E1D9", danger: "#B23B3B"
-};
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -110,10 +106,10 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
   const banner = !item
     ? undefined
     : item.check_out_at
-      ? { bg: colors.chipBg, fg: colors.teal, text: "Shift complete. Thanks for volunteering!" }
+      ? { bg: colors.soft, fg: colors.teal, text: "Shift complete. Thanks for volunteering!" }
       : item.check_in_at
-        ? { bg: colors.greenBg, fg: colors.green, text: "Happening now — check out when you're done." }
-        : { bg: colors.amberBg, fg: colors.amber, text: "Check in when you arrive." };
+        ? { bg: colors.successBg, fg: colors.success, text: "Happening now — check out when you're done." }
+        : { bg: colors.warningBg, fg: colors.warningStrong, text: "Check in when you arrive." };
 
   const actionLabel = item?.check_in_at ? "Check out" : "Check in";
   const actionDisabled = item?.check_in_at ? !canCheckOut : !canCheckIn;
@@ -199,7 +195,7 @@ const styles = StyleSheet.create({
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { paddingHorizontal: 26, paddingTop: 22, paddingBottom: 60 },
   shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, ...card },
-  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.chipBg,
+  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, fontSize: 13, fontWeight: "700" },
@@ -212,10 +208,10 @@ const styles = StyleSheet.create({
   attRow: { flexDirection: "row", alignItems: "center", paddingVertical: 16 },
   attRowLast: {},
   attDotCol: { width: 28, alignItems: "center", alignSelf: "stretch" },
-  attDot: { width: 26, height: 26, borderRadius: 13, borderWidth: 1.5, borderColor: colors.line,
+  attDot: { width: 26, height: 26, borderRadius: 13, borderWidth: 1.5, borderColor: colors.border,
             backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },
   attDotDone: { backgroundColor: colors.teal, borderColor: colors.teal },
-  attLine: { flex: 1, width: 2, backgroundColor: colors.line, marginVertical: 2 },
+  attLine: { flex: 1, width: 2, backgroundColor: colors.border, marginVertical: 2 },
   attLabel: { flex: 1, marginLeft: 14, color: colors.muted, fontSize: 15, fontWeight: "700" },
   attLabelDone: { color: colors.ink },
   attValue: { color: colors.muted, fontSize: 14, fontWeight: "700" },

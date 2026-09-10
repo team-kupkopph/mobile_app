@@ -12,6 +12,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone, VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
+import { colors } from "../theme";
 
 function formatAddress(addr: { line1: string; barangay: string; city: string; province: string }): string {
   return [addr.line1, addr.barangay, addr.city, addr.province].filter(Boolean).join(", ");
@@ -104,17 +105,12 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  white: "#FFFFFF", chipBg: "#E7F0EE", amberBg: "#FAEEDA", amber: "#633806",
-  greyBg: "#ECEAE3", grey: "#5F5E5A", danger: "#B23B3B", dangerBg: "#FBEAEA", line: "#E3E1D9"
-};
 
 const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = {
-  done: { backgroundColor: colors.chipBg }, muted: { backgroundColor: colors.greyBg }, danger: { backgroundColor: colors.amberBg }
+  done: { backgroundColor: colors.soft }, muted: { backgroundColor: colors.greyPill }, danger: { backgroundColor: colors.warningBg }
 };
 const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
-  done: { color: colors.tealDark }, muted: { color: colors.grey }, danger: { color: colors.amber }
+  done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.warningStrong }
 };
 
 const card = {
@@ -138,7 +134,7 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 12, fontWeight: "800" },
   reliabilityLine: { marginTop: 12, color: colors.muted, fontSize: 14, fontWeight: "700" },
   sectionLabel: { marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
-  contactRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.line },
+  contactRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border },
   contactLabel: { color: colors.muted, fontSize: 12, fontWeight: "700" },
   contactValue: { marginTop: 3, color: colors.ink, fontSize: 15, fontWeight: "700" },
   mutedNote: { color: colors.muted, fontSize: 14, fontStyle: "italic" }

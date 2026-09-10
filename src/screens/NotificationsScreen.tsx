@@ -20,8 +20,8 @@ import { relTime } from "../sagip";
 const colors = {
   ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
   line: "#E3E1D9", unreadBg: "#EAF3F2",
-  chipBg: "#E7F0EE", greenBg: "#EAF3DE", green: "#27500A", amberBg: "#FAEEDA", amber: "#633806",
-  pinkBg: "#FBECEC", pink: "#B23B3B"
+  chipBg: "#E7F0EF", greenBg: "#EAF3DE", green: "#27500A", amberBg: "#FAEEDA", amber: "#633806",
+  pinkBg: "#FBEEEC", pink: "#B23B3B"
 };
 
 // US-V8 · the four volunteer notification types get a dedicated icon + tone, matching the

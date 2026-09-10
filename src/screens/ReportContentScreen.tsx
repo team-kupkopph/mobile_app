@@ -6,11 +6,8 @@ import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B", fine: "#9a988f"
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportContent">;
 
@@ -56,7 +53,7 @@ export function ReportContentScreen({ navigation, route }: Props) {
           onChangeText={setReason}
           multiline
           placeholder="Spam, a fake listing, abusive contact…"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.faintDeprecated}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <TouchableOpacity style={styles.submit} onPress={submit} activeOpacity={0.9} disabled={submitting}>

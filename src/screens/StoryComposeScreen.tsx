@@ -10,11 +10,8 @@ import {
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  soft: "#E7F0EF", line: "#E3E1D9", danger: "#B23B3B"
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
@@ -104,7 +101,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, fontSize: 24, fontWeight: "800", marginBottom: 14 },
-  photoTile: { height: 150, borderRadius: 20, borderWidth: 2, borderColor: colors.line, borderStyle: "dashed", alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
+  photoTile: { height: 150, borderRadius: 20, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
   photoTileSet: { borderStyle: "solid", borderColor: colors.teal, backgroundColor: colors.soft },
   photoLabel: { color: colors.teal, fontSize: 16, fontWeight: "700" },
   linkedPill: { alignSelf: "flex-start", marginTop: 16, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, backgroundColor: "#EAF3DE" },
