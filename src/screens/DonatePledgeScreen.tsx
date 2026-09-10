@@ -8,11 +8,8 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  soft: "#E7F0EF", line: "#E3E1D9", ok: "#27500A", okBg: "#EAF3DE"
-};
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -130,8 +127,8 @@ const styles = StyleSheet.create({
   secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
   secondaryLabel: { color: colors.ink, fontSize: 16, fontWeight: "700" },
   confirmWrap: { flexGrow: 1, paddingHorizontal: 26, paddingTop: 140, paddingBottom: 60, alignItems: "center" },
-  checkTile: { width: 84, height: 84, borderRadius: 26, backgroundColor: colors.okBg, alignItems: "center", justifyContent: "center" },
-  checkGlyph: { color: colors.ok, fontSize: 44, fontWeight: "800" },
+  checkTile: { width: 84, height: 84, borderRadius: 26, backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
+  checkGlyph: { color: colors.success, fontSize: 44, fontWeight: "800" },
   confirmTitle: { marginTop: 22, color: colors.ink, fontSize: 26, fontWeight: "800" },
   confirmBody: { marginTop: 12, color: colors.muted, fontSize: 15.5, lineHeight: 23, textAlign: "center" }
 });

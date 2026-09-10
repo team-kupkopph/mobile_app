@@ -17,11 +17,8 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { privacyRows, Settings } from "../settings";
 import { ScreenHeader } from "../components/ui";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B",
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2,
@@ -168,7 +165,7 @@ const styles = StyleSheet.create({
   factRow: { paddingHorizontal: 18, paddingVertical: 16 },
   factLabel: { fontSize: 15, fontWeight: "700", color: colors.ink },
   note: { fontSize: 13, color: colors.muted, marginTop: 4, lineHeight: 18 },
-  divided: { borderBottomWidth: 1, borderBottomColor: colors.line },
+  divided: { borderBottomWidth: 1, borderBottomColor: colors.border },
   footnote: { fontSize: 13, color: colors.muted, marginTop: 10, lineHeight: 18 },
   error: { fontSize: 15, color: colors.danger },
   errorBanner: { fontSize: 14, color: colors.danger, marginBottom: 12 },

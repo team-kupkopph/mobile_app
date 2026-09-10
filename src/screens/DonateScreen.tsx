@@ -12,11 +12,8 @@ import { loadState } from "../net";
 import { needProgressLabel } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", soft: "#E7F0EF"
-};
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
 
@@ -132,7 +129,7 @@ const styles = StyleSheet.create({
   offPlatformNote: { marginTop: 8, marginBottom: 20, color: colors.muted, fontSize: 14, lineHeight: 20 },
   qrCard: { marginBottom: 18, padding: 20, borderRadius: 22, alignItems: "center", ...card },
   provider: { color: colors.teal, fontSize: 16, fontWeight: "800" },
-  qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: 12, backgroundColor: colors.line },
+  qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: 12, backgroundColor: colors.border },
   accountName: { marginTop: 14, color: colors.ink, fontSize: 15, fontWeight: "600" },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" },
   wishlist: { marginTop: 28 },

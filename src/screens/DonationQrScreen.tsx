@@ -9,11 +9,8 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B", fine: "#9a988f"
-};
 
 const PROVIDERS = ["gcash", "maya"] as const;
 const PROVIDER_LABEL: Record<(typeof PROVIDERS)[number], string> = { gcash: "GCash", maya: "Maya" };
@@ -94,7 +91,7 @@ export function DonationQrScreen({ navigation }: Props) {
           value={accountName}
           onChangeText={setAccountName}
           placeholder="Marikina Animal Welfare Group"
-          placeholderTextColor={colors.fine}
+          placeholderTextColor={colors.faintDeprecated}
         />
 
         <Text style={styles.label}>QR image</Text>
@@ -134,7 +131,7 @@ const styles = StyleSheet.create({
   segItemActive: { ...card },
   segText: { color: colors.muted, fontSize: 15, fontWeight: "700" },
   segTextActive: { color: colors.ink },
-  photoBtn: { height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.line, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoBtn: { height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, fontSize: 16, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },

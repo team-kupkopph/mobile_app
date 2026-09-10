@@ -10,11 +10,8 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docLabel } from "../verifications";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", tealDark: "#14504F", page: "#F4F5F2", muted: "#5F5E5A",
-  soft: "#E2EEF0", warnBg: "#FAEEDA", warn2: "#633806", danger: "#B23B3B", line: "#E3E1D9"
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyResubmit">;
 
@@ -145,10 +142,10 @@ const styles = StyleSheet.create({
   h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, fontSize: 17 },
   noteBox: {
-    marginTop: 22, padding: 18, borderRadius: 20, backgroundColor: colors.warnBg
+    marginTop: 22, padding: 18, borderRadius: 20, backgroundColor: colors.warningBg
   },
-  noteLabel: { color: colors.warn2, fontSize: 12, fontWeight: "800", letterSpacing: 0.6 },
-  noteText: { marginTop: 8, color: colors.warn2, fontSize: 16, lineHeight: 23, fontWeight: "600" },
+  noteLabel: { color: colors.warningStrong, fontSize: 12, fontWeight: "800", letterSpacing: 0.6 },
+  noteText: { marginTop: 8, color: colors.warningStrong, fontSize: 16, lineHeight: 23, fontWeight: "600" },
   fileCard: {
     marginTop: 20, padding: 20, borderRadius: 22, backgroundColor: "#FFFFFF",
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
@@ -158,7 +155,7 @@ const styles = StyleSheet.create({
   fileName: { color: colors.ink, fontSize: 18, fontWeight: "700", flex: 1 },
   replaceBtn: {
     paddingHorizontal: 22, height: 44, borderRadius: 22, alignItems: "center",
-    justifyContent: "center", backgroundColor: colors.soft
+    justifyContent: "center", backgroundColor: colors.infoBg
   },
   replaceText: { color: colors.tealDark, fontSize: 16, fontWeight: "800" },
   readyRow: { flexDirection: "row", alignItems: "center", gap: 8 },

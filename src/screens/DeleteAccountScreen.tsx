@@ -21,12 +21,8 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  line: "#E3E1D9", danger: "#B23B3B", dangerBg: "#FBEEEC", ok: "#27500A",
-  warn: "#8A5A12", warnBg: "#FAEEDA",
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2,
@@ -85,7 +81,7 @@ export function DeleteAccountScreen({ navigation }: Props) {
 
         <View style={styles.columns}>
           <Column heading="REMOVED" headingColor={colors.danger} dot={colors.danger} items={REMOVED} />
-          <Column heading="KEPT, ANONYMOUS" headingColor={colors.ok} dot={colors.ok} items={KEPT} />
+          <Column heading="KEPT, ANONYMOUS" headingColor={colors.success} dot={colors.success} items={KEPT} />
         </View>
 
         <Text style={styles.reason}>
@@ -236,9 +232,9 @@ const styles = StyleSheet.create({
   outlineBtnLabel: { fontSize: 16, fontWeight: "700", color: colors.ink },
   tealBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   tealBtnLabel: { fontSize: 17, fontWeight: "700", color: colors.white },
-  warnCard: { borderRadius: 18, backgroundColor: colors.warnBg, padding: 18 },
-  warnTitle: { fontSize: 17, fontWeight: "800", color: colors.warn },
-  warnBody: { fontSize: 14, color: colors.warn, marginTop: 6, lineHeight: 20 },
+  warnCard: { borderRadius: 18, backgroundColor: colors.warningBg, padding: 18 },
+  warnTitle: { fontSize: 17, fontWeight: "800", color: colors.warning },
+  warnBody: { fontSize: 14, color: colors.warning, marginTop: 6, lineHeight: 20 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginTop: 24, marginBottom: 8 },
   blockerCard: { borderRadius: 18, padding: 16, marginBottom: 12, ...card },
   blockerTitle: { fontSize: 16, fontWeight: "800", color: colors.ink },

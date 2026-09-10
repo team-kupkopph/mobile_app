@@ -17,11 +17,8 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { exportFilename, humanSize } from "../settings";
 import { ScreenHeader } from "../components/ui";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  danger: "#B23B3B",
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2,

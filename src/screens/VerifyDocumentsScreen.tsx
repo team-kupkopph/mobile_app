@@ -15,27 +15,15 @@ import { loadState } from "../net";
 import { AlertIcon, CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docChip, docLabel, groupAttention, splitDocs } from "../verifications";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A",
-  teal: "#1C6B6B",
-  page: "#F4F5F2",
-  muted: "#5F5E5A",
-  soft: "#E2EEF0",
-  warnBg: "#FAEEDA",
-  warn2: "#633806",
-  danger: "#B23B3B",
-  dangerBg: "#FBEEEC",
-  ok: "#27500A",
-  okBg: "#EAF3DE"
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyDocuments">;
 
 const CHIP_STYLE = {
-  ok: { bg: colors.okBg, fg: colors.ok },
+  ok: { bg: colors.successBg, fg: colors.success },
   danger: { bg: colors.dangerBg, fg: colors.danger },
-  review: { bg: colors.warnBg, fg: colors.warn2 }
+  review: { bg: colors.warningBg, fg: colors.warningStrong }
 } as const;
 
 export function VerifyDocumentsScreen({ navigation }: Props) {
@@ -122,7 +110,7 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
               </View>
             ) : verification.status === "needs_info" && verification.notes ? (
               <View style={styles.noteBanner}>
-                <AlertIcon color={colors.warn2} size={30} />
+                <AlertIcon color={colors.warningStrong} size={30} />
                 <Text style={styles.noteBannerText}>{verification.notes}</Text>
               </View>
             ) : null}
@@ -243,9 +231,9 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 18,
     borderRadius: 20,
-    backgroundColor: colors.warnBg
+    backgroundColor: colors.warningBg
   },
-  noteBannerText: { flex: 1, color: colors.warn2, fontSize: 15, fontWeight: "600", lineHeight: 21 },
+  noteBannerText: { flex: 1, color: colors.warningStrong, fontSize: 15, fontWeight: "600", lineHeight: 21 },
   noteBannerDanger: { backgroundColor: colors.dangerBg },
   noteBannerTitle: { color: colors.danger, fontSize: 17, fontWeight: "800" },
   noteBannerBody: { marginTop: 6, color: colors.danger, fontSize: 15, fontWeight: "600", lineHeight: 21 },
@@ -269,7 +257,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.soft
+    backgroundColor: colors.infoBg
   },
   docMeta: { flex: 1, gap: 8 },
   docName: { color: colors.ink, fontSize: 18, fontWeight: "700" },
@@ -293,7 +281,7 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 18,
     borderRadius: 22,
-    backgroundColor: colors.okBg
+    backgroundColor: colors.successBg
   },
   approvedDot: {
     width: 26,
@@ -301,9 +289,9 @@ const styles = StyleSheet.create({
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.ok
+    backgroundColor: colors.success
   },
-  approvedTitle: { color: colors.ok, fontSize: 17, fontWeight: "800" },
+  approvedTitle: { color: colors.success, fontSize: 17, fontWeight: "800" },
   approvedSub: { marginTop: 4, color: "#3f5a2e", fontSize: 14 },
   allGood: { marginTop: 24, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

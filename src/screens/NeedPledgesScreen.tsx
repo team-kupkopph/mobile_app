@@ -15,20 +15,16 @@ import { loadState } from "../net";
 import { ChipTone, needProgressLabel, pledgeStatusChip, PledgeStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { colors } from "../theme";
 
-const colors = {
-  ink: "#12213A", teal: "#1C6B6B", page: "#F4F5F2", muted: "#5F5E5A", white: "#FFFFFF",
-  okBg: "#EAF3DE", ok: "#27500A", warnBg: "#FAEEDA", warn: "#8A5A12",
-  greyPill: "#ECEAE3", greyInk: "#5F5E5A", soft: "#E7F0EF", danger: "#B23B3B"
-};
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
 };
 const CHIP: Record<ChipTone, { bg: string; fg: string }> = {
-  ok: { bg: colors.okBg, fg: colors.ok },
-  warn: { bg: colors.warnBg, fg: colors.warn },
-  muted: { bg: colors.greyPill, fg: colors.greyInk }
+  ok: { bg: colors.successBg, fg: colors.success },
+  warn: { bg: colors.warningBg, fg: colors.warning },
+  muted: { bg: colors.greyPill, fg: colors.muted }
 };
 
 type Pledge = { pledge_id: string; quantity: number; status: PledgeStatus; pledger_name: string };
