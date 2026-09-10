@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
-import { StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors, elevation, spacing } from "../../theme";
 import { TAP_SLOP } from "../../touch";
+import { PressScale } from "./PressScale";
 
 /** The minimum touch target, from the design system's own non-negotiable list. */
 export const BACK_BUTTON_SIZE = 44;
@@ -27,9 +28,10 @@ const HEADER_GAP = 16;
  */
 export function BackButton({ onPress, style }: { onPress: () => void; style?: StyleProp<ViewStyle> }) {
   return (
-    <TouchableOpacity
+    // `.press` from the canvas — the default scale for a card or icon button. Not
+    // activeOpacity: the canvas presses controls IN, it does not fade them out.
+    <PressScale
       testID="btn.back"
-      activeOpacity={0.75}
       onPress={onPress}
       style={[styles.back, style]}
       hitSlop={TAP_SLOP}
@@ -37,7 +39,7 @@ export function BackButton({ onPress, style }: { onPress: () => void; style?: St
       accessibilityLabel="Go back"
     >
       <Text style={styles.backGlyph}>‹</Text>
-    </TouchableOpacity>
+    </PressScale>
   );
 }
 

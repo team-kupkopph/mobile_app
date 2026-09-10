@@ -1,9 +1,11 @@
-import { ReactNode } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { colors, gradients } from "../../theme";
+import { colors, gradients, motion } from "../../theme";
 import { GlassSurface } from "../GlassSurface";
+import { PressScale } from "./PressScale";
+import { useReducedMotion } from "../../useReducedMotion";
 
 export type TabBarItem = {
   /** Identity within the bar; compared against `active`. */
@@ -48,17 +50,55 @@ export const TAB_BAR = {
  * that matters, and it is not the 6.49:1 the icon scores on white.
  */
 export function TabBar({ items, active }: { items: TabBarItem[]; active: string }) {
+  const reduced = useReducedMotion();
+  const [barWidth, setBarWidth] = useState(0);
+  const index = Math.max(0, items.findIndex((item) => item.key === active));
+  const slot = barWidth ? barWidth / items.length : 0;
+  const x = useRef(new Animated.Value(index * slot)).current;
+
+  /**
+   * ⚠️ ONE PILL THAT TRAVELS, not one pill per tab appearing and disappearing.
+   *
+   * The canvas's Motion panel names this exactly — "Sliding thumb, tab pill · --dur-slow ·
+   * 420ms" — and it is the difference between a bar that feels connected and one that blinks.
+   * It also means the pill has to live OUTSIDE the items, because a child cannot travel past
+   * its parent's bounds.
+   *
+   * The slide is skipped until the bar has been measured (`slot` is 0 on the first paint, so
+   * there is nothing meaningful to animate to) and whenever Reduce Motion is on, where the
+   * pill jumps straight to the selected tab instead.
+   */
+  useEffect(() => {
+    if (!slot) return;
+    if (reduced) {
+      x.setValue(index * slot);
+      return;
+    }
+    Animated.timing(x, {
+      toValue: index * slot,
+      duration: motion.durationSlow,
+      easing: motion.easing,
+      useNativeDriver: true
+    }).start();
+  }, [index, slot, reduced, x]);
+
   return (
     <View style={styles.wrap} pointerEvents="box-none">
       <GlassSurface raise="float" radius={TAB_BAR.radius} style={styles.bar}>
+        <View style={StyleSheet.absoluteFill} onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)} pointerEvents="none">
+          {slot ? (
+            <Animated.View style={[styles.pillTrack, { width: slot, transform: [{ translateX: x }] }]}>
+              <LinearGradient colors={gradients.activeTab} style={styles.activePill} />
+            </Animated.View>
+          ) : null}
+        </View>
         {items.map((item) => {
           const isActive = item.key === active;
           const color = isActive ? colors.teal : colors.tabInactive;
           return (
-            <TouchableOpacity
+            <PressScale
               key={item.key}
               testID={item.testID}
-              activeOpacity={0.75}
               style={styles.tabItem}
               accessibilityRole="tab"
               accessibilityLabel={item.label}
@@ -70,10 +110,6 @@ export function TabBar({ items, active }: { items: TabBarItem[]; active: string 
                 item.onPress();
               }}
             >
-              {/* Behind the icon AND its label, rather than a chip behind the icon alone — the
-                  whole tab reads as one selected control instead of two halves that only half
-                  agree. This is the shape US-CH1 brought the other two bars to. */}
-              {isActive ? <LinearGradient colors={gradients.activeTab} style={styles.activePill} /> : null}
               <View style={styles.iconSlot}>{item.icon(color, TAB_BAR.iconSize)}</View>
               {/* numberOfLines guards the five-tab shelter bar on the narrowest supported
                   screen: 375 - 32 gutters = 343, and 343/5 = 68.6 pt per item. "Requests" fits,
@@ -81,7 +117,7 @@ export function TabBar({ items, active }: { items: TabBarItem[]; active: string 
               <Text numberOfLines={1} style={[styles.tabText, isActive && styles.activeTabText]}>
                 {item.label}
               </Text>
-            </TouchableOpacity>
+            </PressScale>
           );
         })}
       </GlassSurface>
@@ -111,7 +147,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
+  /** The travelling track: one item wide, moved by translateX. */
+  pillTrack: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0
+  },
   activePill: {
+    // Behind the icon AND its label, rather than a chip behind the icon alone — the whole tab
+    // reads as one selected control instead of two halves that only half agree.
     position: "absolute",
     left: 4,
     right: 4,
