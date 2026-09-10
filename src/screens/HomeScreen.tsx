@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import type { StoryCard } from "./StoriesScreen";
 import { loadState } from "../net";
 import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
@@ -78,6 +79,11 @@ export function HomeScreen({ navigation, route }: Props) {
   // time, on a screen far more people see.
   const [listingsRes, setListingsRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [rescuesRes, setRescuesRes] = useState<{ ok: boolean; status: number } | null>(null);
+  // US-T2 · the stories row used to be a bare link with nothing under it, while both of its
+  // sibling sections showed content. It now asks, so it can say "No stories yet" when that is
+  // true — which a link row can never do.
+  const [stories, setStories] = useState<StoryCard[]>([]);
+  const [storiesRes, setStoriesRes] = useState<{ ok: boolean; status: number } | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -152,7 +158,23 @@ export function HomeScreen({ navigation, route }: Props) {
       // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable; refetch on focus and whenever the city resolves or changes
   }, [city, isReady]);
 
+  const loadStories = useCallback(() => {
+    api.get("/stories").then((r) => {
+      setStoriesRes({ ok: r.ok, status: r.status });
+      // Two, matching the rescue strip. `results`, like StoriesScreen reads.
+      if (r.ok) setStories((r.data?.results ?? []).slice(0, 2));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable
+  }, []);
+
   useFocusEffect(loadCityPanels);
+  useFocusEffect(loadStories);
+
+  /** One retry for the whole screen, for the one-notice case below. */
+  const reloadPanels = useCallback(() => {
+    loadCityPanels();
+    loadStories();
+  }, [loadCityPanels, loadStories]);
 
   /**
    * ⚠️ PER-PANEL STATE — the US-R2 rule this screen's own comment says it follows, now
@@ -166,6 +188,20 @@ export function HomeScreen({ navigation, route }: Props) {
    */
   const listingsPanel = loadState(listingsRes, listings.length);
   const rescuesPanel = loadState(rescuesRes, rescues.length);
+  const storiesPanel = loadState(storiesRes, stories.length);
+
+  /**
+   * ⚠️ ONE NOTICE, NOT THREE. US-R2's per-panel rule exists for panels that DISAGREE — the
+   * dashboard "showing three real counters and one fabricated zero". When every panel failed
+   * for the same reason, that is one fact, and saying it three times is just noise: the first
+   * version of this fix stacked two identical full-height offline blocks on one screen.
+   *
+   * The hero and the quick links stay: "Report now" queues through the outbox and works with
+   * no connection at all, and the trail pills navigate. Only the three data sections — which
+   * genuinely have nothing to show — collapse into the single notice.
+   */
+  const dataPanels = [listingsPanel, storiesPanel, rescuesPanel];
+  const allOffline = dataPanels.every((panel) => panel.kind === "offline");
 
   // US-A1b resume: SignupSuccessScreen's "Start exploring" resets to Home with
   // params.justSignedUp = true, and ONLY that route sets the flag (SigninScreen's plain-login
@@ -347,6 +383,10 @@ export function HomeScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
 
+        {allOffline ? (
+          <LoadStateView state={{ kind: "offline" }} onRetry={reloadPanels} />
+        ) : (
+        <>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Adopt near you</Text>
           <TouchableOpacity testID="btn.home.adopt" hitSlop={TAP_SLOP} activeOpacity={0.7} onPress={() => navigation.navigate("adopt")}>
@@ -392,6 +432,29 @@ export function HomeScreen({ navigation, route }: Props) {
           <Text style={styles.seeAll}>See all ›</Text>
         </TouchableOpacity>
 
+        {storiesPanel.kind !== "ready" && storiesPanel.kind !== "empty" ? (
+          <LoadStateView state={storiesPanel} onRetry={loadStories} />
+        ) : storiesPanel.kind === "empty" ? (
+          <Text style={styles.emptyNote}>No stories yet. Be the first to share one.</Text>
+        ) : stories.map((story) => (
+          <TouchableOpacity
+            key={story.story_id}
+            activeOpacity={0.75}
+            style={styles.rescueCard}
+            onPress={() => navigation.navigate("storyDetail", { storyId: story.story_id })}
+          >
+            <View style={styles.avatarCircle}>
+              <Text style={styles.storyInitials}>{storyInitials(story.author.name)}</Text>
+            </View>
+            <View style={styles.petCopy}>
+              <Text style={styles.petName} numberOfLines={1}>{story.caption}</Text>
+              <Text style={styles.petDetails} numberOfLines={1}>
+                {story.author.name}{story.author.city ? ` · ${story.author.city}` : ""}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+
         {/* `btn.home.rescueMap` used to sit on the "See nearby strays ›" link above, which was
             the third path from Home to this same map (the fourth being the "Lost & found" grid
             tile). Both are gone; this row is now the single way there, so the testID e2e flow 70
@@ -430,12 +493,20 @@ export function HomeScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         ))}
 
+        </>
+        )}
+
         {pendingMember && <Text style={styles.lockedNote}>Claiming rescues unlocks once you're verified.</Text>}
       </ScrollView>
 
       <OwnerTabs active="home" />
     </View>
   );
+}
+
+/** Same two-letter fallback StoriesScreen and StoryDetailScreen already use. */
+function storyInitials(name: string) {
+  return name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
 }
 
 function conditionLabel(condition: string): string {
@@ -875,6 +946,11 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 11,
     textAlign: "center"
+  },
+  storyInitials: {
+    color: colors.teal,
+    fontSize: 15,
+    fontWeight: "800"
   },
   emptyNote: {
     marginTop: 12,
