@@ -4,7 +4,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { PressScale } from "../components/ui";
+import { InquiryList } from "../components/InquiryList";
+import { PressScale, SegmentedControl } from "../components/ui";
 import { motion } from "../theme";
 
 import { Listing } from "../api/types";
@@ -20,6 +21,9 @@ import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors } from "../theme";
 
+
+/** The canvas's Adopt artboard: ["Browse", "My inquiries"]. */
+const SEGMENTS = ["Browse", "My inquiries"];
 
 const SPECIES: Array<{ key: string; label: string }> = [
   { key: "", label: "All" }, { key: "dog", label: "Dogs" },
@@ -48,6 +52,8 @@ export function AdoptScreen({ navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter change
   }, [city, species]);
 
+  const [segment, setSegment] = useState(0);
+
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   return (
@@ -59,12 +65,26 @@ export function AdoptScreen({ navigation }: Props) {
           <TouchableOpacity onPress={() => navigation.navigate("listingForm", undefined)} hitSlop={TAP_SLOP}>
             <Text style={styles.headerLink}>+ List</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("myInquiries")} hitSlop={TAP_SLOP}>
-            <Text style={styles.headerLink}>My inquiries ›</Text>
-          </TouchableOpacity>
         </View>
       </View>
 
+      {/* The canvas's Adopt artboard puts these two views behind a segmented control rather
+          than sending "My inquiries" to a screen of its own. The route still exists — see
+          components/InquiryList.tsx for why — this is the in-place view. */}
+      <SegmentedControl
+        segments={SEGMENTS}
+        index={segment}
+        onChange={setSegment}
+        testID="seg.adopt"
+        style={styles.segmented}
+      />
+
+      {segment === 1 ? (
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          <InquiryList />
+        </ScrollView>
+      ) : (
+      <>
       {/* "Chip select · scale .94 · 340ms" from the canvas's Motion panel — a chip is small,
           so it takes a deeper scale than the .978 a card or button uses. */}
       <View style={styles.filterRow}>
@@ -124,6 +144,8 @@ export function AdoptScreen({ navigation }: Props) {
           </>
         )}
       </ScrollView>
+      </>
+      )}
 
       <OwnerTabs active="adopt" />
     </View>
@@ -146,6 +168,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   headerLinks: { flexDirection: "row", gap: 16 },
   headerLink: { color: colors.teal, fontSize: 14, fontWeight: "700" },
+  segmented: { marginHorizontal: 26, marginTop: 14 },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 26, paddingTop: 14, paddingBottom: 4 },
   filterChip: { paddingHorizontal: 16, height: 36, borderRadius: 18, alignItems: "center",
                justifyContent: "center", backgroundColor: colors.white },

@@ -35,7 +35,13 @@ export function SectionHeader({ title, actionLabel, onAction, onPress, testID, s
   const Row = onPress ? PressScale : View;
   const rowProps = onPress
     ? { onPress, testID, accessibilityRole: "button" as const, accessibilityLabel: `${title}${actionLabel ? ", " + actionLabel : ""}` }
-    : { testID };
+    // ⚠️ NO testID ON THE ROW HERE. When the LABEL is the control, the id must sit on the
+    // label alone: putting it on both meant two elements answered to `btn.home.adopt`, and
+    // Maestro tapped the first — the plain View, which has no handler. The tap reported
+    // COMPLETED and nothing happened, so flow 20 failed one step later on `screen.adopt`.
+    // e2eSelectors.test.ts could not catch this: the selector DID exist, just not on the
+    // thing that does something. Only the flow could.
+    : {};
   return (
     <Row style={[styles.row, style]} {...rowProps}>
       <Text style={styles.title}>{title}</Text>

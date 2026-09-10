@@ -14,3 +14,4 @@ export { PressScale } from "./PressScale";
 export { Avatar } from "./Avatar";
 export { Card } from "./Card";
 export { SectionHeader } from "./SectionHeader";
+export { SegmentedControl } from "./SegmentedControl";
