@@ -28,7 +28,7 @@ import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
   shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -231,7 +231,7 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 4 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4 },
   title: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   headerLinks: { marginTop: 12, flexDirection: "row", gap: 10 },
   headerPill: {
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     justifyContent: "center", ...card
   },
   headerPillText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 130 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 130 },
   impact: { borderRadius: radii.tile, paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18, ...card },
   impactTotals: { color: colors.ink, fontSize: 19, fontWeight: "800" },
   impactDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },

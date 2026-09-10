@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "passwordChanged">;
 
@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: spacing.lg,
     alignItems: "center"
   },
   checkCircle: {

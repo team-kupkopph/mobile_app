@@ -13,7 +13,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
-import { radii, typography } from "../theme";
+import { radii, spacing, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28
+    paddingHorizontal: spacing.lg
   },
   title: {
     color: authColors.ink,

@@ -24,7 +24,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift, blastRadiusCopy } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -201,7 +201,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: {
-    paddingTop: 58, paddingHorizontal: 20, paddingBottom: 10,
+    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
     flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
   },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },

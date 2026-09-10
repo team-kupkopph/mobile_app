@@ -15,7 +15,7 @@ import {
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
-import { radii, typography } from "../theme";
+import { radii, spacing, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -207,7 +207,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
-  content: { flex: 1, paddingHorizontal: 28 },
+  content: { flex: 1, paddingHorizontal: spacing.lg },
   title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
   caption: { marginTop: 8, color: authColors.muted, fontSize: 14, lineHeight: 20 },
   phoneText: { marginTop: 3, color: authColors.ink, fontSize: 15, fontWeight: "800" },

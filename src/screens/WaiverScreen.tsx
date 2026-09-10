@@ -6,7 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii } from "../theme";
+import { colors, elevation, radii, spacing } from "../theme";
 
 
 const card = {
@@ -47,11 +47,11 @@ export function WaiverScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 20, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   noticeCard: { borderRadius: radii.tile, padding: 20, gap: 14, ...card },
   body: { color: colors.muted, fontSize: 15, lineHeight: 22 }
 });

@@ -13,7 +13,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -144,7 +144,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: {
-    paddingTop: 58, paddingHorizontal: 20, paddingBottom: 10,
+    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
     flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
   },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   newBtn: { paddingHorizontal: 16, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   newBtnText: { color: colors.white, ...typography.meta, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 20, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   sectionHeader: { flexDirection: "row", alignItems: "flex-start", marginBottom: 20 },
   sectionTitle: { color: colors.ink, fontSize: 24, fontWeight: "800" },
   sectionSub: { marginTop: 6, color: colors.muted, ...typography.meta },

@@ -17,7 +17,7 @@ import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -113,13 +113,13 @@ export function StoriesScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 14 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 14 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { flex: 1, color: colors.ink, fontSize: 22, fontWeight: "800" },
   share: { paddingHorizontal: 18, paddingVertical: 11, borderRadius: 22, backgroundColor: colors.teal },
   shareLabel: { color: colors.white, fontSize: 15, fontWeight: "700" },
-  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   storyCard: { marginBottom: 16, padding: 16, borderRadius: 22, ...card },
   photo: { height: 150, borderRadius: 16, backgroundColor: colors.placeholder },

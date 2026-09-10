@@ -9,7 +9,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescuePlaceConfirm">;
@@ -105,11 +105,11 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   recipientCard: { marginTop: 8, padding: 18, borderRadius: radii.field, backgroundColor: colors.soft },
   recipientLabel: { color: colors.teal, fontSize: 13, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.5 },
   recipientEmail: { marginTop: 6, color: colors.ink, fontSize: 18, fontWeight: "700" },

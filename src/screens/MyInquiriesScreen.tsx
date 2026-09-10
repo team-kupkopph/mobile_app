@@ -12,6 +12,7 @@ import { InquiryList } from "../components/InquiryList";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ScreenHeader } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
+import { spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "myInquiries">;
 
@@ -29,5 +30,5 @@ export function MyInquiriesScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "transparent" },
-  content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 }
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 }
 });

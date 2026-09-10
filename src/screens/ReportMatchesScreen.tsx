@@ -11,7 +11,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { matchReasons, matchStrength } from "../community";
 import { MatchShape, RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, spacing, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -100,11 +100,11 @@ export function ReportMatchesScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   intro: { color: colors.muted, fontSize: 15, marginBottom: 16 },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 23 },
   matchCard: { marginBottom: 14, padding: 16, borderRadius: 22, ...card },

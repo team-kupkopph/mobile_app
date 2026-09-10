@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, authColors } from "./AuthFormKit";
-import { colors, typography } from "../theme";
+import { colors, spacing, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28
+    paddingHorizontal: spacing.lg
   },
   title: {
     color: authColors.ink,

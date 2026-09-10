@@ -28,7 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { gradients, heroDirection } from "../theme/v3";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent"
   },
   content: {
-    paddingHorizontal: 26,
+    paddingHorizontal: spacing.lg,
     paddingTop: 20,
     paddingBottom: 156
   },

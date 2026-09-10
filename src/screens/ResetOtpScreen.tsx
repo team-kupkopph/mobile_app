@@ -23,7 +23,7 @@ import { codeCheckOutcome } from "../passwordReset";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { radii, typography } from "../theme";
+import { radii, spacing, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28
+    paddingHorizontal: spacing.lg
   },
   title: {
     color: authColors.ink,

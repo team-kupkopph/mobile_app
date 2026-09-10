@@ -18,7 +18,7 @@ import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
@@ -212,7 +212,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
-  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },

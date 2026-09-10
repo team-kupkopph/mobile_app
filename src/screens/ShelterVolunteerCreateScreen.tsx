@@ -15,7 +15,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { ShiftType, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, spacing, typography } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 
@@ -146,11 +146,11 @@ function TypeChips({ value, onChange }: { value: ShiftType; onChange: (t: ShiftT
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: 26, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
   input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },

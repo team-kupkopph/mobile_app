@@ -10,7 +10,7 @@ import { PASSWORD_RULE, passwordError } from "../passwordRules";
 import { codeCheckOutcome } from "../passwordReset";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "resetPassword">;
 
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28
+    paddingHorizontal: spacing.lg
   },
   title: {
     color: authColors.ink,

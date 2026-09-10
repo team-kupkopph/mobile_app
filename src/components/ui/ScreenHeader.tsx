@@ -106,7 +106,7 @@ export function ScreenHeader({ title, onBack, right, align = "left", children }:
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 26,
+    paddingHorizontal: spacing.lg,
     paddingBottom: 6
   },
   row: {

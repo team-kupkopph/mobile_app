@@ -10,7 +10,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { SimpleHeader, authColors } from "./AuthFormKit";
 import { Button, Field } from "../components/ui";
-import { colors, gradients, radii, typography } from "../theme";
+import { colors, gradients, radii, spacing, typography } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: spacing.lg,
     alignItems: "center"
   },
   logoMark: {

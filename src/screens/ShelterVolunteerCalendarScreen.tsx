@@ -14,7 +14,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -154,7 +154,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: {
-    paddingTop: 58, paddingHorizontal: 20, paddingBottom: 10,
+    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
     flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
   },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
-  content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   section: { marginBottom: 22 },
   sectionHeading: { marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: radii.tile, marginBottom: 10, ...card },

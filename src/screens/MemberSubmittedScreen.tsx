@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, typography } from "../theme";
+import { colors, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
 
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: spacing.lg,
     paddingTop: 90,
     alignItems: "center"
   },

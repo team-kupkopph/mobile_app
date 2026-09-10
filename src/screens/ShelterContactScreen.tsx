@@ -8,7 +8,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
-import { typography } from "../theme";
+import { spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterContact">;
 
@@ -125,7 +125,7 @@ export function ShelterContactScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
-  content: { paddingHorizontal: 28, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
   title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, fontSize: 14, lineHeight: 20 },
   formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
