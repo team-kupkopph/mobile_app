@@ -1,7 +1,8 @@
-import { ActivityIndicator, StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
+import { ActivityIndicator, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { PressScale } from "./PressScale";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { colors, elevation, gradients, pill, typography } from "../../theme";
+import { colors, elevation, gradients, motion, pill, typography } from "../../theme";
 
 export type ButtonVariant = "primary" | "secondary" | "glass" | "destructive";
 
@@ -45,8 +46,11 @@ export function Button({ label, onPress, variant = "primary", loading, style, ac
     : <Text style={labelStyle} numberOfLines={1}>{label}</Text>;
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
+    // `.cta:active` from the canvas: a full-width button dips 1px and shrinks only slightly,
+    // rather than taking the deeper `.press` scale a small control needs.
+    <PressScale
+      scale={motion.ctaScale}
+      dip
       onPress={loading ? () => {} : onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
@@ -63,7 +67,7 @@ export function Button({ label, onPress, variant = "primary", loading, style, ac
       ) : (
         <View style={[styles.fill, variantSurface[variant]]}>{body}</View>
       )}
-    </TouchableOpacity>
+    </PressScale>
   );
 }
 

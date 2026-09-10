@@ -4,6 +4,8 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { PressScale } from "../components/ui";
+import { motion } from "../theme";
 
 import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -63,16 +65,20 @@ export function AdoptScreen({ navigation }: Props) {
         </View>
       </View>
 
+      {/* "Chip select · scale .94 · 340ms" from the canvas's Motion panel — a chip is small,
+          so it takes a deeper scale than the .978 a card or button uses. */}
       <View style={styles.filterRow}>
         {SPECIES.map((f) => (
-          <TouchableOpacity hitSlop={TAP_SLOP}
+          <PressScale hitSlop={TAP_SLOP}
             key={f.key || "all"}
+            scale={motion.chipScale}
             style={[styles.filterChip, species === f.key && styles.filterChipActive]}
             onPress={() => setSpecies(f.key)}
-            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityState={{ selected: species === f.key }}
           >
             <Text style={[styles.filterText, species === f.key && styles.filterTextActive]}>{f.label}</Text>
-          </TouchableOpacity>
+          </PressScale>
         ))}
       </View>
 
