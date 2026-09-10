@@ -11,7 +11,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { impactTiles, Impact } from "../community";
 import { BadgeShape, RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   statRow: { flexDirection: "row", gap: 10 },
   statTile: { flex: 1, paddingVertical: 16, borderRadius: 18, alignItems: "center", ...card },
   statValue: { color: colors.teal, fontSize: 26, fontWeight: "800" },
-  statLabel: { marginTop: 4, color: colors.muted, fontSize: 12, fontWeight: "600" },
+  statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "600" },
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   badgeTile: { width: "48%", marginBottom: 14, padding: 16, borderRadius: 22, alignItems: "center", ...card },

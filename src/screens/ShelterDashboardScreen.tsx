@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   verifiedHeroTitle: { color: "#FFFFFF", fontSize: 21, fontWeight: "800" },
   verifiedHeroBody: { marginTop: 4, color: "#DCEDEB", ...typography.body },
-  subLabel: { marginTop: 6, color: colors.muted, fontSize: 16 },
+  subLabel: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   banner: {
     minHeight: 108,
     marginTop: 20,
@@ -299,5 +299,5 @@ const styles = StyleSheet.create({
   footCopy: { flex: 1 },
   footTitle: { color: "#14504F", ...typography.subtitle, fontWeight: "800" },
   footBody: { marginTop: 6, color: "#5f6b6a", ...typography.meta },
-  footCta: { color: "#14504F", fontSize: 16, fontWeight: "800", marginLeft: 12 }
+  footCta: { color: "#14504F", ...typography.subtitle, fontWeight: "800", marginLeft: 12 }
 });

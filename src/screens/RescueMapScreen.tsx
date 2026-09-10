@@ -156,16 +156,16 @@ const styles = StyleSheet.create({
   mapWrap: { height: 200, borderRadius: 22, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   mapBadge: { position: "absolute", left: 12, bottom: 12, backgroundColor: "rgba(255,255,255,0.94)", paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: "center" },
-  mapBadgeText: { color: colors.tealDark, fontSize: 14, fontWeight: "800" },
+  mapBadgeText: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },
   mapNote: { marginTop: 10, color: colors.muted, fontSize: 13, lineHeight: 18 },
   legendRow: { flexDirection: "row", gap: 18, marginTop: 16, marginBottom: 18 },
   legend: { flexDirection: "row", alignItems: "center", gap: 7 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
-  legendText: { color: colors.muted, fontSize: 14, fontWeight: "600" },
+  legendText: { color: colors.muted, ...typography.meta, fontWeight: "600" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
+  cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
-  empty: { marginTop: 30, color: colors.muted, fontSize: 16, textAlign: "center" }
+  empty: { marginTop: 30, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });

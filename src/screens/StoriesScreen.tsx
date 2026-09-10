@@ -121,17 +121,17 @@ const styles = StyleSheet.create({
   share: { paddingHorizontal: 18, paddingVertical: 11, borderRadius: 22, backgroundColor: colors.teal },
   shareLabel: { color: colors.white, fontSize: 15, fontWeight: "700" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
-  empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" },
+  empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   storyCard: { marginBottom: 16, padding: 16, borderRadius: 22, ...card },
   photo: { height: 150, borderRadius: 16, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 14 },
   authorName: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  city: { color: colors.muted, fontSize: 13.5, marginTop: 2 },
+  city: { color: colors.muted, ...typography.meta, marginTop: 2 },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
-  chipText: { fontSize: 12.5, fontWeight: "700" },
+  chipText: { ...typography.meta, fontWeight: "700" },
   caption: { marginTop: 12, color: colors.ink, ...typography.body },
   reactRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 },
   heart: { fontSize: 20, color: "#C9D3CF" },
   heartOn: { color: colors.teal },
-  reactCount: { color: colors.muted, fontSize: 14, fontWeight: "700" }
+  reactCount: { color: colors.muted, ...typography.meta, fontWeight: "700" }
 });

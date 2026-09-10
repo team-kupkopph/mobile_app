@@ -156,14 +156,14 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 20, paddingBottom: 60 },
   sectionHeader: { flexDirection: "row", alignItems: "flex-start", marginBottom: 20 },
   sectionTitle: { color: colors.ink, fontSize: 24, fontWeight: "800" },
-  sectionSub: { marginTop: 6, color: colors.muted, fontSize: 14 },
+  sectionSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   calendarLink: { color: colors.teal, fontSize: 15, fontWeight: "800", marginTop: 4 },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  cardMeta: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
   cardSignedUp: { marginTop: 4, color: colors.muted, ...typography.meta },
   statusChip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   statusChipText: { ...typography.meta, fontWeight: "800" },
-  empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
+  empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });

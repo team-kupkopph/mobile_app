@@ -101,9 +101,9 @@ const styles = StyleSheet.create({
   nextRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 14 },
   nextDot: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   nextNum: { color: colors.teal, fontSize: 15, fontWeight: "800" },
-  nextText: { flex: 1, color: colors.ink, fontSize: 16 },
+  nextText: { flex: 1, color: colors.ink, ...typography.subtitle },
   fine: { marginTop: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
   primary: { marginTop: 28, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   primaryText: { color: colors.white, fontSize: 22, fontWeight: "700" },
-  secondary: { marginTop: 16, color: colors.teal, fontSize: 16, fontWeight: "700", textAlign: "center" }
+  secondary: { marginTop: 16, color: colors.teal, ...typography.subtitle, fontWeight: "700", textAlign: "center" }
 });

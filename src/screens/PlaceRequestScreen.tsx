@@ -17,7 +17,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Decision = "accept" | "decline";
@@ -180,13 +180,13 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 220, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
-  sub: { marginTop: 6, color: colors.muted, fontSize: 16 },
+  sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   body: { marginTop: 14, color: colors.ink, fontSize: 16, lineHeight: 23 },
   feeCard: { marginTop: 18, padding: 18, borderRadius: 18, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between", ...card },
   feeLabel: { color: colors.muted, fontSize: 15, fontWeight: "600" },
   feeValue: { color: colors.ink, fontSize: 20, fontWeight: "800" },
-  posterLine: { marginTop: 14, color: colors.muted, fontSize: 14 },
+  posterLine: { marginTop: 14, color: colors.muted, ...typography.meta },
   decidedNote: { marginTop: 20, color: colors.muted, fontSize: 15, fontWeight: "600", textAlign: "center" },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
   acceptBtn: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },

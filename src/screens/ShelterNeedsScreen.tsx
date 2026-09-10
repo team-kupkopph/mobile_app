@@ -101,14 +101,14 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
-  note: { color: colors.muted, fontSize: 14.5, lineHeight: 21, marginBottom: 16 },
+  note: { color: colors.muted, ...typography.body, lineHeight: 21, marginBottom: 16 },
   addBtn: { height: 54, borderRadius: 27, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center", marginBottom: 20 },
-  addLabel: { color: colors.white, fontSize: 16, fontWeight: "700" },
-  empty: { marginTop: 30, color: colors.muted, fontSize: 16, textAlign: "center" },
+  addLabel: { color: colors.white, ...typography.subtitle, fontWeight: "700" },
+  empty: { marginTop: 30, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   needCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
-  chipText: { fontSize: 12.5, fontWeight: "700" },
-  meta: { marginTop: 8, color: colors.muted, fontSize: 14, textTransform: "capitalize" }
+  chipText: { ...typography.meta, fontWeight: "700" },
+  meta: { marginTop: 8, color: colors.muted, ...typography.meta, textTransform: "capitalize" }
 });

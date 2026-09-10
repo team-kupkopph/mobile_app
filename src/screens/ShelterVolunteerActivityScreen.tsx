@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   heroTitle: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  heroWhen: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  heroWhen: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
   heroOrg: { marginTop: 2, color: colors.muted, ...typography.meta },
   infoCard: {
     marginTop: 24, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 18,
@@ -186,11 +186,11 @@ const styles = StyleSheet.create({
   actionCard: { borderRadius: 20, overflow: "hidden", ...card },
   actionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, height: 60 },
   actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  actionRowText: { color: colors.ink, fontSize: 16, fontWeight: "800" },
+  actionRowText: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   actionRowGlyph: { color: colors.muted, fontSize: 20, fontWeight: "700" },
   cancelButton: {
     marginTop: 24, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.dangerBg
   },
-  cancelButtonText: { color: colors.danger, fontSize: 16, fontWeight: "800" }
+  cancelButtonText: { color: colors.danger, ...typography.subtitle, fontWeight: "800" }
 });

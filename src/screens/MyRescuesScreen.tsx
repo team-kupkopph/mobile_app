@@ -102,8 +102,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
+  cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
-  empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
+  empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });

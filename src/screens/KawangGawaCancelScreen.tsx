@@ -133,5 +133,5 @@ const styles = StyleSheet.create({
     width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",
     justifyContent: "center", backgroundColor: colors.teal
   },
-  primaryText: { color: colors.white, fontSize: 16, fontWeight: "800" }
+  primaryText: { color: colors.white, ...typography.subtitle, fontWeight: "800" }
 });

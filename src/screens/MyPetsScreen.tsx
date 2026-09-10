@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 function capitalize(s: string): string {
@@ -95,6 +95,6 @@ const styles = StyleSheet.create({
   thumb: { width: 64, height: 64, borderRadius: 16, backgroundColor: colors.border },
   thumbEmpty: {},
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
-  empty: { color: colors.muted, fontSize: 16, textAlign: "center" }
+  cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
+  empty: { color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });

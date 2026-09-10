@@ -115,14 +115,14 @@ const styles = StyleSheet.create({
   chipText: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   photo: { height: 180, borderRadius: 16, backgroundColor: colors.soft, marginTop: 14, marginBottom: 6 },
   factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 16 },
-  factKey: { color: colors.muted, fontSize: 14 },
+  factKey: { color: colors.muted, ...typography.meta },
   factVal: { color: colors.ink, fontSize: 15, fontWeight: "700", flexShrink: 1, textAlign: "right" },
   reasonsCard: { marginTop: 16, padding: 16, borderRadius: 18, backgroundColor: colors.soft },
-  reasonsTitle: { color: colors.tealDark, fontSize: 14, fontWeight: "700" },
+  reasonsTitle: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   reasonsText: { marginTop: 6, color: colors.tealDark, fontSize: 14.5, lineHeight: 20 },
   decidedNote: { marginTop: 24, color: colors.muted, fontSize: 15, textAlign: "center" },
   primaryBtn: { marginTop: 24, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" },
   secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
-  secondaryLabel: { color: colors.ink, fontSize: 16, fontWeight: "700" }
+  secondaryLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" }
 });

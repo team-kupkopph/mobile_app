@@ -12,7 +12,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone, VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 function formatAddress(addr: { line1: string; barangay: string; city: string; province: string }): string {
   return [addr.line1, addr.barangay, addr.city, addr.province].filter(Boolean).join(", ");
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
   card: { borderRadius: 20, padding: 18, marginBottom: 18, ...card },
   name: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   chip: { alignSelf: "flex-start", marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
-  chipText: { fontSize: 12, fontWeight: "800" },
-  reliabilityLine: { marginTop: 12, color: colors.muted, fontSize: 14, fontWeight: "700" },
+  chipText: { ...typography.meta, fontWeight: "800" },
+  reliabilityLine: { marginTop: 12, color: colors.muted, ...typography.meta, fontWeight: "700" },
   sectionLabel: { marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
   contactRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border },
-  contactLabel: { color: colors.muted, fontSize: 12, fontWeight: "700" },
+  contactLabel: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   contactValue: { marginTop: 3, color: colors.ink, fontSize: 15, fontWeight: "700" },
-  mutedNote: { color: colors.muted, fontSize: 14, fontStyle: "italic" }
+  mutedNote: { color: colors.muted, ...typography.meta, fontStyle: "italic" }
 });

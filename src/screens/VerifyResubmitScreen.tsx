@@ -157,14 +157,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22, height: 44, borderRadius: 22, alignItems: "center",
     justifyContent: "center", backgroundColor: colors.infoBg
   },
-  replaceText: { color: colors.tealDark, fontSize: 16, fontWeight: "800" },
+  replaceText: { color: colors.tealDark, ...typography.subtitle, fontWeight: "800" },
   readyRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   readyDot: {
     width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.teal
   },
   readyText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
-  fine: { marginTop: 14, color: "#9a988f", fontSize: 14 },
+  fine: { marginTop: 14, color: "#9a988f", ...typography.meta },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: {
     marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center",
@@ -173,5 +173,5 @@ const styles = StyleSheet.create({
   },
   submitIdle: { backgroundColor: "#7FA8A6" },
   submitText: { color: "#FFFFFF", fontSize: 22, fontWeight: "700" },
-  submitSub: { marginTop: 12, color: colors.muted, fontSize: 14, textAlign: "center" }
+  submitSub: { marginTop: 12, color: colors.muted, ...typography.meta, textAlign: "center" }
 });

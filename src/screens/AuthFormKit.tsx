@@ -3,6 +3,7 @@
 // pill status header with back chevron + step dots, 800-weight ink headings, white rounded fields.
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, Field, ScreenHeader } from "../components/ui";
+import { typography } from "../theme";
 import {
   ActivityIndicator,
   StyleProp,
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 8,
     color: authColors.ink,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   input: {
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
   },
   inputText: {
     color: authColors.ink,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   textInput: {
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
   fieldError: {
     marginTop: 6,
     color: authColors.danger,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "700"
   },
   eyeButton: {
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   },
   primaryText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    ...typography.subtitle,
     fontWeight: "800"
   }
 });

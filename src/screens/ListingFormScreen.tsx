@@ -17,7 +17,7 @@ import { PrefillWarning } from "../components/PrefillWarning";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -309,8 +309,8 @@ const styles = StyleSheet.create({
   statusNote: { marginTop: 4, marginBottom: 6, padding: 14, borderRadius: 14, backgroundColor: colors.warningBg },
   statusNoteText: { color: colors.warningStrong, fontSize: 13, fontWeight: "600", lineHeight: 18 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
-  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, fontSize: 16, ...card },
-  notes: { minHeight: 90, borderRadius: 18, padding: 16, color: colors.ink, fontSize: 16, textAlignVertical: "top", ...card },
+  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
+  notes: { minHeight: 90, borderRadius: 18, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   segTrack: { flexDirection: "row", backgroundColor: colors.greyPill, borderRadius: 16, padding: 4, gap: 4 },
   segItem: { flex: 1, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   segItemActive: { ...card },
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   segTextActive: { color: colors.ink },
   fine: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 18 },
   photoBtn: { height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
-  photoText: { color: colors.teal, fontSize: 16, fontWeight: "700" },
+  photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }

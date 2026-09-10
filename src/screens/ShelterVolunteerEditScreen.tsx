@@ -13,7 +13,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ShiftType, shiftTypeLabel } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 
@@ -214,14 +214,14 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
-  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, fontSize: 16, ...card },
+  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
     minWidth: "47%", height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center",
     paddingHorizontal: 12, ...card
   },
   chipActive: { backgroundColor: colors.soft },
-  chipText: { color: colors.muted, fontSize: 14, fontWeight: "700" },
+  chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   chipTextActive: { color: colors.teal },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },

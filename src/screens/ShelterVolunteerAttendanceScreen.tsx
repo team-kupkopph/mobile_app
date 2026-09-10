@@ -196,11 +196,11 @@ const styles = StyleSheet.create({
   avatarText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
-  chipText: { fontSize: 12, fontWeight: "800" },
+  chipText: { ...typography.meta, fontWeight: "800" },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
   noShowBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.greyPill },
-  noShowText: { color: colors.ink, fontSize: 14, fontWeight: "800" },
+  noShowText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
   attendedBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  attendedText: { color: colors.white, fontSize: 14, fontWeight: "800" },
+  attendedText: { color: colors.white, ...typography.meta, fontWeight: "800" },
   btnDisabled: { opacity: 0.6 }
 });

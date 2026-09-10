@@ -219,9 +219,9 @@ const styles = StyleSheet.create({
   },
   otpBoxError: { borderColor: authColors.danger },
   errorText: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
-  resendHint: { marginTop: 26, color: authColors.muted, fontSize: 12, textAlign: "center" },
+  resendHint: { marginTop: 26, color: authColors.muted, ...typography.meta, textAlign: "center" },
   resendAction: { marginTop: 6, color: "#08716D", ...typography.meta, fontWeight: "800", textAlign: "center" },
   resendMuted: { color: "#B6B0A7" },
-  resendNotice: { marginTop: 6, color: authColors.teal, fontSize: 12, fontWeight: "700", textAlign: "center" },
+  resendNotice: { marginTop: 6, color: authColors.teal, ...typography.meta, fontWeight: "700", textAlign: "center" },
   actionButton: { marginTop: 30 }
 });

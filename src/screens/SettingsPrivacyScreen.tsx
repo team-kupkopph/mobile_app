@@ -17,7 +17,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { privacyRows, Settings } from "../settings";
 import { ScreenHeader } from "../components/ui";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -161,12 +161,12 @@ const styles = StyleSheet.create({
   card: { borderRadius: 18, ...card },
   toggleRow: { paddingHorizontal: 18, paddingVertical: 16, flexDirection: "row", alignItems: "center" },
   toggleText: { flex: 1, paddingRight: 14 },
-  toggleLabel: { fontSize: 16, fontWeight: "700", color: colors.ink },
+  toggleLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
   factRow: { paddingHorizontal: 18, paddingVertical: 16 },
   factLabel: { fontSize: 15, fontWeight: "700", color: colors.ink },
   note: { fontSize: 13, color: colors.muted, marginTop: 4, lineHeight: 18 },
   divided: { borderBottomWidth: 1, borderBottomColor: colors.border },
   footnote: { fontSize: 13, color: colors.muted, marginTop: 10, lineHeight: 18 },
   error: { fontSize: 15, color: colors.danger },
-  errorBanner: { fontSize: 14, color: colors.danger, marginBottom: 12 },
+  errorBanner: { ...typography.meta, color: colors.danger, marginBottom: 12 },
 });

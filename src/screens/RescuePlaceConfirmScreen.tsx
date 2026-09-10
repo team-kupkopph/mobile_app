@@ -9,7 +9,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOp
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescuePlaceConfirm">;
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   recipientLabel: { color: colors.teal, fontSize: 13, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.5 },
   recipientEmail: { marginTop: 6, color: colors.ink, fontSize: 18, fontWeight: "700" },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
-  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, fontSize: 16, ...card },
+  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   fine: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 18 },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },

@@ -15,7 +15,7 @@ import { loadState } from "../net";
 import { ChipTone, needProgressLabel, pledgeStatusChip, PledgeStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { flex: 1, color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
-  progress: { color: colors.teal, fontSize: 16, fontWeight: "700" },
+  progress: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   actionRow: { flexDirection: "row", gap: 12, marginTop: 14 },
   secondaryBtn: { paddingHorizontal: 20, paddingVertical: 11, borderRadius: 16, ...card },
   secondaryLabel: { color: colors.ink, fontSize: 15, fontWeight: "700" },
@@ -154,9 +154,9 @@ const styles = StyleSheet.create({
   empty: { marginTop: 20, color: colors.muted, fontSize: 15 },
   pledgeCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
-  pledger: { flex: 1, color: colors.ink, fontSize: 16, fontWeight: "800" },
+  pledger: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
-  chipText: { fontSize: 12.5, fontWeight: "700" },
+  chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, fontSize: 14.5 },
   receiveBtn: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 18, paddingVertical: 10, borderRadius: 14, backgroundColor: colors.soft },
   receiveLabel: { color: colors.teal, fontSize: 14.5, fontWeight: "700" }

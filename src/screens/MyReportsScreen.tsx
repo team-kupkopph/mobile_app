@@ -175,12 +175,12 @@ const styles = StyleSheet.create({
   filterRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 },
   filterChip: { paddingHorizontal: 16, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
   filterChipActive: { backgroundColor: colors.teal },
-  filterText: { color: colors.muted, fontSize: 14, fontWeight: "700" },
+  filterText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   filterTextActive: { color: colors.white },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
+  cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
-  empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
+  empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });

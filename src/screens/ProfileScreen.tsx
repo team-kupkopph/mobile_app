@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   saveError: {
     marginTop: 8,
     color: colors.danger,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "700"
   },
   editActions: {
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   verifyText: {
     marginTop: 5,
     color: colors.muted,
-    fontSize: 12
+    ...typography.meta
   },
   verifyButton: {
     height: 38,

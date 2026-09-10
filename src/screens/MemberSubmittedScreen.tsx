@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
 
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   subheading: {
     marginTop: 6,
     color: colors.muted,
-    fontSize: 14
+    ...typography.meta
   },
   noticeBar: {
     width: "100%",
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   noticeTitle: {
     color: colors.tealDark,
-    fontSize: 14,
+    ...typography.meta,
     fontWeight: "800"
   },
   noticeBody: {
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   hint: {
     marginTop: 22,
     color: colors.muted,
-    fontSize: 12,
+    ...typography.meta,
     textAlign: "center"
   },
   doneButton: {
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   doneText: {
     color: colors.white,
-    fontSize: 16,
+    ...typography.subtitle,
     fontWeight: "800"
   }
 });

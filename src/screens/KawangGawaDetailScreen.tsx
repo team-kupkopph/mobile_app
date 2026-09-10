@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   // Squircle, matching the hub card's tile — V2 replaced round tiles with rounded squares.
   heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   heroTitle: { flex: 1, color: colors.ink, fontSize: 24, fontWeight: "800" },
-  orgName: { marginTop: 14, color: colors.ink, fontSize: 16, fontWeight: "800" },
+  orgName: { marginTop: 14, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoCard: { marginTop: 16, borderRadius: 18, paddingHorizontal: 18, paddingVertical: 16, ...card },
   infoDate: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoWhen: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
               borderRadius: 14, justifyContent: "center" },
   infoChipText: { ...typography.meta, fontWeight: "800" },
   notOpenNote: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "700" },
-  sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
+  sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   consentRow: {
     marginBottom: 14, borderRadius: 14, flexDirection: "row", alignItems: "flex-start",
     paddingHorizontal: 16, paddingVertical: 16, gap: 14, backgroundColor: colors.soft
@@ -278,5 +278,5 @@ const styles = StyleSheet.create({
   formError: { marginTop: 4, marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 56, marginTop: 8, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   consentError: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "700" },
-  submitText: { color: colors.white, fontSize: 16, fontWeight: "800" }
+  submitText: { color: colors.white, ...typography.subtitle, fontWeight: "800" }
 });

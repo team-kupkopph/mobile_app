@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { InquiryList } from "../components/InquiryList";
 import { PressScale, SegmentedControl } from "../components/ui";
-import { motion } from "../theme";
+import { motion, typography } from "../theme";
 
 import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -167,13 +167,13 @@ const styles = StyleSheet.create({
             alignItems: "center", justifyContent: "space-between" },
   title: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   headerLinks: { flexDirection: "row", gap: 16 },
-  headerLink: { color: colors.teal, fontSize: 14, fontWeight: "700" },
+  headerLink: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   segmented: { marginHorizontal: 26, marginTop: 14 },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: 26, paddingTop: 14, paddingBottom: 4 },
   filterChip: { paddingHorizontal: 16, height: 36, borderRadius: 18, alignItems: "center",
                justifyContent: "center", backgroundColor: colors.white },
   filterChipActive: { backgroundColor: colors.teal },
-  filterText: { color: colors.muted, fontSize: 14, fontWeight: "700" },
+  filterText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   filterTextActive: { color: colors.white },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 130 },
   card: { borderRadius: 22, marginBottom: 14, overflow: "hidden", ...card },
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   cardPhotoEmpty: { alignItems: "center", justifyContent: "center" },
   cardBody: { padding: 16 },
   cardName: { color: colors.ink, fontSize: 20, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.muted, fontSize: 14 },
-  cardFee: { marginTop: 8, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
+  cardFee: { marginTop: 8, color: colors.teal, ...typography.meta, fontWeight: "700" },
   empty: { marginTop: 50, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 22 }
 });

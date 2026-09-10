@@ -22,7 +22,7 @@ import { loadState } from "../net";
 import { inquiryProgressLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 import { Chip, type ChipTone } from "./ui";
 
 // inquiry_status (not stage state): active/adopted/declined/withdrawn.
@@ -137,9 +137,9 @@ const styles = StyleSheet.create({
   card: { padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardTop: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   cardName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.muted, fontSize: 14 },
-  progress: { marginTop: 12, color: colors.teal, fontSize: 14, fontWeight: "700" },
-  placementNote: { marginTop: 12, color: colors.teal, fontSize: 14, fontWeight: "800" },
+  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
+  progress: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "700" },
+  placementNote: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "800" },
   shareStory: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, backgroundColor: colors.successBg },
   shareStoryLabel: { color: colors.success, fontSize: 14.5, fontWeight: "700" }
 });

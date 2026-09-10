@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   subheading: {
     marginTop: 6,
     color: colors.muted,
-    fontSize: 14
+    ...typography.meta
   },
   docCard: {
     minHeight: 84,
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     marginTop: 22,
     marginBottom: 8,
     color: colors.muted,
-    fontSize: 12,
+    ...typography.meta,
     fontWeight: "800"
   },
   socialField: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   reviewNote: {
     marginTop: 18,
     color: colors.muted,
-    fontSize: 12,
+    ...typography.meta,
     textAlign: "center"
   },
   submitButton: {
@@ -388,7 +388,7 @@ const styles = StyleSheet.create({
   },
   submitText: {
     color: colors.white,
-    fontSize: 16,
+    ...typography.subtitle,
     fontWeight: "800"
   }
 });

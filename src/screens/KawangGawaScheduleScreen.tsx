@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
-  sectionLabel: { marginTop: 18, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
+  sectionLabel: { marginTop: 18, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardColumn: { flexDirection: "column", alignItems: "stretch" },
   cardRow: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
-  cardMeta: { marginTop: 6, color: colors.teal, fontSize: 14, fontWeight: "700" },
+  cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" }
 });

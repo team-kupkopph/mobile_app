@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
-  chipText: { fontSize: 12.5, fontWeight: "700" },
+  chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, fontSize: 14.5 },
   cancelBtn: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, backgroundColor: "#FBEEEC" },
   cancelLabel: { color: colors.danger, fontSize: 14.5, fontWeight: "700" }

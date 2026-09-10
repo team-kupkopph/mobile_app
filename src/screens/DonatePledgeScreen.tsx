@@ -8,7 +8,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const card = {
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   needTitle: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   shelter: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
-  note: { marginTop: 14, color: colors.muted, fontSize: 14.5, lineHeight: 21 },
+  note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
   label: { marginTop: 26, marginBottom: 12, color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
   stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", padding: 8, borderRadius: 22, ...card },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   primaryBtn: { marginTop: 30, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" },
   secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
-  secondaryLabel: { color: colors.ink, fontSize: 16, fontWeight: "700" },
+  secondaryLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   confirmWrap: { flexGrow: 1, paddingHorizontal: 26, paddingTop: 140, paddingBottom: 60, alignItems: "center" },
   checkTile: { width: 84, height: 84, borderRadius: 26, backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
   checkGlyph: { color: colors.success, fontSize: 44, fontWeight: "800" },

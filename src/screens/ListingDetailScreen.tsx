@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
-  sub: { marginTop: 8, color: colors.muted, fontSize: 16 },
+  sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   donateLink: { marginTop: 10 },
   donateLinkText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },

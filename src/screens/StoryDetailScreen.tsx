@@ -12,7 +12,7 @@ import { Avatar } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -160,19 +160,19 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: 16, backgroundColor: "#FAEEDA" },
-  hiddenText: { color: "#8A5A12", fontSize: 14, fontWeight: "600" },
+  hiddenText: { color: "#8A5A12", ...typography.meta, fontWeight: "600" },
   photo: { height: 280, borderRadius: 20, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
   authorName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
-  city: { color: colors.muted, fontSize: 14, marginTop: 2 },
+  city: { color: colors.muted, ...typography.meta, marginTop: 2 },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
-  chipText: { fontSize: 12.5, fontWeight: "700" },
+  chipText: { ...typography.meta, fontWeight: "700" },
   caption: { marginTop: 18, color: colors.ink, fontSize: 17, lineHeight: 25 },
   actionRow: { flexDirection: "row", gap: 12, marginTop: 26 },
   reactBtn: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 22, paddingVertical: 14, borderRadius: 30, ...card },
   heart: { fontSize: 22, color: "#C9D3CF" },
   heartOn: { color: colors.teal },
-  reactLabel: { color: colors.ink, fontSize: 16, fontWeight: "700" },
+  reactLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   flagBtn: { paddingHorizontal: 22, paddingVertical: 14, borderRadius: 30, ...card },
-  flagLabel: { color: colors.muted, fontSize: 16, fontWeight: "700" }
+  flagLabel: { color: colors.muted, ...typography.subtitle, fontWeight: "700" }
 });
