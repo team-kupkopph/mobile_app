@@ -21,7 +21,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   title: { flex: 1, textAlign: "center", fontSize: 20, fontWeight: "800", color: colors.ink, marginRight: 44 },
   content: { padding: 20, paddingBottom: 48 },
   h1: { fontSize: 26, fontWeight: "800", color: colors.ink, letterSpacing: -0.4 },
-  lede: { fontSize: 15, color: colors.muted, marginTop: 8, lineHeight: 21 },
+  lede: { ...typography.body, color: colors.muted, marginTop: 8 },
   columns: { flexDirection: "row", gap: 12, marginTop: 20 },
   column: { flex: 1, borderRadius: 18, padding: 16, ...card },
   columnHeading: { fontSize: 12, fontWeight: "800", letterSpacing: 0.6, marginBottom: 12 },
@@ -225,19 +225,19 @@ const styles = StyleSheet.create({
   field: { borderRadius: 18, paddingHorizontal: 18, paddingVertical: 12, marginTop: 8, ...card },
   fieldCaption: { fontSize: 11, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 },
   input: { fontSize: 18, fontWeight: "700", color: colors.ink, paddingVertical: 4 },
-  error: { fontSize: 13, color: colors.danger, marginTop: 8 },
+  error: { ...typography.meta, color: colors.danger, marginTop: 8 },
   dangerBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.danger, alignItems: "center", justifyContent: "center" },
-  dangerBtnLabel: { fontSize: 17, fontWeight: "700", color: colors.white },
+  dangerBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
   outlineBtn: { marginTop: 12, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
   outlineBtnLabel: { fontSize: 16, fontWeight: "700", color: colors.ink },
   tealBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
-  tealBtnLabel: { fontSize: 17, fontWeight: "700", color: colors.white },
+  tealBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
   warnCard: { borderRadius: 18, backgroundColor: colors.warningBg, padding: 18 },
-  warnTitle: { fontSize: 17, fontWeight: "800", color: colors.warning },
+  warnTitle: { ...typography.subtitle, fontWeight: "800", color: colors.warning },
   warnBody: { fontSize: 14, color: colors.warning, marginTop: 6, lineHeight: 20 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginTop: 24, marginBottom: 8 },
   blockerCard: { borderRadius: 18, padding: 16, marginBottom: 12, ...card },
   blockerTitle: { fontSize: 16, fontWeight: "800", color: colors.ink },
-  blockerDetail: { fontSize: 13, color: colors.muted, marginTop: 4 },
-  blockerAction: { fontSize: 13, fontWeight: "700", color: colors.teal, marginTop: 8 },
+  blockerDetail: { ...typography.meta, color: colors.muted, marginTop: 4 },
+  blockerAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginTop: 8 },
 });

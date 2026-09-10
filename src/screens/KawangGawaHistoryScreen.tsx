@@ -16,7 +16,7 @@ import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { CardTone, historyHours, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const TONE: Record<CardTone, { bg: string; fg: string }> = {
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
-  empty: { color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
+  empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   statsCard: {
     flexDirection: "row", alignItems: "center", borderRadius: 20, paddingVertical: 20, marginBottom: 18, ...card
@@ -167,13 +167,13 @@ const styles = StyleSheet.create({
   statCol: { flex: 1, alignItems: "center" },
   statDivider: { width: 1, height: 40, backgroundColor: colors.border },
   statValue: { color: colors.ink, fontSize: 24, fontWeight: "800" },
-  statLabel: { marginTop: 4, color: colors.muted, fontSize: 13, fontWeight: "700" },
+  statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "700" },
   sectionLabel: { marginTop: 4, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
-  cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.muted, fontSize: 13, fontWeight: "700" },
+  cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "700" },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" }
+  chipText: { ...typography.meta, fontWeight: "800" }
 });

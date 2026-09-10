@@ -10,7 +10,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { SimpleHeader, authColors } from "./AuthFormKit";
 import { Button, Field } from "../components/ui";
-import { colors, gradients, radii } from "../theme";
+import { colors, gradients, radii, typography } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     overflow: "hidden",
     color: authColors.danger,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   forgotWrap: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   submitButton: {
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   linkCentered: {
     marginTop: 22,
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center"
   }

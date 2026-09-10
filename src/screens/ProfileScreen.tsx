@@ -19,7 +19,7 @@ import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "profile">;
 
@@ -303,14 +303,14 @@ const styles = StyleSheet.create({
   email: {
     marginTop: 5,
     color: colors.muted,
-    fontSize: 13
+    ...typography.meta
   },
   editLinkWrap: {
     marginTop: 10
   },
   editLink: {
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   editBlock: {
@@ -344,12 +344,12 @@ const styles = StyleSheet.create({
   },
   editCancel: {
     color: colors.muted,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   editSave: {
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   cityChip: {
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   cityChipText: {
     color: colors.tealDark,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   cityChipChevron: {
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   },
   verifyButtonText: {
     color: "#FFFFFF",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   accountCard: {

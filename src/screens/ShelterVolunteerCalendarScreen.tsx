@@ -14,7 +14,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -162,14 +162,14 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  empty: { color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
+  empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   section: { marginBottom: 22 },
   sectionHeading: { marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 18, marginBottom: 10, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 16, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.muted, fontSize: 13 },
+  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
   statusChip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   statusChipText: { fontSize: 12, fontWeight: "800" }
 });

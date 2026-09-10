@@ -17,7 +17,7 @@ import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
@@ -125,11 +125,11 @@ const styles = StyleSheet.create({
   storyCard: { marginBottom: 16, padding: 16, borderRadius: 22, ...card },
   photo: { height: 150, borderRadius: 16, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 14 },
-  authorName: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  authorName: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   city: { color: colors.muted, fontSize: 13.5, marginTop: 2 },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
   chipText: { fontSize: 12.5, fontWeight: "700" },
-  caption: { marginTop: 12, color: colors.ink, fontSize: 15, lineHeight: 21 },
+  caption: { marginTop: 12, color: colors.ink, ...typography.body },
   reactRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 },
   heart: { fontSize: 20, color: "#C9D3CF" },
   heartOn: { color: colors.teal },

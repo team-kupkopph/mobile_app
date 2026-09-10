@@ -14,7 +14,7 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { BrowseShift, shiftDurationLabel, shiftSlotsChip, shiftTimeRange, shiftTypeLabel } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const card = {
@@ -253,13 +253,13 @@ const styles = StyleSheet.create({
   heroTitle: { flex: 1, color: colors.ink, fontSize: 24, fontWeight: "800" },
   orgName: { marginTop: 14, color: colors.ink, fontSize: 16, fontWeight: "800" },
   infoCard: { marginTop: 16, borderRadius: 18, paddingHorizontal: 18, paddingVertical: 16, ...card },
-  infoDate: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  infoDate: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoWhen: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
   infoDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },
   infoChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 12, height: 28,
               borderRadius: 14, justifyContent: "center" },
-  infoChipText: { fontSize: 13, fontWeight: "800" },
-  notOpenNote: { marginTop: 14, color: colors.danger, fontSize: 13, fontWeight: "700" },
+  infoChipText: { ...typography.meta, fontWeight: "800" },
+  notOpenNote: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "700" },
   sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, fontSize: 16, fontWeight: "800" },
   consentRow: {
     marginBottom: 14, borderRadius: 14, flexDirection: "row", alignItems: "flex-start",
@@ -275,8 +275,8 @@ const styles = StyleSheet.create({
   consentText: { color: colors.tealDark, fontSize: 13, fontWeight: "700", lineHeight: 19 },
   consentLink: { textDecorationLine: "underline" },
   consentHelper: { marginTop: 6, color: colors.muted, fontSize: 11, fontWeight: "600" },
-  formError: { marginTop: 4, marginBottom: 10, color: colors.danger, fontSize: 13, fontWeight: "700" },
+  formError: { marginTop: 4, marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 56, marginTop: 8, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  consentError: { marginTop: 8, color: colors.danger, fontSize: 13, fontWeight: "700" },
+  consentError: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "700" },
   submitText: { color: colors.white, fontSize: 16, fontWeight: "800" }
 });

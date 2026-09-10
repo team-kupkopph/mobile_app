@@ -16,7 +16,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
-  sub: { marginTop: 8, color: colors.muted, fontSize: 17 },
+  sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   photoBtn: { marginTop: 18, height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, fontSize: 16, fontWeight: "700" },
   label: { marginTop: 24, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
@@ -282,14 +282,14 @@ const styles = StyleSheet.create({
   locCard: { marginTop: 24, padding: 18, borderRadius: 18, ...card },
   locRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   locText: { color: colors.muted, fontSize: 15 },
-  locAddr: { color: colors.ink, fontSize: 17, fontWeight: "700" },
+  locAddr: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   locFooter: { marginTop: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   locFrom: { color: colors.muted, fontSize: 14, fontWeight: "600" },
   adjust: { color: colors.teal, fontSize: 15, fontWeight: "800" },
   locDenied: { color: colors.warningStrong, fontSize: 15, fontWeight: "600" },
   fine: { marginTop: 12, color: colors.muted, fontSize: 13, lineHeight: 19 },
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: 18, ...card },
-  anonLabel: { color: colors.ink, fontSize: 17, fontWeight: "700" },
+  anonLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitIdle: { backgroundColor: colors.tealIdle },

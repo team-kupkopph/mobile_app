@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportSent">;
@@ -91,12 +91,12 @@ const styles = StyleSheet.create({
   hero: { alignItems: "center" },
   heroIcon: { width: 76, height: 76, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, fontSize: 30, fontWeight: "800" },
-  heroBody: { marginTop: 8, color: colors.muted, fontSize: 17, textAlign: "center" },
+  heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   card: { marginTop: 28, padding: 20, borderRadius: 22, ...card },
   cardTitle: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   cardCity: { marginTop: 6, color: colors.muted, fontSize: 15 },
   chip: { marginTop: 12, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center", backgroundColor: colors.warningBg },
-  chipText: { color: colors.warningStrong, fontSize: 13, fontWeight: "800" },
+  chipText: { color: colors.warningStrong, ...typography.meta, fontWeight: "800" },
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
   nextRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 14 },
   nextDot: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },

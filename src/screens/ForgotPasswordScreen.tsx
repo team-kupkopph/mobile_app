@@ -9,6 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "forgotPassword">;
 
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
   linkCentered: {
     marginTop: 22,
     color: "#08716D",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center"
   }

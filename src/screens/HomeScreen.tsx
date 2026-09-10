@@ -28,7 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { gradients, heroDirection } from "../theme/v3";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
   role: {
     marginTop: 6,
     color: colors.muted,
-    fontSize: 13
+    ...typography.meta
   },
   cityRow: {
     marginTop: 6,
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
   },
   cityChange: {
     color: colors.teal,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   bellButton: {
@@ -680,8 +680,7 @@ const styles = StyleSheet.create({
   verifiedHeroBody: {
     marginTop: 4,
     color: "#DCEDEB",
-    fontSize: 15,
-    lineHeight: 21
+    ...typography.body
   },
   reportCard: {
     height: 140,
@@ -705,7 +704,7 @@ const styles = StyleSheet.create({
   reportText: {
     marginTop: 9,
     color: "#D5ECE8",
-    fontSize: 13
+    ...typography.meta
   },
   reportButton: {
     // §13.4 · the drawn pill is 38 pt, under the 44 pt minimum. `minHeight` raises the real
@@ -723,7 +722,7 @@ const styles = StyleSheet.create({
   },
   reportButtonText: {
     color: "#126B69",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800"
   },
   /** Layout only — the fill, radius, accent bar and shadow are Card's. */
@@ -736,9 +735,7 @@ const styles = StyleSheet.create({
   },
   spotEyebrow: {
     color: colors.muted,
-    fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.8,
+    ...typography.label,
     textTransform: "uppercase"
   },
   spotChip: {
@@ -761,7 +758,7 @@ const styles = StyleSheet.create({
   spotMeta: {
     marginTop: 4,
     color: colors.muted,
-    fontSize: 13
+    ...typography.meta
   },
   spotDivider: {
     marginTop: 14,
@@ -831,7 +828,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: colors.ink,
-    fontSize: 17,
+    ...typography.subtitle,
     fontWeight: "800"
   },
   seeAll: {
@@ -864,7 +861,7 @@ const styles = StyleSheet.create({
   },
   petName: {
     color: colors.ink,
-    fontSize: 17,
+    ...typography.subtitle,
     fontWeight: "800"
   },
   petDetails: {

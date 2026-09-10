@@ -13,7 +13,7 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { MySignupItem, MySignups, shiftTypeLabel } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const card = {
@@ -197,8 +197,8 @@ const styles = StyleSheet.create({
   shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
-  cardTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
-  cardOrg: { marginTop: 2, color: colors.muted, fontSize: 13, fontWeight: "700" },
+  cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, fontSize: 14, fontWeight: "700" },
   banner: { marginTop: 16, borderRadius: 16, paddingHorizontal: 18, paddingVertical: 14, flexDirection: "row", alignItems: "center", gap: 10 },
   bannerDot: { width: 9, height: 9, borderRadius: 5 },
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   attLabelDone: { color: colors.ink },
   attValue: { color: colors.muted, fontSize: 14, fontWeight: "700" },
   attValueDone: { color: colors.ink },
-  formError: { marginTop: 20, color: colors.danger, fontSize: 13, fontWeight: "700", textAlign: "center" },
+  formError: { marginTop: 20, color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   actionButton: { height: 56, marginTop: 28, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   actionButtonDisabled: { opacity: 0.5 },
   actionText: { color: colors.white, fontSize: 16, fontWeight: "800" },

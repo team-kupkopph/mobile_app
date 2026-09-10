@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { needProgressLabel } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   sectionNote: { marginTop: 6, marginBottom: 14, color: colors.muted, fontSize: 14, lineHeight: 20 },
   needCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
-  needTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  needTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   needMeta: { marginTop: 6, color: colors.muted, fontSize: 14, textTransform: "capitalize" },
   pledgeBtn: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 22, paddingVertical: 11, borderRadius: 16, backgroundColor: colors.teal },
   pledgeLabel: { color: colors.white, fontSize: 15, fontWeight: "700" },

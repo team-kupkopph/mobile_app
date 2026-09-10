@@ -8,7 +8,7 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 import { useApi } from "../api/useApi";
 import { matchReasons } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   reportCard: { padding: 18, borderRadius: 22, ...card },
   chip: { alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 13, backgroundColor: colors.soft },
-  chipText: { color: colors.teal, fontSize: 13, fontWeight: "700" },
+  chipText: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   photo: { height: 180, borderRadius: 16, backgroundColor: colors.soft, marginTop: 14, marginBottom: 6 },
   factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 16 },
   factKey: { color: colors.muted, fontSize: 14 },

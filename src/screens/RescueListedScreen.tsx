@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueListed">;
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   hero: { alignItems: "center" },
   heroIcon: { width: 76, height: 76, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, fontSize: 30, fontWeight: "800" },
-  heroBody: { marginTop: 8, color: colors.muted, fontSize: 17, textAlign: "center" },
+  heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   primary: { marginTop: 40, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   primaryText: { color: colors.white, fontSize: 22, fontWeight: "700" }
 });

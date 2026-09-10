@@ -16,6 +16,7 @@ import {
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
+import { typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -175,9 +176,9 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   otpBoxError: { borderColor: authColors.danger },
-  errorText: { marginTop: 14, color: authColors.danger, fontSize: 13, fontWeight: "700", textAlign: "center" },
+  errorText: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   resendHint: { marginTop: 26, color: authColors.muted, fontSize: 12, textAlign: "center" },
-  resendAction: { marginTop: 6, color: "#08716D", fontSize: 13, fontWeight: "800", textAlign: "center" },
+  resendAction: { marginTop: 6, color: "#08716D", ...typography.meta, fontWeight: "800", textAlign: "center" },
   resendMuted: { color: "#B6B0A7" },
   resendNotice: { marginTop: 6, color: authColors.teal, fontSize: 12, fontWeight: "700", textAlign: "center" },
   verifyButton: { marginTop: 30 }

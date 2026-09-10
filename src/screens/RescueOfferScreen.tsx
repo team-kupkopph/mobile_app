@@ -9,7 +9,7 @@ import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   radioActive: { borderColor: colors.teal },
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.teal },
-  optionTitle: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  optionTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   optionHint: { marginTop: 3, color: colors.muted, fontSize: 14 },
   fine: { marginTop: 18, color: colors.muted, fontSize: 13, lineHeight: 19 },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },

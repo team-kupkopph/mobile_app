@@ -12,7 +12,7 @@ import { AlertIcon, CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { RootStackParamList } from "../navigation/types";
 import { lateCancelCopy } from "../volunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 const card = {
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: 28, paddingTop: 60, alignItems: "center" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, fontSize: 24, fontWeight: "800" },
-  subheading: { marginTop: 10, color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
+  subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
   primaryButton: {
     width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",
     justifyContent: "center", backgroundColor: colors.teal

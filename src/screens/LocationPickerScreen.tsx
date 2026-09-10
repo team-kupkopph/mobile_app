@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "locationPicker">;
 
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   },
   searchIcon: {
     color: colors.muted,
-    fontSize: 17,
+    ...typography.subtitle,
     fontWeight: "700"
   },
   searchInput: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   formError: {
     marginTop: 12,
     color: colors.danger,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700"
   },
   groupBlock: {
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 30,
     color: colors.muted,
-    fontSize: 13,
+    ...typography.meta,
     textAlign: "center"
   },
   footnote: {

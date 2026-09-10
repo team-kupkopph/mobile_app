@@ -23,6 +23,7 @@ import { codeCheckOutcome } from "../passwordReset";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
+import { typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   codeError: {
     marginTop: 14,
     color: "#B23B3B",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700",
     textAlign: "center"
   },
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
   resendAction: {
     marginTop: 6,
     color: "#08716D",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center"
   },
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
   changeEmail: {
     marginTop: 22,
     color: "#08716D",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center"
   }

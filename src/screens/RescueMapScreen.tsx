@@ -19,7 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { isOffline, loadState } from "../net";
 import { relTime, sagipTitle, strayChip } from "../sagip";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -166,6 +166,6 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 6, color: colors.muted, fontSize: 14 },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" },
+  chipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 30, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

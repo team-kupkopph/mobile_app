@@ -15,7 +15,7 @@ import { loadState } from "../net";
 import { AlertIcon, CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docChip, docLabel, groupAttention, splitDocs } from "../verifications";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyDocuments">;
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
-  sub: { marginTop: 8, color: colors.muted, fontSize: 17 },
+  sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   emptyCard: {
     marginTop: 26,
     borderRadius: 24,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   noteBannerText: { flex: 1, color: colors.warningStrong, fontSize: 15, fontWeight: "600", lineHeight: 21 },
   noteBannerDanger: { backgroundColor: colors.dangerBg },
-  noteBannerTitle: { color: colors.danger, fontSize: 17, fontWeight: "800" },
+  noteBannerTitle: { color: colors.danger, ...typography.subtitle, fontWeight: "800" },
   noteBannerBody: { marginTop: 6, color: colors.danger, fontSize: 15, fontWeight: "600", lineHeight: 21 },
   noteBannerHint: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 20 },
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 20, fontWeight: "800" },
@@ -263,8 +263,8 @@ const styles = StyleSheet.create({
   docName: { color: colors.ink, fontSize: 18, fontWeight: "700" },
   docCount: { color: colors.muted, fontSize: 14, fontWeight: "600", marginTop: -4 },
   chip: { alignSelf: "flex-start", paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { fontSize: 13, fontWeight: "800" },
-  reviewNote: { marginTop: 12, color: colors.danger, fontSize: 15, lineHeight: 21 },
+  chipText: { ...typography.meta, fontWeight: "800" },
+  reviewNote: { marginTop: 12, color: colors.danger, ...typography.body },
   replaceBtn: {
     marginTop: 14,
     height: 46,
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.success
   },
-  approvedTitle: { color: colors.success, fontSize: 17, fontWeight: "800" },
+  approvedTitle: { color: colors.success, ...typography.subtitle, fontWeight: "800" },
   approvedSub: { marginTop: 4, color: "#3f5a2e", fontSize: 14 },
   allGood: { marginTop: 24, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

@@ -13,7 +13,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   newBtn: { paddingHorizontal: 16, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  newBtnText: { color: colors.white, fontSize: 13, fontWeight: "800" },
+  newBtnText: { color: colors.white, ...typography.meta, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 20, paddingBottom: 60 },
   sectionHeader: { flexDirection: "row", alignItems: "flex-start", marginBottom: 20 },
   sectionTitle: { color: colors.ink, fontSize: 24, fontWeight: "800" },
@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
   cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.teal, fontSize: 14, fontWeight: "700" },
-  cardSignedUp: { marginTop: 4, color: colors.muted, fontSize: 13 },
+  cardSignedUp: { marginTop: 4, color: colors.muted, ...typography.meta },
   statusChip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
-  statusChipText: { fontSize: 13, fontWeight: "800" },
+  statusChipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center" }
 });

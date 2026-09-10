@@ -13,7 +13,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone } from "../shelterVolunteer";
-import { colors } from "../theme";
+import { colors, typography } from "../theme";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -186,15 +186,15 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  empty: { color: colors.muted, fontSize: 15, textAlign: "center", lineHeight: 21 },
+  empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: 22, paddingTop: 16, paddingBottom: 60 },
   bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
-  bannerText: { color: colors.danger, fontSize: 13, fontWeight: "700", textAlign: "center" },
+  bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: 20, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   avatarText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
-  name: { color: colors.ink, fontSize: 17, fontWeight: "800" },
+  name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { fontSize: 12, fontWeight: "800" },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
