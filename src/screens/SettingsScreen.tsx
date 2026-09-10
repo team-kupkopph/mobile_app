@@ -10,7 +10,7 @@ import { ScreenHeader } from "../components/ui";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { privacySummary } from "../settings";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { padding: 20, paddingBottom: 48 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginBottom: 8, marginTop: 20 },
-  card: { borderRadius: 18, ...card },
+  card: { borderRadius: radii.tile, ...card },
   row: { minHeight: 56, paddingHorizontal: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   rowDivided: { borderBottomWidth: 1, borderBottomColor: colors.border },
   rowLabel: { ...typography.subtitle, fontWeight: "600", color: colors.ink },

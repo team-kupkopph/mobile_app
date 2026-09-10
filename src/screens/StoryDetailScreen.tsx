@@ -12,7 +12,7 @@ import { Avatar } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -160,11 +160,11 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: 16, backgroundColor: "#FAEEDA" },
   hiddenText: { color: "#8A5A12", ...typography.meta, fontWeight: "600" },
-  photo: { height: 280, borderRadius: 20, backgroundColor: colors.placeholder },
+  photo: { height: 280, borderRadius: radii.field, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
   authorName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   city: { color: colors.muted, ...typography.meta, marginTop: 2 },
-  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
+  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   caption: { marginTop: 18, color: colors.ink, fontSize: 17, lineHeight: 25 },
   actionRow: { flexDirection: "row", gap: 12, marginTop: 26 },

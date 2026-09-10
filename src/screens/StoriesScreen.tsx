@@ -17,7 +17,7 @@ import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 14 },
   authorName: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   city: { color: colors.muted, ...typography.meta, marginTop: 2 },
-  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
+  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   caption: { marginTop: 12, color: colors.ink, ...typography.body },
   reactRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 12 },

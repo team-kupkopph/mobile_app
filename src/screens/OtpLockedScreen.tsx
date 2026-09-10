@@ -13,7 +13,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: authColors.border,
-    borderRadius: 12,
+    borderRadius: radii.chip,
     backgroundColor: "#EDECE7"
   },
   otpDigit: {

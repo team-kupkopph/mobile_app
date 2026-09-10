@@ -14,7 +14,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   section: { marginBottom: 22 },
   sectionHeading: { marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 18, marginBottom: 10, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: radii.tile, marginBottom: 10, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },

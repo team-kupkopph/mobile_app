@@ -16,7 +16,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -269,16 +269,16 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 26, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
-  photoBtn: { marginTop: 18, height: 90, borderRadius: 20, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoBtn: { marginTop: 18, height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   label: { marginTop: 24, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
   segTrack: { flexDirection: "row", backgroundColor: colors.greyPill, borderRadius: 16, padding: 4, gap: 4 },
-  segItem: { flex: 1, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  segItem: { flex: 1, height: 44, borderRadius: radii.chip, alignItems: "center", justifyContent: "center" },
   segItemActive: { ...card },
   segText: { color: colors.muted, fontSize: 15, fontWeight: "700" },
   segTextActive: { color: colors.ink },
-  notes: { marginTop: 2, minHeight: 90, borderRadius: 18, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
-  locCard: { marginTop: 24, padding: 18, borderRadius: 18, ...card },
+  notes: { marginTop: 2, minHeight: 90, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
+  locCard: { marginTop: 24, padding: 18, borderRadius: radii.tile, ...card },
   locRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   locText: { color: colors.muted, fontSize: 15 },
   locAddr: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   adjust: { color: colors.teal, fontSize: 15, fontWeight: "800" },
   locDenied: { color: colors.warningStrong, fontSize: 15, fontWeight: "600" },
   fine: { marginTop: 12, color: colors.muted, fontSize: 13, lineHeight: 19 },
-  anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: 18, ...card },
+  anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: radii.tile, ...card },
   anonLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },

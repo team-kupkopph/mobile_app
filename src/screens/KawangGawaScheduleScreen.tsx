@@ -15,7 +15,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { CardTone, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 const TONE: Record<CardTone, { bg: string; fg: string }> = {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   sectionLabel: { marginTop: 18, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardColumn: { flexDirection: "column", alignItems: "stretch" },
   cardRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   cancelLink: { alignSelf: "flex-end", marginTop: 10, paddingVertical: 4, paddingHorizontal: 4 },

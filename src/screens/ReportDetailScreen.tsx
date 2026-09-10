@@ -14,7 +14,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -271,15 +271,15 @@ const styles = StyleSheet.create({
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   chip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
-  notesCard: { marginTop: 20, padding: 18, borderRadius: 18, ...card },
+  notesCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, ...card },
   notesText: { color: colors.ink, fontSize: 16, lineHeight: 23 },
-  matchesRow: { marginTop: 16, paddingHorizontal: 18, height: 62, borderRadius: 18, flexDirection: "row", alignItems: "center", justifyContent: "space-between", ...card },
+  matchesRow: { marginTop: 16, paddingHorizontal: 18, height: 62, borderRadius: radii.tile, flexDirection: "row", alignItems: "center", justifyContent: "space-between", ...card },
   matchesLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
   matchesChevron: { color: colors.muted, fontSize: 30, fontWeight: "800" },
-  mapWrap: { marginTop: 20, height: 160, borderRadius: 20, overflow: "hidden", backgroundColor: colors.soft },
+  mapWrap: { marginTop: 20, height: 160, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   mapNote: { marginTop: 8, color: colors.muted, fontSize: 12, lineHeight: 17 },
-  waitingCard: { marginTop: 20, padding: 18, borderRadius: 18, backgroundColor: colors.infoBg },
+  waitingCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, backgroundColor: colors.infoBg },
   waitingLine: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   waitingSub: { marginTop: 6, color: colors.tealDark, ...typography.meta },
   sectionTitle: { marginTop: 26, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },

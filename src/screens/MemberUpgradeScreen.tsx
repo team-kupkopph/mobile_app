@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { AdoptIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberUpgrade">;
 
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
   hero: {
     marginTop: 10,
-    borderRadius: 20,
+    borderRadius: radii.field,
     flexDirection: "row",
     alignItems: "center",
     padding: 20,

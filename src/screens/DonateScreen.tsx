@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { needProgressLabel } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   offPlatformNote: { marginTop: 8, marginBottom: 20, color: colors.muted, fontSize: 14, lineHeight: 20 },
   qrCard: { marginBottom: 18, padding: 20, borderRadius: 22, alignItems: "center", ...card },
   provider: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
-  qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: 12, backgroundColor: colors.border },
+  qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: radii.chip, backgroundColor: colors.border },
   accountName: { marginTop: 14, color: colors.ink, fontSize: 15, fontWeight: "600" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   wishlist: { marginTop: 28 },

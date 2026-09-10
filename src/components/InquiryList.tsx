@@ -22,7 +22,7 @@ import { loadState } from "../net";
 import { inquiryProgressLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 import { Chip, type ChipTone } from "./ui";
 
 // inquiry_status (not stage state): active/adopted/declined/withdrawn.
@@ -133,7 +133,7 @@ const card = {
 };
 
 const styles = StyleSheet.create({
-  card: { padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardTop: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   cardName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },

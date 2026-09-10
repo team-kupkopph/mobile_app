@@ -16,7 +16,7 @@ import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { CardTone, historyHours, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 const TONE: Record<CardTone, { bg: string; fg: string }> = {
@@ -161,14 +161,14 @@ const styles = StyleSheet.create({
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
   statsCard: {
-    flexDirection: "row", alignItems: "center", borderRadius: 20, paddingVertical: 20, marginBottom: 18, ...card
+    flexDirection: "row", alignItems: "center", borderRadius: radii.field, paddingVertical: 20, marginBottom: 18, ...card
   },
   statCol: { flex: 1, alignItems: "center" },
   statDivider: { width: 1, height: 40, backgroundColor: colors.border },
   statValue: { color: colors.ink, fontSize: 24, fontWeight: "800" },
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "700" },
   sectionLabel: { marginTop: 4, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },

@@ -21,7 +21,7 @@ import { setIntent } from "../guestIntent";
 import { TabBar, type TabBarItem } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   reportCard: {
     height: 140,
     marginTop: 14,
-    borderRadius: 18,
+    borderRadius: radii.tile,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingLeft: 20,
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderRadius: 18,
+    borderRadius: radii.tile,
     backgroundColor: "#FFFFFF",
     ...elevation.soft
   },

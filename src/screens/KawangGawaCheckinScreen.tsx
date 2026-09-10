@@ -13,7 +13,7 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { MySignupItem, MySignups, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 const card = {
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { paddingHorizontal: 26, paddingTop: 22, paddingBottom: 60 },
-  shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: 20, ...card },
+  shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   bannerDot: { width: 9, height: 9, borderRadius: 5 },
   bannerText: { flex: 1, ...typography.meta, fontWeight: "800" },
   sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  attCard: { borderRadius: 18, paddingHorizontal: 18, ...card },
+  attCard: { borderRadius: radii.tile, paddingHorizontal: 18, ...card },
   attRow: { flexDirection: "row", alignItems: "center", paddingVertical: 16 },
   attRowLast: {},
   attDotCol: { width: 28, alignItems: "center", alignSelf: "stretch" },

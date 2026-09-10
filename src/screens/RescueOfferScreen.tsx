@@ -9,7 +9,7 @@ import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   h1: { color: colors.ink, fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 10, color: colors.muted, fontSize: 16, lineHeight: 22 },
   cardList: { marginTop: 24, gap: 12 },
-  optionCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 18, borderRadius: 20, borderWidth: 2, borderColor: "transparent", ...card },
+  optionCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 18, borderRadius: radii.field, borderWidth: 2, borderColor: "transparent", ...card },
   optionCardActive: { borderColor: colors.teal },
   radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   radioActive: { borderColor: colors.teal },

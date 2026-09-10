@@ -23,7 +23,7 @@ import { codeCheckOutcome } from "../passwordReset";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderColor: authColors.border,
-    borderRadius: 12,
+    borderRadius: radii.chip,
     padding: 0,
     backgroundColor: "#FFFFFF",
     color: authColors.ink,

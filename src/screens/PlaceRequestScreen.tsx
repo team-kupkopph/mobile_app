@@ -17,7 +17,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 type Decision = "accept" | "decline";
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   name: { color: colors.ink, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   body: { marginTop: 14, color: colors.ink, fontSize: 16, lineHeight: 23 },
-  feeCard: { marginTop: 18, padding: 18, borderRadius: 18, flexDirection: "row",
+  feeCard: { marginTop: 18, padding: 18, borderRadius: radii.tile, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between", ...card },
   feeLabel: { color: colors.muted, fontSize: 15, fontWeight: "600" },
   feeValue: { color: colors.ink, fontSize: 20, fontWeight: "800" },

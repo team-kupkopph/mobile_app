@@ -13,7 +13,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone } from "../shelterVolunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 22, paddingTop: 16, paddingBottom: 60 },
   bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
-  card: { borderRadius: 20, padding: 16, marginBottom: 14, ...card },
+  card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   avatarText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },

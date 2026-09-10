@@ -28,7 +28,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { gradients, heroDirection } from "../theme/v3";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
     padding: 20,
-    borderRadius: 24, // matches ShelterDashboardScreen.verifiedHero exactly
+    borderRadius: radii.card, // matches ShelterDashboardScreen.verifiedHero exactly
     backgroundColor: colors.teal
   },
   verifiedHeroIcon: {
@@ -687,7 +687,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     // V3 radius scale: 26 hero / 24 card / 18 row. The fill is now the three-stop brand
     // gradient rather than flat colors.teal — overflow hidden so it cannot bleed the corners.
-    borderRadius: 26,
+    borderRadius: radii.hero,
     overflow: "hidden",
     flexDirection: "row",
     justifyContent: "space-between",
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
   petCard: {
     height: 68,
     marginTop: 10,
-    borderRadius: 18,
+    borderRadius: radii.tile,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 13,
@@ -886,7 +886,7 @@ const styles = StyleSheet.create({
   rescueCard: {
     height: 68,
     marginTop: 16,
-    borderRadius: 18,
+    borderRadius: radii.tile,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 13,

@@ -14,7 +14,7 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   heroWhen: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
   heroOrg: { marginTop: 2, color: colors.muted, ...typography.meta },
   infoCard: {
-    marginTop: 24, borderRadius: 20, paddingHorizontal: 20, paddingVertical: 18,
+    marginTop: 24, borderRadius: radii.field, paddingHorizontal: 20, paddingVertical: 18,
     flexDirection: "row", alignItems: "center", gap: 12, ...card
   },
   infoTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   statusChip: { paddingHorizontal: 14, height: 32, borderRadius: 16, justifyContent: "center" },
   statusChipText: { ...typography.meta, fontWeight: "800" },
   sectionLabel: { marginTop: 28, marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
-  actionCard: { borderRadius: 20, overflow: "hidden", ...card },
+  actionCard: { borderRadius: radii.field, overflow: "hidden", ...card },
   actionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, height: 60 },
   actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
   actionRowText: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },

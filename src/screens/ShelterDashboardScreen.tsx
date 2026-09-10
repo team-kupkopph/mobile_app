@@ -18,7 +18,7 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   verifiedPillText: { color: "#14504F", ...typography.meta, fontWeight: "800" },
   verifiedHero: {
     marginTop: 20, flexDirection: "row", alignItems: "center", gap: 16, padding: 20,
-    borderRadius: 24, backgroundColor: colors.teal
+    borderRadius: radii.card, backgroundColor: colors.teal
   },
   verifiedHeroIcon: {
     width: 46, height: 46, borderRadius: 15, alignItems: "center", justifyContent: "center",

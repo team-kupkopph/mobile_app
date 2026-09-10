@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { colors, gradients, motion, typography } from "../../theme";
+import { colors, gradients, motion, radii, typography } from "../../theme";
 import { GlassSurface } from "../GlassSurface";
 import { PressScale } from "./PressScale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     right: 4,
     top: 6,
     bottom: 6,
-    borderRadius: 20
+    borderRadius: radii.field
   },
   iconSlot: {
     alignItems: "center",

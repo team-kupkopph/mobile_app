@@ -16,7 +16,7 @@ import { AlertIcon, CheckIcon, ClockIcon, UserBadgeIcon, XIcon } from "../compon
 import { RootStackParamList } from "../navigation/types";
 import { notificationTarget } from "../notifications";
 import { relTime } from "../sagip";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 // US-V8 · the four volunteer notification types get a dedicated icon + tone, matching the
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: 26, paddingTop: 16, paddingBottom: 60 },
-  card: { flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 18, borderRadius: 20, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "flex-start", gap: 10, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardUnread: { backgroundColor: colors.soft },
   dot: { marginTop: 6, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.teal },
   cardIcon: { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },

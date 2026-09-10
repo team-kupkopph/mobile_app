@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, squircle, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportSent">;
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: 26, paddingTop: 90, paddingBottom: 60 },
   hero: { alignItems: "center" },
-  heroIcon: { width: 76, height: 76, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
+  heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, fontSize: 30, fontWeight: "800" },
   heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   card: { marginTop: 28, padding: 20, borderRadius: 22, ...card },

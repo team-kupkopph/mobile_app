@@ -15,7 +15,7 @@ import { loadState } from "../net";
 import { AlertIcon, CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docChip, docLabel, groupAttention, splitDocs } from "../verifications";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyDocuments">;
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   emptyCard: {
     marginTop: 26,
-    borderRadius: 24,
+    borderRadius: radii.card,
     alignItems: "center",
     gap: 12,
     paddingVertical: 40,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     padding: 18,
-    borderRadius: 20,
+    borderRadius: radii.field,
     backgroundColor: colors.warningBg
   },
   noteBannerText: { flex: 1, color: colors.warningStrong, fontSize: 15, fontWeight: "600", lineHeight: 21 },

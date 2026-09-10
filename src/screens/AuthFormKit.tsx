@@ -3,7 +3,7 @@
 // pill status header with back chevron + step dots, 800-weight ink headings, white rounded fields.
 import { LinearGradient } from "expo-linear-gradient";
 import { Button, Field, ScreenHeader } from "../components/ui";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 import {
   ActivityIndicator,
   StyleProp,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     height: 46,
     borderWidth: 1,
     borderColor: authColors.border,
-    borderRadius: 12,
+    borderRadius: radii.chip,
     paddingHorizontal: 14,
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#77756F"
   },
   primaryButtonWrap: {
-    borderRadius: 24,
+    borderRadius: radii.card,
     overflow: "hidden"
   },
   primaryButtonDisabled: {

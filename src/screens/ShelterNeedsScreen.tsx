@@ -10,7 +10,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ChipTone, needProgressLabel, needStatusChip, NeedStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, typography } from "../theme";
+import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   needCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
+  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, ...typography.meta, textTransform: "capitalize" }
 });
