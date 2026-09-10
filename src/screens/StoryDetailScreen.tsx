@@ -8,6 +8,7 @@ import {
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import { Avatar } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
@@ -130,7 +131,7 @@ export function StoryDetailScreen({ navigation, route }: Props) {
           ? <Image source={{ uri: story.photos[0].url }} style={styles.photo} resizeMode="cover" />
           : <View style={styles.photo} />}
         <View style={styles.authorRow}>
-          <View style={styles.avatar}><Text style={styles.avatarText}>{initials(story.author.name)}</Text></View>
+          <Avatar initials={initials(story.author.name)} tinted size={50} />
           <View style={{ flex: 1 }}>
             <Text style={styles.authorName}>{story.author.name}</Text>
             {story.author.city ? <Text style={styles.city}>{story.author.city}</Text> : null}
@@ -166,8 +167,6 @@ const styles = StyleSheet.create({
   hiddenText: { color: "#8A5A12", fontSize: 14, fontWeight: "600" },
   photo: { height: 280, borderRadius: 20, backgroundColor: colors.dim },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
-  avatar: { width: 50, height: 50, borderRadius: 16, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  avatarText: { color: colors.teal, fontSize: 18, fontWeight: "800" },
   authorName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   city: { color: colors.muted, fontSize: 14, marginTop: 2 },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 12 },
