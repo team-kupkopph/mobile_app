@@ -17,7 +17,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 type Decision = "accept" | "decline";
@@ -167,8 +167,7 @@ function capitalize(s: string): string {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

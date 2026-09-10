@@ -28,7 +28,7 @@ import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
   shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -226,8 +226,7 @@ export function KawangGawaScreen({ navigation }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

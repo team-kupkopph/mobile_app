@@ -6,7 +6,7 @@ import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportContent">;
@@ -66,8 +66,7 @@ export function ReportContentScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

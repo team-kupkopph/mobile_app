@@ -18,7 +18,7 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -269,11 +269,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 18,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   statNum: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },

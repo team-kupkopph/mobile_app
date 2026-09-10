@@ -21,7 +21,7 @@ import { setIntent } from "../guestIntent";
 import { TabBar, type TabBarItem } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -261,11 +261,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   loginPillText: {
     color: colors.teal,
@@ -367,11 +363,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 18,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   mapIconTile: {
     width: 44,
@@ -426,11 +418,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 13,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   avatarCircle: {
     width: 48,

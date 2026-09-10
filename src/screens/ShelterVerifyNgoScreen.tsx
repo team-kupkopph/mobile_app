@@ -12,7 +12,7 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -219,11 +219,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   backText: { color: colors.ink, fontSize: 26, fontWeight: "700", lineHeight: 28 },
   headerTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
@@ -239,11 +235,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   docCardDisabled: { opacity: 0.55 },
   docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
@@ -284,11 +276,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 16,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   input: { color: colors.ink, fontSize: 15, fontWeight: "800", padding: 0 },
   formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },

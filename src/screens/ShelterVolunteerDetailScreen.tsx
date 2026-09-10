@@ -12,7 +12,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone, VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 function formatAddress(addr: { line1: string; barangay: string; city: string; province: string }): string {
   return [addr.line1, addr.barangay, addr.city, addr.province].filter(Boolean).join(", ");
@@ -114,8 +114,7 @@ const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
 };
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

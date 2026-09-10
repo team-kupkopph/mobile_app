@@ -13,7 +13,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -138,8 +138,7 @@ const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
 };
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

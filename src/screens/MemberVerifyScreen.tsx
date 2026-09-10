@@ -13,7 +13,7 @@ import { uploadErrorMessage } from "../upload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -217,11 +217,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.white,
-    shadowColor: colors.shadowCast,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   backText: {
     color: colors.ink,
@@ -258,11 +254,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: colors.white,
-    shadowColor: colors.shadowCast,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   docIcon: {
     width: 48,
@@ -321,11 +313,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 16,
     backgroundColor: colors.white,
-    shadowColor: colors.shadowCast,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   socialInput: {
     color: colors.ink,

@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "locationPicker">;
 
@@ -164,11 +164,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.white,
-    shadowColor: colors.shadowCast,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   backText: {
     color: colors.ink,
@@ -194,11 +190,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     gap: 10,
     backgroundColor: colors.white,
-    shadowColor: colors.shadowCast,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   searchIcon: {
     color: colors.muted,
@@ -231,11 +223,7 @@ const styles = StyleSheet.create({
   groupCard: {
     borderRadius: 16,
     backgroundColor: colors.white,
-    shadowColor: colors.shadowCast,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2
+    ...elevation.soft
   },
   cityRow: {
     height: 58,

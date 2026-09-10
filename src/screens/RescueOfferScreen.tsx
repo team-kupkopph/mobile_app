@@ -9,7 +9,7 @@ import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
@@ -102,8 +102,7 @@ export function RescueOfferScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

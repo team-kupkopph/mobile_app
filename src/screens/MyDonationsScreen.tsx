@@ -13,12 +13,11 @@ import { loadState } from "../net";
 import { ChipTone, pledgeIsCancellable, pledgeStatusChip, PledgeStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 const card = {
-  backgroundColor: colors.white, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const CHIP: Record<ChipTone, { bg: string; fg: string }> = {

@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL, offerStatusChip, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 const TONE = {
   teal: { bg: colors.infoBg, fg: colors.tealDark }, green: { bg: colors.successBg, fg: colors.success },
@@ -129,8 +129,7 @@ export function MyOffersScreen({ navigation }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({

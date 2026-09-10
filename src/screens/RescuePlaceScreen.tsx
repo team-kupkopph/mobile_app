@@ -8,7 +8,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, typography } from "../theme";
+import { colors, elevation, typography } from "../theme";
 
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -72,8 +72,7 @@ export function RescuePlaceScreen({ navigation, route }: Props) {
 }
 
 const card = {
-  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.08, shadowRadius: 7, elevation: 2
+  backgroundColor: colors.white, ...elevation.soft
 };
 
 const styles = StyleSheet.create({
