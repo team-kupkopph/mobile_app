@@ -48,7 +48,23 @@ const HAND_ROLLED = files.filter(
  */
 // 51 -> 50: MyInquiriesScreen moved to ScreenHeader when its list was extracted so
 // Adopt's segmented control could render the same list in place.
-const REMAINING_HAND_ROLLED = 50;
+//
+// 50 -> 6: the conversion this file's header warned about, done the way the warning asked —
+// mechanically where the shape was mechanical, and by name where it was not. Forty screens
+// drew the identical header (a styles.header row, a goBack chevron, a title beside it,
+// nothing else) and were converted by a codemod that refused any other shape. Three
+// carried a right-side action and one had a bare Text for its back control — those four by
+// hand, the action moving into ScreenHeader's `right`. Checked on device for the thing that
+// burned this project: the title now clears the Dynamic Island on every converted screen,
+// because ScreenHeader pads by the inset rather than 58.
+//
+// The six that remain are the ShelterVolunteer screens whose `styles.header` View wraps far
+// more than a header — a stats block, a calendar strip, a contact card. Converting them is a
+// layout change, not a header swap, and is not disguised as one:
+//   ShelterVolunteerActivityScreen, ShelterVolunteerAttendanceScreen,
+//   ShelterVolunteerCalendarScreen, ShelterVolunteerCancelScreen,
+//   ShelterVolunteerDetailScreen, ShelterVolunteerRequestsScreen.
+const REMAINING_HAND_ROLLED = 6;
 
 describe("the header primitives", () => {
   it("pads by the safe-area inset rather than a magic number", () => {
@@ -104,5 +120,13 @@ describe("the hand-rolled header ratchet", () => {
       "SettingsPrivacyScreen.tsx", "SettingsScreen.tsx"
     ];
     converted.forEach((f) => expect(read(f)).toMatch(/<ScreenHeader/));
+  });
+
+  it("names the six still hand-rolled, so the list can only get shorter", () => {
+    expect(HAND_ROLLED.sort()).toEqual([
+      "ShelterVolunteerActivityScreen.tsx", "ShelterVolunteerAttendanceScreen.tsx",
+      "ShelterVolunteerCalendarScreen.tsx", "ShelterVolunteerCancelScreen.tsx",
+      "ShelterVolunteerDetailScreen.tsx", "ShelterVolunteerRequestsScreen.tsx"
+    ]);
   });
 });

@@ -13,6 +13,7 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { colors, elevation, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -116,13 +117,7 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" activeOpacity={0.75} onPress={() => navigation.goBack()} style={styles.backButton} hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backText}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>NGO papers</Text>
-      </View>
+      <ScreenHeader title="NGO papers" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>NGO papers</Text>
@@ -208,7 +203,6 @@ function DocSlot({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F5F2" },
-  header: { height: 96, alignItems: "center", justifyContent: "flex-end", paddingBottom: 14 },
   backButton: {
     position: "absolute",
     left: 26,
@@ -221,8 +215,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     ...elevation.soft
   },
-  backText: { color: colors.ink, fontSize: 26, fontWeight: "700", lineHeight: 28 },
-  headerTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
   heading: { marginTop: 6, color: colors.ink, fontSize: 24, fontWeight: "800" },
   subheading: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },

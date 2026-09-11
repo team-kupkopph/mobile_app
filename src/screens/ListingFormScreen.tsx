@@ -18,6 +18,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -139,13 +140,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
   if (loading) {
     return (
       <View style={styles.screen}>
-        <View style={styles.header}>
-          <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-            <Text style={styles.backGlyph}>‹</Text>
-          </TouchableOpacity>
-          <Text style={styles.title}>Edit listing</Text>
-        </View>
+        <ScreenHeader title="Edit listing" onBack={() => navigation.goBack()} />
         <ActivityIndicator style={{ marginTop: 60 }} color={colors.teal} />
       </View>
     );

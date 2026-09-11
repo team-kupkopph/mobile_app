@@ -99,7 +99,9 @@ const OFF_GUTTER = 0;
 describe("every screen holds the same gutter", () => {
   it("found gutters to classify", () => {
     // Guard the guard: scans here have reported a plausible smaller number more than once.
-    expect(onToken.length).toBeGreaterThan(120);
+    // 129 gutters at Track S; 95 after the header conversion took 44 `header` rows into
+    // ScreenHeader, which carries the gutter itself. A floor, recalibrated to what exists.
+    expect(onToken.length).toBeGreaterThan(80);
     expect(new Set(onToken).size).toBeGreaterThan(70);
   });
 

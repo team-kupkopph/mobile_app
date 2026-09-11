@@ -3,10 +3,11 @@
 // rather than inventing legal language. The volunteer still sends `waiver_accepted: true` when
 // they check the box on the detail screen — the backend stamps the consent version server-side.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 const card = {
@@ -18,13 +19,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "waiver">;
 export function WaiverScreen({ navigation }: Props) {
   return (
     <View style={styles.screen} testID="screen.waiver">
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Liability waiver & guidelines</Text>
-      </View>
+      <ScreenHeader title="Liability waiver & guidelines" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.noticeCard}>
@@ -47,10 +42,6 @@ export function WaiverScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   noticeCard: { borderRadius: radii.tile, padding: 20, gap: 14, ...card },
   body: { color: colors.muted, ...typography.body }

@@ -15,6 +15,8 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
+import { TAP_SLOP } from "../touch";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -96,23 +98,20 @@ export function ReportDetailScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Report</Text>
-        {report ? (
+      <ScreenHeader
+        title="Report"
+        onBack={() => navigation.goBack()}
+        right={report ? (
           <TouchableOpacity
             style={styles.flagLink}
-            hitSlop={12}
+            hitSlop={TAP_SLOP}
             onPress={() => navigation.navigate("reportContent",
               { targetType: "report", targetId: report.report_id })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
           </TouchableOpacity>
         ) : null}
-      </View>
+      />
 
       {!report ? (
         <LoadStateView state={loadState(res)} subject="report" onRetry={load} />
@@ -259,10 +258,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   flagLink: { marginLeft: "auto" },
   flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },

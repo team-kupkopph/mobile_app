@@ -136,10 +136,26 @@ describe("icon-only controls are announced", () => {
     // by that component instead, and are excluded: requiring the literal string in every
     // file would reward copy-paste over reuse, which is the opposite of the point.
     const files = readdirSync(SCREENS).filter((f) => f.endsWith(".tsx"));
+    //
+    // ⚠️ PER CONTROL, NOT PER FILE. The first version looked for the literal string "Go back"
+    // anywhere in the file, which the hand-rolled chevron always carried — so a screen with
+    // a labelled "Keep my account" button that also calls goBack() passed only because its
+    // chevron was in the same file. When the chevron moved into ScreenHeader, that screen
+    // "lost" its label without any control changing. A control is labelled if ITS tag
+    // carries accessibilityLabel; the string it carries is the screen's business.
+    // A control whose children are visible words is announced by those words; the failure
+    // this guards is the icon-only "‹" with nothing to announce.
     const missing = files.filter((f) => {
       const src = readFileSync(join(SCREENS, f), "utf8");
-      const drawsItsOwn = /onPress=\{\(\) => navigation\.goBack\(\)\}[^\n]*style=/.test(src);
-      return drawsItsOwn && !src.includes('accessibilityLabel="Go back"');
+      const re = /<(TouchableOpacity|Pressable|PressScale|Text)\b([^>]*onPress=\{\(\) => navigation\.goBack\(\)\}[^>]*)>([\s\S]*?)<\/\1>/g;
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(src))) {
+        const [, , attrs, inner] = m;
+        if (!/style=/.test(attrs) || /accessibilityLabel=/.test(attrs)) continue;
+        const words = inner.replace(/<[^>]+>/g, " ").replace(/\{[^}]*\}/g, " ");
+        if (!/[A-Za-z]{2,}/.test(words)) return true;
+      }
+      return false;
     });
     expect(missing).toEqual([]);
   });

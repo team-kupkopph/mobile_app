@@ -14,6 +14,7 @@ import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -62,20 +63,19 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Kawang-Gawa</Text>
-        <TouchableOpacity hitSlop={TAP_SLOP}
-          style={styles.newBtn}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate("shelterVolunteerCreate")}
-        >
-          <Text style={styles.newBtnText}>+ Post an activity</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title="Kawang-Gawa"
+        onBack={() => navigation.goBack()}
+        right={
+          <TouchableOpacity hitSlop={TAP_SLOP}
+            style={styles.newBtn}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate("shelterVolunteerCreate")}
+          >
+            <Text style={styles.newBtnText}>+ Post an activity</Text>
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.sectionHeader}>
@@ -147,9 +147,6 @@ const styles = StyleSheet.create({
     paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
     flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
   },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   newBtn: { paddingHorizontal: 16, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   newBtnText: { color: colors.white, ...typography.meta, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },

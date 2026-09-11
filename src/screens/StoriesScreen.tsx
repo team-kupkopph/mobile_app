@@ -10,7 +10,7 @@ import {
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
-import { Avatar } from "../components/ui";
+import { Avatar, ScreenHeader } from "../components/ui";
 import { StaleBanner } from "../components/StaleBanner";
 import { isOffline, loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
@@ -57,16 +57,15 @@ export function StoriesScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Stories</Text>
-        <TouchableOpacity hitSlop={TAP_SLOP} style={styles.share} onPress={() => navigation.navigate("storyCompose", {})}>
-          <Text style={styles.shareLabel}>+ Share</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenHeader
+        title="Stories"
+        onBack={() => navigation.goBack()}
+        right={
+          <TouchableOpacity hitSlop={TAP_SLOP} style={styles.share} onPress={() => navigation.navigate("storyCompose", {})}>
+            <Text style={styles.shareLabel}>+ Share</Text>
+          </TouchableOpacity>
+        }
+      />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loadState(res, stories?.length).kind !== "ready" ? (
           <LoadStateView
@@ -113,10 +112,6 @@ export function StoriesScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 14 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { flex: 1, color: colors.ink, fontSize: 22, fontWeight: "800" },
   share: { paddingHorizontal: 18, paddingVertical: 11, borderRadius: 22, backgroundColor: colors.teal },
   shareLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
