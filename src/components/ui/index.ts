@@ -15,3 +15,4 @@ export { Avatar } from "./Avatar";
 export { Card } from "./Card";
 export { SectionHeader } from "./SectionHeader";
 export { SegmentedControl } from "./SegmentedControl";
+export { SocialSignIn } from "./SocialSignIn";

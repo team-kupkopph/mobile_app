@@ -7,9 +7,11 @@ import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } 
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { useSocialSignIn } from "../auth/useSocialSignIn";
 import { RootStackParamList } from "../navigation/types";
 import { SimpleHeader, authColors } from "./AuthFormKit";
 import { Button, Field } from "../components/ui";
+import { SocialSignIn } from "../components/ui/SocialSignIn";
 import { colors, gradients, radii, spacing, typography } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -19,6 +21,7 @@ const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 type Props = NativeStackScreenProps<RootStackParamList, "signin">;
 
 export function SigninScreen({ navigation }: Props) {
+  const onSocial = useSocialSignIn(navigation);
   const api = useApi();
   const { setTokens } = useAuth();
 
@@ -144,6 +147,11 @@ export function SigninScreen({ navigation }: Props) {
         </TouchableOpacity>
 
         <Button testID="btn.signin.submit" label="Log in" onPress={onSubmit} loading={submitting} style={styles.submitButton} />
+
+        {/* The canvas draws the provider row HERE, on Log in (SignIn.dc.html) — the one place
+            it is designed. Order and spacing are the artboard's: 26 under the CTA, 18 under
+            the rule. Both providers go through the same handler as Welcome's. */}
+        <SocialSignIn testIDPrefix="signin" onPress={onSocial} />
 
         <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("accountType")}>
           <Text style={styles.linkCentered}>New to Kupkop? Create account</Text>

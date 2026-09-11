@@ -1,8 +1,8 @@
 import { NativeStackScreenProps, createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
-import { NOT_CONFIGURED_MESSAGE, SocialProvider, signInWithProvider } from "../auth/socialAuth";
+import { useSocialSignIn } from "../auth/useSocialSignIn";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
 import { DonateScreen } from "../screens/DonateScreen";
@@ -215,26 +215,15 @@ export function RootNavigator() {
 function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList, "welcome">) {
   // US-A2. This handler was MISSING until 2026-08-06: WelcomeScreen rendered a "Continue with
   // Google" button and nothing was ever passed for it, so tapping it did nothing at all —
-  // silently. Now it either starts the provider flow or explains why it can't.
-  async function onSocial(provider: SocialProvider) {
-    const res = await signInWithProvider(provider);
-    if (res.ok) {
-      navigation.navigate("accountType", { social: res.identity });
-      return;
-    }
-    if (res.reason === "cancelled") return;
-    Alert.alert(
-      res.reason === "not_configured" ? "Not available yet" : "Sign-in failed",
-      res.reason === "not_configured" ? NOT_CONFIGURED_MESSAGE : "Please try again."
-    );
-  }
+  // silently. It now lives in useSocialSignIn, shared with the Log in screen.
+  const onSocial = useSocialSignIn(navigation);
 
   return (
     <WelcomeScreen
       onGetStarted={() => navigation.navigate("accountType")}
       onLogin={() => navigation.navigate("signin")}
       onBrowseGuest={() => navigation.navigate("homeGuest")}
-      onContinueWithGoogle={() => onSocial("google")}
+      onSocial={onSocial}
     />
   );
 }

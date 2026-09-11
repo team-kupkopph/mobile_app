@@ -199,12 +199,13 @@ for (const file of sources(SRC)) {
 }
 
 /**
- * ⚠️ THESE THIRTEEN ARE NOT A BACKLOG OF THE SAME THING. Every shadow that reproduced a step
- * is bound; what is left genuinely differs, and two of them differ by almost nothing:
+ * ⚠️ THESE TWELVE ARE NOT A BACKLOG OF THE SAME THING. Every shadow that reproduced a step
+ * is bound; what is left genuinely differs, and one of them differs by almost nothing:
  *
- *   · WelcomeScreen `secondary` is `soft` in EVERY value except the cast colour — #12213A
- *     where every other shadow in the app casts #1F3A5F. That is a one-off colour, the same
- *     shape as the seven one-off greys, not a one-off depth.
+ *   · (Resolved.) WelcomeScreen `secondary` was `soft` in every value except the cast colour —
+ *     #12213A where the rest of the app casts #1F3A5F. It went with the lone "Continue with
+ *     Google" button it styled, replaced by the shared SocialSignIn row, which uses the token.
+ *     Thirteen became twelve by deletion, not by absorption.
  *   · ProfileScreen `card` is `card` except `elevation: 4` against the step's 6 — an
  *     Android-only difference, invisible on iOS, which is why it survived this long.
  *
@@ -216,7 +217,7 @@ for (const file of sources(SRC)) {
  * It may fall. It may not rise: a new screen typing its own shadow is the drift the token
  * exists to end.
  */
-const ONE_OFFS = 13;
+const ONE_OFFS = 12;
 
 describe("screens take depth from the theme", () => {
   it("found shadows to classify", () => {

@@ -1,6 +1,11 @@
 import { Image, ImageSourcePropType, StyleSheet, View } from "react-native";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
+// Provider marks, rasterised from the canvas's own SVG paths (design/mobile-v3/SignIn.dc.html)
+// with `sharp` at 192 px, the same way the paw is shipped. Apple's is a white mask so it takes
+// `tintColor` like the paw; Google's carries its four brand colours and must NOT be tinted.
+const appleMark = require("../../assets/apple-logo-white.png") as ImageSourcePropType;
+const googleMark = require("../../assets/google-g.png") as ImageSourcePropType;
 
 type IconProps = {
   color: string;
@@ -481,3 +486,30 @@ const styles = StyleSheet.create({
     borderRadius: 2
   }
 });
+
+/** The Apple mark, tinted — sentence-case ink on a light pill, white on a dark one. */
+export function AppleIcon({ color, size = 19 }: IconProps) {
+  return (
+    <Image
+      source={appleMark}
+      resizeMode="contain"
+      accessibilityIgnoresInvertColors
+      style={{ width: size, height: size, tintColor: color }}
+    />
+  );
+}
+
+/**
+ * The Google "G". `color` is accepted for the IconProps contract but deliberately unused:
+ * the mark is four brand colours and Google's guidelines do not permit recolouring it.
+ */
+export function GoogleIcon({ size = 19 }: IconProps) {
+  return (
+    <Image
+      source={googleMark}
+      resizeMode="contain"
+      accessibilityIgnoresInvertColors
+      style={{ width: size, height: size }}
+    />
+  );
+}
