@@ -360,8 +360,13 @@ for (const file of sources(SRC)) {
  *     line height moved onto `body`, gaining its 21.
  * What remains at fifteen is in JSX, not in a style: the ladder's step title sets its weight
  * per state inline, including a 600 for steps not yet reached, as the artboard draws it.
+ *
+ * 213, DOWN FROM 293, BY DELETION: the 44 hand-rolled headers went to ScreenHeader, taking
+ * their 30 pt "‹" glyph style and their own title style with them. Neither was ever going to
+ * bind to a step — a chevron is not text and a hand-rolled title is what the primitive
+ * replaces — so this is the count shrinking because the drift was removed, not absorbed.
  */
-const OFF_RAMP = 293;
+const OFF_RAMP = 213;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {

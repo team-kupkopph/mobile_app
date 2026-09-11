@@ -2,10 +2,11 @@
 // criteria and either when it was earned or that it's still locked — never claiming an unearned
 // badge is earned.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -28,13 +29,7 @@ export function BadgeComparisonScreen({ navigation, route }: Props) {
   const when = earnedDate(badge.earned_at);
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Badge</Text>
-      </View>
+      <ScreenHeader title="Badge" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={[styles.medal, badge.earned ? styles.medalOn : styles.medalOff]}>
           <Text style={[styles.medalGlyph, badge.earned ? null : styles.medalGlyphOff]}>★</Text>
@@ -63,10 +58,6 @@ export function BadgeComparisonScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 60, alignItems: "center" },
   medal: { width: 108, height: 108, borderRadius: 32, alignItems: "center", justifyContent: "center" },
   medalOn: { backgroundColor: colors.soft },

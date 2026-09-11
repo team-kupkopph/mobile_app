@@ -13,6 +13,7 @@ import MapView, { Region } from "react-native-maps";
 import { LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "adjustPin">;
@@ -59,13 +60,7 @@ export function AdjustPinScreen({ navigation, route }: Props) {
         <View style={styles.pinShadow} />
       </View>
 
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Adjust the pin</Text>
-      </View>
+      <ScreenHeader title="Adjust the pin" onBack={() => navigation.goBack()} />
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Move the map so the pin sits exactly where the animal is.</Text>
@@ -90,10 +85,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { position: "absolute", top: 0, left: 0, right: 0, paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800", textShadowColor: "rgba(244,245,242,0.9)", textShadowRadius: 6 },
   // Centre the pin, then lift it by half its height so its *tip* rests on the map centre.
   pinLayer: { ...StyleSheet.absoluteFillObject, alignItems: "center", justifyContent: "center" },
   pin: { marginBottom: 44 },

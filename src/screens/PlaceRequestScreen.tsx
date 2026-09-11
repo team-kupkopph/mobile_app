@@ -18,6 +18,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 type Decision = "accept" | "decline";
@@ -85,13 +86,7 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Placement offer</Text>
-      </View>
+      <ScreenHeader title="Placement offer" onBack={() => navigation.goBack()} />
 
       {!inquiry ? (
         // The list came back fine and this offer is not in it: withdrawn, or never addressed
@@ -172,10 +167,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 220, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, ...typography.hero },

@@ -7,6 +7,7 @@ import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportContent">;
@@ -37,13 +38,7 @@ export function ReportContentScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Report this</Text>
-      </View>
+      <ScreenHeader title="Report this" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
         <Text style={styles.label}>What's wrong?</Text>
@@ -71,10 +66,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20 },
   label: { marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   notes: { minHeight: 120, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },

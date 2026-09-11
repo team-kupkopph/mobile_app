@@ -11,6 +11,7 @@ import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -52,13 +53,7 @@ export function StoryComposeScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Share a story</Text>
-      </View>
+      <ScreenHeader title="Share a story" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.h1}>A photo makes the story</Text>
         <TouchableOpacity style={[styles.photoTile, photoUrl ? styles.photoTileSet : null]}
@@ -94,10 +89,6 @@ export function StoryComposeScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, fontSize: 24, fontWeight: "800", marginBottom: 14 },
   photoTile: { height: 150, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center", backgroundColor: colors.white },

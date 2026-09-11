@@ -14,6 +14,7 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -107,19 +108,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity
- testID="btn.back"          activeOpacity={0.75}
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Text style={styles.backText}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Get verified</Text>
-      </View>
+      <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>Quick verification</Text>

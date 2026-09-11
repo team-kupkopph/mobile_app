@@ -14,6 +14,7 @@ import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { MySignupItem, MySignups, shiftTypeLabel } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 const card = {
@@ -116,13 +117,7 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Today's shift</Text>
-      </View>
+      <ScreenHeader title="Today's shift" onBack={() => navigation.goBack()} />
 
       {!item ? (
         <View style={styles.centerFill}>
@@ -187,10 +182,6 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { paddingHorizontal: spacing.lg, paddingTop: 22, paddingBottom: 60 },
   shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, ...card },

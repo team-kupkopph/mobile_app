@@ -22,6 +22,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -197,19 +198,12 @@ function Column({
 
 function Header({ title, navigation }: { title: string; navigation: Props["navigation"] }) {
   return (
-    <View style={styles.header}>
-      <Text style={styles.back} onPress={() => navigation.goBack()}
-            accessibilityRole="button" accessibilityLabel="Go back">‹</Text>
-      <Text style={styles.title} accessibilityRole="header">{title}</Text>
-    </View>
+    <ScreenHeader title={title} onBack={() => navigation.goBack()} align="center" />
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 64, paddingHorizontal: spacing.lg, paddingBottom: 12, flexDirection: "row", alignItems: "center" },
-  back: { width: 44, height: 44, borderRadius: 22, textAlign: "center", lineHeight: 42, fontSize: 26, fontWeight: "700", color: colors.ink, ...card },
-  title: { flex: 1, textAlign: "center", fontSize: 20, fontWeight: "800", color: colors.ink, marginRight: 44 },
   content: { padding: 20, paddingBottom: 48 },
   h1: { fontSize: 26, fontWeight: "800", color: colors.ink, letterSpacing: -0.4 },
   lede: { ...typography.body, color: colors.muted, marginTop: 8 },

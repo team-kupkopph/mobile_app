@@ -11,6 +11,7 @@ import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docLabel } from "../verifications";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyResubmit">;
@@ -54,19 +55,7 @@ export function VerifyResubmitScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back"
-          activeOpacity={0.75}
-          onPress={() => navigation.goBack()}
-          style={styles.back}
-          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Resubmit documents</Text>
-      </View>
+      <ScreenHeader title="Resubmit documents" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.h1}>One document needs a fix</Text>
@@ -135,8 +124,6 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center",
     backgroundColor: "#FFFFFF", ...elevation.soft
   },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },

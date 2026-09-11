@@ -8,6 +8,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AdoptIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberUpgrade">;
 
@@ -21,19 +22,7 @@ const UNLOCKS = [
 export function MemberUpgradeScreen({ navigation }: Props) {
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity
- testID="btn.back"          activeOpacity={0.75}
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-        >
-          <Text style={styles.backText}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Get verified</Text>
-      </View>
+      <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
         <View style={styles.hero}>

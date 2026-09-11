@@ -10,6 +10,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
@@ -45,13 +46,7 @@ export function RescueOfferScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Offer help</Text>
-      </View>
+      <ScreenHeader title="Offer help" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
         <Text style={styles.h1}>Can't claim it? Chip in instead.</Text>
@@ -107,10 +102,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 6, flexDirection: "row", alignItems: "center", gap: 16 },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 12 },
   h1: { color: colors.ink, fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 10, color: colors.muted, fontSize: 16, lineHeight: 22 },
