@@ -153,6 +153,30 @@ export async function clearCache(): Promise<void> {
   }
 }
 
+/**
+ * Small per-account preferences that are NOT response caches — the Adopt deck's shortlist and
+ * hidden list. Same PREFIX on purpose: they belong to the signed-in account, so clearCache()
+ * takes them with everything else on any session end, and the next person on a shared phone
+ * does not inherit a stranger's saved pets. No TTL and no §12.5 allowlist, because nothing
+ * here is a server body and nothing here is a location.
+ */
+export async function readPref<T>(name: string): Promise<T | null> {
+  try {
+    const raw = await storage()?.getItem(PREFIX + "pref." + name);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function writePref(name: string, value: unknown): Promise<void> {
+  try {
+    await storage()?.setItem(PREFIX + "pref." + name, JSON.stringify(value));
+  } catch {
+    // Best effort, like writeCache: a failed write must not break the interaction.
+  }
+}
+
 /** Exposed for the §12.5 guard, so the test asserts against the real list. */
 export const CACHEABLE_PATHS: readonly string[] = [...CACHEABLE];
 export const CACHE_TTL_MS = TTL_MS;

@@ -1,12 +1,14 @@
 // US-A3 · the Adopt tab — browse public listings. GET /listings?city=&species=&page=.
-// Reference: screens/user/screen-adopt.png. Replaces the M8 placeholder.
+// Reference: design/mobile-v3/Adopt.dc.html (the V3 deck; screens/user/screen-adopt.png was the
+// V2 list it replaced). Replaces the M8 placeholder.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { AdoptDeck } from "../components/AdoptDeck";
 import { InquiryList } from "../components/InquiryList";
 import { PressScale, SegmentedControl } from "../components/ui";
-import { elevation, motion, spacing, typography } from "../theme";
+import { motion, spacing, tabBarClearance, typography } from "../theme";
 
 import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -113,34 +115,14 @@ export function AdoptScreen({ navigation }: Props) {
         ) : (
           <>
           {stale ? <StaleBanner offline={isOffline(res)} /> : null}
-          {(listings ?? []).map((l, i) => (
-            <TouchableOpacity
-              // Indexed, so a flow can tap "the first listing" without knowing the fixture's
-              // id. `card.adopt.0` is the contract; which animal is in it is the seed's business.
-              testID={`card.adopt.${i}`}
-              key={l.listing_id}
-              style={styles.card}
-              activeOpacity={0.9}
-              onPress={() => navigation.navigate("listingDetail", { listingId: l.listing_id })}
-            >
-              {l.photo_url ? (
-                <Image source={{ uri: l.photo_url }} style={styles.cardPhoto} resizeMode="cover" />
-              ) : (
-                <View style={[styles.cardPhoto, styles.cardPhotoEmpty]} />
-              )}
-              <View style={styles.cardBody}>
-                <Text style={styles.cardName}>{l.pet.name}</Text>
-                <Text style={styles.cardMeta}>
-                  {[capitalize(l.pet.species), l.pet.breed, l.city].filter(Boolean).join(" · ")}
-                </Text>
-                <Text style={styles.cardFee}>
-                  {l.adoption_fee && Number(l.adoption_fee) > 0
-                    ? `Adoption fee · ₱${Number(l.adoption_fee).toLocaleString()}`
-                    : "No adoption fee"}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {/* The canvas's Browse view is a deck, not a list — see components/AdoptDeck.tsx.
+              The species chips above still drive the query; the deck is what the result
+              becomes. `card.adopt.0` stays the top card, so 20-browse-and-inquire.yaml holds. */}
+          <AdoptDeck
+            listings={listings ?? []}
+            city={city}
+            onOpen={(listingId) => navigation.navigate("listingDetail", { listingId })}
+          />
           </>
         )}
       </ScrollView>
@@ -152,13 +134,7 @@ export function AdoptScreen({ navigation }: Props) {
   );
 }
 
-function capitalize(s: string): string {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "transparent" },
@@ -174,13 +150,6 @@ const styles = StyleSheet.create({
   filterChipActive: { backgroundColor: colors.teal },
   filterText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   filterTextActive: { color: colors.white },
-  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 130 },
-  card: { borderRadius: 22, marginBottom: 14, overflow: "hidden", ...card },
-  cardPhoto: { width: "100%", height: 170, backgroundColor: colors.border },
-  cardPhotoEmpty: { alignItems: "center", justifyContent: "center" },
-  cardBody: { padding: 16 },
-  cardName: { color: colors.ink, fontSize: 20, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
-  cardFee: { marginTop: 8, color: colors.teal, ...typography.meta, fontWeight: "700" },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: tabBarClearance },
   empty: { marginTop: 50, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 22 }
 });

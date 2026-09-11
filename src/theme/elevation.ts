@@ -39,5 +39,19 @@ export const elevation = {
     shadowOpacity: 0.14,
     shadowRadius: 22,
     elevation: 10
+  },
+  /**
+   * The Adopt deck's top card — the one shadow the canvas declares outside its Elevation
+   * panel: `--sh-deck: 0 2px 6px rgba(31,58,95,.07), 0 22px 44px -14px rgba(31,58,95,.30)`,
+   * in Adopt.dc.html only. Same conversion as the three above: the ambient half, offset
+   * carried across exactly, blur and opacity scaled for CSS's negative spread. Deeper than
+   * `float` because the card is the thing being handled, not chrome the content slides under.
+   */
+  deck: {
+    shadowColor: colors.shadowCast,
+    shadowOffset: { width: 0, height: 22 },
+    shadowOpacity: 0.19,
+    shadowRadius: 28,
+    elevation: 14
   }
 } as const satisfies Record<string, Elevation>;

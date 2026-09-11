@@ -299,11 +299,15 @@ for (const file of sources(SRC)) {
  * It may fall. It may not rise: a new screen typing `fontSize: 14` is the drift the ramp
  * exists to end.
  *
- * 491, not 490: the inquiry ladder's step title (InquiryScreen `stageTitle`) is the 89th
- * bold fifteen — 15 / 20 at 600–800 by state, as the artboard draws it. Counted here on
- * purpose so the bold-fifteen decision sees its true size, not hidden under `body`.
+ * 493, not 490, and both additions are the same finding. The inquiry ladder's step title
+ * (InquiryScreen `stageTitle`) is the 89th bold fifteen — 15 / 20 at 600–800 by state. The
+ * Adopt deck retired one off-ramp size with the list it replaced (a 20 pt card name) and
+ * added three more bold fifteens — a fact label at 700 and two small-button labels at 800.
+ * All four are exactly as their artboards draw them: the canvas keeps using 15 / 700–800 as
+ * its label and button size, and the ramp has no such step. Counted on purpose, not hidden
+ * under `body`, so the bold-fifteen decision sees its true size.
  */
-const OFF_RAMP = 491;
+const OFF_RAMP = 493;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
