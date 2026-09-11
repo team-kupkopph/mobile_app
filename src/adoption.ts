@@ -46,3 +46,61 @@ export function inquiryProgressLabel(stages: InquiryStage[]): string {
   }
   return "Not started";
 }
+
+// ---------------------------------------------------------------------------------------------
+// The adopter's ladder — design/mobile-v3/Inquiry.dc.html. STAGE_LABEL above is the terse
+// vocabulary the shelter side and the one-line summary use; these are the adopter-facing
+// titles and the "what it involves" notes the artboard shows when a step is tapped.
+// ---------------------------------------------------------------------------------------------
+
+export type StageKey = (typeof STAGE_ORDER)[number];
+
+type NoteContext = { pet: string; shelter: string };
+
+export const STAGE_STEP: Record<StageKey, {
+  title: string;
+  note: (c: NoteContext) => string;
+  /** The artboard's skipped copy differs from the "what it involves" copy. */
+  skippedNote?: (c: NoteContext) => string;
+}> = {
+  inquiry: {
+    title: "Inquiry sent",
+    note: ({ shelter }) => `Your message reached ${shelter} and they opened your file.`
+  },
+  application: {
+    title: "Application & background check",
+    note: ({ shelter }) => `${shelter} checks your details and background. Nothing further is usually needed from you here.`
+  },
+  home_check: {
+    title: "Home check",
+    note: ({ pet }) => `A volunteer visits to see where ${pet} would live.`,
+    skippedNote: ({ shelter }) => `${shelter} waived the home visit for this listing.`
+  },
+  interview: {
+    title: "Interview",
+    note: ({ pet }) => `A volunteer talks with you about ${pet}'s routine and your home.`
+  },
+  vet_clearance: {
+    title: "Vet clearance",
+    note: ({ pet }) => `${pet}'s vaccination and neuter records are finalised before handover.`
+  },
+  finalization: {
+    title: "Finalization",
+    note: () => "You sign the adoption agreement and arrange pickup."
+  }
+};
+
+/**
+ * "Step N of 6": the first stage that is neither done nor skipped, 1-based. Every stage
+ * settled means the ladder is complete and N is 6. The artboard's example — inquiry done,
+ * application done, home check skipped, interview in progress — is step 4, 67% along.
+ */
+export function ladderStep(stages: InquiryStage[]): { step: number; of: number } {
+  const byKey = new Map(stages.map((s) => [s.stage_key, s.state]));
+  const settled = (key: string) => {
+    const st = byKey.get(key);
+    return st === "done" || st === "skipped";
+  };
+  const idx = STAGE_ORDER.findIndex((key) => !settled(key));
+  return { step: idx === -1 ? STAGE_ORDER.length : idx + 1, of: STAGE_ORDER.length };
+}

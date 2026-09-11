@@ -298,8 +298,12 @@ for (const file of sources(SRC)) {
  *
  * It may fall. It may not rise: a new screen typing `fontSize: 14` is the drift the ramp
  * exists to end.
+ *
+ * 491, not 490: the inquiry ladder's step title (InquiryScreen `stageTitle`) is the 89th
+ * bold fifteen — 15 / 20 at 600–800 by state, as the artboard draws it. Counted here on
+ * purpose so the bold-fifteen decision sees its true size, not hidden under `body`.
  */
-const OFF_RAMP = 490;
+const OFF_RAMP = 491;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
