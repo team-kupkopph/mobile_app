@@ -31,7 +31,8 @@ export const TAB_BAR = {
   /** Horizontal inset on each side — the bar is detached, not edge-to-edge. */
   gutter: 16,
   radius: 26,
-  iconSize: 24
+  /** 23, not 24 — every tab icon in Main.dc.html is drawn `<svg width="23" height="23">`. */
+  iconSize: 23
 } as const;
 
 /**
@@ -173,11 +174,15 @@ const styles = StyleSheet.create({
   activePill: {
     // Behind the icon AND its label, rather than a chip behind the icon alone — the whole tab
     // reads as one selected control instead of two halves that only half agree.
+    //
+    // Geometry is the canvas's: `top: 5px; left: 3.5px; height: 56px; border-radius: 20px`
+    // on a 68 pt bar, so the bottom inset is 68 − 5 − 56 = 7. It was 6/6, which kept the
+    // 56 pt height but sat the pill a point low.
     position: "absolute",
-    left: 4,
-    right: 4,
-    top: 6,
-    bottom: 6,
+    left: 3.5,
+    right: 3.5,
+    top: 5,
+    bottom: 7,
     borderRadius: radii.field
   },
   iconSlot: {
@@ -187,14 +192,17 @@ const styles = StyleSheet.create({
   tabText: {
     marginTop: 4,
     color: colors.tabInactive,
-    // ⚠️ NOT SNAPPED TO THE RAMP, DELIBERATELY. The size table maps 12 -> meta (13), but the
-    // canvas draws this exact element at 11px (Main.dc.html: the tab label span is
-    // `font-size: 11px; letter-spacing: .1px; font-weight: {{tab.weight}}`). Snapping up to
-    // 13 would move the tab label AWAY from the design, not toward it. It does not fit the
-    // 11pt `label` step either — that step is uppercase, 800, +0.8 tracking, while this is
-    // sentence case at +0.1 with a weight that changes on selection. The 1pt gap between
-    // this and the canvas is a real finding, not drift to absorb; see the T2 PR.
-    fontSize: 12,
+    // ⚠️ THE CANVAS'S OWN VALUES, AND DELIBERATELY NOT A RAMP STEP. Main.dc.html draws this
+    // exact span as `font-size: 11px; letter-spacing: .1px; font-weight: {{tab.weight}}`,
+    // and `{{tab.weight}}` resolves to `on ? "800" : "600"` — which is what the pair below
+    // already did. T2's size table maps 12 -> meta (13); following it would have moved the
+    // label further from the design, so it was held back then and corrected to 11 here.
+    //
+    // It still fits no step: `label` is 11 but uppercase, 800 and +0.8 tracking, while this
+    // is sentence case at +0.1 with a weight that changes on selection. Written as literals
+    // because the design says so, not because nobody has migrated it.
+    fontSize: 11,
+    letterSpacing: 0.1,
     fontWeight: "600"
   },
   activeTabText: {

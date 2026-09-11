@@ -317,15 +317,14 @@ describe("screens take their text sizes from the ramp", () => {
     // T2's rule. A size within 1pt of a step whose bind changes nothing else is a snap and
     // belongs on the ramp; one that would also restyle the text is deliberately still here.
     //
-    // ⚠️ ONE DELIBERATE EXEMPTION, AND IT IS ASSERTED RATHER THAN ALLOWED. TabBar's label is
-    // 12pt, which the size table maps to `meta` (13) — but the canvas draws that exact
-    // element at 11px, so snapping up would move it AWAY from the design. It fits no step:
-    // the 11pt one is uppercase/800/+0.8, this is sentence case at +0.1 with a weight that
-    // changes on selection. Listing it here (rather than skipping it in the scan) means a
-    // stale exemption fails too: snap it, and this expectation goes red.
-    expect(snappableButRaw.map((s) => s.split(" -> ")[0].replace(/^.*\/src\//, "src/"))).toEqual([
-      "src/components/ui/TabBar.tsx"
-    ]);
+    // ⚠️ THIS LIST HELD ONE EXEMPTION AND NO LONGER DOES, WHICH IS THE POINT OF LISTING IT.
+    // T2 held TabBar's label back: it was 12pt, the size table maps 12 -> `meta` (13), and
+    // the canvas draws that exact element at 11px, so snapping up would have moved it away
+    // from the design. The exemption was written as an assertion rather than a skip so that
+    // resolving it would fail too — and it did. Correcting the label to the canvas's 11 /
+    // +0.1 turned this expectation red on a list that was no longer true, and it is now
+    // empty. A guard that only failed in one direction would have gone quietly stale.
+    expect(snappableButRaw).toEqual([]);
   });
 
   it("has not grown a new off-ramp text size", () => {
