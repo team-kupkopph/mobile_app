@@ -169,24 +169,14 @@ const offScale = sites.filter(
 );
 
 /**
- * ⚠️ THESE FIVE ARE SQUARE TILES WHOSE RADIUS DOES NOT FOLLOW THE 0.32 RULE, so they are
- * neither bindable to a container step nor already correct. Naming them here rather than
- * skipping them in the scan means a stale exemption fails too.
- *
- *   DonatePledge      checkTile     84 -> 26, rule says 27
- *   SigninScreen      logoGradient  84 -> 24, rule says 27
- *   ShelterVolunteerAttendance / Requests  avatar  44 -> 12, rule says 14
- *   ShelterVolunteerRequests  animalPhoto  52 -> 12, rule says 17
- *
- * Moving them is 2–5 pt on a corner: a visible change, and therefore a decision, not a bind.
+ * ⚠️ THIS LIST HELD FIVE TILES AND NOW HOLDS NONE, WHICH IS THE POINT OF LISTING THEM. Track R
+ * found five square tiles at 0.29–0.31 × size instead of the rule's 0.32 — checkTile and
+ * logoGradient at 84 (26 and 24, rule 27), two avatars at 44 (12, rule 14), animalPhoto at
+ * 52 (12, rule 17) — and held them back, because 2–5 pt on a corner is visible and therefore a
+ * decision. Naming them as an assertion rather than a skip meant that decision, once taken,
+ * would turn this red on a list that was no longer true. It did. They are on `squircle(size)`.
  */
-const TILE_EXEMPTIONS = [
-  "src/screens/DonatePledgeScreen.tsx",
-  "src/screens/ShelterVolunteerAttendanceScreen.tsx",
-  "src/screens/ShelterVolunteerRequestsScreen.tsx",
-  "src/screens/ShelterVolunteerRequestsScreen.tsx",
-  "src/screens/SigninScreen.tsx"
-];
+const TILE_EXEMPTIONS: string[] = [];
 
 /**
  * ⚠️ THE REMAINING WORK, AND IT IS NOT ONE JOB. 139 radii are genuinely off the five-step

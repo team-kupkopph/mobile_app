@@ -19,7 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 12, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
+  avatar: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   avatarText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   requestedAt: { marginTop: 2, color: colors.muted, ...typography.meta },
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   pickerSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   pickerList: { marginTop: 14 },
   animalCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, marginBottom: 10, ...card },
-  animalPhoto: { width: 52, height: 52, borderRadius: 12 },
+  animalPhoto: { width: 52, height: 52, borderRadius: squircle(52) },
   animalPhotoEmpty: { backgroundColor: colors.greyPill },
   animalName: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   animalSpecies: { marginTop: 2, color: colors.muted, ...typography.meta },

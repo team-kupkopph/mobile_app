@@ -8,7 +8,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, spacing, squircle, typography } from "../theme";
 
 
 const card = {
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
   secondaryLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   confirmWrap: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 140, paddingBottom: 60, alignItems: "center" },
-  checkTile: { width: 84, height: 84, borderRadius: 26, backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
+  checkTile: { width: 84, height: 84, borderRadius: squircle(84), backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
   checkGlyph: { color: colors.success, fontSize: 44, fontWeight: "800" },
   confirmTitle: { marginTop: 22, color: colors.ink, fontSize: 26, fontWeight: "800" },
   confirmBody: { marginTop: 12, color: colors.muted, fontSize: 15.5, lineHeight: 23, textAlign: "center" }
