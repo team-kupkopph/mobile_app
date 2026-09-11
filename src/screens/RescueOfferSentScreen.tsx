@@ -7,7 +7,7 @@ import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, squircle, typography } from "../theme";
+import { colors, spacing, squircle, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOfferSent">;
@@ -43,7 +43,7 @@ export function RescueOfferSentScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
+  content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.lg },
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 10, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 22 },

@@ -85,19 +85,16 @@ for (const file of sources(SRC)) {
 }
 
 /**
- * ⚠️ FIVE SCREEN CONTAINERS STILL SIT OFF THE GUTTER, AND I DID NOT MOVE THEM, because the
- * canvas names 26 and 28 and says nothing about these:
- *
- *   ShelterVolunteerAttendance / Detail / Requests   22   ordinary list screens; almost
- *                                                         certainly should be 20 too
- *   ShelterVolunteerCancel                           24   centered confirmation layout
- *   RescueOfferSent                                  32   centered confirmation layout
- *
- * The last two centre their content, so their horizontal padding governs text measure rather
- * than alignment to the screen edge — moving them is a design call, not a migration. Listing
- * them here rather than skipping them in the scan means a stale exemption fails too.
+ * ⚠️ ZERO, AND IT IS NO LONGER A RATCHET. Track S moved the 26s and 28s the canvas named and
+ * left five containers it did not: three shelter-volunteer list screens at 22, and two
+ * centred confirmation layouts at 24 and 32 whose padding also set their text measure. The
+ * canvas's own word is "Screen gutter is 20 everywhere", and a centred layout's horizontal
+ * padding is still its gutter — the content is centred within it — so all five moved. The
+ * two centred screens' text got 4 pt and 12 pt wider as a result; that is the change, and
+ * it is the designed one. This is now a flat rule: a screen container takes the gutter from
+ * `spacing.lg`, and this number may not rise.
  */
-const OFF_GUTTER = 5;
+const OFF_GUTTER = 0;
 
 describe("every screen holds the same gutter", () => {
   it("found gutters to classify", () => {
