@@ -135,6 +135,6 @@ const styles = StyleSheet.create({
   sectionLabel: { marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
   contactRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border },
   contactLabel: { color: colors.muted, ...typography.meta, fontWeight: "700" },
-  contactValue: { marginTop: 3, color: colors.ink, fontSize: 15, fontWeight: "700" },
+  contactValue: { marginTop: 3, color: colors.ink, ...typography.strong, fontWeight: "700" },
   mutedNote: { color: colors.muted, ...typography.meta, fontStyle: "italic" }
 });

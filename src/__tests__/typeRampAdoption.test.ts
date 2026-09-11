@@ -32,6 +32,18 @@ const SRC = join(__dirname, "..");
 const RAMP = typography as Record<string, Record<string, string | number>>;
 /** A step that names no weight declares a RANGE; the caller supplies the weight. */
 const isOpen = (step: string) => !("fontWeight" in RAMP[step]);
+/**
+ * The ranges the canvas declares for its open steps. `meta` is 400–800; `subtitle` and
+ * `strong` are 700–800. A 15 pt label at 600 is not on the ramp — it is one weight short of
+ * the step — and must not bind to `strong` on size alone, the way T1 bound by size before
+ * the ranges were written down.
+ */
+const RANGE: Record<string, [number, number]> = { subtitle: [700, 800], strong: [700, 800], meta: [400, 800] };
+const inRange = (step: string, weight: string) => {
+  const r = RANGE[step];
+  const w = Number(weight);
+  return !r || (w >= r[0] && w <= r[1]);
+};
 
 function sources(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -189,18 +201,26 @@ function render(props: Record<string, string>): Resolved | null {
   };
 }
 
-/** The step this style could bind to with no pixel change, if any. */
+/**
+ * The step this style could bind to with no pixel change, if any.
+ *
+ * ⚠️ EVERY STEP AT THAT SIZE IS TRIED, not the first. Fifteen has two: `body` (closed —
+ * 400 with a line height) and `strong` (open — 700–800, no line height). Returning on the
+ * first size match would have made every bold fifteen look unbindable the moment `strong`
+ * existed, which is exactly the step it exists for.
+ */
 function stepFor(r: Resolved): string | null {
   for (const [name, tok] of Object.entries(RAMP)) {
     if (Number(tok.fontSize) !== r.size) continue;
     if (isOpen(name)) {
-      // The token supplies size only; the caller's weight survives untouched.
-      return r.tracking === 0 && r.leading === null ? name : null;
+      // The token supplies size only; the caller's weight survives untouched — if it is in range.
+      if (r.tracking === 0 && r.leading === null && inRange(name, r.weight)) return name;
+      continue;
     }
-    if (String(tok.fontWeight ?? "400") !== r.weight) return null;
-    if (Number(tok.letterSpacing ?? 0) !== r.tracking) return null;
+    if (String(tok.fontWeight ?? "400") !== r.weight) continue;
+    if (Number(tok.letterSpacing ?? 0) !== r.tracking) continue;
     const tl = tok.lineHeight === undefined ? null : Number(tok.lineHeight);
-    if (tl !== r.leading) return null;
+    if (tl !== r.leading) continue;
     return name;
   }
   return null;
@@ -226,6 +246,7 @@ function sideEffects(r: Resolved, step: string): string[] {
   const tok = RAMP[step];
   const out: string[] = [];
   if (isOpen(step)) {
+    if (!inRange(step, r.weight)) out.push("weight");
     if (r.tracking !== 0) out.push("tracking");
     if (r.leading !== null) out.push("leading");
     return out;
@@ -299,15 +320,17 @@ for (const file of sources(SRC)) {
  * It may fall. It may not rise: a new screen typing `fontSize: 14` is the drift the ramp
  * exists to end.
  *
- * 493, not 490, and both additions are the same finding. The inquiry ladder's step title
- * (InquiryScreen `stageTitle`) is the 89th bold fifteen — 15 / 20 at 600–800 by state. The
- * Adopt deck retired one off-ramp size with the list it replaced (a 20 pt card name) and
- * added three more bold fifteens — a fact label at 700 and two small-button labels at 800.
- * All four are exactly as their artboards draw them: the canvas keeps using 15 / 700–800 as
- * its label and button size, and the ramp has no such step. Counted on purpose, not hidden
- * under `body`, so the bold-fifteen decision sees its true size.
+ * 424, DOWN FROM 493, AND THE BOLD FIFTEEN IS NO LONGER A FINDING — IT IS A STEP. From T2
+ * onward every track counted the 15 pt labels and small buttons at 700–800 that the ramp had
+ * no home for, and refused to disguise them as `body`; by the Adopt deck the count was 93.
+ * The canvas's own artboards drew that size nine times against four uses of body, so the
+ * panel was the incomplete party. It now declares "Label, small button | 15 / 700-800",
+ * `typography.strong` is its token, and the 69 sites that render exactly as it describes
+ * are bound with no pixel change. The 24 that remain at fifteen are the 600s — one weight
+ * short of the declared range — and the ones carrying a line height; both are decisions
+ * of their own, not drift the step can absorb.
  */
-const OFF_RAMP = 493;
+const OFF_RAMP = 424;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
@@ -364,9 +387,20 @@ describe("screens take their text sizes from the ramp", () => {
     expect(stepFor(render({ fontSize: "15", lineHeight: "21" })!)).toBe("body");
   });
 
-  it("keeps the caller's weight on the two steps that declare a range", () => {
+  it("tries every step at a size, so a bold fifteen finds `strong` past `body`", () => {
+    expect(stepFor(render({ fontSize: "15", fontWeight: '"700"' })!)).toBe("strong");
+    expect(stepFor(render({ fontSize: "15", fontWeight: '"800"' })!)).toBe("strong");
+    expect(stepFor(render({ fontSize: "15", lineHeight: "21" })!)).toBe("body");
+    // 600 is one weight short of the declared range; it is not on the ramp.
+    expect(stepFor(render({ fontSize: "15", fontWeight: '"600"' })!)).toBeNull();
+    // A plain fifteen with no line height is body-drift, not a strong label at 400.
+    expect(stepFor(render({ fontSize: "15" })!)).toBeNull();
+  });
+
+  it("keeps the caller's weight on the three steps that declare a range", () => {
     expect(isOpen("meta")).toBe(true);
     expect(isOpen("subtitle")).toBe(true);
+    expect(isOpen("strong")).toBe(true);
     expect(isOpen("body")).toBe(false);
     // 13pt at 800 is still `meta` — the step names no weight, so binding preserves the bold.
     expect(stepFor(render({ fontSize: "13", fontWeight: '"800"' })!)).toBe("meta");

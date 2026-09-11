@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   confirmText: {
     color: colors.white,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   cancelButton: {

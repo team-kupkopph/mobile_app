@@ -7,7 +7,7 @@ import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, squircle } from "../theme";
+import { colors, squircle, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOfferSent">;
@@ -49,5 +49,5 @@ const styles = StyleSheet.create({
   heroBody: { marginTop: 10, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 22 },
   primary: { marginTop: 30, height: 58, width: "100%", borderRadius: 29, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   primaryText: { color: colors.white, fontSize: 18, fontWeight: "700" },
-  secondary: { marginTop: 16, color: colors.teal, fontSize: 15, fontWeight: "700" }
+  secondary: { marginTop: 16, color: colors.teal, ...typography.strong, fontWeight: "700" }
 });

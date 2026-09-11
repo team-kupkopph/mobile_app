@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     ...elevation.soft
   },
   label: {
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "700",
     color: colors.ink
   }

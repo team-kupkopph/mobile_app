@@ -261,11 +261,10 @@ const styles = StyleSheet.create({
   facts: { ...StyleSheet.absoluteFillObject, padding: 18, justifyContent: "center", gap: 10, backgroundColor: "rgba(255,255,255,0.88)" },
   factRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   factTile: { width: 26, height: 26, borderRadius: squircle(26), alignItems: "center", justifyContent: "center" },
-  // ⚠️ BOLD FIFTEEN, three times on this card — fact labels at 700, the Details and
-  // "Show hidden again" labels at 800 — because the artboard uses 15 / 700–800 as its
-  // small-button size and the ramp has no such step (`body` is closed at 400). Written as
-  // drawn and counted in the ratchet; see typeRampAdoption for the running total.
-  factLabel: { fontSize: 15, fontWeight: "700", color: colors.ink },
+  // `strong` — the artboard's 15 / 700–800 small-button size. This card was written as
+  // literals while the ramp had no bold fifteen and counted as drift; the canvas panel now
+  // declares the step and these three bind to it with no pixel change.
+  factLabel: { ...typography.strong, fontWeight: "700", color: colors.ink },
   factsEmpty: { ...typography.body, color: colors.muted, textAlign: "center" },
   stamp: { position: "absolute", top: 96 },
   stampSaved: { left: 18, transform: [{ rotate: "-11deg" }] },
@@ -287,14 +286,14 @@ const styles = StyleSheet.create({
   endNote: { marginTop: 10, maxWidth: 250, ...typography.meta, color: colors.muted, textAlign: "center" },
   endButton: { marginTop: 22, borderRadius: pill(50), overflow: "hidden" },
   endButtonFill: { height: 50, paddingHorizontal: 24, alignItems: "center", justifyContent: "center" },
-  endButtonText: { fontSize: 15, fontWeight: "800", color: colors.white },
+  endButtonText: { ...typography.strong, fontWeight: "800", color: colors.white },
 
   actions: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 18 },
   round: { width: 58, height: 58, borderRadius: pill(58), overflow: "hidden", ...elevation.card },
   roundPlain: { backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },
   roundFill: { flex: 1, alignItems: "center", justifyContent: "center" },
   details: { height: 50, paddingHorizontal: 22, borderRadius: pill(50), justifyContent: "center", backgroundColor: colors.glass, ...elevation.soft },
-  detailsText: { fontSize: 15, fontWeight: "800", color: colors.ink },
+  detailsText: { ...typography.strong, fontWeight: "800", color: colors.ink },
   topHighlight: { position: "absolute", top: 0, left: 0, right: 0, height: 1, backgroundColor: "rgba(255,255,255,0.34)" },
   hint: { marginTop: 14, ...typography.meta, lineHeight: 19, color: colors.muted, textAlign: "center" }
 });

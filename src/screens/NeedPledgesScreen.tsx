@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   progress: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   actionRow: { flexDirection: "row", gap: 12, marginTop: 14 },
   secondaryBtn: { paddingHorizontal: 20, paddingVertical: 11, borderRadius: 16, ...card },
-  secondaryLabel: { color: colors.ink, fontSize: 15, fontWeight: "700" },
+  secondaryLabel: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, fontSize: 18, fontWeight: "800" },
   empty: { marginTop: 20, color: colors.muted, fontSize: 15 },
   pledgeCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },

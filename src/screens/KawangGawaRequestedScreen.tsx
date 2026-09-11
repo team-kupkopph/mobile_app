@@ -67,5 +67,5 @@ const styles = StyleSheet.create({
   },
   primaryText: { color: colors.white, ...typography.subtitle, fontWeight: "800" },
   secondaryButton: { marginTop: 18, paddingVertical: 10 },
-  secondaryText: { color: colors.teal, fontSize: 15, fontWeight: "700" }
+  secondaryText: { color: colors.teal, ...typography.strong, fontWeight: "700" }
 });

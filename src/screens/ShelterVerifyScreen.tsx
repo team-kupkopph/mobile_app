@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   },
   docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   docCopy: { flex: 1, marginLeft: 14 },
-  docTitle: { color: colors.ink, fontSize: 15, fontWeight: "800" },
+  docTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, fontSize: 11 },
   docUploadLink: { color: authColors.teal, ...typography.meta, fontWeight: "800" },
   docDone: { alignItems: "center" },
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     ...elevation.soft
   },
-  socialInput: { color: colors.ink, fontSize: 15, fontWeight: "800", padding: 0 },
+  socialInput: { color: colors.ink, ...typography.strong, fontWeight: "800", padding: 0 },
   consentRow: {
     marginTop: 22,
     borderRadius: 14,

@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: "row", alignItems: "flex-start", marginBottom: 20 },
   sectionTitle: { color: colors.ink, fontSize: 24, fontWeight: "800" },
   sectionSub: { marginTop: 6, color: colors.muted, ...typography.meta },
-  calendarLink: { color: colors.teal, fontSize: 15, fontWeight: "800", marginTop: 4 },
+  calendarLink: { color: colors.teal, ...typography.strong, fontWeight: "800", marginTop: 4 },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },

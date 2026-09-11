@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   title: { ...typography.subtitle, fontWeight: "800", color: colors.ink, textAlign: "center" },
   body: { fontSize: 14, color: colors.muted, textAlign: "center", marginTop: 6, lineHeight: 20 },
   backLink: { marginTop: 18, paddingVertical: 10, paddingHorizontal: 22 },
-  backLinkLabel: { fontSize: 15, fontWeight: "700", color: colors.teal },
+  backLinkLabel: { ...typography.strong, fontWeight: "700", color: colors.teal },
   retry: { marginTop: 18, paddingVertical: 10, paddingHorizontal: 22, borderRadius: 22, backgroundColor: colors.teal },
-  retryLabel: { fontSize: 15, fontWeight: "700", color: "#FFFFFF" },
+  retryLabel: { ...typography.strong, fontWeight: "700", color: "#FFFFFF" },
 });

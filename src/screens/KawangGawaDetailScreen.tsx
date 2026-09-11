@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   orgName: { marginTop: 14, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoCard: { marginTop: 16, borderRadius: radii.tile, paddingHorizontal: 18, paddingVertical: 16, ...card },
   infoDate: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  infoWhen: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
+  infoWhen: { marginTop: 4, color: colors.teal, ...typography.strong, fontWeight: "700" },
   infoDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },
   infoChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 12, height: 28,
               borderRadius: 14, justifyContent: "center" },

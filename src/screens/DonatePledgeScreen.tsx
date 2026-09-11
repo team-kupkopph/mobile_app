@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   needTitle: { color: colors.ink, fontSize: 26, fontWeight: "800" },
-  shelter: { marginTop: 4, color: colors.teal, fontSize: 15, fontWeight: "700" },
+  shelter: { marginTop: 4, color: colors.teal, ...typography.strong, fontWeight: "700" },
   note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
   label: { marginTop: 26, marginBottom: 12, color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
   stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", padding: 8, borderRadius: 22, ...card },

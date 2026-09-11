@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   h1: { fontSize: 26, fontWeight: "800", color: colors.ink, letterSpacing: -0.4, marginTop: 8 },
   lede: { ...typography.body, color: colors.muted, marginTop: 8 },
   fileCard: { borderRadius: radii.tile, padding: 16, marginTop: 20, ...card },
-  fileName: { fontSize: 15, fontWeight: "700", color: colors.ink },
+  fileName: { ...typography.strong, fontWeight: "700", color: colors.ink },
   fileMeta: { ...typography.meta, color: colors.muted, marginTop: 4 },
   groupTitle: { fontSize: 12, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginTop: 26, marginBottom: 8 },
   card: { borderRadius: radii.tile, paddingVertical: 8, ...card },

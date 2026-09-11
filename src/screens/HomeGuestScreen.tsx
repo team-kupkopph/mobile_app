@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   cityText: {
     color: colors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "700"
   },
   cityChange: {
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   },
   mapTitle: {
     color: colors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   mapSub: {

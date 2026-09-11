@@ -1,4 +1,4 @@
-// The type ramp. Eight steps.
+// The type ramp. Nine steps.
 //
 // ⚠️ SEVEN OF THE EIGHT lineHeights WERE THIS FILE'S OWN, NOT THE DESIGN'S — and they are gone.
 // The approved canvas (design/mobile-v3/Components.dc.html, "Type ramp") labels its steps
@@ -18,10 +18,18 @@
 // uses LEAST: at 13pt the screens run 800x44, 700x39, 400x25, and at 17pt 800x24 against
 // 700x6. Spreading those tokens would have de-bolded ~170 sites in the name of conformance.
 //
-// So `subtitle` and `meta` carry size only, and the caller supplies fontWeight:
+// So `subtitle`, `meta` and `strong` carry size only, and the caller supplies fontWeight:
 //     { ...typography.meta, fontWeight: "800" }
 // which is the range the canvas declares, expressed honestly. The other six steps name one
 // weight because the panel names one.
+//
+// ⚠️ `strong` IS THE NINTH STEP, AND THE ARTBOARDS ASKED FOR IT BEFORE THE PANEL DID. The
+// panel declared one fifteen — body, 400 / 21 — while the artboards on the same canvas drew
+// fifteen at 700 or 800 nine times across four of them, and the app built to those artboards
+// held 93 such sites: "the bold fifteen" that every conformance track since T2 counted and
+// declined to disguise as body. The panel now names it, "Label, small button | 15 / 700-800",
+// and this step is the token for it. Body keeps its line height; strong names none, so a
+// label stays on RN's default leading exactly as it rendered before it was bound.
 //
 // ⚠️ THIS IS A DESIGNED RAMP, NOT A MEASURED ONE, and that is the point. `pnpm surface`-style
 // counting finds 29 distinct fontSize values in src/**/*.tsx (9 through 54, including 12.5,
@@ -38,7 +46,7 @@
 //   23, 22, 21      -> title (21)
 //   20, 19, 18      -> section (19)
 //   17, 16.5, 16    -> subtitle (17)
-//   15.5, 15, 14.5  -> body (15)
+//   15.5, 15, 14.5  -> body (15) at 400 with a line height; strong (15) at 700-800 without
 //   14, 13.5, 13, 12.5, 12 -> meta (13)
 //   11, 10, 9       -> label (11)
 import { TextStyle } from "react-native";
@@ -58,6 +66,8 @@ export const typography = {
   subtitle: { fontSize: 17 },
   /** Body copy. */
   body: { fontSize: 15, fontWeight: "400", lineHeight: 21 },
+  /** Labels and small buttons at fifteen. Weight is the caller's, 700 or 800 — see the note. */
+  strong: { fontSize: 15 },
   /** Metadata, helper text, chip labels. Weight is the caller's — see the range note. */
   meta: { fontSize: 13 },
   /** Field labels and tab labels. Uppercase where used as a field label. */

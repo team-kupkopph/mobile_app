@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
             backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },
   attDotDone: { backgroundColor: colors.teal, borderColor: colors.teal },
   attLine: { flex: 1, width: 2, backgroundColor: colors.border, marginVertical: 2 },
-  attLabel: { flex: 1, marginLeft: 14, color: colors.muted, fontSize: 15, fontWeight: "700" },
+  attLabel: { flex: 1, marginLeft: 14, color: colors.muted, ...typography.strong, fontWeight: "700" },
   attLabelDone: { color: colors.ink },
   attValue: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   attValueDone: { color: colors.ink },

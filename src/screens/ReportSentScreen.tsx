@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
   nextRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 14 },
   nextDot: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
-  nextNum: { color: colors.teal, fontSize: 15, fontWeight: "800" },
+  nextNum: { color: colors.teal, ...typography.strong, fontWeight: "800" },
   nextText: { flex: 1, color: colors.ink, ...typography.subtitle },
   fine: { marginTop: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
   primary: { marginTop: 28, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },

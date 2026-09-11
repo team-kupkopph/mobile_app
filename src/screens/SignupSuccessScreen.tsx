@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     color: authColors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   stepBody: {
