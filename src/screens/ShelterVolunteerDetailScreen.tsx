@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 20, fontWeight: "800" },
-  content: { paddingHorizontal: 22, paddingTop: 16, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   card: { borderRadius: radii.field, padding: 18, marginBottom: 18, ...card },
   name: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   chip: { alignSelf: "flex-start", marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },

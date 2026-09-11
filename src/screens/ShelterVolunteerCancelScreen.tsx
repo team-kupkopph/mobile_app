@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 19, fontWeight: "800" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  content: { flex: 1, paddingHorizontal: 24, paddingTop: 20, paddingBottom: 60, alignItems: "center" },
+  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60, alignItems: "center" },
   summaryCard: {
     width: "100%", flexDirection: "row", alignItems: "center", gap: 14,
     borderRadius: radii.field, padding: 18, ...card

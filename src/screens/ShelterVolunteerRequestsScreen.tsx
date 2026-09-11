@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   subtitle: { marginTop: 3, color: colors.muted, ...typography.meta, textAlign: "center" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center", marginTop: 8 },
-  content: { paddingHorizontal: 22, paddingTop: 16, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   sectionLabel: { marginBottom: 12, color: colors.ink, ...typography.strong, fontWeight: "800" },
   bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
