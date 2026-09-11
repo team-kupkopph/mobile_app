@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  h1: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
+  h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   emptyCard: {
     marginTop: 26,

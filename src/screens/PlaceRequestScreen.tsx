@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 220, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
-  name: { color: colors.ink, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
+  name: { color: colors.ink, ...typography.hero },
   sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   body: { marginTop: 14, color: colors.ink, fontSize: 16, lineHeight: 23 },
   feeCard: { marginTop: 18, padding: 18, borderRadius: radii.tile, flexDirection: "row",

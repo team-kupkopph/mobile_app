@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   photo: { width: "100%", height: 240, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
-  name: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
+  name: { color: colors.ink, ...typography.hero },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   donateLink: { marginTop: 10 },
   donateLinkText: { color: colors.teal, ...typography.strong, fontWeight: "700" },

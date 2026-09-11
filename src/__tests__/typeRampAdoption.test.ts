@@ -329,8 +329,20 @@ for (const file of sources(SRC)) {
  * are bound with no pixel change. The 24 that remain at fifteen are the 600s — one weight
  * short of the declared range — and the ones carrying a line height; both are decisions
  * of their own, not drift the step can absorb.
+ *
+ * 411, DOWN FROM 424 — T3, AND WHAT T3 TURNED OUT NOT TO BE. The plan called 30 pt "the app's
+ * most common heading size (54 uses)" and framed a decision: a display step above 27, or
+ * move the sites. Read by what the text IS rather than what size it wears, 45 of the 54 are
+ * `backGlyph` — the "‹" back chevron drawn as text on the screens that have not adopted
+ * BackButton. That is screenHeader.test.ts's enumerated remainder, a header migration its
+ * own header warns about, and no ramp step was ever going to describe it. Four more are
+ * glyphs too (a "›", avatar initials, step and quantity numerals). The thirteen real
+ * headings moved: five screen titles to `display` (27) and eight hero lines — confirmation
+ * screens and the pet's name on Listing Detail — to `hero` (25). The name was the one call:
+ * the panel's "Subject name" is 21, but on that screen the name IS the hero line, and the
+ * deck card draws it at hero; −5 pt rather than −9.
  */
-const OFF_RAMP = 424;
+const OFF_RAMP = 411;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {

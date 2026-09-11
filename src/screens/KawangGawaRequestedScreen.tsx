@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     width: 108, height: 108, borderRadius: 54, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.soft
   },
-  heading: { marginTop: 24, color: colors.ink, fontSize: 28, fontWeight: "800" },
+  heading: { marginTop: 24, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
   hint: { marginTop: 26, color: colors.muted, fontSize: 13, textAlign: "center", lineHeight: 19 },
   primaryButton: {
