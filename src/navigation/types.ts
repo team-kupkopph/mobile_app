@@ -105,6 +105,8 @@ export type RootStackParamList = {
   // placement inquiry client-side (all six stages skipped — the CasePlaceView bypass) and
   // taps through with its inquiry_id.
   placeRequest: { inquiryId: string };
+  /** The adopter's ladder for one inquiry — design/mobile-v3/Inquiry.dc.html. */
+  inquiry: { inquiryId: string };
   placeAccepted: undefined;
   // Track H — the owner's own pets (US-H3): what a rescuer/shelter placed with them, or what
   // they adopted. Reachable from ProfileScreen; GET /me/pets.

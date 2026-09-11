@@ -84,14 +84,16 @@ export function InquiryList() {
             const placement = isPlacement(iq);
             const pendingPlacement = placement && iq.status === "active";
             // A placement still awaiting the recipient's decision goes to the accept/decline
-            // screen; a decided placement (or a normal inquiry) goes to the listing like today.
+            // screen; everything else goes to the ladder, which links on to the listing. (It
+            // went straight to the listing before the ladder existed.)
             function onPress() {
               if (pendingPlacement) navigation.navigate("placeRequest", { inquiryId: iq.inquiry_id });
-              else navigation.navigate("listingDetail", { listingId: iq.listing.listing_id });
+              else navigation.navigate("inquiry", { inquiryId: iq.inquiry_id });
             }
             return (
               <TouchableOpacity
                 key={iq.inquiry_id}
+                testID={`card.inquiry.${iq.inquiry_id}`}
                 style={styles.card}
                 activeOpacity={0.85}
                 onPress={onPress}
