@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   infoSub: { marginTop: 4, color: colors.muted, ...typography.meta },
   statusChip: { paddingHorizontal: 14, height: 32, borderRadius: 16, justifyContent: "center" },
   statusChipText: { ...typography.meta, fontWeight: "800" },
-  sectionLabel: { marginTop: 28, marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
+  sectionLabel: { marginTop: 28, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
   actionCard: { borderRadius: radii.field, overflow: "hidden", ...card },
   actionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, height: 60 },
   actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },

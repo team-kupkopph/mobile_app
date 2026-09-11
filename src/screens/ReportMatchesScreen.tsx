@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  intro: { color: colors.muted, fontSize: 15, marginBottom: 16 },
+  intro: { color: colors.muted, ...typography.body, marginBottom: 16 },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 23 },
   matchCard: { marginBottom: 14, padding: 16, borderRadius: 22, ...card },
   row: { flexDirection: "row", gap: 14 },
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   type: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 11, paddingVertical: 4, borderRadius: 11 },
   chipText: { ...typography.meta, fontWeight: "700" },
-  reasons: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 19 },
+  reasons: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 19 },
   review: { marginTop: 10, color: colors.teal, fontSize: 14.5, fontWeight: "700" },
   footnote: { marginTop: 8, color: colors.muted, ...typography.meta, textAlign: "center" }
 });

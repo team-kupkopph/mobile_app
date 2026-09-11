@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   caption: {
     marginTop: 10,
     color: authColors.muted,
-    fontSize: 14,
+    ...typography.meta,
     lineHeight: 20,
     textAlign: "center"
   },

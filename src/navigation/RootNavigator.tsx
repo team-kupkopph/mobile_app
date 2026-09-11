@@ -94,6 +94,7 @@ import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
+import { typography } from "../theme";
 // screen imports are added as tasks land; start with the ones that exist.
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -257,7 +258,7 @@ const styles = StyleSheet.create({
   lockedBody: {
     marginTop: 10,
     color: "#62615C",
-    fontSize: 14,
+    ...typography.meta,
     textAlign: "center",
     lineHeight: 20
   }

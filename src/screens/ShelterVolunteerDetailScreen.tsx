@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   chip: { alignSelf: "flex-start", marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   reliabilityLine: { marginTop: 12, color: colors.muted, ...typography.meta, fontWeight: "700" },
-  sectionLabel: { marginBottom: 10, color: colors.muted, fontSize: 12, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
+  sectionLabel: { marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
   contactRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border },
   contactLabel: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   contactValue: { marginTop: 3, color: colors.ink, ...typography.strong, fontWeight: "700" },

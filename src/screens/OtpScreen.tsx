@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#7A5310",
     color: "#7A5310",
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center",
     lineHeight: 19
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   unverifiedBody: {
     marginTop: 3,
     color: "#7A5310",
-    fontSize: 12,
+    ...typography.meta,
     lineHeight: 17
   },
   title: {
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   caption: {
     marginTop: 5,
     color: authColors.muted,
-    fontSize: 14,
+    ...typography.meta,
     lineHeight: 20
   },
   emailText: {

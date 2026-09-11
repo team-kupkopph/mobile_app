@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   noticeBody: {
     marginTop: 4,
     color: colors.muted,
-    fontSize: 12,
+    ...typography.meta,
     lineHeight: 17
   },
   hint: {

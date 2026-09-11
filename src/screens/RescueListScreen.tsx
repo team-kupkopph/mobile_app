@@ -116,11 +116,11 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  draftNote: { marginTop: 4, marginBottom: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
+  draftNote: { marginTop: 4, marginBottom: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
-  fine: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 18 },
-  error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
+  error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
 });

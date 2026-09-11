@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   heroText: {
     marginTop: 8,
     color: colors.soft,
-    fontSize: 13,
+    ...typography.meta,
     lineHeight: 19
   },
   sectionTitle: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   lightText: {
     marginTop: 6,
     color: colors.muted,
-    fontSize: 13,
+    ...typography.meta,
     lineHeight: 18
   },
   cta: {

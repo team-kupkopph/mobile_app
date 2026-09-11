@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   headerTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
   heading: { marginTop: 6, color: colors.ink, fontSize: 24, fontWeight: "800" },
-  subheading: { marginTop: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
+  subheading: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
   docCard: {
     minHeight: 84,
     marginTop: 16,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF"
   },
   consentBoxChecked: { backgroundColor: authColors.teal },
-  pendingText: { flex: 1, color: "#633806", fontSize: 13, fontWeight: "700", lineHeight: 19 },
+  pendingText: { flex: 1, color: "#633806", ...typography.meta, fontWeight: "700", lineHeight: 19 },
   fieldLabel: { marginTop: 20, marginBottom: 8, color: colors.muted, ...typography.meta, fontWeight: "800" },
   field: {
     height: 54,

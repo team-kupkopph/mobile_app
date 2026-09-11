@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   consentText: {
     flex: 1,
     color: colors.tealDark,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700",
     lineHeight: 19
   },

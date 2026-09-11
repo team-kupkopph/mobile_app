@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
   filterChipActive: { backgroundColor: colors.teal },
   filterText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   filterTextActive: { color: colors.white },
-  groupHead: { marginTop: 4, marginBottom: 10, color: colors.muted, fontSize: 12,
+  groupHead: { marginTop: 4, marginBottom: 10, color: colors.muted, ...typography.meta,
                fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.soft,

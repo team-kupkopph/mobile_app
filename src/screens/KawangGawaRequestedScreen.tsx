@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   heading: { marginTop: 24, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
-  hint: { marginTop: 26, color: colors.muted, fontSize: 13, textAlign: "center", lineHeight: 19 },
+  hint: { marginTop: 26, color: colors.muted, ...typography.meta, textAlign: "center", lineHeight: 19 },
   primaryButton: {
     width: "100%", height: 56, marginTop: 34, borderRadius: 28, alignItems: "center",
     justifyContent: "center", backgroundColor: colors.teal

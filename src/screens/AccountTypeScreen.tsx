@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   caption: {
     marginTop: 6,
     color: authColors.muted,
-    fontSize: 14,
+    ...typography.meta,
     lineHeight: 20
   },
   card: {
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   cardBody: {
     marginTop: 6,
     color: authColors.muted,
-    fontSize: 12,
+    ...typography.meta,
     lineHeight: 17
   },
   identityChip: {

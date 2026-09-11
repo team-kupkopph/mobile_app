@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   photoLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   linkedPill: { alignSelf: "flex-start", marginTop: 16, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, backgroundColor: "#EAF3DE" },
   linkedText: { color: "#27500A", ...typography.meta, fontWeight: "700" },
-  label: { marginTop: 24, marginBottom: 10, color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
+  label: { marginTop: 24, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   field: { padding: 16, borderRadius: radii.field, ...card },
   input: { color: colors.ink, ...typography.subtitle, minHeight: 96, textAlignVertical: "top" },
   error: { marginTop: 10, color: colors.danger, ...typography.meta, fontWeight: "600" },

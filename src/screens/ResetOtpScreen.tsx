@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   caption: {
     marginTop: 5,
     color: authColors.muted,
-    fontSize: 14,
+    ...typography.meta,
     lineHeight: 20
   },
   emailText: {

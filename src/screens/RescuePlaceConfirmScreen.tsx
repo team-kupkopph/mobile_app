@@ -111,12 +111,12 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   recipientCard: { marginTop: 8, padding: 18, borderRadius: radii.field, backgroundColor: colors.soft },
-  recipientLabel: { color: colors.teal, fontSize: 13, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.5 },
+  recipientLabel: { color: colors.teal, ...typography.meta, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.5 },
   recipientEmail: { marginTop: 6, color: colors.ink, fontSize: 18, fontWeight: "700" },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
-  fine: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 18 },
-  error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
+  error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
 });
