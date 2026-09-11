@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 90, paddingBottom: 60 },
   hero: { alignItems: "center" },
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  heroTitle: { marginTop: 18, color: colors.ink, fontSize: 30, fontWeight: "800" },
+  heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   card: { marginTop: 28, padding: 20, borderRadius: 22, ...card },
   cardTitle: { color: colors.ink, fontSize: 20, fontWeight: "800" },

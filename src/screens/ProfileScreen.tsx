@@ -259,9 +259,7 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     color: colors.ink,
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: -0.5
+    ...typography.display
   },
   card: {
     marginTop: 18,
