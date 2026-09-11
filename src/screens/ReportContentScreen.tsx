@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 20 },
   label: { marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   notes: { minHeight: 120, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
-  error: { marginTop: 14, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  error: { marginTop: 14, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
 });

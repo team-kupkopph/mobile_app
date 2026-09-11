@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   reasonsCard: { marginTop: 16, padding: 16, borderRadius: radii.tile, backgroundColor: colors.soft },
   reasonsTitle: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   reasonsText: { marginTop: 6, color: colors.tealDark, fontSize: 14.5, lineHeight: 20 },
-  decidedNote: { marginTop: 24, color: colors.muted, fontSize: 15, textAlign: "center" },
+  decidedNote: { marginTop: 24, color: colors.muted, ...typography.body, textAlign: "center" },
   primaryBtn: { marginTop: 24, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
   primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" },
   secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },

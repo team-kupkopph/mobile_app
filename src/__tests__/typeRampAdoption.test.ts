@@ -213,8 +213,14 @@ function stepFor(r: Resolved): string | null {
   for (const [name, tok] of Object.entries(RAMP)) {
     if (Number(tok.fontSize) !== r.size) continue;
     if (isOpen(name)) {
-      // The token supplies size only; the caller's weight survives untouched — if it is in range.
-      if (r.tracking === 0 && r.leading === null && inRange(name, r.weight)) return name;
+      // ⚠️ THE TOKEN SUPPLIES SIZE ONLY, AND EVERYTHING ELSE IS THE CALLER'S — weight, but
+      // also tracking and leading. An open step names none of them, so a spread overrides
+      // none of them: `{ ...typography.strong, fontWeight: "700", lineHeight: 21 }` renders
+      // exactly as the literal did. T1's rule required tracking 0 and no leading here, which
+      // treated an explicit line height as drift; it is a design choice the ramp does not
+      // govern (only body names one, by #54's decision). The one thing that IS checked is the
+      // declared weight range.
+      if (inRange(name, r.weight)) return name;
       continue;
     }
     if (String(tok.fontWeight ?? "400") !== r.weight) continue;
@@ -246,9 +252,8 @@ function sideEffects(r: Resolved, step: string): string[] {
   const tok = RAMP[step];
   const out: string[] = [];
   if (isOpen(step)) {
+    // Only the weight range: an open step overrides neither tracking nor leading.
     if (!inRange(step, r.weight)) out.push("weight");
-    if (r.tracking !== 0) out.push("tracking");
-    if (r.leading !== null) out.push("leading");
     return out;
   }
   if (String(tok.fontWeight ?? "400") !== r.weight) out.push("weight");
@@ -341,8 +346,22 @@ for (const file of sources(SRC)) {
  * screens and the pet's name on Listing Detail — to `hero` (25). The name was the one call:
  * the panel's "Subject name" is 21, but on that screen the name IS the hero line, and the
  * deck card draws it at hero; −5 pt rather than −9.
+ *
+ * 293, DOWN FROM 411, IN THREE MOVES THAT ADD UP EXACTLY (35 + 50 + 33 = 118):
+ *   · 35 zero-change binds unlocked by correcting T1's rule for open steps. `strong`, `meta`
+ *     and `subtitle` name no tracking and no leading, so a spread overrides neither — an
+ *     explicit `lineHeight: 21` beside `...typography.meta` renders exactly as the literal
+ *     did. T1 had treated it as a side effect. Only the declared weight range is checked.
+ *   · 50 one-point snaps the same correction turned into pure size moves — T2's "size plus
+ *     leading" leftovers: 14→13 x31, 12→13 x18, 12.5→13 x1, every extra property kept.
+ *   · 33 fifteens: 22 at weight 600 — one step outside the range the canvas declares and a
+ *     weight its artboards never draw at fifteen, twelve of them inline field errors —
+ *     moved to 700 and onto `strong`; 11 body-copy sites at 400 without body's designed
+ *     line height moved onto `body`, gaining its 21.
+ * What remains at fifteen is in JSX, not in a style: the ladder's step title sets its weight
+ * per state inline, including a 600 for steps not yet reached, as the artboard draws it.
  */
-const OFF_RAMP = 411;
+const OFF_RAMP = 293;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {

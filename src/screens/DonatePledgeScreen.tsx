@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   needTitle: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   shelter: { marginTop: 4, color: colors.teal, ...typography.strong, fontWeight: "700" },
   note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
-  label: { marginTop: 26, marginBottom: 12, color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
+  label: { marginTop: 26, marginBottom: 12, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", padding: 8, borderRadius: 22, ...card },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },

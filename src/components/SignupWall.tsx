@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   body: {
     marginTop: 8,
     color: authColors.muted,
-    fontSize: 14,
+    ...typography.meta,
     lineHeight: 20,
     textAlign: "center"
   },
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 12,
     color: authColors.tealDark,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "700",
     lineHeight: 18
   },

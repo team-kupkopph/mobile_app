@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   map: { ...StyleSheet.absoluteFillObject },
   mapBadge: { position: "absolute", left: 12, bottom: 12, backgroundColor: "rgba(255,255,255,0.94)", paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: "center" },
   mapBadgeText: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },
-  mapNote: { marginTop: 10, color: colors.muted, fontSize: 13, lineHeight: 18 },
+  mapNote: { marginTop: 10, color: colors.muted, ...typography.meta, lineHeight: 18 },
   legendRow: { flexDirection: "row", gap: 18, marginTop: 16, marginBottom: 18 },
   legend: { flexDirection: "row", alignItems: "center", gap: 7 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },

@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   notes: { minHeight: 80, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   photoBtn: { marginTop: 14, height: 64, borderRadius: radii.tile, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
-  error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitIdle: { backgroundColor: colors.tealIdle },
   submitText: { color: colors.white, fontSize: 19, fontWeight: "700" }

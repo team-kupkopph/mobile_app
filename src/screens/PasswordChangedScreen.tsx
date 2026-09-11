@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   noticeBody: {
     marginTop: 3,
     color: authColors.muted,
-    fontSize: 12,
+    ...typography.meta,
     lineHeight: 17
   },
   doneButton: {

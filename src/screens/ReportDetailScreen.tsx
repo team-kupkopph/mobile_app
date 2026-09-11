@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   matchesChevron: { color: colors.muted, fontSize: 30, fontWeight: "800" },
   mapWrap: { marginTop: 20, height: 160, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
-  mapNote: { marginTop: 8, color: colors.muted, fontSize: 12, lineHeight: 17 },
+  mapNote: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 17 },
   waitingCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, backgroundColor: colors.infoBg },
   waitingLine: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   waitingSub: { marginTop: 6, color: colors.tealDark, ...typography.meta },
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   actionRow: { marginTop: 30 },
   claimBtn: { height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   claimBtnText: { color: colors.white, fontSize: 19, fontWeight: "700" },
-  claimFine: { marginTop: 10, color: colors.muted, fontSize: 13, lineHeight: 18, textAlign: "center" },
+  claimFine: { marginTop: 10, color: colors.muted, ...typography.meta, lineHeight: 18, textAlign: "center" },
   offerBtn: { marginTop: 16, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal },
   offerBtnText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" }
 });

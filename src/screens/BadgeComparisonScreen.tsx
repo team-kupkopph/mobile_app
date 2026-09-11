@@ -77,9 +77,9 @@ const styles = StyleSheet.create({
   dimText: { color: colors.muted },
   description: { marginTop: 10, color: colors.muted, fontSize: 15.5, lineHeight: 22, textAlign: "center" },
   criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18, borderRadius: 22, ...card },
-  criteriaLabel: { color: colors.muted, fontSize: 13, fontWeight: "600", letterSpacing: 0.4 },
+  criteriaLabel: { color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   criteriaText: { marginTop: 6, color: colors.ink, ...typography.subtitle, fontWeight: "600" },
   earnedPill: { marginTop: 22, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 16, backgroundColor: colors.successBg },
   earnedText: { color: colors.success, ...typography.strong, fontWeight: "700" },
-  lockedText: { marginTop: 22, color: colors.muted, fontSize: 15, fontWeight: "600" }
+  lockedText: { marginTop: 22, color: colors.muted, ...typography.strong, fontWeight: "700" }
 });

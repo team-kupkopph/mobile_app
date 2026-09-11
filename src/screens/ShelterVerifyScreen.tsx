@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   headerTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
   heading: { marginTop: 6, color: colors.ink, fontSize: 24, fontWeight: "800" },
-  subheading: { marginTop: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
+  subheading: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
   docCard: {
     minHeight: 84,
     marginTop: 16,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF"
   },
   consentBoxChecked: { backgroundColor: authColors.teal },
-  consentText: { flex: 1, color: colors.tealDark, fontSize: 13, fontWeight: "700", lineHeight: 19 },
+  consentText: { flex: 1, color: colors.tealDark, ...typography.meta, fontWeight: "700", lineHeight: 19 },
   formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 54, marginTop: 20, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
   submitButtonDisabled: { opacity: 0.5 },

@@ -122,8 +122,8 @@ const styles = StyleSheet.create({
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.teal },
   optionTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   optionHint: { marginTop: 3, color: colors.muted, ...typography.meta },
-  fine: { marginTop: 18, color: colors.muted, fontSize: 13, lineHeight: 19 },
-  error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  fine: { marginTop: 18, color: colors.muted, ...typography.meta, lineHeight: 19 },
+  error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 22, marginBottom: 30, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitIdle: { backgroundColor: colors.tealIdle },
   submitText: { color: colors.white, fontSize: 22, fontWeight: "700" }

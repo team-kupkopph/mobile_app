@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   caption: {
     marginTop: 5,
     color: authColors.muted,
-    fontSize: 14,
+    ...typography.meta,
     lineHeight: 20
   },
   emailText: {
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: authColors.danger,
     color: authColors.danger,
-    fontSize: 13,
+    ...typography.meta,
     fontWeight: "800",
     textAlign: "center",
     lineHeight: 19
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   noticeBody: {
     marginTop: 4,
     color: "#8A3A33",
-    fontSize: 12,
+    ...typography.meta,
     lineHeight: 17
   },
   sendButton: {

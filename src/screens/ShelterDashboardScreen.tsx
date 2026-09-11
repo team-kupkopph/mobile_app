@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.teal
   },
   primaryText: { color: "#FFFFFF", fontSize: 20, fontWeight: "800" },
-  primaryHint: { marginTop: 12, color: colors.muted, fontSize: 15, textAlign: "center" },
+  primaryHint: { marginTop: 12, color: colors.muted, ...typography.body, textAlign: "center" },
   footCard: {
     marginTop: 26,
     minHeight: 100,

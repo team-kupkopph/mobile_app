@@ -268,12 +268,11 @@ const styles = StyleSheet.create({
   dotTodo: { backgroundColor: colors.page, borderWidth: 2, borderColor: colors.border },
   stageText: { flex: 1, minWidth: 0, paddingTop: 3 },
   stageHead: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", gap: 10 },
-  // ⚠️ STILL OFF THE RAMP, FOR TWO REASONS THE `strong` STEP DOES NOT COVER. The artboard
-  // sets this at 15 / 20 with a weight of 600–800 by state. `strong` is 15 / 700–800 with
-  // no line height — so a step at 600 is one weight short of the range, and the 20 pt
-  // leading is something the step deliberately does not name. Written as the design draws
-  // it and counted in the ratchet; resolving it is a design call on both counts.
-  stageTitle: { flex: 1, fontSize: 15, lineHeight: 20 },
+  // `body` for the size and the panel's 21 pt leading (the artboard's incidental 20 loses to
+  // the panel, as everywhere). The weight is set per state in the JSX above — 800 / 700 / 600
+  // as the artboard draws it — so the token's 400 never renders; the 600 for a step not yet
+  // reached is the one fifteen-at-600 left in the app, and it is the design's.
+  stageTitle: { flex: 1, ...typography.body },
   stageMeta: { ...typography.meta, fontWeight: "700" },
   note: { marginTop: 8, paddingVertical: 11, paddingHorizontal: 13, borderRadius: radii.chip, backgroundColor: colors.page },
   noteText: { ...typography.meta, lineHeight: 19, color: colors.muted },

@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   noteBox: {
     marginTop: 22, padding: 18, borderRadius: radii.field, backgroundColor: colors.warningBg
   },
-  noteLabel: { color: colors.warningStrong, fontSize: 12, fontWeight: "800", letterSpacing: 0.6 },
+  noteLabel: { color: colors.warningStrong, ...typography.meta, fontWeight: "800", letterSpacing: 0.6 },
   noteText: { marginTop: 8, color: colors.warningStrong, fontSize: 16, lineHeight: 23, fontWeight: "600" },
   fileCard: {
     marginTop: 20, padding: 20, borderRadius: 22, backgroundColor: "#FFFFFF",
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   readyText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   fine: { marginTop: 14, color: "#9a988f", ...typography.meta },
-  error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: {
     marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.teal, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },

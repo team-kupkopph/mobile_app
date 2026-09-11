@@ -112,6 +112,6 @@ const styles = StyleSheet.create({
   medalGlyph: { color: colors.teal, fontSize: 28, fontWeight: "800" },
   medalGlyphOff: { color: colors.muted, fontSize: 22 },
   badgeName: { marginTop: 12, color: colors.ink, ...typography.strong, fontWeight: "800", textAlign: "center" },
-  badgeCriteria: { marginTop: 6, color: colors.muted, fontSize: 12.5, textAlign: "center", lineHeight: 17 },
+  badgeCriteria: { marginTop: 6, color: colors.muted, ...typography.meta, textAlign: "center", lineHeight: 17 },
   dimText: { color: colors.muted }
 });

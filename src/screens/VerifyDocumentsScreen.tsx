@@ -225,11 +225,11 @@ const styles = StyleSheet.create({
     borderRadius: radii.field,
     backgroundColor: colors.warningBg
   },
-  noteBannerText: { flex: 1, color: colors.warningStrong, fontSize: 15, fontWeight: "600", lineHeight: 21 },
+  noteBannerText: { flex: 1, color: colors.warningStrong, ...typography.strong, fontWeight: "700", lineHeight: 21 },
   noteBannerDanger: { backgroundColor: colors.dangerBg },
   noteBannerTitle: { color: colors.danger, ...typography.subtitle, fontWeight: "800" },
-  noteBannerBody: { marginTop: 6, color: colors.danger, fontSize: 15, fontWeight: "600", lineHeight: 21 },
-  noteBannerHint: { marginTop: 8, color: colors.muted, fontSize: 14, lineHeight: 20 },
+  noteBannerBody: { marginTop: 6, color: colors.danger, ...typography.strong, fontWeight: "700", lineHeight: 21 },
+  noteBannerHint: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 20 },
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 20, fontWeight: "800" },
   docCard: {
     marginBottom: 14,

@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   tagText: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   feeCard: { marginTop: 18, padding: 18, borderRadius: radii.tile, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between", ...card },
-  feeLabel: { color: colors.muted, fontSize: 15, fontWeight: "600" },
+  feeLabel: { color: colors.muted, ...typography.strong, fontWeight: "700" },
   feeValue: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, fontSize: 18, fontWeight: "800" },
   body: { color: colors.ink, fontSize: 16, lineHeight: 23 },

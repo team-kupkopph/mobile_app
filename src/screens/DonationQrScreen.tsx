@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { color: colors.ink, fontSize: 22, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  draftNote: { marginTop: 4, marginBottom: 6, color: colors.teal, fontSize: 13, fontWeight: "600", lineHeight: 19 },
+  draftNote: { marginTop: 4, marginBottom: 6, color: colors.teal, ...typography.meta, fontWeight: "600", lineHeight: 19 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   segTrack: { flexDirection: "row", backgroundColor: "#ECEAE3", borderRadius: 16, padding: 4, gap: 4 },
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   segTextActive: { color: colors.ink },
   photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
-  error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
 });

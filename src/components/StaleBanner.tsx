@@ -13,6 +13,7 @@
 // volunteer shifts that may already be full. The whole value of a cache is that stale data
 // beats no data; the whole risk is that stale data looks like fresh data.
 import { StyleSheet, Text } from "react-native";
+import { typography } from "../theme";
 
 const colors = { warn: "#8a5a12", warnBg: "#FAEEDA", warnLine: "#E7D3AE" };
 
@@ -33,7 +34,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 14,
     color: colors.warn,
-    fontSize: 14,
+    ...typography.meta,
     lineHeight: 20,
     marginBottom: 14,
     paddingHorizontal: 14,

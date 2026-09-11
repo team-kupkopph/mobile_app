@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.soft },
   chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   chipTextActive: { color: colors.teal },
-  error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
+  error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
 });

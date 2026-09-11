@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { SocialProvider } from "./auth/socialAuth";
 import { SocialSignIn } from "./components/ui/SocialSignIn";
 import { TAP_SLOP } from "./touch";
+import { typography } from "./theme";
 
 /**
  * The landing screen — rebuilt 2026-09-05 to be lighter and to lay itself out.
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
   },
   pillarText: {
     color: c.onHero,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "700",
     letterSpacing: 0.3,
   },
@@ -362,11 +363,11 @@ const styles = StyleSheet.create({
   // Prominent by colour and weight rather than by a third box — and with an explicit
   // 48 pt target, which is the part the old 18 pt text link never had.
   guest: { minHeight: 48, alignItems: "center", justifyContent: "center" },
-  guestText: { color: c.tealDk, fontSize: 17, lineHeight: 22, fontWeight: "700" },
+  guestText: { color: c.tealDk, ...typography.subtitle, lineHeight: 22, fontWeight: "700" },
 
   link: { minHeight: 44, alignItems: "center", justifyContent: "center" },
-  linkText: { color: c.muted, fontSize: 15, lineHeight: 20, textAlign: "center" },
+  linkText: { color: c.muted, ...typography.body, textAlign: "center" },
 
   termsPressable: { minHeight: 44, alignItems: "center", justifyContent: "center" },
-  termsText: { color: c.fine, fontSize: 13, lineHeight: 18, textAlign: "center" },
+  termsText: { color: c.fine, ...typography.meta, lineHeight: 18, textAlign: "center" },
 });

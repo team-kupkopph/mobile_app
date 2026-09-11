@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   card: { marginTop: 28, padding: 20, borderRadius: 22, ...card },
   cardTitle: { color: colors.ink, fontSize: 20, fontWeight: "800" },
-  cardCity: { marginTop: 6, color: colors.muted, fontSize: 15 },
+  cardCity: { marginTop: 6, color: colors.muted, ...typography.body },
   chip: { marginTop: 12, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center", backgroundColor: colors.warningBg },
   chipText: { color: colors.warningStrong, ...typography.meta, fontWeight: "800" },
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
   nextDot: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   nextNum: { color: colors.teal, ...typography.strong, fontWeight: "800" },
   nextText: { flex: 1, color: colors.ink, ...typography.subtitle },
-  fine: { marginTop: 6, color: colors.muted, fontSize: 14, lineHeight: 20 },
+  fine: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
   primary: { marginTop: 28, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   primaryText: { color: colors.white, fontSize: 22, fontWeight: "700" },
   secondary: { marginTop: 16, color: colors.teal, ...typography.subtitle, fontWeight: "700", textAlign: "center" }

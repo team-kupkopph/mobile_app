@@ -6,7 +6,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 
 const card = {
@@ -53,5 +53,5 @@ const styles = StyleSheet.create({
   title: { flex: 1, color: colors.ink, fontSize: 20, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   noticeCard: { borderRadius: radii.tile, padding: 20, gap: 14, ...card },
-  body: { color: colors.muted, fontSize: 15, lineHeight: 22 }
+  body: { color: colors.muted, ...typography.body }
 });

@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.teal
   },
   chipVerifiedText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
-  orgSub: { marginTop: 10, color: colors.muted, fontSize: 15 },
+  orgSub: { marginTop: 10, color: colors.muted, ...typography.body },
   statRow: { marginTop: 20, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
     width: "31%",
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   rowLabelLocked: { color: colors.muted },
   rowDanger: { color: colors.danger, ...typography.subtitle, fontWeight: "600" },
   rowRight: { flexDirection: "row", alignItems: "center", gap: 10 },
-  rowValue: { color: colors.muted, fontSize: 15, fontWeight: "600" },
+  rowValue: { color: colors.muted, ...typography.strong, fontWeight: "700" },
   chev: { color: "#C9CEC7", fontSize: 22, fontWeight: "700" },
   accentWarn: {
     margin: 12,
