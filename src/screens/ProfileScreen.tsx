@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.chip,
     paddingHorizontal: 14,
     color: colors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800",
     backgroundColor: "#FFFFFF",
     textAlign: "center"
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   cityChipChevron: {
     marginLeft: 2,
     color: colors.teal,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   verifyCard: {
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
   },
   verifyTitle: {
     color: colors.tealDark,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   verifyText: {
@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   accountRowLabel: {
     color: colors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   accountRowChevron: {

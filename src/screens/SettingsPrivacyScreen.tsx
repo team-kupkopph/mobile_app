@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   toggleText: { flex: 1, paddingRight: 14 },
   toggleLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
   factRow: { paddingHorizontal: 18, paddingVertical: 16 },
-  factLabel: { fontSize: 15, fontWeight: "700", color: colors.ink },
+  factLabel: { ...typography.strong, fontWeight: "700", color: colors.ink },
   note: { fontSize: 13, color: colors.muted, marginTop: 4, lineHeight: 18 },
   divided: { borderBottomWidth: 1, borderBottomColor: colors.border },
   footnote: { fontSize: 13, color: colors.muted, marginTop: 10, lineHeight: 18 },

@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     width: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.teal
   },
-  readyText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
+  readyText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   fine: { marginTop: 14, color: "#9a988f", ...typography.meta },
   error: { marginTop: 16, color: colors.danger, fontSize: 15, fontWeight: "600" },
   submit: {

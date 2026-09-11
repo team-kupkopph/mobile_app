@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   photo: { height: 180, borderRadius: 16, backgroundColor: colors.soft, marginTop: 14, marginBottom: 6 },
   factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 16 },
   factKey: { color: colors.muted, ...typography.meta },
-  factVal: { color: colors.ink, fontSize: 15, fontWeight: "700", flexShrink: 1, textAlign: "right" },
+  factVal: { color: colors.ink, ...typography.strong, fontWeight: "700", flexShrink: 1, textAlign: "right" },
   reasonsCard: { marginTop: 16, padding: 16, borderRadius: radii.tile, backgroundColor: colors.soft },
   reasonsTitle: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   reasonsText: { marginTop: 6, color: colors.tealDark, fontSize: 14.5, lineHeight: 20 },

@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
   title: { flex: 1, color: colors.ink, fontSize: 22, fontWeight: "800" },
   share: { paddingHorizontal: 18, paddingVertical: 11, borderRadius: 22, backgroundColor: colors.teal },
-  shareLabel: { color: colors.white, fontSize: 15, fontWeight: "700" },
+  shareLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   storyCard: { marginBottom: 16, padding: 16, borderRadius: 22, ...card },

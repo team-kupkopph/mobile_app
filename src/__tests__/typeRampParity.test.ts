@@ -37,8 +37,8 @@ if (!canvasPath) {
 const STEPS = Object.entries(typography) as Array<[string, Record<string, unknown>]>;
 
 describe("the type ramp", () => {
-  it("has the canvas's eight sizes", () => {
-    expect(STEPS.map(([, s]) => s.fontSize)).toEqual([27, 25, 21, 19, 17, 15, 13, 11]);
+  it("has the canvas's nine sizes — fifteen twice, once closed and once open", () => {
+    expect(STEPS.map(([, s]) => s.fontSize)).toEqual([27, 25, 21, 19, 17, 15, 15, 13, 11]);
   });
 
   it("names a lineHeight on body and nowhere else", () => {
@@ -66,10 +66,12 @@ describeParity("parity with the approved canvas", () => {
       expect(canvas).toContain(`${size} / 800 / ${ls}`);
     });
 
-  it("declares 17 and 13 as weight RANGES, and gives neither a tracking value", () => {
-    // "Card title, button, field | 17 / 700-800" and "Meta, helper, chip | 13 / 400-800".
-    // Three fields would mean a tracking value; these have two, and the second is a range.
+  it("declares 17, 15 and 13 as weight RANGES, and gives none a tracking value", () => {
+    // "Card title, button, field | 17 / 700-800", "Label, small button | 15 / 700-800" and
+    // "Meta, helper, chip | 13 / 400-800". Three fields would mean a tracking value; these
+    // have two, and the second is a range.
     expect(canvas).toContain("17 / 700-800");
+    expect(canvas).toContain("15 / 700-800");
     expect(canvas).toContain("13 / 400-800");
     expect(canvas).not.toContain("17 / 700 / -0.2");
   });
@@ -79,18 +81,21 @@ describeParity("parity with the approved canvas", () => {
   });
 });
 
-describe("the two range steps", () => {
+describe("the three range steps", () => {
   /**
    * ⚠️ A RANGE CANNOT BE PINNED. Collapsing "13 / 400-800" to 400 picked the weight the app
    * uses least — 800x44 and 700x39 against 400x25 — so spreading the token would have
    * de-bolded the majority. Size only; the caller brings the weight.
    */
-  it.each(["subtitle", "meta"] as const)("%s names no fontWeight", (step) => {
+  it.each(["subtitle", "strong", "meta"] as const)("%s names no fontWeight", (step) => {
     expect(typography[step]).not.toHaveProperty("fontWeight");
   });
 
-  it("gives subtitle no letterSpacing — the panel names none at 17pt", () => {
+  it("gives subtitle and strong no letterSpacing — the panel names none at 17 or bold 15", () => {
     expect(typography.subtitle).not.toHaveProperty("letterSpacing");
+    expect(typography.strong).not.toHaveProperty("letterSpacing");
+    // ...and no lineHeight either: a bound label stays on RN's default leading, as it rendered.
+    expect(typography.strong).not.toHaveProperty("lineHeight");
   });
 
   it("still pins a weight on the six steps the panel pins", () => {

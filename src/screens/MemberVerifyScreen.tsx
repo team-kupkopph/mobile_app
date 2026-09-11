@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
   },
   docTitle: {
     color: colors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   docSubtitle: {
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   },
   socialInput: {
     color: colors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800",
     padding: 0
   },

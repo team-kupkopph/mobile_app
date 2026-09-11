@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   bannerCopy: { flex: 1, marginLeft: 18 },
   bannerTitle: { color: colors.warningStrong, fontSize: 19, fontWeight: "800" },
   bannerBody: { marginTop: 2, color: "#8a6d3b", ...typography.meta },
-  bannerCta: { color: colors.warningStrong, fontSize: 15, fontWeight: "700" },
+  bannerCta: { color: colors.warningStrong, ...typography.strong, fontWeight: "700" },
   statRow: { marginTop: 22, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
     width: "31%",

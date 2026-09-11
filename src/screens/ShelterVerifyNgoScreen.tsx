@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   docCardDisabled: { opacity: 0.55 },
   docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   docCopy: { flex: 1, marginLeft: 14 },
-  docTitle: { color: colors.ink, fontSize: 15, fontWeight: "800" },
+  docTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, fontSize: 11 },
   docUploadLink: { color: authColors.teal, ...typography.meta, fontWeight: "800" },
   docMuted: { color: "#9A988F", ...typography.meta, fontWeight: "800" },
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     ...elevation.soft
   },
-  input: { color: colors.ink, fontSize: 15, fontWeight: "800", padding: 0 },
+  input: { color: colors.ink, ...typography.strong, fontWeight: "800", padding: 0 },
   formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { height: 54, marginTop: 22, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
   submitButtonDisabled: { opacity: 0.5 },

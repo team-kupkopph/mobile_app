@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     borderRadius: 19
   },
   chipWarn: { backgroundColor: colors.warningBg },
-  chipWarnText: { color: colors.warningStrong, fontSize: 15, fontWeight: "800" },
+  chipWarnText: { color: colors.warningStrong, ...typography.strong, fontWeight: "800" },
   chipVerified: { backgroundColor: colors.infoBg },
   verifiedDot: {
     width: 18,
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.teal
   },
-  chipVerifiedText: { color: colors.tealDark, fontSize: 15, fontWeight: "800" },
+  chipVerifiedText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   orgSub: { marginTop: 10, color: colors.muted, fontSize: 15 },
   statRow: { marginTop: 20, flexDirection: "row", justifyContent: "space-between" },
   statCard: {

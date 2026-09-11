@@ -22,6 +22,7 @@ import { existsSync, readFileSync } from "fs";
 import { dirname, join } from "path";
 
 import { signInWithProvider } from "../auth/socialAuth";
+import { typography } from "../theme";
 
 const SRC = join(__dirname, "..");
 const read = (rel: string) => readFileSync(join(SRC, rel), "utf8");
@@ -158,9 +159,11 @@ describeParity("the provider row matches the Log in artboard", () => {
     expect(row).toMatch(/\.\.\.elevation\.soft/);
   });
 
-  it("sets the label at the artboard's 15 / 700", () => {
+  it("sets the label at the artboard's 15 / 700 — which is now the `strong` step", () => {
     expect(google![2]).toMatch(/font-size: 15px; font-weight: 700/);
-    expect(row).toMatch(/fontSize: 15,\s*fontWeight: "700"/);
+    // Written as a literal when the ramp had no bold fifteen; bound the day it gained one.
+    expect(row).toMatch(/\.\.\.typography\.strong,\s*fontWeight: "700"/);
+    expect(typography.strong.fontSize).toBe(15);
   });
 
   it("draws the mark at the artboard's 19", () => {

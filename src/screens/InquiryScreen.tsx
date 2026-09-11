@@ -268,10 +268,11 @@ const styles = StyleSheet.create({
   dotTodo: { backgroundColor: colors.page, borderWidth: 2, borderColor: colors.border },
   stageText: { flex: 1, minWidth: 0, paddingTop: 3 },
   stageHead: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", gap: 10 },
-  // ⚠️ THE 89th BOLD FIFTEEN. The artboard sets this at 15 / 20 with a weight of 600–800 by
-  // state, and the ramp has no such step: `body` is the only 15 and it is closed at 400. T2
-  // counted 88 sites in exactly this position and left them for a decision; this is one more,
-  // written as the design says and counted in the ratchet rather than disguised as `body`.
+  // ⚠️ STILL OFF THE RAMP, FOR TWO REASONS THE `strong` STEP DOES NOT COVER. The artboard
+  // sets this at 15 / 20 with a weight of 600–800 by state. `strong` is 15 / 700–800 with
+  // no line height — so a step at 600 is one weight short of the range, and the 20 pt
+  // leading is something the step deliberately does not name. Written as the design draws
+  // it and counted in the ratchet; resolving it is a design call on both counts.
   stageTitle: { flex: 1, fontSize: 15, lineHeight: 20 },
   stageMeta: { ...typography.meta, fontWeight: "700" },
   note: { marginTop: 8, paddingVertical: 11, paddingHorizontal: 13, borderRadius: radii.chip, backgroundColor: colors.page },

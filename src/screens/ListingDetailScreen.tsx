@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   name: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   donateLink: { marginTop: 10 },
-  donateLinkText: { color: colors.teal, fontSize: 15, fontWeight: "700" },
+  donateLinkText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
   tag: { backgroundColor: colors.soft, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   tagText: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },

@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   emailText: {
     marginTop: 3,
     color: authColors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "800"
   },
   otpRow: {

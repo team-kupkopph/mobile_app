@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   content: { flex: 1, paddingHorizontal: spacing.lg },
   title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, fontSize: 14, lineHeight: 20 },
-  phoneText: { marginTop: 3, color: authColors.ink, fontSize: 15, fontWeight: "800" },
+  phoneText: { marginTop: 3, color: authColors.ink, ...typography.strong, fontWeight: "800" },
   otpRow: { marginTop: 30, flexDirection: "row", justifyContent: "space-between" },
   otpBox: {
     width: 46,

@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   cityName: {
     flex: 1,
     color: colors.ink,
-    fontSize: 15,
+    ...typography.strong,
     fontWeight: "700"
   },
   cityNameSelected: {

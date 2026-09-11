@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: authColors.paleTeal
   },
-  providerLetter: { color: authColors.teal, fontSize: 15, fontWeight: "700" },
+  providerLetter: { color: authColors.teal, ...typography.strong, fontWeight: "700" },
   identityEmail: { flex: 1, marginLeft: 12, color: authColors.ink, ...typography.meta, fontWeight: "600" },
   identitySource: { color: colors.muted, ...typography.meta },
   chevron: {

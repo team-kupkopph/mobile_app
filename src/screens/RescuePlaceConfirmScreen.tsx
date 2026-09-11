@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   recipientCard: { marginTop: 8, padding: 18, borderRadius: radii.field, backgroundColor: colors.soft },
   recipientLabel: { color: colors.teal, fontSize: 13, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.5 },
   recipientEmail: { marginTop: 6, color: colors.ink, fontSize: 18, fontWeight: "700" },
-  label: { marginTop: 20, marginBottom: 10, color: colors.ink, fontSize: 15, fontWeight: "700" },
+  label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   fine: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 18 },
   error: { marginTop: 18, color: colors.danger, fontSize: 15, fontWeight: "600" },
