@@ -12,7 +12,7 @@ import { RootStackParamList } from "../navigation/types";
 import { SimpleHeader, authColors } from "./AuthFormKit";
 import { Button, Field } from "../components/ui";
 import { SocialSignIn } from "../components/ui/SocialSignIn";
-import { colors, gradients, radii, spacing, typography } from "../theme";
+import { colors, gradients, radii, spacing, squircle, typography } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   logoGradient: {
     width: 84,
     height: 84,
-    borderRadius: 24,
+    borderRadius: squircle(84),
     alignItems: "center",
     justifyContent: "center"
   },
