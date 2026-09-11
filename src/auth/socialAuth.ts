@@ -19,6 +19,12 @@
 //   Everything downstream (the identity chip, the account-type step, POST /auth/social/{provider},
 //   token storage, the signup-success landing) is already built and needs no change.
 //
+// ⚠️ S0-05 AND S0-06 MUST LAND TOGETHER, NOT IN THE ORDER THE PAPERWORK CLEARS. App Store Review
+// Guideline 4.8 requires Sign in with Apple wherever a third-party sign-in is offered, so a build
+// with a working Google button and a "not available yet" Apple button is a rejection, not a
+// partial feature. The UI enforces the pairing (components/ui/SocialSignIn.tsx renders both or
+// neither); this note is so the credentials are not wired one at a time as they arrive.
+//
 // WHY THE BUTTON MUST NOT BE SILENT: before this module, WelcomeScreen rendered "Continue with
 // Google" but RootNavigator never passed a handler, so the button did nothing at all when tapped.
 // A dead control is worse than a disabled one — the user cannot tell the difference between "broken"

@@ -5,6 +5,8 @@ import { useCallback } from "react";
 import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import type { SocialProvider } from "./auth/socialAuth";
+import { SocialSignIn } from "./components/ui/SocialSignIn";
 import { TAP_SLOP } from "./touch";
 
 /**
@@ -65,7 +67,6 @@ type WelcomeCopy = {
   subtitle: string;
   pillars: string[];
   getStarted: string;
-  continueWithGoogle: string;
   login: string;
   browseGuest: string;
   terms: string;
@@ -91,7 +92,6 @@ const DEFAULT_COPY: WelcomeCopy = {
    */
   pillars: ["Rescue", "Adopt", "Volunteer","Donate"],
   getStarted: "Get started",
-  continueWithGoogle: "Continue with Google",
   login: "Already have an account? Log in",
   browseGuest: "Browse as a guest",
   terms: "By continuing you agree to our Terms & Privacy.",
@@ -108,7 +108,7 @@ const mergeCopy = (copy?: WelcomeCopyInput): WelcomeCopy => ({
 type WelcomeScreenProps = {
   copy?: WelcomeCopyInput;
   onGetStarted?: () => void;
-  onContinueWithGoogle?: () => void;
+  onSocial?: (provider: SocialProvider) => void;
   onLogin?: () => void;
   onBrowseGuest?: () => void;
   onTerms?: () => void;
@@ -117,7 +117,7 @@ type WelcomeScreenProps = {
 export function WelcomeScreen({
   copy: copyInput,
   onGetStarted,
-  onContinueWithGoogle,
+  onSocial,
   onLogin,
   onBrowseGuest,
   onTerms,
@@ -206,18 +206,12 @@ export function WelcomeScreen({
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* White fill + soft shadow, deliberately NO border: in V2 the shadow is what says
-            "raised and tappable", and a stroke here reads as the old V1 language. */}
-        <TouchableOpacity
-          testID="btn.welcome.google"
-          activeOpacity={0.85}
-          onPress={onContinueWithGoogle}
-          accessibilityRole="button"
-          accessibilityLabel={copy.continueWithGoogle}
-          style={styles.secondary}
-        >
-          <Text style={styles.secondaryText}>{copy.continueWithGoogle}</Text>
-        </TouchableOpacity>
+        {/* ⚠️ THIS SCREEN HAS NO ARTBOARD. The canvas designs the provider row on the Log in
+            screen only (SignIn.dc.html), and Welcome is not drawn at all — so the row here is
+            that design reused, not a second one. It replaced a lone full-width "Continue with
+            Google", which was the exact shape App Store Guideline 4.8 rejects: a third-party
+            sign-in with no Sign in with Apple beside it. */}
+        <SocialSignIn testIDPrefix="welcome" onPress={(p) => onSocial?.(p)} />
 
         <TouchableOpacity
           testID="btn.welcome.guest"
@@ -364,19 +358,6 @@ const styles = StyleSheet.create({
   },
   primaryText: { color: c.white, fontSize: 20, lineHeight: 26, fontWeight: "700" },
 
-  secondary: {
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: c.white,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#12213A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 7,
-    elevation: 2,
-  },
-  secondaryText: { color: c.ink, fontSize: 17, lineHeight: 22, fontWeight: "700" },
 
   // Prominent by colour and weight rather than by a third box — and with an explicit
   // 48 pt target, which is the part the old 18 pt text link never had.
