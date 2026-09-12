@@ -7,7 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
 
 import { useApi } from "../api/useApi";
 import { useOutbox } from "../outbox/OutboxProvider";
@@ -234,24 +234,13 @@ export function ReportStrayScreen({ navigation, route }: Props) {
 function Segmented({ options, value, onChange }: {
   options: readonly string[]; value: string; onChange: (v: string) => void;
 }) {
+  // The primitive takes labels and an index; the screens keep their string enums.
   return (
-    <View style={styles.segTrack}>
-      {options.map((opt) => {
-        const active = opt === value;
-        return (
-          <TouchableOpacity
-            key={opt}
-            style={[styles.segItem, active && styles.segItemActive]}
-            onPress={() => onChange(opt)}
-            activeOpacity={0.85}
-          >
-            <Text style={[styles.segText, active && styles.segTextActive]}>
-              {opt.charAt(0).toUpperCase() + opt.slice(1)}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+    <SegmentedControl
+      segments={options.map((opt) => opt.charAt(0).toUpperCase() + opt.slice(1))}
+      index={Math.max(0, options.indexOf(value))}
+      onChange={(i) => onChange(options[i])}
+    />
   );
 }
 
@@ -267,11 +256,6 @@ const styles = StyleSheet.create({
   photoBtn: { marginTop: 18, height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   label: { marginTop: 24, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  segTrack: { flexDirection: "row", backgroundColor: colors.greyPill, borderRadius: 16, padding: 4, gap: 4 },
-  segItem: { flex: 1, height: 44, borderRadius: radii.chip, alignItems: "center", justifyContent: "center" },
-  segItemActive: { ...card },
-  segText: { color: colors.muted, ...typography.strong, fontWeight: "700" },
-  segTextActive: { color: colors.ink },
   notes: { marginTop: 2, minHeight: 90, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   locCard: { marginTop: 24, padding: 18, borderRadius: radii.tile, ...card },
   locRow: { flexDirection: "row", alignItems: "center", gap: 12 },

@@ -15,7 +15,7 @@ import { loadState } from "../net";
 import { ChipTone, needProgressLabel, pledgeStatusChip, PledgeStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 const card = {
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   progress: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   actionRow: { flexDirection: "row", gap: 12, marginTop: 14 },
-  secondaryBtn: { paddingHorizontal: 20, paddingVertical: 11, borderRadius: 16, ...card },
+  secondaryBtn: { height: 38, paddingHorizontal: 20, justifyContent: "center", borderRadius: pill(38), ...card },
   secondaryLabel: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.section },
   empty: { marginTop: 20, color: colors.muted, ...typography.body },
@@ -148,6 +148,6 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, fontSize: 14.5 },
-  receiveBtn: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 18, paddingVertical: 10, borderRadius: 14, backgroundColor: colors.soft },
+  receiveBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.soft },
   receiveLabel: { color: colors.teal, fontSize: 14.5, fontWeight: "700" }
 });

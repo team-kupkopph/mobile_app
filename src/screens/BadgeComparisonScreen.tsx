@@ -5,7 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, squircle, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 const card = {
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18, borderRadius: radii.card, ...card },
   criteriaLabel: { color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   criteriaText: { marginTop: 6, color: colors.ink, ...typography.subtitle, fontWeight: "600" },
-  earnedPill: { marginTop: 22, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 16, backgroundColor: colors.successBg },
+  earnedPill: { marginTop: 22, height: 38, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.successBg },
   earnedText: { color: colors.success, ...typography.strong, fontWeight: "700" },
   lockedText: { marginTop: 22, color: colors.muted, ...typography.strong, fontWeight: "700" }
 });

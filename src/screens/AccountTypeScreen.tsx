@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     height: 52,
     borderWidth: 1,
     borderColor: authColors.border,
-    borderRadius: 16,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

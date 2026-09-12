@@ -12,7 +12,7 @@ import { Avatar, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -148,7 +148,7 @@ export function StoryDetailScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: 16, backgroundColor: "#FAEEDA" },
+  hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: radii.notice, backgroundColor: "#FAEEDA" },
   hiddenText: { color: "#8A5A12", ...typography.meta, fontWeight: "600" },
   photo: { height: 280, borderRadius: radii.field, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
@@ -158,10 +158,10 @@ const styles = StyleSheet.create({
   chipText: { ...typography.meta, fontWeight: "700" },
   caption: { marginTop: 18, color: colors.ink, fontSize: 17, lineHeight: 25 },
   actionRow: { flexDirection: "row", gap: 12, marginTop: 26 },
-  reactBtn: { flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 22, paddingVertical: 14, borderRadius: 30, ...card },
+  reactBtn: { flexDirection: "row", alignItems: "center", gap: 10, height: 44, paddingHorizontal: 22, borderRadius: pill(44), ...card },
   heart: { fontSize: 22, color: "#C9D3CF" },
   heartOn: { color: colors.teal },
   reactLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
-  flagBtn: { paddingHorizontal: 22, paddingVertical: 14, borderRadius: 30, ...card },
+  flagBtn: { height: 44, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(44), ...card },
   flagLabel: { color: colors.muted, ...typography.subtitle, fontWeight: "700" }
 });

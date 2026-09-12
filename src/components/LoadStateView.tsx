@@ -12,7 +12,7 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "rea
 
 import { LoadState, loadStateCopy } from "../net";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { pill, typography } from "../theme";
 
 const colors = { ink: "#12213A", muted: "#5F5E5A", teal: "#1C6B6B" };
 
@@ -108,6 +108,6 @@ const styles = StyleSheet.create({
   body: { ...typography.meta, color: colors.muted, textAlign: "center", marginTop: 6, lineHeight: 20 },
   backLink: { marginTop: 18, paddingVertical: 10, paddingHorizontal: 22 },
   backLinkLabel: { ...typography.strong, fontWeight: "700", color: colors.teal },
-  retry: { marginTop: 18, paddingVertical: 10, paddingHorizontal: 22, borderRadius: 22, backgroundColor: colors.teal },
+  retry: { marginTop: 18, height: 38, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   retryLabel: { ...typography.strong, fontWeight: "700", color: "#FFFFFF" },
 });

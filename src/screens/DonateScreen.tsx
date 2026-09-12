@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { needProgressLabel } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   needCard: { marginBottom: 12, padding: 18, borderRadius: radii.card, ...card },
   needTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   needMeta: { marginTop: 6, color: colors.muted, ...typography.meta, textTransform: "capitalize" },
-  pledgeBtn: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 22, paddingVertical: 11, borderRadius: 16, backgroundColor: colors.teal },
+  pledgeBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   pledgeLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   myDonationsRow: { marginTop: 26, alignItems: "center" },
   myDonationsLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" }

@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     flexDirection: "row",
     alignItems: "flex-start",
-    borderRadius: 14,
+    borderRadius: radii.notice,
     paddingHorizontal: 16,
     paddingVertical: 14,
     backgroundColor: "#FBE9CF"

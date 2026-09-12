@@ -8,7 +8,7 @@ import { AdoptIcon, VolunteerIcon } from "../components/AppIcons";
 import { TopStatus } from "../components/TopStatus";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, authColors } from "./AuthFormKit";
-import { radii, spacing, squircle, typography } from "../theme";
+import { pill, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signupSuccess">;
 
@@ -205,9 +205,10 @@ const styles = StyleSheet.create({
   },
   verifyBadge: {
     marginLeft: 8,
+    height: 28,
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 14,
+    justifyContent: "center",
+    borderRadius: pill(28),
     backgroundColor: "#F3DFB0"
   },
   verifyText: {
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
   noticeBar: {
     width: "100%",
     marginTop: 22,
-    borderRadius: 14,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "flex-start",
     paddingHorizontal: 16,

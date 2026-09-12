@@ -217,8 +217,23 @@ const TILE_EXEMPTIONS: string[] = [];
  *   · 4 hand-rolled segmented controls (`segTrack`, `segment`) — SegmentedControl exists.
  *   · Adopt's stamp at 15, which is the artboard's own value, and Welcome's 168 pt logo tile
  *     at 0.25 × size, on a screen that has no artboard.
+ *
+ * 2, DOWN FROM 44, AND THE TWO ARE NAMED BELOW AS AN ASSERTION. The panel gained the row the
+ * artboards were already drawing (library #11: `14px · notice`), and the 24 notice boxes,
+ * banners and option rows bound to `radii.notice`. The 14 padding-sized pills were given the
+ * height they already rendered at and `pill(h)` — the canvas's 38 for small buttons, 28 for a
+ * badge, 32 for a linked-story pill, 44 for the story actions, 68 for the two stepper tracks
+ * (a control track is a pill of its height, as SegmentedControl's is). Three screens' hand-
+ * rolled segmented controls are the SegmentedControl primitive; NeedForm's five wrapping
+ * categories are a filter row of 38 pt pills, which is what the primitive's own header says
+ * more than three should be. What remains is not off the scale by accident:
+ *   · AdoptDeck `stampFill` — 15 is the value Adopt.dc.html draws the stamp at, rotated 11°.
+ *   · WelcomeScreen `logoCard` — the brand mark's tile at 168 / 42 = 0.25, the app icon's own
+ *     corner, on the one screen the canvas never drew. The squircle rule is for UI tiles.
  */
-const OFF_SCALE = 44;
+const OFF_SCALE = 2;
+/** The two above, by name. Resolving either must fail this list, so it is an assertion. */
+const KNOWN_OFF_SCALE = ["src/WelcomeScreen.tsx", "src/components/AdoptDeck.tsx"];
 /** Drawn geometry — see `isGeometry`. May fall; may not rise. */
 const GEOMETRY = 30;
 
@@ -251,6 +266,10 @@ describe("screens take corner radii from the theme", () => {
   it("counts drawn geometry apart from containers, and it may not rise either", () => {
     expect(geometry.length).toBeLessThanOrEqual(GEOMETRY);
     expect(geometry.length).toBe(GEOMETRY);
+  });
+
+  it("names the two that are off the scale on purpose", () => {
+    expect(offScale.map((s) => s.file.replace(/^.*\/src\//, "src/")).sort()).toEqual([...KNOWN_OFF_SCALE].sort());
   });
 
   it("records the remaining off-scale radii rather than absorbing them", () => {

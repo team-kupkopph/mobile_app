@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
 
 
 const PROVIDERS = ["gcash", "maya"] as const;
@@ -64,21 +64,11 @@ export function DonationQrScreen({ navigation }: Props) {
         </Text>
 
         <Text style={styles.label}>Payment app</Text>
-        <View style={styles.segTrack}>
-          {PROVIDERS.map((p) => {
-            const active = p === provider;
-            return (
-              <TouchableOpacity
-                key={p}
-                style={[styles.segItem, active && styles.segItemActive]}
-                onPress={() => setProvider(p)}
-                activeOpacity={0.85}
-              >
-                <Text style={[styles.segText, active && styles.segTextActive]}>{PROVIDER_LABEL[p]}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <SegmentedControl
+          segments={PROVIDERS.map((p) => PROVIDER_LABEL[p])}
+          index={PROVIDERS.indexOf(provider)}
+          onChange={(i) => setProvider(PROVIDERS[i])}
+        />
 
         <Text style={styles.label}>Name on the account</Text>
         <TextInput
@@ -113,11 +103,6 @@ const styles = StyleSheet.create({
   draftNote: { marginTop: 4, marginBottom: 6, color: colors.teal, ...typography.meta, fontWeight: "600", lineHeight: 19 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
-  segTrack: { flexDirection: "row", backgroundColor: "#ECEAE3", borderRadius: 16, padding: 4, gap: 4 },
-  segItem: { flex: 1, height: 44, borderRadius: radii.chip, alignItems: "center", justifyContent: "center" },
-  segItemActive: { ...card },
-  segText: { color: colors.muted, ...typography.strong, fontWeight: "700" },
-  segTextActive: { color: colors.ink },
   photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },

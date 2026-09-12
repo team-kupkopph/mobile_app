@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   },
   consentRow: {
     marginTop: 26,
-    borderRadius: 14,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

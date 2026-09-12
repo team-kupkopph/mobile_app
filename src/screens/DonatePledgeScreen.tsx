@@ -8,7 +8,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, spacing, squircle, typography } from "../theme";
+import { colors, elevation, pill, spacing, squircle, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 
@@ -104,7 +104,8 @@ const styles = StyleSheet.create({
   shelter: { marginTop: 4, color: colors.teal, ...typography.strong, fontWeight: "700" },
   note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
   label: { marginTop: 26, marginBottom: 12, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
-  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", padding: 8, borderRadius: 22, ...card },
+  // A control track is a pill of its height, as SegmentedControl's is: 8 + 52 + 8.
+  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", height: 68, padding: 8, borderRadius: pill(68), ...card },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },
   qty: { color: colors.ink, fontSize: 30, fontWeight: "800", minWidth: 40, textAlign: "center" },
