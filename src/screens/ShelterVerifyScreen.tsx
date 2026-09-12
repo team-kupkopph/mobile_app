@@ -15,7 +15,7 @@ import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const MIN_PHOTOS = 3;
 
@@ -34,7 +34,6 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const baseComplete = !!govId && !!billing && photos.length >= MIN_PHOTOS && social.trim().length > 0 && consent;
 
   async function presign(): Promise<string | null> {
     // null = the person cancelled or declined the permission — an ordinary outcome, not an
@@ -64,8 +63,35 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
     ];
   }
 
+  /**
+   * Design-system rule: NEVER disable a submit button because of validation. A greyed button
+   * gives a person nothing to press and no explanation. `submitting` still blocks — a request
+   * in flight is not a validation error. f93f74a fixed this on eight screens, including the
+   * NGO step this one leads to, and missed this one; the ratchet in buttonAdoption.test.ts
+   * is what found it.
+   */
   async function onPrimary() {
-    if (!baseComplete || submitting) return;
+    if (submitting) return;
+    if (!govId) {
+      setError("Upload a government ID first.");
+      return;
+    }
+    if (!billing) {
+      setError("Upload a proof of billing first.");
+      return;
+    }
+    if (photos.length < MIN_PHOTOS) {
+      setError(`Add ${MIN_PHOTOS - photos.length} more rescue photo${MIN_PHOTOS - photos.length === 1 ? "" : "s"}.`);
+      return;
+    }
+    if (social.trim().length === 0) {
+      setError("Enter your Facebook page (facebook.com/your.shelter).");
+      return;
+    }
+    if (!consent) {
+      setError("Tick the consent box to continue.");
+      return;
+    }
     if (isNgo) {
       // Step 1 of 2: hand the base set to the NGO step; it submits everything together.
       navigation.navigate("shelterVerifyNgo", { baseDocs: baseDocs(), socialUrl: social.trim() });
@@ -139,9 +165,12 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
 
         {!!error && <Text style={styles.formError}>{error}</Text>}
 
-        <TouchableOpacity activeOpacity={0.85} style={[styles.submitButton, !baseComplete && styles.submitButtonDisabled]} onPress={onPrimary} disabled={!baseComplete || submitting}>
-          {submitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.submitText}>{isNgo ? "Continue to NGO papers" : "Submit for review"}</Text>}
-        </TouchableOpacity>
+        <Button
+          label={isNgo ? "Continue to NGO papers" : "Submit for review"}
+          onPress={onPrimary}
+          loading={submitting}
+          style={styles.submitButton}
+        />
 
         <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={onDefer}>
           <Text style={styles.deferLink}>I'll upload these later</Text>
@@ -261,8 +290,6 @@ const styles = StyleSheet.create({
   consentBoxChecked: { backgroundColor: authColors.teal },
   consentText: { flex: 1, color: colors.tealDark, ...typography.meta, fontWeight: "700", lineHeight: 19 },
   formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
-  submitButton: { height: 54, marginTop: 20, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
-  submitButtonDisabled: { opacity: 0.5 },
-  submitText: { color: "#FFFFFF", ...typography.subtitle, fontWeight: "800" },
+  submitButton: { marginTop: 20 },
   deferLink: { marginTop: 18, color: "#08716D", ...typography.meta, fontWeight: "800", textAlign: "center" }
 });
