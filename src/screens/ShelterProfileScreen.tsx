@@ -243,7 +243,7 @@ function Row({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 120 },
-  pageTitle: { color: colors.ink, fontSize: 27, fontWeight: "800" },
+  pageTitle: { color: colors.ink, ...typography.display },
   identityCard: {
     marginTop: 16,
     borderRadius: 28,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.teal
   },
   avatarGlyph: { color: "#FFFFFF", fontSize: 40, fontWeight: "900" },
-  orgName: { marginTop: 16, color: colors.ink, fontSize: 25, fontWeight: "800" },
+  orgName: { marginTop: 16, color: colors.ink, ...typography.hero },
   chip: {
     marginTop: 12,
     flexDirection: "row",
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   },
   statNum: { color: colors.ink, fontSize: 25, fontWeight: "800" },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
-  groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 20, fontWeight: "800" },
+  groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   group: {
     borderRadius: radii.card,
     overflow: "hidden",

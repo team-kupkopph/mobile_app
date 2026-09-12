@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: "row", gap: 12, marginTop: 14 },
   secondaryBtn: { paddingHorizontal: 20, paddingVertical: 11, borderRadius: 16, ...card },
   secondaryLabel: { color: colors.ink, ...typography.strong, fontWeight: "700" },
-  sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, fontSize: 18, fontWeight: "800" },
+  sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.section },
   empty: { marginTop: 20, color: colors.muted, ...typography.body },
   pledgeCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },

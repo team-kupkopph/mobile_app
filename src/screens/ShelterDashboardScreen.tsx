@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 120 },
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  orgName: { flex: 1, color: colors.ink, fontSize: 26, fontWeight: "800" },
+  orgName: { flex: 1, color: colors.ink, ...typography.hero },
   unverifiedPill: {
     flexDirection: "row",
     alignItems: "center",
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     width: 46, height: 46, borderRadius: 15, alignItems: "center", justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.18)"
   },
-  verifiedHeroTitle: { color: "#FFFFFF", fontSize: 21, fontWeight: "800" },
+  verifiedHeroTitle: { color: "#FFFFFF", ...typography.title },
   verifiedHeroBody: { marginTop: 4, color: "#DCEDEB", ...typography.body },
   subLabel: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   banner: {
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3E1BE"
   },
   bannerCopy: { flex: 1, marginLeft: 18 },
-  bannerTitle: { color: colors.warningStrong, fontSize: 19, fontWeight: "800" },
+  bannerTitle: { color: colors.warningStrong, ...typography.section },
   bannerBody: { marginTop: 2, color: "#8a6d3b", ...typography.meta },
   bannerCta: { color: colors.warningStrong, ...typography.strong, fontWeight: "700" },
   statRow: { marginTop: 22, flexDirection: "row", justifyContent: "space-between" },

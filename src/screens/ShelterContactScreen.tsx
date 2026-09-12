@@ -126,7 +126,7 @@ export function ShelterContactScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
   content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
-  title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
+  title: { color: authColors.ink, ...typography.hero, lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, ...typography.meta, lineHeight: 20 },
   formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submit: { marginTop: 26 }

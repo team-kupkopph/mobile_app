@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   medalOff: { backgroundColor: colors.greyPill },
   medalGlyph: { color: colors.teal, fontSize: 54, fontWeight: "800" },
   medalGlyphOff: { color: colors.muted },
-  name: { marginTop: 20, color: colors.ink, fontSize: 26, fontWeight: "800", textAlign: "center" },
+  name: { marginTop: 20, color: colors.ink, ...typography.hero, textAlign: "center" },
   dimText: { color: colors.muted },
   description: { marginTop: 10, color: colors.muted, fontSize: 15.5, lineHeight: 22, textAlign: "center" },
   criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18, borderRadius: 22, ...card },

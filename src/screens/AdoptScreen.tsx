@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "transparent" },
   header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4, flexDirection: "row",
             alignItems: "center", justifyContent: "space-between" },
-  title: { color: colors.ink, fontSize: 26, fontWeight: "800" },
+  title: { color: colors.ink, ...typography.hero },
   headerLinks: { flexDirection: "row", gap: 16 },
   headerLink: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   segmented: { marginHorizontal: 26, marginTop: 14 },

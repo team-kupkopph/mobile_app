@@ -214,11 +214,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 28
   },
-  headerTitle: {
-    color: colors.ink,
-    fontSize: 18,
-    fontWeight: "800"
-  },
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: 60
@@ -226,8 +221,7 @@ const styles = StyleSheet.create({
   heading: {
     marginTop: 6,
     color: colors.ink,
-    fontSize: 24,
-    fontWeight: "800"
+    ...typography.hero
   },
   subheading: {
     marginTop: 6,

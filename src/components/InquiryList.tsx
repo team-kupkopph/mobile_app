@@ -137,7 +137,7 @@ const card = {
 const styles = StyleSheet.create({
   card: { padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardTop: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
-  cardName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
+  cardName: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
   progress: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "700" },
   placementNote: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "800" },

@@ -301,10 +301,8 @@ const styles = StyleSheet.create({
   // here, so it carries the weight and the subtitle stays quiet underneath it.
   tagline: {
     color: c.white,
-    fontSize: 26,
+    ...typography.hero,
     lineHeight: 32,
-    fontWeight: "800",
-    letterSpacing: -0.5,
     textAlign: "center",
   },
   subtitle: {

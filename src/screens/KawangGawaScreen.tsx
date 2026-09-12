@@ -232,7 +232,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4 },
-  title: { color: colors.ink, fontSize: 26, fontWeight: "800" },
+  title: { color: colors.ink, ...typography.hero },
   headerLinks: { marginTop: 12, flexDirection: "row", gap: 10 },
   headerPill: {
     // §13.4 · a real 44 pt box rather than hitSlop; touch.ts is explicit that invisible slop

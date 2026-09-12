@@ -577,8 +577,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     color: colors.ink,
-    fontSize: 22,
-    fontWeight: "800",
+    ...typography.title,
     lineHeight: 28
   },
   role: {
@@ -674,8 +673,7 @@ const styles = StyleSheet.create({
   },
   verifiedHeroTitle: {
     color: "#FFFFFF",
-    fontSize: 21,
-    fontWeight: "800"
+    ...typography.title
   },
   verifiedHeroBody: {
     marginTop: 4,
@@ -697,8 +695,7 @@ const styles = StyleSheet.create({
   },
   reportTitle: {
     color: "#FFFFFF",
-    fontSize: 23,
-    fontWeight: "800",
+    ...typography.title,
     lineHeight: 28
   },
   reportText: {
@@ -752,8 +749,7 @@ const styles = StyleSheet.create({
   spotTitle: {
     marginTop: 10,
     color: colors.ink,
-    fontSize: 20,
-    fontWeight: "800"
+    ...typography.section
   },
   spotMeta: {
     marginTop: 4,

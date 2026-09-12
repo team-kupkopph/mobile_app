@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   pin: { marginBottom: 44 },
   pinShadow: { position: "absolute", top: "50%", width: 12, height: 6, borderRadius: 6, backgroundColor: "rgba(18,33,58,0.28)" },
   card: { position: "absolute", left: 20, right: 20, bottom: 34, padding: 22, borderRadius: radii.card, ...card },
-  cardTitle: { color: colors.ink, fontSize: 19, fontWeight: "800", lineHeight: 25 },
+  cardTitle: { color: colors.ink, ...typography.section, lineHeight: 25 },
   cardSub: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 20 },
   save: { marginTop: 18, height: 58, borderRadius: 29, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   saveIdle: { backgroundColor: colors.tealIdle },

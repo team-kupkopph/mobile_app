@@ -295,8 +295,7 @@ const styles = StyleSheet.create({
   name: {
     marginTop: 16,
     color: colors.ink,
-    fontSize: 20,
-    fontWeight: "800"
+    ...typography.section
   },
   email: {
     marginTop: 5,

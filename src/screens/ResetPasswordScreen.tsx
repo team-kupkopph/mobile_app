@@ -160,8 +160,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: authColors.ink,
-    fontSize: 24,
-    fontWeight: "800",
+    ...typography.hero,
     lineHeight: 30
   },
   caption: {

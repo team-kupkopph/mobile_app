@@ -159,7 +159,7 @@ function ChipRow({
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
   content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
-  title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
+  title: { color: authColors.ink, ...typography.hero, lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, ...typography.meta, lineHeight: 20 },
   groupLabel: { marginTop: 20, marginBottom: 4, color: authColors.ink, ...typography.meta, fontWeight: "800" },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },

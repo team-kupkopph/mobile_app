@@ -252,8 +252,7 @@ const styles = StyleSheet.create({
   },
   lockedTitle: {
     color: "#1F3A5F",
-    fontSize: 20,
-    fontWeight: "800"
+    ...typography.section
   },
   lockedBody: {
     marginTop: 10,

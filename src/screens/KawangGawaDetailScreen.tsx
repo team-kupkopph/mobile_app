@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   // Squircle, matching the hub card's tile — V2 replaced round tiles with rounded squares.
   heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  heroTitle: { flex: 1, color: colors.ink, fontSize: 24, fontWeight: "800" },
+  heroTitle: { flex: 1, color: colors.ink, ...typography.hero },
   orgName: { marginTop: 14, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoCard: { marginTop: 16, borderRadius: radii.tile, paddingHorizontal: 18, paddingVertical: 16, ...card },
   infoDate: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },

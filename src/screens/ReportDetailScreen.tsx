@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   waitingCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, backgroundColor: colors.infoBg },
   waitingLine: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   waitingSub: { marginTop: 6, color: colors.tealDark, ...typography.meta },
-  sectionTitle: { marginTop: 26, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
+  sectionTitle: { marginTop: 26, marginBottom: 14, color: colors.ink, ...typography.section },
   ladder: { paddingLeft: 4 },
   ladderRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 16 },
   ladderDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: colors.border },

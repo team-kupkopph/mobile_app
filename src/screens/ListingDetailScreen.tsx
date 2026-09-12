@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
              alignItems: "center", justifyContent: "space-between", ...card },
   feeLabel: { color: colors.muted, ...typography.strong, fontWeight: "700" },
   feeValue: { color: colors.ink, fontSize: 20, fontWeight: "800" },
-  sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, fontSize: 18, fontWeight: "800" },
+  sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, ...typography.section },
   body: { color: colors.ink, fontSize: 16, lineHeight: 23 },
   inquireBtn: { marginTop: 30, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   inquireBtnIdle: { backgroundColor: colors.tealIdle },

@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   card: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: radii.field, marginBottom: 12, ...card },
   thumb: { width: 64, height: 64, borderRadius: 16, backgroundColor: colors.border },
   thumbEmpty: {},
-  cardTitle: { color: colors.ink, fontSize: 18, fontWeight: "800" },
+  cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   empty: { color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });

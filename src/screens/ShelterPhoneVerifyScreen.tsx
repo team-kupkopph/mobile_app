@@ -157,7 +157,7 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
   content: { flex: 1, paddingHorizontal: spacing.lg },
-  title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
+  title: { color: authColors.ink, ...typography.hero, lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, ...typography.meta, lineHeight: 20 },
   phoneText: { marginTop: 3, color: authColors.ink, ...typography.strong, fontWeight: "800" },
   otpRow: { marginTop: 30, flexDirection: "row", justifyContent: "space-between" },

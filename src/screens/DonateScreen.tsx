@@ -115,7 +115,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  orgName: { color: colors.ink, fontSize: 26, fontWeight: "800" },
+  orgName: { color: colors.ink, ...typography.hero },
   offPlatformNote: { marginTop: 8, marginBottom: 20, color: colors.muted, ...typography.meta, lineHeight: 20 },
   qrCard: { marginBottom: 18, padding: 20, borderRadius: 22, alignItems: "center", ...card },
   provider: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   accountName: { marginTop: 14, color: colors.ink, ...typography.strong, fontWeight: "700" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   wishlist: { marginTop: 28 },
-  sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: "800" },
+  sectionTitle: { color: colors.ink, ...typography.section },
   sectionNote: { marginTop: 6, marginBottom: 14, color: colors.muted, ...typography.meta, lineHeight: 20 },
   needCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
   needTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },

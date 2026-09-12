@@ -91,11 +91,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 28
   },
-  headerTitle: {
-    color: colors.ink,
-    fontSize: 18,
-    fontWeight: "800"
-  },
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg
@@ -122,8 +117,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     color: colors.white,
-    fontSize: 19,
-    fontWeight: "800"
+    ...typography.section
   },
   heroText: {
     marginTop: 8,
