@@ -12,7 +12,7 @@ import MapView, { Region } from "react-native-maps";
 
 import { LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, radii, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 
@@ -78,10 +78,7 @@ export function AdjustPinScreen({ navigation, route }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, shadowColor: colors.shadowCast, shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.12, shadowRadius: 10, elevation: 4
-};
+const card = { backgroundColor: colors.white, ...elevation.soft };
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },

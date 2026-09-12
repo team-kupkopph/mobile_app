@@ -268,11 +268,7 @@ const styles = StyleSheet.create({
     paddingVertical: 26,
     paddingHorizontal: 20,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4
+    ...elevation.card
   },
   avatar: {
     width: 84,

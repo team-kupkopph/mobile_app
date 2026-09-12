@@ -8,7 +8,7 @@ import { AdoptIcon, VolunteerIcon } from "../components/AppIcons";
 import { TopStatus } from "../components/TopStatus";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, authColors } from "./AuthFormKit";
-import { pill, radii, spacing, squircle, typography } from "../theme";
+import { elevation, pill, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signupSuccess">;
 
@@ -175,11 +175,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 1
+    ...elevation.soft
   },
   iconTile: {
     width: 46,

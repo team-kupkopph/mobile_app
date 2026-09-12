@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, authColors } from "./AuthFormKit";
-import { colors, radii, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -130,11 +130,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 22,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2
+    ...elevation.soft
   },
   secondCard: {
     marginTop: 18

@@ -228,12 +228,14 @@ const TILE_EXEMPTIONS: string[] = [];
  * categories are a filter row of 38 pt pills, which is what the primitive's own header says
  * more than three should be. What remains is not off the scale by accident:
  *   · AdoptDeck `stampFill` — 15 is the value Adopt.dc.html draws the stamp at, rotated 11°.
- *   · WelcomeScreen `logoCard` — the brand mark's tile at 168 / 42 = 0.25, the app icon's own
- *     corner, on the one screen the canvas never drew. The squircle rule is for UI tiles.
+ *   · (Resolved.) WelcomeScreen `logoCard` was held back as "the app icon's own corner, on
+ *     the one screen the canvas never drew" — and that was wrong on the second count. SignIn's
+ *     artboard draws the brand tile at 80 / 26, which is the squircle rule; Welcome's is the
+ *     same tile at 168, so it is `squircle(LOGO)`. This list is one shorter, as it should be.
  */
-const OFF_SCALE = 2;
-/** The two above, by name. Resolving either must fail this list, so it is an assertion. */
-const KNOWN_OFF_SCALE = ["src/WelcomeScreen.tsx", "src/components/AdoptDeck.tsx"];
+const OFF_SCALE = 1;
+/** The one above, by name. Resolving it must fail this list, so it is an assertion. */
+const KNOWN_OFF_SCALE = ["src/components/AdoptDeck.tsx"];
 /** Drawn geometry — see `isGeometry`. May fall; may not rise. */
 const GEOMETRY = 30;
 
@@ -268,7 +270,7 @@ describe("screens take corner radii from the theme", () => {
     expect(geometry.length).toBe(GEOMETRY);
   });
 
-  it("names the two that are off the scale on purpose", () => {
+  it("names the one that is off the scale on purpose", () => {
     expect(offScale.map((s) => s.file.replace(/^.*\/src\//, "src/")).sort()).toEqual([...KNOWN_OFF_SCALE].sort());
   });
 

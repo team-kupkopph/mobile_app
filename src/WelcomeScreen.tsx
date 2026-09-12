@@ -9,7 +9,7 @@ import type { SocialProvider } from "./auth/socialAuth";
 import { Button } from "./components/ui/Button";
 import { SocialSignIn } from "./components/ui/SocialSignIn";
 import { TAP_SLOP } from "./touch";
-import { typography } from "./theme";
+import { elevation, squircle, typography } from "./theme";
 
 /**
  * The landing screen — rebuilt 2026-09-05 to be lighter and to lay itself out.
@@ -244,6 +244,9 @@ export function WelcomeScreen({
   );
 }
 
+/** The brand tile's design size; the radius follows it even when flexShrink takes a little off. */
+const LOGO = 168;
+
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: c.bg },
 
@@ -271,19 +274,17 @@ const styles = StyleSheet.create({
     // tagline is what gets clipped. Shrinking the decoration is always the right trade
     // against clipping the words. This is the same claim the header makes about the old
     // absolute layout, so it had better be true of the new one.
-    height: 168,
+    height: LOGO,
     aspectRatio: 1,
     flexShrink: 1,
-    borderRadius: 42,          // squircle, per the V2 language — not a circle
+    // SignIn.dc.html draws the brand tile at 80 / 26 — the 0.32 squircle rule — with its
+    // own shadow. This is the same tile at 168; the 42 (0.25) was the app icon's corner.
+    borderRadius: squircle(LOGO),
     backgroundColor: c.white,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
-    shadowColor: "#0B1F2A",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    elevation: 6,
+    ...elevation.brand,
   },
   logoImage: { width: "78%", height: "78%" },
 
