@@ -12,7 +12,7 @@ import { GuestIntentAction } from "../guestIntent";
 import { CheckIcon, ProfileIcon, VolunteerIcon } from "./AppIcons";
 import { PrimaryButton, authColors } from "../screens/AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 export type SignupWallAction = GuestIntentAction;
 
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   noteBar: {
     width: "100%",
     marginTop: 20,
-    borderRadius: 14,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

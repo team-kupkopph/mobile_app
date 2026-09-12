@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
   accentWarn: {
     margin: 12,
     minHeight: 52,
-    borderRadius: 16,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   accentTeal: {
     margin: 12,
     minHeight: 52,
-    borderRadius: 16,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,

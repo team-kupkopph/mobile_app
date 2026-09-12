@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   socialInput: { color: colors.ink, ...typography.strong, fontWeight: "800", padding: 0 },
   consentRow: {
     marginTop: 22,
-    borderRadius: 14,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

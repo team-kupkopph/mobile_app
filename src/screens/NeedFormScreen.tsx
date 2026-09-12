@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 const card = {
@@ -148,11 +148,13 @@ const styles = StyleSheet.create({
   error: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "600" },
   groupLabel: { marginTop: 22, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   segments: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  segment: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, ...card },
+  // Five options wrap: a filter row of pills, not a segmented control (the primitive takes two or three).
+  segment: { height: 38, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), ...card },
   segmentOn: { backgroundColor: colors.teal },
   segmentText: { color: colors.ink, ...typography.meta, fontWeight: "700", textTransform: "capitalize" },
   segmentTextOn: { color: colors.white },
-  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", padding: 8, borderRadius: 22, ...card },
+  // A control track is a pill of its height, as SegmentedControl's is: 8 + 52 + 8.
+  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", height: 68, padding: 8, borderRadius: pill(68), ...card },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },
   qty: { color: colors.ink, fontSize: 30, fontWeight: "800", minWidth: 40, textAlign: "center" },

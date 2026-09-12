@@ -7,7 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { spacing, typography } from "../theme";
+import { radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "passwordChanged">;
 
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   noticeBar: {
     width: "100%",
     marginTop: 34,
-    borderRadius: 16,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

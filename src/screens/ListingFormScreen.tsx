@@ -18,7 +18,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
 
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -269,24 +269,13 @@ export function ListingFormScreen({ navigation, route }: Props) {
 function Segmented({ options, value, onChange }: {
   options: readonly string[]; value: string; onChange: (v: string) => void;
 }) {
+  // The primitive takes labels and an index; the screens keep their string enums.
   return (
-    <View style={styles.segTrack}>
-      {options.map((opt) => {
-        const active = opt === value;
-        return (
-          <TouchableOpacity
-            key={opt}
-            style={[styles.segItem, active && styles.segItemActive]}
-            onPress={() => onChange(opt)}
-            activeOpacity={0.85}
-          >
-            <Text style={[styles.segText, active && styles.segTextActive]}>
-              {opt.charAt(0).toUpperCase() + opt.slice(1)}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
+    <SegmentedControl
+      segments={options.map((opt) => opt.charAt(0).toUpperCase() + opt.slice(1))}
+      index={Math.max(0, options.indexOf(value))}
+      onChange={(i) => onChange(options[i])}
+    />
   );
 }
 
@@ -302,16 +291,11 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, ...typography.title },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   draftNote: { marginTop: 4, marginBottom: 6, color: colors.teal, ...typography.meta, fontWeight: "600", lineHeight: 19 },
-  statusNote: { marginTop: 4, marginBottom: 6, padding: 14, borderRadius: 14, backgroundColor: colors.warningBg },
+  statusNote: { marginTop: 4, marginBottom: 6, padding: 14, borderRadius: radii.notice, backgroundColor: colors.warningBg },
   statusNoteText: { color: colors.warningStrong, ...typography.meta, fontWeight: "600", lineHeight: 18 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   notes: { minHeight: 90, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
-  segTrack: { flexDirection: "row", backgroundColor: colors.greyPill, borderRadius: 16, padding: 4, gap: 4 },
-  segItem: { flex: 1, height: 44, borderRadius: radii.chip, alignItems: "center", justifyContent: "center" },
-  segItemActive: { ...card },
-  segText: { color: colors.muted, ...typography.strong, fontWeight: "700" },
-  segTextActive: { color: colors.ink },
   fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
   photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },

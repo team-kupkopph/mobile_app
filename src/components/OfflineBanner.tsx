@@ -9,7 +9,7 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { useConnectivity } from "../net/ConnectivityProvider";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 const colors = { warnBg: "#FAEEDA", warn: "#633806" };
 
@@ -31,7 +31,7 @@ export function OfflineBanner({ bottom = 96 }: { bottom?: number }) {
 
 const styles = StyleSheet.create({
   bar: {
-    position: "absolute", left: 16, right: 16, borderRadius: 14,
+    position: "absolute", left: 16, right: 16, borderRadius: radii.notice,
     backgroundColor: colors.warnBg, paddingVertical: 10, paddingHorizontal: 14,
   },
   text: { ...typography.meta, fontWeight: "600", color: colors.warn, textAlign: "center" },

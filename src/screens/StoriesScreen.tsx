@@ -17,7 +17,7 @@ import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -112,7 +112,7 @@ export function StoriesScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  share: { paddingHorizontal: 18, paddingVertical: 11, borderRadius: 22, backgroundColor: colors.teal },
+  share: { height: 38, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   shareLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },

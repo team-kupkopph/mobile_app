@@ -5,6 +5,12 @@
 export const radii = {
   /** Chips, small status pills, tiny badges. */
   chip: 12,
+  /**
+   * Tinted notice bars, banners, consent and option rows. The artboards drew this element at
+   * 13–14 (Inquiry's contact box, Profile's glass, the status chips on Main and Adopt) before
+   * the panel named it; library #11 added the row. The screens had it at 14 or 16 in 24 places.
+   */
+  notice: 14,
   /** Icon tiles and avatars at the common 46–56 pt sizes. See `squircle()` for the rule. */
   tile: 18,
   /** Filled form fields. */

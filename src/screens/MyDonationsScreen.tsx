@@ -13,7 +13,7 @@ import { loadState } from "../net";
 import { ChipTone, pledgeIsCancellable, pledgeStatusChip, PledgeStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 
@@ -119,6 +119,6 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, fontSize: 14.5 },
-  cancelBtn: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, backgroundColor: "#FBEEEC" },
+  cancelBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: "#FBEEEC" },
   cancelLabel: { color: colors.danger, fontSize: 14.5, fontWeight: "700" }
 });

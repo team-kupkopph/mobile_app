@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   empty: { color: colors.muted, ...typography.body, textAlign: "center", marginTop: 8 },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   sectionLabel: { marginBottom: 12, color: colors.ink, ...typography.strong, fontWeight: "800" },
-  bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
+  bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   flagStrip: {
-    marginTop: 12, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 12,
+    marginTop: 12, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 12,
     flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: colors.warningBg
   },
   flagTitle: { color: colors.warningStrong, ...typography.meta, fontWeight: "800" },

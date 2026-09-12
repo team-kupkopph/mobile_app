@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   summarySub: { marginTop: 3, color: colors.muted, ...typography.meta },
   question: { alignSelf: "flex-start", marginTop: 26, color: colors.ink, ...typography.hero },
   body: { alignSelf: "flex-start", marginTop: 10, color: colors.muted, ...typography.body },
-  bannerBox: { width: "100%", marginTop: 18, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
+  bannerBox: { width: "100%", marginTop: 18, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   cancelButton: { width: "100%", marginTop: 36 },
   keepLink: { marginTop: 16, height: 40, alignItems: "center", justifyContent: "center" },

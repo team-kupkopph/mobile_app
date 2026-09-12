@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   notOpenNote: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "700" },
   sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   consentRow: {
-    marginBottom: 14, borderRadius: 14, flexDirection: "row", alignItems: "flex-start",
+    marginBottom: 14, borderRadius: radii.notice, flexDirection: "row", alignItems: "flex-start",
     paddingHorizontal: 16, paddingVertical: 16, gap: 14, backgroundColor: colors.soft
   },
   consentRowAlert: { backgroundColor: "#FBEEEC" },

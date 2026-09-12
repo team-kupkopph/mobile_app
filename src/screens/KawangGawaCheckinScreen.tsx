@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
-  banner: { marginTop: 16, borderRadius: 16, paddingHorizontal: 18, paddingVertical: 14, flexDirection: "row", alignItems: "center", gap: 10 },
+  banner: { marginTop: 16, borderRadius: radii.notice, paddingHorizontal: 18, paddingVertical: 14, flexDirection: "row", alignItems: "center", gap: 10 },
   bannerDot: { width: 9, height: 9, borderRadius: 5 },
   bannerText: { flex: 1, ...typography.meta, fontWeight: "800" },
   sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },

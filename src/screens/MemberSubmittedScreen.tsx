@@ -7,7 +7,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { colors, radii, spacing, typography } from "../theme";
 import { Button } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   noticeBar: {
     width: "100%",
     marginTop: 34,
-    borderRadius: 16,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

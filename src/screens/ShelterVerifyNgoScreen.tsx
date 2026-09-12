@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   docDoneText: { marginTop: 5, color: colors.muted, fontSize: 10, fontWeight: "700" },
   pendingRow: {
     marginTop: 16,
-    borderRadius: 14,
+    borderRadius: radii.notice,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

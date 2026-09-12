@@ -19,7 +19,7 @@
 // `accessibilityRole="alert"` that US-U1 established for errors, so five screens get both
 // for free instead of five near-misses.
 import { StyleSheet, Text } from "react-native";
-import { typography } from "../theme";
+import { radii, typography } from "../theme";
 
 /** Errors live with what they affect, never pooled at the top (design-system rule). */
 const colors = { danger: "#B23B3B", dangerBg: "#FBEEEC", dangerLine: "#E7C7C2" };
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.dangerBg,
     borderColor: colors.dangerLine,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: radii.notice,
     color: colors.danger,
     ...typography.meta,
     lineHeight: 20,
