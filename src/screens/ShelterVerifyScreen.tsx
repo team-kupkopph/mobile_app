@@ -5,7 +5,7 @@
 //   NGO papers (step 2), which submits base + SEC/BAI in one request (server enforces tier1 -> tier2).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
@@ -14,8 +14,8 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Avatar, Button, ScreenHeader } from "../components/ui";
+import { colors, elevation, radii, spacing, typography } from "../theme";
+import { Avatar, Button, Field, ScreenHeader } from "../components/ui";
 
 const MIN_PHOTOS = 3;
 
@@ -33,7 +33,6 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
   const [busy, setBusy] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-
 
   async function presign(): Promise<string | null> {
     // null = the person cancelled or declined the permission — an ordinary outcome, not an
@@ -144,19 +143,15 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
           onPress={() => uploadInto("photo", (url) => setPhotos((p) => [...p, url]))}
         />
 
-        <Text style={styles.fieldLabel}>Social link</Text>
-        <View style={styles.socialField}>
-          <TextInput
-            value={social}
-            onChangeText={setSocial}
-            placeholder="facebook.com/your.shelter"
-            placeholderTextColor="#9A988F"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-            style={styles.socialInput}
-          />
-        </View>
+        <Field
+          label="Social link"
+          value={social}
+          onChangeText={setSocial}
+          placeholder="facebook.com/your.shelter"
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+        />
 
         <TouchableOpacity activeOpacity={0.85} style={styles.consentRow} onPress={() => setConsent((v) => !v)}>
           <View style={[styles.consentBox, consent && styles.consentBoxChecked]}>{consent && <CheckIcon color="#FFFFFF" size={13} />}</View>
@@ -220,7 +215,6 @@ function DocSlot({
   );
 }
 
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F5F2" },
   backButton: {
@@ -256,16 +250,6 @@ const styles = StyleSheet.create({
   docDone: { alignItems: "center" },
   docCheck: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "#5B8A3A" },
   docDoneText: { marginTop: 5, color: colors.muted, ...typography.caption, fontWeight: "700" },
-  fieldLabel: { marginTop: 22, marginBottom: 8, color: colors.muted, ...typography.meta, fontWeight: "800" },
-  socialField: {
-    height: 54,
-    borderRadius: radii.field,
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
-  },
-  socialInput: { color: colors.ink, ...typography.strong, fontWeight: "800", padding: 0 },
   consentRow: {
     marginTop: 22,
     borderRadius: radii.notice,

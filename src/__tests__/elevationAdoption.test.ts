@@ -246,8 +246,10 @@ describe("screens take depth from the theme", () => {
   it("found shadows to classify", () => {
     // Guard the guard: scans in this repo have reported a plausible smaller number more
     // than once, and a guard that matches nothing passes forever.
-    expect(bound.length).toBeGreaterThan(80);
-    expect(bound.length + handRolled.length).toBeGreaterThan(95);
+    // Floors, not targets: hand-rolled fields and buttons carried their own `...card` and
+    // `...elevation.soft` until they became Field and Button, which shadow once each.
+    expect(bound.length).toBeGreaterThan(70);
+    expect(bound.length + handRolled.length).toBeGreaterThan(80);
   });
 
   it("leaves no hand-rolled shadow that reproduces a step exactly", () => {

@@ -5,12 +5,11 @@
 // for the surrounding chrome.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
-
+import { colors, spacing, typography } from "../theme";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -41,13 +40,11 @@ export function RescuePlaceScreen({ navigation, route }: Props) {
           shelter — instead of listing it publicly for adoption.
         </Text>
 
-        <Text style={styles.label}>Recipient's email</Text>
-        <TextInput
-          style={styles.input}
+        <Field
+          label="Recipient's email"
           value={email}
           onChangeText={setEmail}
           placeholder="name@example.com"
-          placeholderTextColor={colors.muted}
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"
@@ -64,16 +61,10 @@ export function RescuePlaceScreen({ navigation, route }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   draftNote: { marginTop: 4, marginBottom: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
-  label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }

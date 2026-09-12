@@ -10,12 +10,8 @@ import {
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, pill, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
-
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
+import { colors, pill, radii, spacing, typography } from "../theme";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "storyCompose">;
 
@@ -70,12 +66,13 @@ export function StoryComposeScreen({ navigation, route }: Props) {
           </View>
         ) : null}
 
-        <Text style={styles.label}>Caption</Text>
-        <View style={styles.field}>
-          <TextInput style={styles.input} value={caption} onChangeText={setCaption} multiline
-            placeholder="Tell people what happened — how you met, how it's going now."
-            placeholderTextColor="#9A988F" />
-        </View>
+        <Field
+          label="Caption"
+          value={caption}
+          onChangeText={setCaption}
+          multiline
+          placeholder="Tell people what happened — how you met, how it's going now."
+        />
 
         {error && photoUrl ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -94,9 +91,6 @@ const styles = StyleSheet.create({
   photoLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   linkedPill: { alignSelf: "flex-start", marginTop: 16, height: 32, paddingHorizontal: 14, justifyContent: "center", borderRadius: pill(32), backgroundColor: "#EAF3DE" },
   linkedText: { color: "#27500A", ...typography.meta, fontWeight: "700" },
-  label: { marginTop: 24, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
-  field: { padding: 16, borderRadius: radii.field, ...card },
-  input: { color: colors.ink, ...typography.subtitle, minHeight: 96, textAlignVertical: "top" },
   error: { marginTop: 10, color: colors.danger, ...typography.meta, fontWeight: "600" },
   primaryBtn: { marginTop: 28 }
 });

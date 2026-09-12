@@ -4,7 +4,7 @@
 // Server enforces tier1 -> tier2 (409 tier1_incomplete) and the required set (422 missing_docs).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
@@ -12,8 +12,8 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Avatar, Button, ScreenHeader } from "../components/ui";
+import { colors, elevation, radii, spacing, typography } from "../theme";
+import { Avatar, Button, Field, ScreenHeader } from "../components/ui";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -137,15 +137,15 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
           <Text style={styles.pendingText}>Our BAI licence is still processing — I'll send it later.</Text>
         </TouchableOpacity>
 
-        <Text style={styles.fieldLabel}>Vet name</Text>
-        <View style={styles.field}>
-          <TextInput value={vetName} onChangeText={setVetName} placeholder="Dr. Juan Cruz" placeholderTextColor="#9A988F" style={styles.input} />
-        </View>
-        <Text style={styles.fieldLabel}>Vet PRC number</Text>
-        <View style={styles.field}>
-          <TextInput value={prc} onChangeText={setPrc} placeholder="6–8 digits" placeholderTextColor="#9A988F" keyboardType="number-pad" style={styles.input} />
-        </View>
-        {prc.trim().length > 0 && !prcValid && <Text style={styles.formError}>PRC number must be 6–8 digits.</Text>}
+        <Field label="Vet name" value={vetName} onChangeText={setVetName} placeholder="Dr. Juan Cruz" />
+        <Field
+          label="Vet PRC number"
+          value={prc}
+          onChangeText={setPrc}
+          placeholder="6–8 digits"
+          keyboardType="number-pad"
+          error={prc.trim().length > 0 && !prcValid ? "PRC number must be 6–8 digits." : undefined}
+        />
 
         {!!error && <Text style={styles.formError}>{error}</Text>}
 
@@ -196,7 +196,6 @@ function DocSlot({
     </TouchableOpacity>
   );
 }
-
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F5F2" },
@@ -257,16 +256,6 @@ const styles = StyleSheet.create({
   },
   consentBoxChecked: { backgroundColor: authColors.teal },
   pendingText: { flex: 1, color: "#633806", ...typography.meta, fontWeight: "700", lineHeight: 19 },
-  fieldLabel: { marginTop: 20, marginBottom: 8, color: colors.muted, ...typography.meta, fontWeight: "800" },
-  field: {
-    height: 54,
-    borderRadius: radii.field,
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
-  },
-  input: { color: colors.ink, ...typography.strong, fontWeight: "800", padding: 0 },
   formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { marginTop: 22 }
 });

@@ -4,14 +4,13 @@
 // separate, always-both-keys gate (org approved AND this QR reviewer-verified).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
-
+import { colors, radii, spacing, typography } from "../theme";
+import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 
 const PROVIDERS = ["gcash", "maya"] as const;
 const PROVIDER_LABEL: Record<(typeof PROVIDERS)[number], string> = { gcash: "GCash", maya: "Maya" };
@@ -70,13 +69,11 @@ export function DonationQrScreen({ navigation }: Props) {
           onChange={(i) => setProvider(PROVIDERS[i])}
         />
 
-        <Text style={styles.label}>Name on the account</Text>
-        <TextInput
-          style={styles.input}
+        <Field
+          label="Name on the account"
           value={accountName}
           onChangeText={setAccountName}
           placeholder="Marikina Animal Welfare Group"
-          placeholderTextColor={colors.faintDeprecated}
         />
 
         <Text style={styles.label}>QR image</Text>
@@ -93,16 +90,11 @@ export function DonationQrScreen({ navigation }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   draftNote: { marginTop: 4, marginBottom: 6, color: colors.teal, ...typography.meta, fontWeight: "600", lineHeight: 19 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },

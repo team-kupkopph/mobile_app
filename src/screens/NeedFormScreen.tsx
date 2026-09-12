@@ -10,8 +10,8 @@ import { useApi } from "../api/useApi";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, pill, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { colors, elevation, pill, spacing, typography } from "../theme";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -80,12 +80,13 @@ export function NeedFormScreen({ navigation, route }: Props) {
             only by half — someone scanning down starts typing before they reach the notice
             that nothing they type can be saved. */}
         {prefillFailed ? <PrefillWarning message={PREFILL_FAILED} /> : null}
-        <View style={[styles.field, !title.trim() && error ? styles.fieldError : null]}>
-          <Text style={styles.fieldLabel}>What do you need?</Text>
-          <TextInput style={styles.input} value={title} onChangeText={setTitle}
-            placeholder="e.g. Dog food (adult, dry)" placeholderTextColor="#9A988F" />
-        </View>
-        {!title.trim() && error ? <Text style={styles.error}>{error}</Text> : null}
+        <Field
+          label="What do you need?"
+          value={title}
+          onChangeText={setTitle}
+          placeholder="e.g. Dog food (adult, dry)"
+          error={!title.trim() && error ? error : undefined}
+        />
 
         {!editing ? (
           <>
@@ -117,12 +118,13 @@ export function NeedFormScreen({ navigation, route }: Props) {
             accessibilityValue={{ now: qty }}><Text style={styles.stepGlyph}>+</Text></TouchableOpacity>
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.fieldLabel}>Details (optional)</Text>
-          <TextInput style={[styles.input, styles.multiline]} value={description}
-            onChangeText={setDescription} multiline placeholder="Brand, size, anything specific"
-            placeholderTextColor="#9A988F" />
-        </View>
+        <Field
+          label="Details (optional)"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          placeholder="Brand, size, anything specific"
+        />
 
         {error && title.trim() ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -140,11 +142,6 @@ export function NeedFormScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  field: { marginTop: 16, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 8, borderRadius: radii.field, ...card },
-  fieldError: { borderWidth: 1.5, borderColor: colors.danger },
-  fieldLabel: { color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
-  input: { color: colors.ink, ...typography.subtitle, fontWeight: "700", paddingVertical: 6 },
-  multiline: { minHeight: 72, textAlignVertical: "top", fontWeight: "400", ...typography.subtitle },
   error: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "600" },
   groupLabel: { marginTop: 22, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   segments: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

@@ -6,7 +6,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
@@ -14,10 +14,9 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ShiftType, shiftTypeLabel } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
-
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -137,39 +136,32 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
           <Text style={styles.label}>Activity type</Text>
           <TypeChips value={type} onChange={setType} />
 
-          <Text style={styles.label}>Starts</Text>
-          <TextInput
-            style={styles.input}
+          <Field
+            label="Starts"
             value={startsAt}
             onChangeText={setStartsAt}
             placeholder="2026-08-30T09:00"
-            placeholderTextColor={colors.faintDeprecated}
             autoCapitalize="none"
             autoCorrect={false}
           />
 
-          <Text style={styles.label}>Ends</Text>
-          <TextInput
-            style={styles.input}
+          <Field
+            label="Ends"
             value={endsAt}
             onChangeText={setEndsAt}
             placeholder="2026-08-30T11:00"
-            placeholderTextColor={colors.faintDeprecated}
             autoCapitalize="none"
             autoCorrect={false}
           />
 
-          <Text style={styles.label}>Capacity</Text>
-          <TextInput
-            style={styles.input}
+          <Field
+            label="Capacity"
             value={capacity}
             onChangeText={setCapacity}
             placeholder="1"
-            placeholderTextColor={colors.faintDeprecated}
             keyboardType="number-pad"
+            error={error ? error : undefined}
           />
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
 
           <Button label="Save changes" onPress={submit} loading={submitting} style={styles.submit} />
         </ScrollView>
@@ -202,7 +194,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
     minWidth: "47%", height: 48, borderRadius: radii.chip, alignItems: "center", justifyContent: "center",
@@ -211,6 +202,5 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.soft },
   chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   chipTextActive: { color: colors.teal },
-  error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }
 });

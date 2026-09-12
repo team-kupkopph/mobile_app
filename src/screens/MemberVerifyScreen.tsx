@@ -5,7 +5,7 @@
 // wasn't accepted server-side, surfaced as a friendly inline error.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
@@ -14,7 +14,7 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -136,19 +136,15 @@ export function MemberVerifyScreen({ navigation }: Props) {
           )}
         </TouchableOpacity>
 
-        <Text style={styles.fieldLabel}>Social link</Text>
-        <View style={styles.socialField}>
-          <TextInput
-            value={socialUrl}
-            onChangeText={setSocialUrl}
-            placeholder="facebook.com/your.name"
-            placeholderTextColor={colors.muted}
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="url"
-            style={styles.socialInput}
-          />
-        </View>
+        <Field
+          label="Social link"
+          value={socialUrl}
+          onChangeText={setSocialUrl}
+          placeholder="facebook.com/your.name"
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+        />
 
         <TouchableOpacity
           activeOpacity={0.85}
@@ -177,7 +173,6 @@ export function MemberVerifyScreen({ navigation }: Props) {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   screen: {
@@ -264,27 +259,6 @@ const styles = StyleSheet.create({
     color: colors.muted,
     ...typography.caption,
     fontWeight: "700"
-  },
-  fieldLabel: {
-    marginTop: 22,
-    marginBottom: 8,
-    color: colors.muted,
-    ...typography.meta,
-    fontWeight: "800"
-  },
-  socialField: {
-    height: 54,
-    borderRadius: radii.field,
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    backgroundColor: colors.white,
-    ...elevation.soft
-  },
-  socialInput: {
-    color: colors.ink,
-    ...typography.strong,
-    fontWeight: "800",
-    padding: 0
   },
   consentRow: {
     marginTop: 26,

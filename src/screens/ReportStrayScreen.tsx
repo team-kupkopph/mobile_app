@@ -6,8 +6,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
+import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 
 import { useApi } from "../api/useApi";
 import { useOutbox } from "../outbox/OutboxProvider";
@@ -17,7 +17,6 @@ import { RootStackParamList } from "../navigation/types";
 import { sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-
 
 const SPECIES = ["dog", "cat", "other"] as const;
 const CONDITIONS = ["injured", "sick", "healthy", "pregnant"] as const;
@@ -165,15 +164,13 @@ export function ReportStrayScreen({ navigation, route }: Props) {
         <Text style={styles.label}>Condition</Text>
         <Segmented options={CONDITIONS} value={condition} onChange={setCondition} />
 
-        <Text style={styles.label}>Notes (optional)</Text>
-        <TextInput
+        <Field
+          label="Notes (optional)"
           testID="field.reportStray.notes"
-          style={styles.notes}
           value={notes}
           onChangeText={setNotes}
           multiline
           placeholder="Limping, near the sari-sari store — wouldn't let me near."
-          placeholderTextColor={colors.muted}
         />
 
         <View style={styles.locCard}>
@@ -256,7 +253,6 @@ const styles = StyleSheet.create({
   photoBtn: { marginTop: 18, height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   label: { marginTop: 24, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  notes: { marginTop: 2, minHeight: 90, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   locCard: { marginTop: 24, padding: 18, borderRadius: radii.tile, ...card },
   locRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   locText: { color: colors.muted, ...typography.body },

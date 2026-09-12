@@ -17,9 +17,8 @@ import { PrefillWarning } from "../components/PrefillWarning";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
-
+import { colors, radii, spacing, typography } from "../theme";
+import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 
 const SPECIES = ["dog", "cat", "other"] as const;
 const SEX = ["male", "female", "unknown"] as const;
@@ -171,71 +170,44 @@ export function ListingFormScreen({ navigation, route }: Props) {
           </Text>
         ) : null}
 
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="Bantay"
-          placeholderTextColor={colors.muted}
-        />
+        <Field label="Name" value={name} onChangeText={setName} placeholder="Bantay" />
 
         <Text style={styles.label}>Animal</Text>
         <Segmented options={SPECIES} value={species} onChange={setSpecies} />
 
-        <Text style={styles.label}>Breed (optional)</Text>
-        <TextInput
-          style={styles.input}
-          value={breed}
-          onChangeText={setBreed}
-          placeholder="Aspin"
-          placeholderTextColor={colors.muted}
-        />
+        <Field label="Breed (optional)" value={breed} onChangeText={setBreed} placeholder="Aspin" />
 
         <Text style={styles.label}>Sex</Text>
         <Segmented options={SEX} value={sex} onChange={setSex} />
 
-        <Text style={styles.label}>Birthdate (optional)</Text>
-        <TextInput
-          style={styles.input}
+        <Field
+          label="Birthdate (optional)"
           value={birthdate}
           onChangeText={setBirthdate}
           placeholder="YYYY-MM-DD"
-          placeholderTextColor={colors.muted}
           keyboardType="numbers-and-punctuation"
         />
 
-        <Text style={styles.label}>Description (optional)</Text>
-        <TextInput
-          style={styles.notes}
+        <Field
+          label="Description (optional)"
           value={description}
           onChangeText={setDescription}
           multiline
           placeholder="Friendly, house-trained, good with kids…"
-          placeholderTextColor={colors.muted}
         />
 
-        <Text style={styles.label}>Adoption fee (₱)</Text>
-        <TextInput
-          style={styles.input}
+        <Field
+          label="Adoption fee (₱)"
           value={fee}
           onChangeText={setFee}
           keyboardType="decimal-pad"
           placeholder="0"
-          placeholderTextColor={colors.muted}
         />
         <Text style={styles.fine}>
           Tier-1 rescues and individual Verified Members are capped at ₱500. Registered NGOs aren't capped.
         </Text>
 
-        <Text style={styles.label}>City</Text>
-        <TextInput
-          style={styles.input}
-          value={city}
-          onChangeText={setCity}
-          placeholder="Marikina"
-          placeholderTextColor={colors.muted}
-        />
+        <Field label="City" value={city} onChangeText={setCity} placeholder="Marikina" />
 
         {!isEdit ? (
           <>
@@ -273,10 +245,6 @@ function Segmented({ options, value, onChange }: {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
@@ -284,8 +252,6 @@ const styles = StyleSheet.create({
   statusNote: { marginTop: 4, marginBottom: 6, padding: 14, borderRadius: radii.notice, backgroundColor: colors.warningBg },
   statusNoteText: { color: colors.warningStrong, ...typography.meta, fontWeight: "600", lineHeight: 18 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
-  notes: { minHeight: 90, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
   photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
