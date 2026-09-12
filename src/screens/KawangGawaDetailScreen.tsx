@@ -5,8 +5,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ScreenHeader } from "../components/ui";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Button, ScreenHeader } from "../components/ui";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
@@ -222,21 +222,14 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
 
           {!!error && <Text style={styles.formError}>{error}</Text>}
 
-          <TouchableOpacity
+          <Button
             testID="btn.kawanggawaDetail.request"
-            activeOpacity={0.85}
-            accessibilityRole="button"
+            label="Request"
+            onPress={submit}
+            loading={submitting}
             accessibilityLabel="Request this shift"
             style={styles.submitButton}
-            onPress={submit}
-            disabled={submitting}
-          >
-            {submitting ? (
-              <ActivityIndicator color={colors.white} />
-            ) : (
-              <Text style={styles.submitText}>Request</Text>
-            )}
-          </TouchableOpacity>
+          />
         </ScrollView>
       )}
     </View>
@@ -275,7 +268,6 @@ const styles = StyleSheet.create({
   consentLink: { textDecorationLine: "underline" },
   consentHelper: { marginTop: 6, color: colors.muted, fontSize: 11, fontWeight: "600" },
   formError: { marginTop: 4, marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "700" },
-  submitButton: { height: 56, marginTop: 8, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  consentError: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "700" },
-  submitText: { color: colors.white, ...typography.subtitle, fontWeight: "800" }
+  submitButton: { marginTop: 8 },
+  consentError: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "700" }
 });

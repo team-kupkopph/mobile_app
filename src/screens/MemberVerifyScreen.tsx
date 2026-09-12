@@ -14,7 +14,7 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -167,18 +167,12 @@ export function MemberVerifyScreen({ navigation }: Props) {
 
         <Text style={styles.reviewNote}>A Kupkop admin reviews this — usually within a day.</Text>
 
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]}
+        <Button
+          label="Submit for review"
           onPress={handleSubmit}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <Text style={styles.submitText}>Submit for review</Text>
-          )}
-        </TouchableOpacity>
+          loading={submitting}
+          style={styles.submitButton}
+        />
       </ScrollView>
     </View>
   );
@@ -346,20 +340,5 @@ const styles = StyleSheet.create({
     ...typography.meta,
     textAlign: "center"
   },
-  submitButton: {
-    height: 54,
-    marginTop: 16,
-    borderRadius: 27,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.teal
-  },
-  submitButtonDisabled: {
-    opacity: 0.5
-  },
-  submitText: {
-    color: colors.white,
-    ...typography.subtitle,
-    fontWeight: "800"
-  }
+  submitButton: { marginTop: 16 }
 });

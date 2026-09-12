@@ -3,12 +3,12 @@
 // rescue tooling — see Design Package decision: adoption is gated on the badge too) and hands off
 // to MemberVerifyScreen for the actual submission.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { AdoptIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberUpgrade">;
 
@@ -48,13 +48,7 @@ export function MemberUpgradeScreen({ navigation }: Props) {
           <Text style={styles.lightText}>A valid ID and one link to your social page.</Text>
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={styles.cta}
-          onPress={() => navigation.navigate("memberVerify")}
-        >
-          <Text style={styles.ctaText}>Get verified</Text>
-        </TouchableOpacity>
+        <Button label="Get verified" onPress={() => navigation.navigate("memberVerify")} style={styles.cta} />
         <Text style={styles.footnote}>Free · takes a few minutes</Text>
       </View>
     </View>
@@ -160,19 +154,7 @@ const styles = StyleSheet.create({
     ...typography.meta,
     lineHeight: 18
   },
-  cta: {
-    height: 54,
-    marginTop: 28,
-    borderRadius: 27,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.teal
-  },
-  ctaText: {
-    color: colors.white,
-    ...typography.subtitle,
-    fontWeight: "800"
-  },
+  cta: { marginTop: 28 },
   footnote: {
     marginTop: 12,
     marginBottom: 30,

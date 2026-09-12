@@ -10,6 +10,7 @@ import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, spacing, typography } from "../theme";
+import { Button } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaRequested">;
 
@@ -30,13 +31,11 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
           Once confirmed, it moves from "Awaiting approval" to your upcoming shifts.
         </Text>
 
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={styles.primaryButton}
+        <Button
+          label="View my schedule"
           onPress={() => navigation.navigate("kawanggawaSchedule")}
-        >
-          <Text style={styles.primaryText}>View my schedule</Text>
-        </TouchableOpacity>
+          style={styles.primaryButton}
+        />
 
         <TouchableOpacity hitSlop={TAP_SLOP}
           activeOpacity={0.7}
@@ -61,11 +60,7 @@ const styles = StyleSheet.create({
   heading: { marginTop: 24, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
   hint: { marginTop: 26, color: colors.muted, ...typography.meta, textAlign: "center", lineHeight: 19 },
-  primaryButton: {
-    width: "100%", height: 56, marginTop: 34, borderRadius: 28, alignItems: "center",
-    justifyContent: "center", backgroundColor: colors.teal
-  },
-  primaryText: { color: colors.white, ...typography.subtitle, fontWeight: "800" },
+  primaryButton: { width: "100%", marginTop: 34 },
   secondaryButton: { marginTop: 18, paddingVertical: 10 },
   secondaryText: { color: colors.teal, ...typography.strong, fontWeight: "700" }
 });

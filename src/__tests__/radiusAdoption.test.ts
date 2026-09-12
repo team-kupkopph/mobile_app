@@ -185,15 +185,20 @@ const TILE_EXEMPTIONS: string[] = [];
  * padding rather than height, which are pills by intent but have no height for the pill rule
  * to halve; and tiles that are 0.29–0.31 × size instead of 0.32. Each is a visible move.
  * It may fall. It may not rise.
+ *
+ * 138: Welcome's `primaryWrap` carried `borderRadius: 30` with no height — a pill by intent
+ * the rule could not halve — and went with the hand-rolled button it clipped.
  */
-const OFF_SCALE = 139;
+const OFF_SCALE = 138;
 
 describe("screens take corner radii from the theme", () => {
   it("found radii to classify", () => {
     // Guard the guard: scans here have reported a plausible smaller number more than once.
     expect(sites.length).toBeGreaterThan(400);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
-    expect(sites.filter(isPill).length).toBeGreaterThan(150);
+    // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
+    // own height once, in one file. The floor moved down with them; it is still a floor.
+    expect(sites.filter(isPill).length).toBeGreaterThan(110);
   });
 
   it("leaves no container literal that already equals a step", () => {

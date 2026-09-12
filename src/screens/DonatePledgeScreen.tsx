@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, spacing, squircle, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 const card = {
@@ -51,13 +51,12 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
             You pledged {qty} to “{needTitle}”. {shelterName} will confirm once it arrives —
             you'll get a notification then. Salamat sa pagtulong!
           </Text>
-          <TouchableOpacity style={styles.primaryBtn}
-            onPress={() => navigation.navigate("myDonations")}>
-            <Text style={styles.primaryLabel}>See my donations</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.goBack()}>
-            <Text style={styles.secondaryLabel}>Back to wishlist</Text>
-          </TouchableOpacity>
+          <Button
+            label="See my donations"
+            onPress={() => navigation.navigate("myDonations")}
+            style={styles.primaryBtn}
+          />
+          <Button label="Back to wishlist" onPress={() => navigation.goBack()} variant="secondary" style={styles.secondaryBtn} />
         </ScrollView>
       </View>
     );
@@ -92,9 +91,7 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.primaryBtn} onPress={submit} disabled={busy}>
-          <Text style={styles.primaryLabel}>{busy ? "Pledging…" : "Pledge this"}</Text>
-        </TouchableOpacity>
+        <Button label="Pledge this" onPress={submit} loading={busy} style={styles.primaryBtn} />
       </ScrollView>
     </View>
   );
@@ -112,10 +109,8 @@ const styles = StyleSheet.create({
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },
   qty: { color: colors.ink, fontSize: 30, fontWeight: "800", minWidth: 40, textAlign: "center" },
   error: { marginTop: 18, color: "#B23B3B", fontSize: 14.5, fontWeight: "600" },
-  primaryBtn: { marginTop: 30, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
-  primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" },
-  secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
-  secondaryLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
+  primaryBtn: { marginTop: 30 },
+  secondaryBtn: { marginTop: 14 },
   confirmWrap: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 140, paddingBottom: 60, alignItems: "center" },
   checkTile: { width: 84, height: 84, borderRadius: squircle(84), backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
   checkGlyph: { color: colors.success, fontSize: 44, fontWeight: "800" },

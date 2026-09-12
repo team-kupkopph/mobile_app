@@ -216,8 +216,13 @@ for (const file of sources(SRC)) {
  *
  * It may fall. It may not rise: a new screen typing its own shadow is the drift the token
  * exists to end.
+ *
+ * TEN, DOWN FROM TWELVE, AGAIN BY DELETION. Welcome's `primaryWrap` (0,4)/.14/7 and
+ * VerifyResubmit's `submit` (0,4)/.12/8 were the shadows two hand-rolled primary buttons
+ * cast. Both buttons are now `<Button>`, which draws the canvas's `.cta` — no shadow — so
+ * there is nothing left to bind or to absorb.
  */
-const ONE_OFFS = 12;
+const ONE_OFFS = 10;
 
 describe("screens take depth from the theme", () => {
   it("found shadows to classify", () => {

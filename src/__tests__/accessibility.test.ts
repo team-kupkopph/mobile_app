@@ -261,7 +261,9 @@ describe("nested actions inside an accessible container", () => {
     const accessible = files.flatMap(({ src }) => containers(src)).filter(
       ({ attrs }) =>
         attrs.includes("accessibilityLabel") || attrs.includes('accessibilityRole="button"'));
-    expect(accessible.length).toBeGreaterThan(30);
+    // 45 hand-rolled CTAs carried their own accessibilityRole="button" until they became
+    // <Button>, which sets it once. The floor moved down with them; it is still a floor.
+    expect(accessible.length).toBeGreaterThan(20);
   });
 
   it("exposes every nested action through accessibilityActions", () => {

@@ -2,11 +2,12 @@
 // POST /cases/{caseId}/list response is just { listing_id }, and the route carries no
 // params — see RootStackParamList) so this is a plain confirmation, not a link-through.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, spacing, squircle, typography } from "../theme";
+import { Button } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueListed">;
@@ -21,13 +22,11 @@ export function RescueListedScreen({ navigation }: Props) {
           <Text style={styles.heroBody}>The animal now shows up in Adopt once your account clears verification.</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.primary}
-          activeOpacity={0.9}
+        <Button
+          label="Back to my rescues"
           onPress={() => navigation.navigate("myRescues")}
-        >
-          <Text style={styles.primaryText}>Back to my rescues</Text>
-        </TouchableOpacity>
+          style={styles.primary}
+        />
       </ScrollView>
     </View>
   );
@@ -40,6 +39,5 @@ const styles = StyleSheet.create({
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
-  primary: { marginTop: 40, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  primaryText: { color: colors.white, fontSize: 22, fontWeight: "700" }
+  primary: { marginTop: 40 }
 });

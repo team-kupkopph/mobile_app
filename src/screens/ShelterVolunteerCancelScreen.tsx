@@ -25,6 +25,7 @@ import { ShelterShift, blastRadiusCopy } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { Button } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -128,13 +129,11 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
           <Text style={styles.subheading}>
             {cancelledSignups} volunteer{cancelledSignups === 1 ? "" : "s"} notified.
           </Text>
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={styles.primaryButton}
+          <Button
+            label="Back to activities"
             onPress={() => navigation.navigate("shelterVolunteer")}
-          >
-            <Text style={styles.primaryText}>Back to activities</Text>
-          </TouchableOpacity>
+            style={styles.primaryButton}
+          />
         </View>
       ) : phase === "submitting" ? (
         <View style={styles.centerFill}>
@@ -167,13 +166,12 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
             </View>
           )}
 
-          <TouchableOpacity
-            style={styles.cancelButton}
-            activeOpacity={0.85}
+          <Button
+            label="Cancel activity"
             onPress={() => setConfirmVisible(true)}
-          >
-            <Text style={styles.cancelButtonText}>Cancel activity</Text>
-          </TouchableOpacity>
+            variant="destructive"
+            style={styles.cancelButton}
+          />
           <TouchableOpacity style={styles.keepLink} activeOpacity={0.75} onPress={() => navigation.goBack()} hitSlop={TAP_SLOP}>
             <Text style={styles.keepLinkText}>Keep activity</Text>
           </TouchableOpacity>
@@ -221,19 +219,11 @@ const styles = StyleSheet.create({
   body: { alignSelf: "flex-start", marginTop: 10, color: colors.muted, ...typography.body },
   bannerBox: { width: "100%", marginTop: 18, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
-  cancelButton: {
-    width: "100%", height: 56, marginTop: 36, borderRadius: 28,
-    alignItems: "center", justifyContent: "center", backgroundColor: colors.danger
-  },
-  cancelButtonText: { color: colors.white, ...typography.subtitle, fontWeight: "800" },
+  cancelButton: { width: "100%", marginTop: 36 },
   keepLink: { marginTop: 16, height: 40, alignItems: "center", justifyContent: "center" },
   keepLinkText: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
-  primaryButton: {
-    width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",
-    justifyContent: "center", backgroundColor: colors.teal
-  },
-  primaryText: { color: colors.white, ...typography.subtitle, fontWeight: "800" }
+  primaryButton: { width: "100%", marginTop: 32 }
 });

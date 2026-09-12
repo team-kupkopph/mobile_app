@@ -5,7 +5,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Circle, Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
@@ -15,7 +15,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 import { TAP_SLOP } from "../touch";
 
 const TONE = {
@@ -225,15 +225,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
 
           {!isReporterView && report.status === "reported" ? (
             <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={styles.claimBtn}
-                activeOpacity={0.9}
-                onPress={confirmClaim}
-                disabled={claiming}
-              >
-                {claiming ? <ActivityIndicator color={colors.white} />
-                  : <Text style={styles.claimBtnText}>Claim this case</Text>}
-              </TouchableOpacity>
+              <Button label="Claim this case" onPress={confirmClaim} loading={claiming} />
               <Text style={styles.claimFine}>
                 Claiming is final — it's locked to you and can't be handed back.
               </Text>
@@ -285,8 +277,6 @@ const styles = StyleSheet.create({
   ladderLabel: { color: colors.muted, ...typography.subtitle },
   ladderLabelDone: { color: colors.ink, fontWeight: "700" },
   actionRow: { marginTop: 30 },
-  claimBtn: { height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  claimBtnText: { color: colors.white, fontSize: 19, fontWeight: "700" },
   claimFine: { marginTop: 10, color: colors.muted, ...typography.meta, lineHeight: 18, textAlign: "center" },
   offerBtn: { marginTop: 16, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal },
   offerBtnText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" }

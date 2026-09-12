@@ -5,7 +5,7 @@
 // phase renders lateCancelCopy(was_late) straight from that response.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { AlertIcon, CheckIcon } from "../components/AppIcons";
@@ -13,7 +13,7 @@ import { ConfirmModal } from "../components/ConfirmModal";
 import { RootStackParamList } from "../navigation/types";
 import { lateCancelCopy } from "../volunteer";
 import { colors, elevation, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 
@@ -72,13 +72,11 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
           <Text style={styles.heading}>Shift cancelled</Text>
           <Text style={styles.subheading}>{lateCancelCopy(!!wasLate)}</Text>
 
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={styles.primaryButton}
+          <Button
+            label="Back to schedule"
             onPress={() => navigation.navigate("kawanggawaSchedule")}
-          >
-            <Text style={styles.primaryText}>Back to schedule</Text>
-          </TouchableOpacity>
+            style={styles.primaryButton}
+          />
         </View>
       )}
 
@@ -90,9 +88,7 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
           <Text style={styles.heading}>Couldn't cancel</Text>
           <Text style={styles.subheading}>{errorMessage}</Text>
 
-          <TouchableOpacity activeOpacity={0.85} style={styles.primaryButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.primaryText}>Back to schedule</Text>
-          </TouchableOpacity>
+          <Button label="Back to schedule" onPress={() => navigation.goBack()} style={styles.primaryButton} />
         </View>
       )}
 
@@ -116,9 +112,5 @@ const styles = StyleSheet.create({
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
-  primaryButton: {
-    width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",
-    justifyContent: "center", backgroundColor: colors.teal
-  },
-  primaryText: { color: colors.white, ...typography.subtitle, fontWeight: "800" }
+  primaryButton: { width: "100%", marginTop: 32 }
 });

@@ -2,12 +2,12 @@
 // every flaggable target type (route.params.targetType) — POST /moderation/flags.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportContent">;
@@ -51,10 +51,7 @@ export function ReportContentScreen({ navigation, route }: Props) {
           placeholderTextColor={colors.faintDeprecated}
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <TouchableOpacity style={styles.submit} onPress={submit} activeOpacity={0.9} disabled={submitting}>
-          {submitting ? <ActivityIndicator color={colors.white} />
-            : <Text style={styles.submitText}>Send report</Text>}
-        </TouchableOpacity>
+        <Button label="Send report" onPress={submit} loading={submitting} style={styles.submit} />
       </View>
     </View>
   );
@@ -70,6 +67,5 @@ const styles = StyleSheet.create({
   label: { marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   notes: { minHeight: 120, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   error: { marginTop: 14, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
+  submit: { marginTop: 26 }
 });

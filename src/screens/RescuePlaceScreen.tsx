@@ -5,11 +5,11 @@
 // for the surrounding chrome.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,9 +58,7 @@ export function RescuePlaceScreen({ navigation, route }: Props) {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.submit} onPress={next} activeOpacity={0.9}>
-          <Text style={styles.submitText}>Next</Text>
-        </TouchableOpacity>
+        <Button label="Next" onPress={next} style={styles.submit} />
       </ScrollView>
     </View>
   );
@@ -78,6 +76,5 @@ const styles = StyleSheet.create({
   input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
+  submit: { marginTop: 26 }
 });

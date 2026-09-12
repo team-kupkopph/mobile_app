@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -79,9 +79,7 @@ export function StoryComposeScreen({ navigation, route }: Props) {
 
         {error && photoUrl ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.primaryBtn} onPress={post} disabled={busy}>
-          <Text style={styles.primaryLabel}>{busy ? "Posting…" : "Post story"}</Text>
-        </TouchableOpacity>
+        <Button label="Post story" onPress={post} loading={busy} style={styles.primaryBtn} />
       </ScrollView>
     </View>
   );
@@ -100,6 +98,5 @@ const styles = StyleSheet.create({
   field: { padding: 16, borderRadius: radii.field, ...card },
   input: { color: colors.ink, ...typography.subtitle, minHeight: 96, textAlignVertical: "top" },
   error: { marginTop: 10, color: colors.danger, ...typography.meta, fontWeight: "600" },
-  primaryBtn: { marginTop: 28, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
-  primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" }
+  primaryBtn: { marginTop: 28 }
 });

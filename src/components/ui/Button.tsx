@@ -25,6 +25,8 @@ type ButtonProps = {
   loading?: boolean;
   style?: StyleProp<ViewStyle>;
   accessibilityLabel?: string;
+  /** "Waiting for your location" — what a screen says instead of disabling the button. */
+  accessibilityHint?: string;
   /**
    * ⚠️ Not optional in practice. e2eSelectors.test.ts asserts these exist and the Maestro
    * flows tap them; a primitive that cannot carry one silently breaks the suite the moment a
@@ -35,7 +37,7 @@ type ButtonProps = {
 
 const HEIGHT = 54;
 
-export function Button({ label, onPress, variant = "primary", loading, style, accessibilityLabel, testID }: ButtonProps) {
+export function Button({ label, onPress, variant = "primary", loading, style, accessibilityLabel, accessibilityHint, testID }: ButtonProps) {
   const labelStyle =
     variant === "destructive" ? styles.destructiveLabel
     : variant === "primary" ? styles.primaryLabel
@@ -54,6 +56,7 @@ export function Button({ label, onPress, variant = "primary", loading, style, ac
       onPress={loading ? () => {} : onPress}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ busy: !!loading }}
       testID={testID}
       style={[styles.wrap, style]}

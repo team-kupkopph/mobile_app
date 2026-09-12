@@ -13,7 +13,7 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { colors, elevation, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -37,7 +37,6 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
   const docsReady = !!sec && (baiPending || !!bai);
   // Kept for the button's APPEARANCE only — a form that cannot yet be sent may look
   // secondary, but it must still be pressable and must say why. See onSubmit.
-  const canSubmit = docsReady && vetName.trim().length > 0 && prcValid && !submitting;
 
   async function presign(): Promise<string | null> {
     const res = await pickAndUpload(api, "verification_doc");
@@ -150,9 +149,7 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
 
         {!!error && <Text style={styles.formError}>{error}</Text>}
 
-        <TouchableOpacity activeOpacity={0.85} style={[styles.submitButton, !canSubmit && styles.submitButtonDisabled]} onPress={onSubmit}>
-          {submitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.submitText}>Submit for review</Text>}
-        </TouchableOpacity>
+        <Button label="Submit for review" onPress={onSubmit} loading={submitting} style={styles.submitButton} />
       </ScrollView>
     </View>
   );
@@ -272,7 +269,5 @@ const styles = StyleSheet.create({
   },
   input: { color: colors.ink, ...typography.strong, fontWeight: "800", padding: 0 },
   formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },
-  submitButton: { height: 54, marginTop: 22, borderRadius: 27, alignItems: "center", justifyContent: "center", backgroundColor: authColors.teal },
-  submitButtonDisabled: { opacity: 0.5 },
-  submitText: { color: "#FFFFFF", ...typography.subtitle, fontWeight: "800" }
+  submitButton: { marginTop: 22 },
 });

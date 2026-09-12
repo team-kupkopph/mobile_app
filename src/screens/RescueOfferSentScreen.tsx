@@ -8,6 +8,7 @@ import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL } from "../sagip";
 import { TAP_SLOP } from "../touch";
 import { colors, spacing, squircle, typography } from "../theme";
+import { Button } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOfferSent">;
@@ -26,13 +27,11 @@ export function RescueOfferSentScreen({ navigation, route }: Props) {
           contact — no other action needed from you until then.
         </Text>
 
-        <TouchableOpacity
-          style={styles.primary}
-          activeOpacity={0.9}
+        <Button
+          label="Back to the report"
           onPress={() => navigation.replace("reportDetail", { reportId })}
-        >
-          <Text style={styles.primaryText}>Back to the report</Text>
-        </TouchableOpacity>
+          style={styles.primary}
+        />
         <TouchableOpacity hitSlop={TAP_SLOP} onPress={() => navigation.navigate("myOffers")} activeOpacity={0.7}>
           <Text style={styles.secondary}>See my offers</Text>
         </TouchableOpacity>
@@ -47,7 +46,6 @@ const styles = StyleSheet.create({
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 10, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 22 },
-  primary: { marginTop: 30, height: 58, width: "100%", borderRadius: 29, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  primaryText: { color: colors.white, fontSize: 18, fontWeight: "700" },
+  primary: { marginTop: 30, width: "100%" },
   secondary: { marginTop: 16, color: colors.teal, ...typography.strong, fontWeight: "700" }
 });

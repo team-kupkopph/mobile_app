@@ -18,7 +18,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -255,10 +255,12 @@ export function ListingFormScreen({ navigation, route }: Props) {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.submit} onPress={submit} activeOpacity={0.9} disabled={submitting}>
-          {submitting ? <ActivityIndicator color={colors.white} />
-            : <Text style={styles.submitText}>{isEdit ? "Save changes" : "Create listing"}</Text>}
-        </TouchableOpacity>
+        <Button
+          label={isEdit ? "Save changes" : "Create listing"}
+          onPress={submit}
+          loading={submitting}
+          style={styles.submit}
+        />
       </ScrollView>
     </View>
   );
@@ -314,6 +316,5 @@ const styles = StyleSheet.create({
   photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitText: { color: colors.white, fontSize: 20, fontWeight: "700" }
+  submit: { marginTop: 26 }
 });

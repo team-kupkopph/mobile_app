@@ -15,7 +15,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { advanceableStatuses, sagipTitle, strayChip } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -140,20 +140,16 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
               moved on to resolved), not instead of them. */}
           {report.status === "safe" ? (
             <View style={styles.handoffRow}>
-              <TouchableOpacity
-                style={[styles.listBtn, styles.handoffBtn]}
+              <Button
+                label="List for adoption"
                 onPress={() => navigation.navigate("rescueList", { caseId })}
-                activeOpacity={0.9}
-              >
-                <Text style={styles.listBtnText}>List for adoption</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.listBtn, styles.handoffBtn]}
+                variant="secondary"
+              />
+              <Button
+                label="Place with someone"
                 onPress={() => navigation.navigate("rescuePlace", { caseId })}
-                activeOpacity={0.9}
-              >
-                <Text style={styles.listBtnText}>Place with someone</Text>
-              </TouchableOpacity>
+                variant="secondary"
+              />
             </View>
           ) : null}
 
@@ -211,18 +207,13 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
 
               {error ? <Text style={styles.error}>{error}</Text> : null}
 
-              <TouchableOpacity
-                style={[styles.submit, !target && styles.submitIdle]}
+              <Button
+                label={target ? `Mark ${STATUS_LABEL[target]}` : "Pick a status above"}
                 onPress={submit}
-                activeOpacity={0.9}
-                disabled={submitting}
+                loading={submitting}
                 accessibilityHint={target ? undefined : "Choose the new status first"}
-              >
-                {submitting ? <ActivityIndicator color={colors.white} />
-                  : <Text style={styles.submitText}>
-                      {target ? `Mark ${STATUS_LABEL[target]}` : "Pick a status above"}
-                    </Text>}
-              </TouchableOpacity>
+                style={styles.submit}
+              />
             </>
           )}
         </ScrollView>
@@ -245,9 +236,7 @@ const styles = StyleSheet.create({
   map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { ...typography.meta, fontWeight: "800" },
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
-  listBtn: { height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal, backgroundColor: colors.white },
   handoffBtn: { flex: 1 },
-  listBtnText: { color: colors.teal, ...typography.strong, fontWeight: "800" },
   resolvedNote: { marginTop: 24, color: colors.muted, fontSize: 16, lineHeight: 22 },
   sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   radioList: { gap: 10 },
@@ -262,7 +251,5 @@ const styles = StyleSheet.create({
   photoBtn: { marginTop: 14, height: 64, borderRadius: radii.tile, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitIdle: { backgroundColor: colors.tealIdle },
-  submitText: { color: colors.white, fontSize: 19, fontWeight: "700" }
+  submit: { marginTop: 26 }
 });

@@ -6,6 +6,7 @@ import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, spacing, squircle, typography } from "../theme";
+import { Button } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportSent">;
@@ -52,25 +53,21 @@ export function ReportSentScreen({ navigation, route }: Props) {
         <Text style={styles.fine}>No one yet? It widens automatically — unclaimed reports alert a bigger radius.</Text>
 
         {reportId ? (
-          <TouchableOpacity
+          <Button
             testID="btn.reportSent.track"
-            style={styles.primary}
-            activeOpacity={0.9}
+            label="Track this report"
             onPress={() => navigation.replace("reportDetail", { reportId })}
-          >
-            <Text style={styles.primaryText}>Track this report</Text>
-          </TouchableOpacity>
+            style={styles.primary}
+          />
         ) : (
           // No server id yet — My Reports is where the queued item lives and can be
           // retried or discarded.
-          <TouchableOpacity
+          <Button
             testID="btn.reportSent.myReports"
-            style={styles.primary}
-            activeOpacity={0.9}
+            label="See my reports"
             onPress={() => navigation.replace("myReports")}
-          >
-            <Text style={styles.primaryText}>See my reports</Text>
-          </TouchableOpacity>
+            style={styles.primary}
+          />
         )}
         <TouchableOpacity hitSlop={TAP_SLOP} onPress={() => navigation.popToTop()} activeOpacity={0.7}>
           <Text style={styles.secondary}>Back to home</Text>
@@ -102,7 +99,6 @@ const styles = StyleSheet.create({
   nextNum: { color: colors.teal, ...typography.strong, fontWeight: "800" },
   nextText: { flex: 1, color: colors.ink, ...typography.subtitle },
   fine: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
-  primary: { marginTop: 28, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  primaryText: { color: colors.white, fontSize: 22, fontWeight: "700" },
+  primary: { marginTop: 28 },
   secondary: { marginTop: 16, color: colors.teal, ...typography.subtitle, fontWeight: "700", textAlign: "center" }
 });
