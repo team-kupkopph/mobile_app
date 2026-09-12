@@ -53,5 +53,20 @@ export const elevation = {
     shadowOpacity: 0.19,
     shadowRadius: 28,
     elevation: 14
+  },
+  /**
+   * The brand tile — the logo's squircle on Sign in and Welcome. SignIn.dc.html draws it with
+   * its own pair, cast in forest rather than the navy the surfaces use:
+   * `0 3px 8px rgba(17,36,31,.16), 0 18px 34px -10px rgba(17,36,31,.46)`. Same conversion as
+   * `deck`: the ambient half, offset carried across, blur and opacity scaled for the negative
+   * spread. Welcome's tile had hand-rolled `#0B1F2A / (0,10) / .18 / 16` — the right instinct
+   * (darker, deeper than a card) with the wrong numbers.
+   */
+  brand: {
+    shadowColor: colors.forest,
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.29,
+    shadowRadius: 22,
+    elevation: 12
   }
 } as const satisfies Record<string, Elevation>;

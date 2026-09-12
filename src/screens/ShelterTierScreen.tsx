@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
-import { radii, spacing, typography } from "../theme";
+import { elevation, radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterTier">;
 
@@ -106,11 +106,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 22,
     backgroundColor: "#FFFFFF",
-    shadowColor: "#1F3A5F",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2
+    ...elevation.soft
   },
   secondCard: { marginTop: 18 },
   iconCircle: {

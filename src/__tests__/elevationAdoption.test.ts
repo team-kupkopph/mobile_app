@@ -178,6 +178,7 @@ function stepFor(s: Shadow): string | null {
 
 const bound: string[] = [];
 const handRolled: string[] = [];
+const suppressions: string[] = [];
 const reproducesAStep: string[] = [];
 
 for (const file of sources(SRC)) {
@@ -192,6 +193,9 @@ for (const file of sources(SRC)) {
     const { s, spread } = readShadow(text, blk[0], blk[1]);
     if (spread) { bound.push(`${file}:${spread}`); continue; }
     if (s.color === null && s.opacity === null && s.radius === null) continue;
+    // A suppression — `shadowOpacity: 0` with nothing else — turns a token's shadow OFF on a
+    // dimmed or disabled state. It names no depth of its own and is not a one-off.
+    if (s.opacity === 0 && s.color === null && s.radius === null) { suppressions.push(file); continue; }
     handRolled.push(file);
     const step = stepFor(s);
     if (step) reproducesAStep.push(`${file} -> ${step} ${JSON.stringify(s)}`);
@@ -221,8 +225,22 @@ for (const file of sources(SRC)) {
  * VerifyResubmit's `submit` (0,4)/.12/8 were the shadows two hand-rolled primary buttons
  * cast. Both buttons are now `<Button>`, which draws the canvas's `.cta` — no shadow — so
  * there is nothing left to bind or to absorb.
+ *
+ * ZERO, AND A FLAT RULE FROM HERE. The ten were decided, not absorbed:
+ *   · Welcome's logo tile — `#0B1F2A / (0,10) / .18 / 16` — was the right instinct with the
+ *     wrong numbers. SignIn.dc.html draws the BRAND TILE with a shadow of its own, cast in
+ *     forest and deeper than a card, and `elevation.brand` is that shadow, converted the way
+ *     `deck` was. (The same artboard draws the tile at the squircle rule, which is why its
+ *     radius left radiusAdoption's exemption list in the same change.)
+ *   · ProfileScreen `card` was `card` except an Android-only elevation; it is `card`.
+ *   · AccountType and ShelterTier's option rows, SignupSuccess and PasswordChanged's notice
+ *     bars, the auth kit's input and AdjustPin's card were all lighter-than-`soft` variations
+ *     on the same idea — (0,2–4) / .05–.12 / 6–10 — on exactly the elements the panel files
+ *     under "inputs, chips, pills, small raised controls". They are `soft`.
+ *   · Field's and Impact's `shadowOpacity: 0` are suppressions, not shadows, and are now
+ *     recognised as such by rule (see the loop) rather than tolerated by count.
  */
-const ONE_OFFS = 10;
+const ONE_OFFS = 0;
 
 describe("screens take depth from the theme", () => {
   it("found shadows to classify", () => {
@@ -242,6 +260,12 @@ describe("screens take depth from the theme", () => {
 
   it("records the remaining one-offs rather than absorbing them", () => {
     expect(handRolled.length).toBe(ONE_OFFS);
+  });
+
+  it("sees the two suppressions as suppressions, and no more than two", () => {
+    expect(suppressions.map((f) => f.replace(/^.*\/src\//, "src/")).sort()).toEqual([
+      "src/components/ui/Field.tsx", "src/screens/ImpactScreen.tsx"
+    ]);
   });
 
   it("counts the call, not the import", () => {
