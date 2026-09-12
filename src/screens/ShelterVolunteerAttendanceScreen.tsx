@@ -14,7 +14,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone } from "../shelterVolunteer";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Avatar, Button, ScreenHeader } from "../components/ui";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -104,9 +104,7 @@ export function ShelterVolunteerAttendanceScreen({ navigation, route }: Props) {
                 onPress={() => navigation.navigate("shelterVolunteerDetail", { signupId: row.signup_id })}
               >
                 <View style={styles.cardTop}>
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{initials(row.volunteer.display_name)}</Text>
-                  </View>
+                  <Avatar initials={initials(row.volunteer.display_name)} size={44} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.name}>{row.volunteer.display_name}</Text>
                   </View>
@@ -161,8 +159,6 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  avatarText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },

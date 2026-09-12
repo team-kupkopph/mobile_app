@@ -68,5 +68,19 @@ export const elevation = {
     shadowOpacity: 0.29,
     shadowRadius: 22,
     elevation: 12
+  },
+  /**
+   * The primary call to action. `.cta` on SignIn, Inquiry and the Components panel casts in
+   * the button's own teal: `0 2px 5px rgba(20,80,79,.24), 0 12px 26px -8px rgba(20,80,79,.5)`.
+   * Same conversion as the rest: the ambient half, offset carried across, blur and opacity
+   * scaled for the negative spread. `Button` drew no shadow at all before this, which is why
+   * the gradient pill read flatter on device than on the artboards.
+   */
+  cta: {
+    shadowColor: colors.tealDark,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8
   }
 } as const satisfies Record<string, Elevation>;

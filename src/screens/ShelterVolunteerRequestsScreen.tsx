@@ -20,7 +20,7 @@ import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } 
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Avatar, Button, ScreenHeader } from "../components/ui";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -233,9 +233,7 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
               return (
                 <View key={row.signup_id} style={styles.card}>
                   <View style={styles.cardTop}>
-                    <View style={styles.avatar}>
-                      <Text style={styles.avatarText}>{initials(row.volunteer.display_name)}</Text>
-                    </View>
+                    <Avatar initials={initials(row.volunteer.display_name)} size={44} />
                     <View style={{ flex: 1 }}>
                       <Text style={styles.name}>{row.volunteer.display_name}</Text>
                       {!!row.requested_at && (
@@ -376,8 +374,6 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
-  avatar: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  avatarText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   requestedAt: { marginTop: 2, color: colors.muted, ...typography.meta },
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },

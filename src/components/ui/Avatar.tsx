@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, Text, ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { colors, gradients, squircle, typography } from "../../theme";
@@ -38,15 +38,21 @@ export function Avatar({ initials, children, tinted, size = 52, style }: AvatarP
   );
 
   if (!tinted) {
-    return <View style={[styles.base, shape, style]}>{face}</View>;
+    // The canvas's pet / person tile is a gradient too — a quieter one than the four org
+    // tiles, and the same for everyone.
+    return (
+      <LinearGradient colors={gradients.tile} start={TILE_START} end={TILE_END} style={[styles.base, shape, style]}>
+        {face}
+      </LinearGradient>
+    );
   }
 
   const pick = gradients.avatarTiles[hash(initials ?? "") % gradients.avatarTiles.length];
   return (
     <LinearGradient
       colors={pick.tile}
-      start={{ x: 0.15, y: 0 }}
-      end={{ x: 0.85, y: 1 }}
+      start={TILE_START}
+      end={TILE_END}
       style={[styles.base, shape, style]}
     >
       {children ?? (
@@ -59,6 +65,10 @@ export function Avatar({ initials, children, tinted, size = 52, style }: AvatarP
 }
 
 /** Small, stable, and not trying to be a good hash — only to be the SAME one every time. */
+/** 150° on the canvas, top-left to bottom-right here. */
+const TILE_START = { x: 0.15, y: 0 };
+const TILE_END = { x: 0.85, y: 1 };
+
 function hash(value: string): number {
   let n = 0;
   for (let i = 0; i < value.length; i++) n = (n * 31 + value.charCodeAt(i)) >>> 0;

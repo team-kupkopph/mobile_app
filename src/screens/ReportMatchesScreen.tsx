@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { matchReasons, matchStrength } from "../community";
 import { MatchShape, RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Avatar, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -67,7 +67,8 @@ export function ReportMatchesScreen({ navigation, route }: Props) {
               <TouchableOpacity key={m.match_id} style={styles.matchCard} activeOpacity={0.85}
                 onPress={() => navigation.navigate("matchDetail", { reportId, match: m })}>
                 <View style={styles.row}>
-                  <View style={styles.photo} />
+                  {/* No photo on the match payload yet; the tile is the placeholder the canvas draws. */}
+                  <Avatar size={96} />
                   <View style={{ flex: 1 }}>
                     <View style={styles.topRow}>
                       <Text style={styles.type}>
@@ -100,7 +101,6 @@ const styles = StyleSheet.create({
   empty: { marginTop: 40, color: colors.muted, ...typography.body, textAlign: "center" },
   matchCard: { marginBottom: 14, padding: 16, borderRadius: radii.card, ...card },
   row: { flexDirection: "row", gap: 14 },
-  photo: { width: 96, height: 96, borderRadius: squircle(96), backgroundColor: colors.soft },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   type: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 11, paddingVertical: 4, borderRadius: radii.chip },

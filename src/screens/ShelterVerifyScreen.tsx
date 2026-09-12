@@ -15,7 +15,7 @@ import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Avatar, Button, ScreenHeader } from "../components/ui";
 
 const MIN_PHOTOS = 3;
 
@@ -197,9 +197,9 @@ function DocSlot({
 }) {
   return (
     <TouchableOpacity activeOpacity={0.8} style={styles.docCard} onPress={onPress} disabled={busy}>
-      <View style={styles.docIcon}>
+      <Avatar size={48}>
         <DocumentIcon color={authColors.teal} />
-      </View>
+      </Avatar>
       <View style={styles.docCopy}>
         <Text style={styles.docTitle}>{label}</Text>
         <Text style={styles.docSubtitle}>{hint}</Text>
@@ -249,7 +249,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     ...elevation.soft
   },
-  docIcon: { width: 48, height: 48, borderRadius: squircle(48), alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   docCopy: { flex: 1, marginLeft: 14 },
   docTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, ...typography.caption, fontWeight: "600" },

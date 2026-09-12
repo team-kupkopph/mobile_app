@@ -25,7 +25,7 @@ import { ShelterShift, blastRadiusCopy } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Avatar, Button, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -138,9 +138,9 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.summaryCard}>
-            <View style={styles.summaryIcon}>
+            <Avatar size={48}>
               <VolunteerIcon color={colors.teal} size={26} />
-            </View>
+            </Avatar>
             <View style={{ flex: 1 }}>
               <Text style={styles.summaryTitle}>{shiftTypeLabel(shift.type)}</Text>
               <Text style={styles.summaryWhen}>{shiftWhenLabel(shift.starts_at, shift.ends_at)}</Text>
@@ -197,7 +197,6 @@ const styles = StyleSheet.create({
     width: "100%", flexDirection: "row", alignItems: "center", gap: 14,
     borderRadius: radii.field, padding: 18, ...card
   },
-  summaryIcon: { width: 48, height: 48, borderRadius: squircle(48), backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   summaryTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   summaryWhen: { marginTop: 3, color: colors.teal, ...typography.meta, fontWeight: "700" },
   summarySub: { marginTop: 3, color: colors.muted, ...typography.meta },
