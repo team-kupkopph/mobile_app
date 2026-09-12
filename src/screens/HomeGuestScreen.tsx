@@ -1,13 +1,20 @@
-// US-A1b — guest browse. Reference: screens/user/screen-home-guest.png. Read-only Home for an
-// unauthenticated visitor: fetches the PUBLIC GET /listings endpoint (no token needed) instead of
-// /me, has no bell/notifications, and every action that would require an account — a listing
-// card, "Report now", the Adopt/Volunteer/You tabs — opens the SignupWall instead of navigating.
-// The city is fixed to the seeded "Marikina" (no locationPicker for guests — changing it is an
-// account feature, see LocationPickerScreen's PUT /me/location).
+// US-A1b — guest browse. Read-only Home for an unauthenticated visitor.
+//
+// ⚠️ THE SAME HOME, NOT A SEPARATE ONE. This screen composes the pieces in
+// components/home/HomeSections.tsx — the header, the report card, the three sections and
+// their rows — exactly as HomeScreen does, from the same three public endpoints (/listings,
+// /stories, /reports/map are AllowAny on GET). What differs is only what a guest cannot do:
+// there is no /me, so no verification card, no spotlight and no trail; the bell's slot holds
+// "Log in"; the status slot says "browsing as a guest"; the city is fixed to the seeded one;
+// and the gated taps — Report now, See all under Adopt, a stray's row, the Adopt / Volunteer /
+// You tabs — open the SignupWall. A listing row opens the read-only detail (US-A3).
+//
+// It was written against a V1 mock and then not kept up with Home for two sprints; the header
+// of HomeSections.tsx records what that looked like and why the pieces are now shared.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,15 +22,16 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { Listing } from "../api/types";
-import { AdoptIcon, HomeIcon, LocationPinIcon, ProfileIcon, VolunteerIcon } from "../components/AppIcons";
+import { AdoptIcon, HomeIcon, ProfileIcon, VolunteerIcon } from "../components/AppIcons";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
-import { TabBar, type TabBarItem } from "../components/ui";
+import { SectionHeader, TabBar, type TabBarItem } from "../components/ui";
+import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, StoryRow, StoryRowData, StrayRow, sectionSpacing } from "../components/home/HomeSections";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, pill, radii, spacing, squircle, typography } from "../theme";
 
-const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
 type Props = NativeStackScreenProps<RootStackParamList, "homeGuest">;
 
@@ -38,19 +46,34 @@ export function HomeGuestScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const api = useApi();
   const [listings, setListings] = useState<Listing[]>([]);
-  const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [listingsRes, setListingsRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [stories, setStories] = useState<StoryRowData[]>([]);
+  const [storiesRes, setStoriesRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [rescues, setRescues] = useState<MapReport[]>([]);
+  const [rescuesRes, setRescuesRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [wall, setWall] = useState<WallState>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      setRes(null);
-      api.get(`/listings?city=${GUEST_CITY}`).then((r) => {
-        setRes({ ok: r.ok, status: r.status });
-        if (r.ok) setListings(r.data.results ?? []);
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
-    }, [])
-  );
+  // ⚠️ THE SAME THREE SECTIONS THE SIGNED-IN HOME SHOWS, from the same three endpoints — all
+  // three are AllowAny on GET. For two sprints the guest Home showed one of them, drawn the V1
+  // way, and a "See nearby strays" row the signed-in Home had already replaced with the
+  // "Nearby rescues" section. HomeSections.tsx says why that is not allowed to happen again.
+  const load = useCallback(() => {
+    setListingsRes(null); setStoriesRes(null); setRescuesRes(null);
+    api.get(`/listings?city=${GUEST_CITY}`).then((r) => {
+      setListingsRes({ ok: r.ok, status: r.status });
+      if (r.ok) setListings((r.data?.results ?? []).slice(0, 5));
+    });
+    api.get("/stories").then((r) => {
+      setStoriesRes({ ok: r.ok, status: r.status });
+      if (r.ok) setStories((r.data?.results ?? []).slice(0, 2));
+    });
+    api.get(`/reports/map?city=${GUEST_CITY}&status=reported`).then((r) => {
+      setRescuesRes({ ok: r.ok, status: r.status });
+      if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
+  }, []);
+  useFocusEffect(load);
 
   function openWall(action: SignupWallAction, subject?: string) {
     setWall({ action, subject });
@@ -67,111 +90,105 @@ export function HomeGuestScreen({ navigation }: Props) {
     navigation.navigate("signin");
   }
 
-  return (
-    <View style={styles.screen}>
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <View style={styles.headerCopy}>
-            <Text style={styles.greeting}>Welcome!</Text>
-            <View style={styles.cityRow}>
-              <Text style={styles.cityText}>Marikina City</Text>
-              <Text style={styles.cityChange}>Change ›</Text>
-            </View>
-          </View>
-          <TouchableOpacity hitSlop={TAP_SLOP}
-            activeOpacity={0.85}
-            style={styles.loginPill}
-            onPress={() => navigation.navigate("signin")}
-          >
-            <Text style={styles.loginPillText}>Log in</Text>
-          </TouchableOpacity>
-        </View>
+  const listingsPanel = loadState(listingsRes, listings.length);
+  const storiesPanel = loadState(storiesRes, stories.length);
+  const rescuesPanel = loadState(rescuesRes, rescues.length);
 
-        <View style={styles.guestBanner}>
+  return (
+    <View style={styles.screen} testID="screen.homeGuest">
+      <ScreenBackdrop />
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
+        {/* The bell's slot carries "Log in"; the city is fixed to the seeded one — changing it
+            is an account feature (LocationPickerScreen's PUT /me/location). */}
+        <HomeHeader
+          greeting="Welcome!"
+          city={`${GUEST_CITY} City`}
+          right={
+            <TouchableOpacity
+              hitSlop={TAP_SLOP}
+              activeOpacity={0.85}
+              style={styles.loginPill}
+              onPress={() => navigation.navigate("signin")}
+              accessibilityRole="button"
+            >
+              <Text style={styles.loginPillText}>Log in</Text>
+            </TouchableOpacity>
+          }
+        />
+
+        {/* The status slot: where a member sees "Verified Member in review", a guest sees this,
+            in the same card. */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.guestCard}
+          onPress={() => navigation.navigate("accountType")}
+          accessibilityRole="button"
+          accessibilityLabel="Sign up"
+        >
           <View style={styles.guestIcon}>
-            <ProfileIcon color={colors.teal} size={20} />
+            <ProfileIcon color={colors.teal} size={22} />
           </View>
           <View style={styles.guestCopy}>
             <Text style={styles.guestTitle}>You're browsing as a guest</Text>
             <Text style={styles.guestBody}>Sign up to adopt, save pets & help strays.</Text>
           </View>
-          <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("accountType")}>
-            <Text style={styles.guestLink}>Sign up ›</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.reportCard}>
-          <View>
-            <Text style={styles.reportTitle}>Saw a stray?</Text>
-            <Text style={styles.reportText}>Report it in seconds — help is near.</Text>
-            <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.85} style={styles.reportButton} onPress={() => openWall("report")}>
-              <Text style={styles.reportButtonText}>Report now</Text>
-            </TouchableOpacity>
-          </View>
-          <Image source={paw} resizeMode="contain" style={styles.reportPaw} />
-        </View>
-
-        {/* US-G2 · a guest can reach the public rescue map (GET /reports/map is AllowAny — public
-            since US-S4). This navigates DIRECTLY, not through the SignupWall like the gated actions
-            above: browsing the map needs no account. Mirrors the owner Home's "See nearby strays"
-            link. Closes Sprint 1's last remaining US-A1b Partial (guest home never pointed at it). */}
-        <TouchableOpacity hitSlop={TAP_SLOP}
-          activeOpacity={0.85}
-          style={styles.mapCard}
-          accessibilityRole="button"
-          onPress={() => navigation.navigate("rescueMap")}
-        >
-          <View style={styles.mapIconTile}>
-            <LocationPinIcon color={colors.teal} size={20} />
-          </View>
-          <View style={styles.mapCopy}>
-            <Text style={styles.mapTitle}>See nearby strays</Text>
-            <Text style={styles.mapSub}>Live map of reports around you</Text>
-          </View>
-          <Text style={styles.mapChevron}>›</Text>
+          <Text style={styles.guestLink}>Sign up ›</Text>
         </TouchableOpacity>
 
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Adopt near you</Text>
-        </View>
+        <ReportStrayCard testID="btn.homeGuest.report" onPress={() => openWall("report")} />
 
-        {loadState(res, listings.length).kind !== "ready" && (
-          <LoadStateView
-            state={loadState(res, listings.length)}
-            emptyTitle="No pets listed near Marikina yet — check back soon."
-          />
-        )}
-
-        {listings.map((listing) => (
-          <TouchableOpacity
+        <SectionHeader
+          title="Adopt near you"
+          actionLabel="See all ›"
+          onAction={() => openWall("adopt")}
+          testID="btn.homeGuest.adopt"
+          style={sectionSpacing.first}
+        />
+        {listingsPanel.kind !== "ready" && listingsPanel.kind !== "empty" ? (
+          <LoadStateView state={listingsPanel} onRetry={load} />
+        ) : listingsPanel.kind === "empty" ? (
+          <EmptyNote>No pets listed near you yet.</EmptyNote>
+        ) : listings.map((listing, i) => (
+          // US-A1b/A3: a guest may VIEW a listing read-only; Inquire on it raises the wall.
+          <ListingRow
             key={listing.listing_id}
-            activeOpacity={0.85}
-            style={styles.petCard}
-            // US-A3: a guest may now open the listing read-only; the wall is raised at the
-            // Inquire action inside detail, not at the card tap. (The signup-wall itself still
-            // exists here for the Report / Adopt-tab / You-tab entry points, which have no
-            // read-only surface to fall through to.)
+            testID={`card.homeGuest.listing.${i}`}
+            listing={listing}
             onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
-          >
-            <View style={styles.avatarCircle}>
-              <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
-            </View>
-            <View style={styles.petCopy}>
-              <Text style={styles.petName}>{listing.pet.name}</Text>
-              <Text style={styles.petDetails}>
-                {listing.pet.species}
-                {listing.pet.breed ? ` · ${listing.pet.breed}` : ""}
-              </Text>
-            </View>
-            <View style={styles.petMeta}>
-              <View style={styles.availableBadge}>
-                <Text style={styles.availableText}>
-                  {listing.status === "available" ? "Available" : listing.status}
-                </Text>
-              </View>
-              <Text style={styles.shelterText}>{listing.city}</Text>
-            </View>
-          </TouchableOpacity>
+          />
+        ))}
+
+        <SectionHeader
+          title="Community stories"
+          actionLabel="See all ›"
+          onPress={() => navigation.navigate("stories")}
+          style={sectionSpacing.next}
+        />
+        {storiesPanel.kind !== "ready" && storiesPanel.kind !== "empty" ? (
+          <LoadStateView state={storiesPanel} onRetry={load} />
+        ) : storiesPanel.kind === "empty" ? (
+          <EmptyNote>No stories yet.</EmptyNote>
+        ) : stories.map((story) => (
+          <StoryRow key={story.story_id} story={story} onPress={() => navigation.navigate("storyDetail", { storyId: story.story_id })} />
+        ))}
+
+        {/* US-G2 · the public rescue map (GET /reports/map is AllowAny). The section header goes
+            there directly, as on the signed-in Home. A row is a step toward claiming, which is
+            an account action, so it opens the wall rather than a detail whose only control the
+            guest cannot use. */}
+        <SectionHeader
+          testID="btn.homeGuest.rescueMap"
+          title="Nearby rescues"
+          actionLabel="See map ›"
+          onPress={() => navigation.navigate("rescueMap")}
+          style={sectionSpacing.next}
+        />
+        {rescuesPanel.kind !== "ready" && rescuesPanel.kind !== "empty" ? (
+          <LoadStateView state={rescuesPanel} onRetry={load} />
+        ) : rescuesPanel.kind === "empty" ? (
+          <EmptyNote>No strays reported nearby yet.</EmptyNote>
+        ) : rescues.map((report) => (
+          <StrayRow key={report.report_id} report={report} onPress={() => openWall("account", report.species)} />
         ))}
       </ScrollView>
 
@@ -223,43 +240,13 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 156
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between"
-  },
-  headerCopy: {
-    flex: 1,
-    marginRight: 12
-  },
-  greeting: {
-    color: colors.ink,
-    ...typography.title,
-    lineHeight: 28
-  },
-  cityRow: {
-    marginTop: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8
-  },
-  cityText: {
-    color: colors.ink,
-    ...typography.strong,
-    fontWeight: "700"
-  },
-  cityChange: {
-    color: colors.teal,
-    ...typography.meta,
-    fontWeight: "700"
-  },
   loginPill: {
     height: 40,
     paddingHorizontal: 20,
-    borderRadius: 20,
+    borderRadius: pill(40),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.white,
     ...elevation.soft
   },
   loginPillText: {
@@ -267,29 +254,29 @@ const styles = StyleSheet.create({
     ...typography.meta,
     fontWeight: "800"
   },
-  guestBanner: {
-    minHeight: 72,
-    marginTop: 20,
-    borderWidth: 1,
-    borderColor: colors.teal,
-    borderRadius: radii.notice,
-    flexDirection: "row",
+  // The signed-in Home's status card, in the guest's tint: same height, radius, padding and
+  // type as `reviewCard` there. It was an outlined box with a circle icon — the V1 recipe.
+  guestCard: {
+    minHeight: 84,
+    marginTop: 22,
+    borderRadius: radii.card,
     alignItems: "center",
-    paddingHorizontal: 14,
+    flexDirection: "row",
+    paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: colors.soft
   },
   guestIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 46,
+    height: 46,
+    borderRadius: squircle(46),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF"
+    backgroundColor: colors.white
   },
   guestCopy: {
     flex: 1,
-    marginLeft: 12
+    marginLeft: 14
   },
   guestTitle: {
     color: colors.ink,
@@ -297,173 +284,15 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   guestBody: {
-    marginTop: 3,
+    marginTop: 5,
     color: colors.muted,
-    ...typography.caption, fontWeight: "600"
+    ...typography.caption,
+    fontWeight: "600"
   },
   guestLink: {
     marginLeft: 8,
     color: colors.tealDark,
     ...typography.meta,
     fontWeight: "800"
-  },
-  reportCard: {
-    height: 140,
-    marginTop: 14,
-    borderRadius: radii.tile,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingLeft: 20,
-    paddingRight: 16,
-    paddingTop: 15,
-    backgroundColor: colors.teal
-  },
-  reportTitle: {
-    color: "#FFFFFF",
-    ...typography.title,
-    lineHeight: 28
-  },
-  reportText: {
-    marginTop: 9,
-    color: "#D5ECE8",
-    ...typography.meta
-  },
-  reportButton: {
-    width: 136,
-    height: 38,
-    marginTop: 14,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF"
-  },
-  reportButtonText: {
-    color: "#126B69",
-    ...typography.meta,
-    fontWeight: "800"
-  },
-  reportPaw: {
-    width: 72,
-    height: 72,
-    marginTop: 4
-  },
-  // Was a bare teal "See nearby strays ›" text link — the one V1 element left between two V2
-  // cards, and the smallest target on the screen. Rebuilt as a V2 raised row: white fill with
-  // the `v2soft` shadow and NO stroke, since in this language the shadow is what says
-  // "tappable" and a border reads as V1. The squircle icon tile matches the guest banner above
-  // it, so the two rows now belong to the same system.
-  mapCard: {
-    marginTop: 14,
-    minHeight: 72,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: radii.tile,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
-  },
-  mapIconTile: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.soft
-  },
-  mapCopy: {
-    flex: 1,
-    marginLeft: 14
-  },
-  mapTitle: {
-    color: colors.ink,
-    ...typography.strong,
-    fontWeight: "800"
-  },
-  mapSub: {
-    marginTop: 2,
-    color: colors.muted,
-    ...typography.meta
-  },
-  mapChevron: {
-    marginLeft: 8,
-    color: colors.teal,
-    fontSize: 19,
-    fontWeight: "700"
-  },
-  sectionHeader: {
-    marginTop: 22,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between"
-  },
-  sectionTitle: {
-    color: colors.ink,
-    ...typography.subtitle,
-    fontWeight: "800"
-  },
-  emptyText: {
-    marginTop: 14,
-    color: colors.muted,
-    ...typography.meta,
-    textAlign: "center"
-  },
-  petCard: {
-    height: 68,
-    marginTop: 10,
-    borderRadius: radii.card,
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 13,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
-  },
-  avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.soft
-  },
-  avatarPaw: {
-    width: 24,
-    height: 24,
-    tintColor: colors.teal
-  },
-  petCopy: {
-    flex: 1,
-    marginLeft: 14
-  },
-  petName: {
-    color: colors.ink,
-    ...typography.subtitle,
-    fontWeight: "800"
-  },
-  petDetails: {
-    marginTop: 5,
-    color: colors.muted,
-    ...typography.caption, fontWeight: "600"
-  },
-  petMeta: {
-    alignItems: "flex-end"
-  },
-  availableBadge: {
-    minWidth: 92,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#E1F2D3"
-  },
-  availableText: {
-    color: "#356A24",
-    ...typography.meta,
-    fontWeight: "800"
-  },
-  shelterText: {
-    marginTop: 8,
-    color: "#AAA69D",
-    ...typography.caption, fontWeight: "600"
-  },
+  }
 });

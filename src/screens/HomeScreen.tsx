@@ -7,13 +7,14 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Alert, Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
-import { Avatar, Card, PressScale, SectionHeader } from "../components/ui";
+import { Card, PressScale, SectionHeader } from "../components/ui";
+import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, StoryRow, StrayRow, sectionSpacing } from "../components/home/HomeSections";
 import type { StoryCard } from "./StoriesScreen";
 import { loadState } from "../net";
 import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
@@ -23,14 +24,10 @@ import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { pickSpotlight } from "../sagip";
-import { TAP_SLOP } from "../touch";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { gradients, heroDirection } from "../theme/v3";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 
-const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;
 
@@ -50,7 +47,6 @@ const TONE = {
   green: { bg: "#EAF3DE", fg: "#27500A" }, grey: { bg: "#ECEAE3", fg: "#5F5E5A" }
 } as const;
 
-type MapReport = { report_id: string; species: string; condition: string; city: string | null };
 
 export function HomeScreen({ navigation, route }: Props) {
   // The status bar is real now (App.tsx), so the first thing on screen has to start below
@@ -234,32 +230,25 @@ export function HomeScreen({ navigation, route }: Props) {
     <View style={styles.screen} testID="screen.home">
       <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <View style={styles.headerCopy}>
-            <Text style={styles.greeting}>{me?.display_name ? `Kumusta, ${me.display_name}!` : "Kumusta!"}</Text>
-            {pendingMember ? (
-              <Text style={styles.role}>Pet owner · Verified Member pending</Text>
-            ) : (
-              <View style={styles.cityRow}>
-                <Text style={styles.cityText}>{city ?? "Set your city"}</Text>
-                <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("locationPicker")}>
-                  <Text style={styles.cityChange}>Change ›</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-          <TouchableOpacity
-            style={styles.bellButton}
-            activeOpacity={0.75}
-            onPress={() => navigation.navigate("notifications")}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Notifications"
-          >
-            <BellIcon color="#12213A" />
-            {hasUnread ? <View style={styles.bellDot} /> : null}
-          </TouchableOpacity>
-        </View>
+        <HomeHeader
+          greeting={me?.display_name ? `Kumusta, ${me.display_name}!` : "Kumusta!"}
+          roleLine={pendingMember ? "Pet owner · Verified Member pending" : undefined}
+          city={city ?? "Set your city"}
+          onChangeCity={() => navigation.navigate("locationPicker")}
+          right={
+            <TouchableOpacity
+              style={styles.bellButton}
+              activeOpacity={0.75}
+              onPress={() => navigation.navigate("notifications")}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Notifications"
+            >
+              <BellIcon color="#12213A" />
+              {hasUnread ? <View style={styles.bellDot} /> : null}
+            </TouchableOpacity>
+          }
+        />
 
         {pendingMember && (
           // US-D4 audit (2026-08-24) · was a dead tap — "Documents ›" implied a
@@ -296,27 +285,7 @@ export function HomeScreen({ navigation, route }: Props) {
           </View>
         )}
 
-        <LinearGradient
-          colors={gradients.hero}
-          start={heroDirection.start}
-          end={heroDirection.end}
-          style={styles.reportCard}
-        >
-          <View>
-            <Text style={styles.reportTitle}>Saw a stray?</Text>
-            <Text style={styles.reportText}>Report it in seconds — help is near.</Text>
-            <TouchableOpacity
-              testID="btn.home.report"
-              activeOpacity={0.85}
-              style={styles.reportButton}
-              onPress={() => navigation.navigate("reportStray")}
-              hitSlop={TAP_SLOP}
-            >
-              <Text style={styles.reportButtonText}>Report now</Text>
-            </TouchableOpacity>
-          </View>
-          <Image source={paw} resizeMode="contain" style={styles.reportPaw} />
-        </LinearGradient>
+        <ReportStrayCard testID="btn.home.report" onPress={() => navigation.navigate("reportStray")} />
 
         {spotlight && (
           // The left accent is the one place this card departs from the V2 recipe's strokeless
@@ -397,40 +366,19 @@ export function HomeScreen({ navigation, route }: Props) {
           actionLabel="See all ›"
           onAction={() => navigation.navigate("adopt")}
           testID="btn.home.adopt"
-          style={styles.sectionHeader}
+          style={sectionSpacing.first}
         />
 
         {listingsPanel.kind !== "ready" && listingsPanel.kind !== "empty" ? (
           <LoadStateView state={listingsPanel} onRetry={loadCityPanels} />
         ) : listingsPanel.kind === "empty" ? (
-          <Text style={styles.emptyNote}>No pets listed near you yet.</Text>
+          <EmptyNote>No pets listed near you yet.</EmptyNote>
         ) : listings.map((listing) => (
-          <TouchableOpacity
+          <ListingRow
             key={listing.listing_id}
-            activeOpacity={0.75}
-            style={styles.petCard}
+            listing={listing}
             onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
-          >
-            {/* ⚠️ SQUIRCLE, NOT A CIRCLE. The design system calls the rounded square "a
-                deliberate V2 replacement for the old circular avatar", and these two rows were
-                the last circles left on Home — sitting directly under the squircle story
-                avatars, which made the inconsistency impossible to miss once both were on
-                screen together. */}
-            <Avatar size={52}>
-              <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
-            </Avatar>
-            <View style={styles.petCopy}>
-              <Text style={styles.petName}>{listing.pet.name}</Text>
-              <Text style={styles.petDetails}>
-                {[listing.pet.species, listing.pet.breed, listing.city].filter(Boolean).join(" · ")}
-              </Text>
-            </View>
-            <View style={styles.petMeta}>
-              <View style={styles.availableBadge}>
-                <Text style={styles.availableText}>Available</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
+          />
         ))}
 
         {/* US-T2 · the community stories entry point (was a dead 'Community' idea in the design). */}
@@ -438,30 +386,15 @@ export function HomeScreen({ navigation, route }: Props) {
           title="Community stories"
           actionLabel="See all ›"
           onPress={() => navigation.navigate("stories")}
-          style={styles.rescueSectionRow}
+          style={sectionSpacing.next}
         />
 
         {storiesPanel.kind !== "ready" && storiesPanel.kind !== "empty" ? (
           <LoadStateView state={storiesPanel} onRetry={loadStories} />
         ) : storiesPanel.kind === "empty" ? (
-          <Text style={styles.emptyNote}>No stories yet. Be the first to share one.</Text>
+          <EmptyNote>No stories yet. Be the first to share one.</EmptyNote>
         ) : stories.map((story) => (
-          <TouchableOpacity
-            key={story.story_id}
-            activeOpacity={0.75}
-            style={styles.rescueCard}
-            onPress={() => navigation.navigate("storyDetail", { storyId: story.story_id })}
-          >
-            {/* Tinted: a story's author is shown as an organisation-style tile, so the same
-                person keeps the same colour across Home, Stories and a story's detail. */}
-            <Avatar initials={storyInitials(story.author.name)} tinted size={44} />
-            <View style={styles.petCopy}>
-              <Text style={styles.petName} numberOfLines={1}>{story.caption}</Text>
-              <Text style={styles.petDetails} numberOfLines={1}>
-                {story.author.name}{story.author.city ? ` · ${story.author.city}` : ""}
-              </Text>
-            </View>
-          </TouchableOpacity>
+          <StoryRow key={story.story_id} story={story} onPress={() => navigation.navigate("storyDetail", { storyId: story.story_id })} />
         ))}
 
         {/* `btn.home.rescueMap` used to sit on the "See nearby strays ›" link above, which was
@@ -473,36 +406,15 @@ export function HomeScreen({ navigation, route }: Props) {
           title="Nearby rescues"
           actionLabel="See map ›"
           onPress={() => navigation.navigate("rescueMap")}
-          style={styles.rescueSectionRow}
+          style={sectionSpacing.next}
         />
 
         {rescuesPanel.kind !== "ready" && rescuesPanel.kind !== "empty" ? (
           <LoadStateView state={rescuesPanel} onRetry={loadCityPanels} />
         ) : rescuesPanel.kind === "empty" ? (
-          <Text style={styles.emptyNote}>No strays reported nearby yet.</Text>
+          <EmptyNote>No strays reported nearby yet.</EmptyNote>
         ) : rescues.map((report) => (
-          <TouchableOpacity
-            key={report.report_id}
-            activeOpacity={0.75}
-            style={styles.rescueCard}
-            onPress={() => navigation.navigate("reportDetail", { reportId: report.report_id })}
-          >
-            {/* ⚠️ SQUIRCLE, NOT A CIRCLE. The design system calls the rounded square "a
-                deliberate V2 replacement for the old circular avatar", and these two rows were
-                the last circles left on Home — sitting directly under the squircle story
-                avatars, which made the inconsistency impossible to miss once both were on
-                screen together. */}
-            <Avatar size={52}>
-              <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
-            </Avatar>
-            <View style={styles.petCopy}>
-              <Text style={styles.petName}>{report.species} · {report.city ?? "Nearby"}</Text>
-              <Text style={styles.petDetails}>{report.condition} · needs pickup</Text>
-            </View>
-            <View style={conditionBadgeStyle(report.condition)}>
-              <Text style={conditionTextStyle(report.condition)}>{conditionLabel(report.condition)}</Text>
-            </View>
-          </TouchableOpacity>
+          <StrayRow key={report.report_id} report={report} onPress={() => navigation.navigate("reportDetail", { reportId: report.report_id })} />
         ))}
 
         </>
@@ -516,28 +428,6 @@ export function HomeScreen({ navigation, route }: Props) {
   );
 }
 
-/** Same two-letter fallback StoriesScreen and StoryDetailScreen already use. */
-function storyInitials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
-}
-
-function conditionLabel(condition: string): string {
-  if (condition === "injured" || condition === "sick") return "Urgent";
-  if (condition === "pregnant") return "Special";
-  return "Stable";
-}
-
-function conditionBadgeStyle(condition: string) {
-  if (condition === "injured" || condition === "sick") return styles.urgentBadge;
-  if (condition === "pregnant") return styles.specialBadge;
-  return styles.stableBadge;
-}
-
-function conditionTextStyle(condition: string) {
-  if (condition === "injured" || condition === "sick") return styles.urgentText;
-  if (condition === "pregnant") return styles.specialText;
-  return styles.stableText;
-}
 
 function intentToast(action: GuestIntentAction): [string, string] {
   switch (action) {
@@ -565,41 +455,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: 20,
     paddingBottom: 156
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between"
-  },
-  headerCopy: {
-    flex: 1,
-    marginRight: 12
-  },
-  greeting: {
-    color: colors.ink,
-    ...typography.title,
-    lineHeight: 28
-  },
-  role: {
-    marginTop: 6,
-    color: colors.muted,
-    ...typography.meta
-  },
-  cityRow: {
-    marginTop: 6,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8
-  },
-  cityText: {
-    color: colors.ink,
-    ...typography.strong,
-    fontWeight: "700"
-  },
-  cityChange: {
-    color: colors.teal,
-    ...typography.meta,
-    fontWeight: "700"
   },
   bellButton: {
     width: 40,
@@ -679,48 +534,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: "#DCEDEB",
     ...typography.body
-  },
-  reportCard: {
-    height: 140,
-    marginTop: 14,
-    // V3 radius scale: 26 hero / 24 card / 18 row. The fill is now the three-stop brand
-    // gradient rather than flat colors.teal — overflow hidden so it cannot bleed the corners.
-    borderRadius: radii.hero,
-    overflow: "hidden",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingLeft: 20,
-    paddingRight: 16,
-    paddingTop: 15
-  },
-  reportTitle: {
-    color: "#FFFFFF",
-    ...typography.title,
-    lineHeight: 28
-  },
-  reportText: {
-    marginTop: 9,
-    color: "#D5ECE8",
-    ...typography.meta
-  },
-  reportButton: {
-    // §13.4 · the drawn pill is 38 pt, under the 44 pt minimum. `minHeight` raises the real
-    // target without repainting the design, and TAP_SLOP on the element covers the rest.
-    // This is the control someone uses in a hurry, standing over an animal — the last one
-    // that should be fiddly to press.
-    width: 136,
-    height: 38,
-    minHeight: 44,
-    marginTop: 14,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF"
-  },
-  reportButtonText: {
-    color: "#126B69",
-    ...typography.meta,
-    fontWeight: "800"
   },
   /** Layout only — the fill, radius, accent bar and shadow are Card's. */
   spotCardLayout: { marginTop: 18 },
@@ -807,143 +620,10 @@ const styles = StyleSheet.create({
     ...typography.meta,
     fontWeight: "800"
   },
-  reportPaw: {
-    width: 72,
-    height: 72,
-    marginTop: 4
-  },
-  sectionHeader: {
-    marginTop: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between"
-  },
-  sectionTitle: {
-    color: colors.ink,
-    ...typography.subtitle,
-    fontWeight: "800"
-  },
-  seeAll: {
-    color: "#126B69",
-    ...typography.meta,
-    fontWeight: "800"
-  },
-  petCard: {
-    height: 68,
-    marginTop: 10,
-    borderRadius: radii.tile,
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 13,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
-  },
-  avatarPaw: {
-    width: 24,
-    height: 24,
-    tintColor: colors.teal
-  },
-  petCopy: {
-    flex: 1,
-    marginLeft: 14
-  },
-  petName: {
-    color: colors.ink,
-    ...typography.subtitle,
-    fontWeight: "800"
-  },
-  petDetails: {
-    marginTop: 5,
-    color: colors.muted,
-    ...typography.caption, fontWeight: "600"
-  },
-  petMeta: {
-    alignItems: "flex-end"
-  },
-  availableBadge: {
-    minWidth: 92,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#E1F2D3"
-  },
-  availableText: {
-    color: "#356A24",
-    ...typography.meta,
-    fontWeight: "800"
-  },
-  shelterText: {
-    marginTop: 8,
-    color: "#AAA69D",
-    ...typography.caption, fontWeight: "600"
-  },
-  rescueTitle: {},
-  rescueCard: {
-    height: 68,
-    marginTop: 16,
-    borderRadius: radii.tile,
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 13,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
-  },
-  urgentBadge: {
-    width: 68,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.warningBg
-  },
-  urgentText: {
-    color: colors.warningStrong,
-    ...typography.meta,
-    fontWeight: "800"
-  },
   lockedNote: {
     marginTop: 14,
     color: colors.muted,
     ...typography.caption, fontWeight: "600",
     textAlign: "center"
-  },
-  emptyNote: {
-    marginTop: 12,
-    color: colors.muted,
-    ...typography.meta,
-    textAlign: "center"
-  },
-  rescueSectionRow: {
-    marginTop: 34,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between"
-  },
-  specialBadge: {
-    minWidth: 68,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.soft
-  },
-  specialText: {
-    color: colors.teal,
-    ...typography.meta,
-    fontWeight: "800"
-  },
-  stableBadge: {
-    minWidth: 68,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#E1F2D3"
-  },
-  stableText: {
-    color: "#356A24",
-    ...typography.meta,
-    fontWeight: "800"
   }
 });
