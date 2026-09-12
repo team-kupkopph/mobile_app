@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 const card = {
@@ -140,7 +140,7 @@ export function NeedFormScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  field: { marginTop: 16, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 8, borderRadius: 22, ...card },
+  field: { marginTop: 16, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 8, borderRadius: radii.field, ...card },
   fieldError: { borderWidth: 1.5, borderColor: colors.danger },
   fieldLabel: { color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   input: { color: colors.ink, fontSize: 18, fontWeight: "700", paddingVertical: 6 },

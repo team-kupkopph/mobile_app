@@ -11,7 +11,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { matchReasons, matchStrength } from "../community";
 import { MatchShape, RootStackParamList } from "../navigation/types";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 const card = {
@@ -98,12 +98,12 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   intro: { color: colors.muted, ...typography.body, marginBottom: 16 },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, textAlign: "center", lineHeight: 23 },
-  matchCard: { marginBottom: 14, padding: 16, borderRadius: 22, ...card },
+  matchCard: { marginBottom: 14, padding: 16, borderRadius: radii.card, ...card },
   row: { flexDirection: "row", gap: 14 },
-  photo: { width: 96, height: 96, borderRadius: 16, backgroundColor: colors.soft },
+  photo: { width: 96, height: 96, borderRadius: squircle(96), backgroundColor: colors.soft },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   type: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  chip: { paddingHorizontal: 11, paddingVertical: 4, borderRadius: 11 },
+  chip: { paddingHorizontal: 11, paddingVertical: 4, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   reasons: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 19 },
   review: { marginTop: 10, color: colors.teal, fontSize: 14.5, fontWeight: "700" },

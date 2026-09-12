@@ -14,7 +14,7 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 const MIN_PHOTOS = 3;
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   docCard: {
     minHeight: 84,
     marginTop: 16,
-    borderRadius: 16,
+    borderRadius: radii.card,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     ...elevation.soft
   },
-  docIcon: { width: 48, height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
+  docIcon: { width: 48, height: 48, borderRadius: squircle(48), alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   docCopy: { flex: 1, marginLeft: 14 },
   docTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, fontSize: 11 },
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   fieldLabel: { marginTop: 22, marginBottom: 8, color: colors.muted, ...typography.meta, fontWeight: "800" },
   socialField: {
     height: 54,
-    borderRadius: 14,
+    borderRadius: radii.field,
     justifyContent: "center",
     paddingHorizontal: 16,
     backgroundColor: "#FFFFFF",

@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   },
   lightCard: {
     marginTop: 26,
-    borderRadius: 16,
+    borderRadius: radii.card,
     padding: 18,
     backgroundColor: colors.soft
   },

@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
   reviewCard: {
     minHeight: 84,
     marginTop: 22,
-    borderRadius: 15,
+    borderRadius: radii.card,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 16,

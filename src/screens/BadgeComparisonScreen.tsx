@@ -5,7 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 const card = {
@@ -59,7 +59,7 @@ export function BadgeComparisonScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 60, alignItems: "center" },
-  medal: { width: 108, height: 108, borderRadius: 32, alignItems: "center", justifyContent: "center" },
+  medal: { width: 108, height: 108, borderRadius: squircle(108), alignItems: "center", justifyContent: "center" },
   medalOn: { backgroundColor: colors.soft },
   medalOff: { backgroundColor: colors.greyPill },
   medalGlyph: { color: colors.teal, fontSize: 54, fontWeight: "800" },
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   name: { marginTop: 20, color: colors.ink, ...typography.hero, textAlign: "center" },
   dimText: { color: colors.muted },
   description: { marginTop: 10, color: colors.muted, fontSize: 15.5, lineHeight: 22, textAlign: "center" },
-  criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18, borderRadius: 22, ...card },
+  criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18, borderRadius: radii.card, ...card },
   criteriaLabel: { color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   criteriaText: { marginTop: 6, color: colors.ink, ...typography.subtitle, fontWeight: "600" },
   earnedPill: { marginTop: 22, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 16, backgroundColor: colors.successBg },

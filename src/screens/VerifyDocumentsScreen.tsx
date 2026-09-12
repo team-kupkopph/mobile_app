@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   docCard: {
     marginBottom: 14,
-    borderRadius: 22,
+    borderRadius: radii.card,
     padding: 18,
     backgroundColor: "#FFFFFF",
     ...elevation.soft
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 14,
     padding: 18,
-    borderRadius: 22,
+    borderRadius: radii.card,
     backgroundColor: colors.successBg
   },
   approvedDot: {

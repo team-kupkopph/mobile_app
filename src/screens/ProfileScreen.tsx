@@ -19,7 +19,7 @@ import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "profile">;
 
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 84,
     height: 84,
-    borderRadius: 22,
+    borderRadius: squircle(84),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.soft,
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   verifyCard: {
     minHeight: 84,
     marginTop: 18,
-    borderRadius: 15,
+    borderRadius: radii.card,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 16,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   },
   accountCard: {
     marginTop: 18,
-    borderRadius: 15,
+    borderRadius: radii.card,
     paddingHorizontal: 18,
     backgroundColor: "#FFFFFF",
     ...elevation.soft

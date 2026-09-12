@@ -163,9 +163,20 @@ const bindableLiterals = sites.filter(
 );
 /** A square tile wearing a container step — same pixel, wrong rule. */
 const squareOnContainerStep = tokenRefs.filter((s) => s.square);
+/**
+ * ⚠️ DRAWN GEOMETRY IS NOT A CONTAINER. A check mark's stem is 5×20 with radius 3; a clock
+ * hand is 2.4 tall with radius 2; a consent checkbox is 26×26 with radius 7; a bell's
+ * clapper, an eye's pupil, a lock body. The scale's smallest step is `chip` (12), and nothing
+ * drawn as a shape below it is asking to be a chip. The rule: a radius under 12 on an element
+ * no larger than 44 pt (or with no size at all — the icon primitives) is geometry, and is
+ * counted on its own ratchet below rather than among the containers.
+ */
+const isGeometry = (s: Site) =>
+  s.radius !== null && s.radius < 12 && (s.side === null || s.side <= 44);
+const geometry = sites.filter((s) => isGeometry(s) && !isPill(s) && !followsSquircle(s));
 const offScale = sites.filter(
   (s) => s.radius !== null && !stepValues.includes(s.radius) &&
-         !isPill(s) && !followsSquircle(s)
+         !isPill(s) && !followsSquircle(s) && !isGeometry(s)
 );
 
 /**
@@ -188,8 +199,28 @@ const TILE_EXEMPTIONS: string[] = [];
  *
  * 138: Welcome's `primaryWrap` carried `borderRadius: 30` with no height — a pill by intent
  * the rule could not halve — and went with the hand-rolled button it clipped.
+ *
+ * 44, DOWN FROM 138, BY DECIDING WHAT EACH ELEMENT IS RATHER THAN HOW FAR ITS NUMBER WAS
+ * FROM A STEP. 64 moved: 37 things named and drawn as cards (docCard, statCard, pledgeCard,
+ * photo wells and the map well, which the canvas clips with the card around them) to `card`;
+ * 11 text inputs to `field`; 11 square tiles at 0.25–0.31 × size to `squircle(size)` —
+ * three 48 pt document icons, two avatars, the 108 pt medal, a 96 pt photo; 4 chips to
+ * `chip`; the dashboard's 108 pt hero banner to `hero`. 30 were never containers — drawn
+ * geometry, now counted on its own ratchet. What is left is four groups the panel has no
+ * answer for, and says so:
+ *   · 24 tinted notice boxes, banners and option rows at 14 or 16. The ARTBOARDS draw this
+ *     element — Inquiry's contact box, Main's status chips, Profile's glass — at 13–14, and
+ *     the PANEL declares no step between chip (12) and tile (18). The same shape as the bold
+ *     fifteen: the panel is the incomplete party, and it is the panel's row to add.
+ *   · 14 pills sized by padding rather than height (`retry`, `stepper`, `earnedPill`...),
+ *     pills by intent the halving rule cannot see. Each wants a height, then `pill(h)`.
+ *   · 4 hand-rolled segmented controls (`segTrack`, `segment`) — SegmentedControl exists.
+ *   · Adopt's stamp at 15, which is the artboard's own value, and Welcome's 168 pt logo tile
+ *     at 0.25 × size, on a screen that has no artboard.
  */
-const OFF_SCALE = 138;
+const OFF_SCALE = 44;
+/** Drawn geometry — see `isGeometry`. May fall; may not rise. */
+const GEOMETRY = 30;
 
 describe("screens take corner radii from the theme", () => {
   it("found radii to classify", () => {
@@ -215,6 +246,11 @@ describe("screens take corner radii from the theme", () => {
 
   it("has not grown a new off-scale radius", () => {
     expect(offScale.length).toBeLessThanOrEqual(OFF_SCALE);
+  });
+
+  it("counts drawn geometry apart from containers, and it may not rise either", () => {
+    expect(geometry.length).toBeLessThanOrEqual(GEOMETRY);
+    expect(geometry.length).toBe(GEOMETRY);
   });
 
   it("records the remaining off-scale radii rather than absorbing them", () => {

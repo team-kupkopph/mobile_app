@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40 },
   card: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: radii.field, marginBottom: 12, ...card },
-  thumb: { width: 64, height: 64, borderRadius: 16, backgroundColor: colors.border },
+  thumb: { width: 64, height: 64, borderRadius: squircle(64), backgroundColor: colors.border },
   thumbEmpty: {},
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },

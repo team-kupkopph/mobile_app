@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   empty: { marginTop: 40, color: colors.muted, fontSize: 16, lineHeight: 23, textAlign: "center" },
-  pledgeCard: { marginBottom: 14, padding: 18, borderRadius: 22, ...card },
+  pledgeCard: { marginBottom: 14, padding: 18, borderRadius: radii.card, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },

@@ -101,10 +101,10 @@ export function MatchDetailScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  reportCard: { padding: 18, borderRadius: 22, ...card },
-  chip: { alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 13, backgroundColor: colors.soft },
+  reportCard: { padding: 18, borderRadius: radii.card, ...card },
+  chip: { alignSelf: "flex-start", paddingHorizontal: 12, paddingVertical: 6, borderRadius: radii.chip, backgroundColor: colors.soft },
   chipText: { color: colors.teal, ...typography.meta, fontWeight: "700" },
-  photo: { height: 180, borderRadius: 16, backgroundColor: colors.soft, marginTop: 14, marginBottom: 6 },
+  photo: { height: 180, borderRadius: radii.card, backgroundColor: colors.soft, marginTop: 14, marginBottom: 6 },
   factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 16 },
   factKey: { color: colors.muted, ...typography.meta },
   factVal: { color: colors.ink, ...typography.strong, fontWeight: "700", flexShrink: 1, textAlign: "right" },

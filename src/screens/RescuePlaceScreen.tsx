@@ -8,7 +8,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   draftNote: { marginTop: 4, marginBottom: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
+  input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }

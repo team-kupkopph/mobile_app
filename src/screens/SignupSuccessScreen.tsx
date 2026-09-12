@@ -8,7 +8,7 @@ import { AdoptIcon, VolunteerIcon } from "../components/AppIcons";
 import { TopStatus } from "../components/TopStatus";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, authColors } from "./AuthFormKit";
-import { spacing, typography } from "../theme";
+import { radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signupSuccess">;
 
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   stepCard: {
     width: "100%",
     marginTop: 14,
-    borderRadius: 16,
+    borderRadius: radii.card,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 16,
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     height: 46,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 14,
+    borderRadius: squircle(46),
     backgroundColor: authColors.paleTeal
   },
   stepCopy: {

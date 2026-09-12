@@ -15,7 +15,7 @@ import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { ShiftType, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
@@ -141,10 +141,10 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  input: { height: 52, borderRadius: 16, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
+  input: { height: 52, borderRadius: radii.field, paddingHorizontal: 16, color: colors.ink, ...typography.subtitle, ...card },
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
-    minWidth: "47%", height: 48, borderRadius: 14, alignItems: "center", justifyContent: "center",
+    minWidth: "47%", height: 48, borderRadius: radii.chip, alignItems: "center", justifyContent: "center",
     paddingHorizontal: 12, ...card
   },
   chipActive: { backgroundColor: colors.soft },

@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
-import { spacing, typography } from "../theme";
+import { radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterTier">;
 
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     marginTop: 28,
     borderWidth: 1,
     borderColor: authColors.border,
-    borderRadius: 16,
+    borderRadius: radii.card,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 18,

@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
   pickerClose: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   pickerSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   pickerList: { marginTop: 14 },
-  animalCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: 16, marginBottom: 10, ...card },
+  animalCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: radii.card, marginBottom: 10, ...card },
   animalPhoto: { width: 52, height: 52, borderRadius: squircle(52) },
   animalPhotoEmpty: { backgroundColor: colors.greyPill },
   animalName: { color: colors.ink, ...typography.strong, fontWeight: "800" },

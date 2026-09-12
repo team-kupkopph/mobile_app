@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   petCard: {
     height: 68,
     marginTop: 10,
-    borderRadius: 14,
+    borderRadius: radii.card,
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 13,

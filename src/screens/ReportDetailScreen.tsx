@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
   flagLink: { marginLeft: "auto" },
   flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  photo: { width: "100%", height: 200, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
+  photo: { width: "100%", height: 200, borderRadius: radii.card, marginBottom: 18, backgroundColor: colors.border },
   h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   chip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },

@@ -152,7 +152,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
-  mapWrap: { height: 200, borderRadius: 22, overflow: "hidden", backgroundColor: colors.soft },
+  mapWrap: { height: 200, borderRadius: radii.card, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   mapBadge: { position: "absolute", left: 12, bottom: 12, backgroundColor: "rgba(255,255,255,0.94)", paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: "center" },
   mapBadgeText: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },

@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   noteLabel: { color: colors.warningStrong, ...typography.meta, fontWeight: "800", letterSpacing: 0.6 },
   noteText: { marginTop: 8, color: colors.warningStrong, fontSize: 16, lineHeight: 23, fontWeight: "600" },
   fileCard: {
-    marginTop: 20, padding: 20, borderRadius: 22, backgroundColor: "#FFFFFF",
+    marginTop: 20, padding: 20, borderRadius: radii.card, backgroundColor: "#FFFFFF",
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     ...elevation.soft
   },
