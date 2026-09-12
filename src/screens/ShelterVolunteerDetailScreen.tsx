@@ -5,7 +5,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
@@ -13,6 +13,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone, VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 function formatAddress(addr: { line1: string; barangay: string; city: string; province: string }): string {
   return [addr.line1, addr.barangay, addr.city, addr.province].filter(Boolean).join(", ");
@@ -47,14 +48,7 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Volunteer</Text>
-        <View style={styles.back} />
-      </View>
+      <ScreenHeader title="Volunteer" onBack={() => navigation.goBack()} align="center" />
 
       {!detail ? (
         <LoadStateView state={loadState(res)} subject="volunteer" onRetry={load}
@@ -119,13 +113,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: {
-    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
-  },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, ...typography.section },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   card: { borderRadius: radii.field, padding: 18, marginBottom: 18, ...card },
   name: { color: colors.ink, ...typography.section },

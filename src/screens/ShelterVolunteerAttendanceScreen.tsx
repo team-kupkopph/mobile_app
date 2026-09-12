@@ -14,6 +14,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone } from "../shelterVolunteer";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -74,14 +75,7 @@ export function ShelterVolunteerAttendanceScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Attendance</Text>
-        <View style={styles.back} />
-      </View>
+      <ScreenHeader title="Attendance" onBack={() => navigation.goBack()} align="center" />
 
       {!!banner && (
         <View style={styles.bannerBox}>
@@ -177,13 +171,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: {
-    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
-  },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, ...typography.section },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },

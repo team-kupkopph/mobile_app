@@ -35,10 +35,10 @@ const stripComments = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").repl
  */
 const SHARED = files.filter((f) => /<ScreenHeader|<SimpleHeader|<AuthHeader/.test(stripComments(read(f))));
 /** A screen still drawing its own back affordance. */
-const HAND_ROLLED = files.filter(
-  (f) => !SHARED.includes(f) &&
-    /testID="btn\.back"|styles\.backGlyph|accessibilityLabel="Go back"/.test(stripComments(read(f)))
-);
+const HAND_ROLLED_RE = /testID="btn\.back"|styles\.backGlyph|accessibilityLabel="Go back"/;
+const classify = (src: string) =>
+  /<ScreenHeader|<SimpleHeader|<AuthHeader/.test(src) ? "SHARED" : HAND_ROLLED_RE.test(src) ? "HAND_ROLLED" : "NONE";
+const HAND_ROLLED = files.filter((f) => classify(stripComments(read(f))) === "HAND_ROLLED");
 
 /**
  * ⚠️ A RATCHET, NOT A TARGET. It fails if the count goes UP, which is the thing worth
@@ -58,13 +58,13 @@ const HAND_ROLLED = files.filter(
 // burned this project: the title now clears the Dynamic Island on every converted screen,
 // because ScreenHeader pads by the inset rather than 58.
 //
-// The six that remain are the ShelterVolunteer screens whose `styles.header` View wraps far
-// more than a header — a stats block, a calendar strip, a contact card. Converting them is a
-// layout change, not a header swap, and is not disguised as one:
-//   ShelterVolunteerActivityScreen, ShelterVolunteerAttendanceScreen,
-//   ShelterVolunteerCalendarScreen, ShelterVolunteerCancelScreen,
-//   ShelterVolunteerDetailScreen, ShelterVolunteerRequestsScreen.
-const REMAINING_HAND_ROLLED = 6;
+// ZERO, AND A FLAT RULE FROM HERE. The last six were the ShelterVolunteer screens, which #69
+// left behind with the note that their `styles.header` "wraps far more than a header — a
+// stats block, a calendar strip". Read again, it did not: five were a back button, a centred
+// title and a spacer, and Requests added a subtitle line, which ScreenHeader's `children`
+// slot carries under the row. The note was wrong and the conversion was a header swap after
+// all. The ratchet is now the flat rule it was always meant to become: no screen draws its own.
+const REMAINING_HAND_ROLLED = 0;
 
 describe("the header primitives", () => {
   it("pads by the safe-area inset rather than a magic number", () => {
@@ -98,7 +98,8 @@ describe("the hand-rolled header ratchet", () => {
     // Guard the guard: a broken scan would make every count below meaningless. This repo has
     // had a selector scan report 0 and another report 128 phantoms; assert the scope first.
     expect(SHARED.length).toBeGreaterThanOrEqual(23);
-    expect(HAND_ROLLED.length).toBeGreaterThan(0);
+    // The scan must still SEE a hand-rolled header when one exists: feed it the shape.
+    expect(classify("<Text testID=\"btn.back\" style={styles.backGlyph}>‹</Text>")).toBe("HAND_ROLLED");
   });
 
   it("has not grown a new hand-rolled header", () => {
@@ -122,11 +123,7 @@ describe("the hand-rolled header ratchet", () => {
     converted.forEach((f) => expect(read(f)).toMatch(/<ScreenHeader/));
   });
 
-  it("names the six still hand-rolled, so the list can only get shorter", () => {
-    expect(HAND_ROLLED.sort()).toEqual([
-      "ShelterVolunteerActivityScreen.tsx", "ShelterVolunteerAttendanceScreen.tsx",
-      "ShelterVolunteerCalendarScreen.tsx", "ShelterVolunteerCancelScreen.tsx",
-      "ShelterVolunteerDetailScreen.tsx", "ShelterVolunteerRequestsScreen.tsx"
-    ]);
+  it("names none still hand-rolled — the list got shorter until it was empty", () => {
+    expect(HAND_ROLLED.sort()).toEqual([]);
   });
 });
