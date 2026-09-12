@@ -339,7 +339,13 @@ describe("no screen draws a fake status bar", () => {
 // real bug. The rule is about VALIDATION state only, so this matches the names validation
 // state actually goes by rather than banning `disabled` outright.
 describe("submit buttons are not disabled by validation", () => {
-  const VALIDATION_FLAG = /disabled=\{!\s*(canSubmit|isValid|formValid|canSend|canContinue|valid)\b/;
+  // ⚠️ `baseComplete` WAS NOT ON THIS LIST, AND SHELTERVERIFY PASSED FOR A WEEK WITH
+  // `disabled={!baseComplete || submitting}` — five fields gating the only control on the
+  // screen, and a handler that returned silently. It was found by buttonAdoption.test.ts
+  // enumerating every hand-rolled CTA by name, not by this pattern. A list of names is only
+  // as good as the names; `*Complete` and `*Ready` now count, and the readiness flags that
+  // are NOT validation (AdjustPin's map `ready`) are named in that other file instead.
+  const VALIDATION_FLAG = /disabled=\{!\s*(canSubmit|isValid|formValid|canSend|canContinue|valid|\w*[cC]omplete|\w+Ready)\b/;
 
   const files: Array<{ name: string; src: string }> = readdirSync(SCREENS)
     .filter((f) => f.endsWith(".tsx"))

@@ -13,7 +13,7 @@ import { uploadErrorMessage } from "../upload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   docCard: {
     minHeight: 84,
     marginTop: 24,
-    borderRadius: 16,
+    borderRadius: radii.card,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   docIcon: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: squircle(48),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.soft
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   },
   socialField: {
     height: 54,
-    borderRadius: 14,
+    borderRadius: radii.field,
     justifyContent: "center",
     paddingHorizontal: 16,
     backgroundColor: colors.white,

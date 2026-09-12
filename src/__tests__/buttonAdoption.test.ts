@@ -11,13 +11,16 @@
  *
  * ⚠️ WHY THE REMAINDER IS NOT "THE REST". `Button` has no `disabled` prop on purpose (see its
  * header: a submit disabled by validation is a product rule this app already fixed once). Five
- * of the eight sites below carry a `disabled` that is NOT a validation gate — a map that has
+ * of the seven sites below carry a `disabled` that is NOT a validation gate — a map that has
  * not settled, an inquiry already sent, a placement already decided, a geofence. Whether those
  * become a `Button` state or stay hand-rolled is a decision for the primitive, not a codemod.
- * One — ShelterVerify — IS a validation gate (`disabled={!baseComplete}`: ID, billing, photos,
- * social, consent) whose handler returns silently when un-ready, the pattern `f93f74a` removed
- * from eight other screens and missed here; the fix is that story's (an error under the field),
- * not a `disabled` prop. Two are 46 pt row actions in a list, not CTAs.
+ * Two are 46 pt row actions in a list, not CTAs.
+ *
+ * (Resolved.) ShelterVerify was an eighth: `disabled={!baseComplete}` — ID, billing, photos,
+ * social, consent — with a handler that returned silently when un-ready. That is a validation
+ * gate, the pattern `f93f74a` removed from eight screens and missed on this one. It now says
+ * which document is missing and is a `Button`; the list below shrank by one, which is how this
+ * file is meant to change.
  */
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
@@ -70,7 +73,6 @@ describe("full-width CTAs are the Button primitive", () => {
       "ListingDetailScreen:inquireBtn",             // disabled once the inquiry is sent
       "PlaceRequestScreen:acceptBtn",               // disabled once decided
       "PlaceRequestScreen:declineBtn",              // disabled once decided
-      "ShelterVerifyScreen:submitButton",           // disabled={!baseComplete} — a validation gate, f93f74a's bug; onPrimary returns silently
       "ShelterVolunteerAttendanceScreen:attendedBtn", // 46 pt row action, not a CTA
       "ShelterVolunteerRequestsScreen:approveBtn"     // 46 pt row action, not a CTA
     ]);

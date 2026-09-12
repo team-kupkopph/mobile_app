@@ -23,7 +23,7 @@ import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   pageTitle: { color: colors.ink, ...typography.display },
   identityCard: {
     marginTop: 16,
-    borderRadius: 28,
+    borderRadius: radii.card,
     alignItems: "center",
     paddingVertical: 26,
     backgroundColor: "#FFFFFF",
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 96,
     height: 96,
-    borderRadius: 30,
+    borderRadius: squircle(96),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.teal
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   statCard: {
     width: "31%",
     height: 100,
-    borderRadius: 22,
+    borderRadius: radii.card,
     justifyContent: "center",
     paddingHorizontal: 18,
     backgroundColor: "#FFFFFF",

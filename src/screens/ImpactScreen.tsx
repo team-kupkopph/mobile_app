@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "600" },
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, ...typography.section },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  badgeTile: { width: "48%", marginBottom: 14, padding: 16, borderRadius: 22, alignItems: "center", ...card },
+  badgeTile: { width: "48%", marginBottom: 14, padding: 16, borderRadius: radii.card, alignItems: "center", ...card },
   badgeTileDim: { backgroundColor: colors.greyPill, shadowOpacity: 0 },
   medal: { width: 56, height: 56, borderRadius: squircle(56), alignItems: "center", justifyContent: "center" },
   medalOn: { backgroundColor: colors.soft },

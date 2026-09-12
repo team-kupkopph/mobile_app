@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "locationPicker">;
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6
   },
   groupCard: {
-    borderRadius: 16,
+    borderRadius: radii.card,
     backgroundColor: colors.white,
     ...elevation.soft
   },

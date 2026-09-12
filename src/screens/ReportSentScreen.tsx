@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, spacing, squircle, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { Button } from "../components/ui";
 
 
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
-  card: { marginTop: 28, padding: 20, borderRadius: 22, ...card },
+  card: { marginTop: 28, padding: 20, borderRadius: radii.card, ...card },
   cardTitle: { color: colors.ink, ...typography.section },
   cardCity: { marginTop: 6, color: colors.muted, ...typography.body },
   chip: { marginTop: 12, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center", backgroundColor: colors.warningBg },

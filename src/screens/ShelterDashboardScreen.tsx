@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   banner: {
     minHeight: 108,
     marginTop: 20,
-    borderRadius: 22,
+    borderRadius: radii.hero,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   statCard: {
     width: "31%",
     height: 104,
-    borderRadius: 22,
+    borderRadius: radii.card,
     alignItems: "flex-start",
     justifyContent: "center",
     paddingHorizontal: 18,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   footCard: {
     marginTop: 26,
     minHeight: 100,
-    borderRadius: 22,
+    borderRadius: radii.card,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 24,

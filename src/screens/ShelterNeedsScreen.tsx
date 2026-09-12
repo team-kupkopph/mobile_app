@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   note: { color: colors.muted, ...typography.body, lineHeight: 21, marginBottom: 16 },
   addBtn: { marginBottom: 20 },
   empty: { marginTop: 30, color: colors.muted, ...typography.subtitle, textAlign: "center" },
-  needCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
+  needCard: { marginBottom: 12, padding: 18, borderRadius: radii.card, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },

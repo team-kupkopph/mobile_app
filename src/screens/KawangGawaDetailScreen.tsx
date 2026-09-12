@@ -14,7 +14,7 @@ import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { BrowseShift, shiftDurationLabel, shiftSlotsChip, shiftTimeRange, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 
 
 const card = {
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 22, paddingBottom: 60 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   // Squircle, matching the hub card's tile — V2 replaced round tiles with rounded squares.
-  heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
+  heroIcon: { width: 52, height: 52, borderRadius: squircle(52), backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   heroTitle: { flex: 1, color: colors.ink, ...typography.hero },
   orgName: { marginTop: 14, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoCard: { marginTop: 16, borderRadius: radii.tile, paddingHorizontal: 18, paddingVertical: 16, ...card },

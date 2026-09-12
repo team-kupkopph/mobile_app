@@ -168,7 +168,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  photo: { width: "100%", height: 220, borderRadius: 22, marginBottom: 18, backgroundColor: colors.border },
+  photo: { width: "100%", height: 220, borderRadius: radii.card, marginBottom: 18, backgroundColor: colors.border },
   name: { color: colors.ink, ...typography.hero },
   sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   body: { marginTop: 14, color: colors.ink, fontSize: 16, lineHeight: 23 },

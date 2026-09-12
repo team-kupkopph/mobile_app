@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   secondaryLabel: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.section },
   empty: { marginTop: 20, color: colors.muted, ...typography.body },
-  pledgeCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
+  pledgeCard: { marginBottom: 12, padding: 18, borderRadius: radii.card, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   pledger: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
