@@ -6,8 +6,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ScreenHeader } from "../components/ui";
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Button, ScreenHeader } from "../components/ui";
 
 import { ListingDetail } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -172,16 +172,26 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             </TouchableOpacity>
           ) : null}
 
-          <TouchableOpacity
-            testID="btn.listingDetail.inquire"
-            style={[styles.inquireBtn, (inquiring || inquired) && styles.inquireBtnIdle]}
-            activeOpacity={0.9}
-            onPress={onInquirePressed}
-            disabled={inquiring || inquired}
-          >
-            {inquiring ? <ActivityIndicator color={colors.white} />
-              : <Text style={styles.inquireText}>{inquired ? "Inquiry sent" : "Inquire to adopt"}</Text>}
-          </TouchableOpacity>
+          {inquired ? (
+            <>
+              {/* e2e 20-browse-and-inquire asserts this copy: it is the signal the POST was accepted. */}
+              <Text style={styles.inquiredNote}>Inquiry sent — the poster will reach out.</Text>
+              <Button
+                label="See my inquiries"
+                onPress={() => navigation.navigate("myInquiries")}
+                variant="secondary"
+                style={styles.inquireBtn}
+              />
+            </>
+          ) : (
+            <Button
+              testID="btn.listingDetail.inquire"
+              label="Inquire to adopt"
+              onPress={onInquirePressed}
+              loading={inquiring}
+              style={styles.inquireBtn}
+            />
+          )}
         </ScrollView>
       )}
 
@@ -227,7 +237,6 @@ const styles = StyleSheet.create({
   feeValue: { color: colors.ink, fontSize: 20, fontWeight: "800" },
   sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, ...typography.section },
   body: { color: colors.ink, fontSize: 16, lineHeight: 23 },
-  inquireBtn: { marginTop: 30, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  inquireBtnIdle: { backgroundColor: colors.tealIdle },
-  inquireText: { color: colors.white, fontSize: 19, fontWeight: "700" }
+  inquiredNote: { marginTop: 30, color: colors.muted, ...typography.strong, fontWeight: "700", textAlign: "center" },
+  inquireBtn: { marginTop: 14 }
 });

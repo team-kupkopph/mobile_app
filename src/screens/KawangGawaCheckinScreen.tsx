@@ -5,7 +5,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
@@ -14,7 +14,7 @@ import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { MySignupItem, MySignups, shiftTypeLabel } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 const card = {
@@ -81,8 +81,6 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
     ? [...data.upcoming, ...data.requested, ...data.history].find((i) => i.signup_id === signupId)
     : undefined;
 
-  const canCheckIn = !!item && !item.check_in_at && !submitting;
-  const canCheckOut = !!item && !!item.check_in_at && !item.check_out_at && !submitting;
 
   async function act(action: "in" | "out") {
     if (submitting) return;
@@ -112,7 +110,6 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
         : { bg: colors.warningBg, fg: colors.warningStrong, text: "Check in when you arrive." };
 
   const actionLabel = item?.check_in_at ? "Check out" : "Check in";
-  const actionDisabled = item?.check_in_at ? !canCheckOut : !canCheckIn;
   const onAction = () => act(item?.check_in_at ? "out" : "in");
 
   return (
@@ -160,18 +157,11 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
 
           {!!error && <Text style={styles.formError}>{error}</Text>}
 
-          <TouchableOpacity
-            activeOpacity={0.85}
-            style={[styles.actionButton, actionDisabled && styles.actionButtonDisabled]}
-            onPress={onAction}
-            disabled={actionDisabled}
-          >
-            {submitting ? (
-              <ActivityIndicator color={colors.white} />
-            ) : (
-              <Text style={styles.actionText}>{actionLabel}</Text>
-            )}
-          </TouchableOpacity>
+          {/* Once checked out there is nothing left to do; the banner says so, and a greyed
+              "Check out" under it said nothing. */}
+          {!!item && !item.check_out_at && (
+            <Button label={actionLabel} onPress={onAction} loading={submitting} style={styles.actionButton} />
+          )}
 
           <Text style={styles.helper}>The shelter marks your attendance from this.</Text>
         </ScrollView>
@@ -207,8 +197,6 @@ const styles = StyleSheet.create({
   attValue: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   attValueDone: { color: colors.ink },
   formError: { marginTop: 20, color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
-  actionButton: { height: 56, marginTop: 28, borderRadius: 28, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  actionButtonDisabled: { opacity: 0.5 },
-  actionText: { color: colors.white, ...typography.subtitle, fontWeight: "800" },
+  actionButton: { marginTop: 28 },
   helper: { marginTop: 12, color: colors.muted, ...typography.meta, fontWeight: "600", textAlign: "center" }
 });

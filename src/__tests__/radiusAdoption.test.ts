@@ -242,7 +242,8 @@ const GEOMETRY = 30;
 describe("screens take corner radii from the theme", () => {
   it("found radii to classify", () => {
     // Guard the guard: scans here have reported a plausible smaller number more than once.
-    expect(sites.length).toBeGreaterThan(400);
+    // 479 before Track R; hand-rolled buttons and headers took their radii with them since.
+    expect(sites.length).toBeGreaterThan(350);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.

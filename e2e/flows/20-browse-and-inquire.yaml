@@ -16,7 +16,14 @@ appId: ph.kupkop.app
     id: "screen.listingDetail"
 - tapOn:
     id: "btn.listingDetail.inquire"
-# The button becomes "Inquiry sent" and disables itself. Asserting the copy here is
-# deliberate: it is the only signal the POST was accepted rather than merely dispatched.
+# An alert confirms either outcome — "Inquiry sent" on a fresh one, "Already inquired" when
+# this account has inquired before — and while it is up nothing behind it is visible to an
+# assertion. Dismiss it, then assert the screen's own copy: the button is replaced by an
+# "Inquiry sent" note and a live "See my inquiries", in BOTH cases, so the flow no longer
+# depends on whether the fixture account is fresh. Asserting the copy is deliberate: it is the
+# signal the POST was accepted rather than merely dispatched.
+- tapOn:
+    text: "OK"
+    optional: true
 - assertVisible: "Inquiry sent"
 
