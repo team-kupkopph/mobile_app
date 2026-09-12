@@ -381,8 +381,8 @@ for (const file of sources(SRC)) {
  *     17 / 700-800 and `Button` and `Field` already bind to it, so these are buttons and
  *     fields not on the primitive — the header story's shape, not the ramp's.
  *   · 43 glyphs drawn as text — the six ShelterVolunteer "‹" (screenHeader.test.ts's
- *     remainder) and ScreenHeader's own, "›" chevrons, hearts, medals, avatar initials, OTP
- *     digits — no step is for.
+ *     remainder, since resolved) and ScreenHeader's own, "›" chevrons, hearts, medals, avatar
+ *     initials, OTP digits — no step is for.
  *   · 20 small text sites at 10-11 / 400-700 — captions and footnotes below `meta`, which
  *     the ramp's only 11 pt step (`label`, 800 / +0.8 / upper) does not describe. The tab
  *     label is one of them, at the canvas's own 11 / 600 / +0.1.
@@ -392,6 +392,9 @@ for (const file of sources(SRC)) {
  *   · 7 large numerals (`statValue`, `feeValue`, `impactTotals`...) that the canvas never
  *     draws at all, so there is no evidence to snap them to.
  *   · 3 value labels at 18 / 700 (`recipientEmail`, `docName`, `fileName`).
+ * 96, DOWN FROM 102: the last six hand-rolled headers — the ShelterVolunteer screens — went to
+ * ScreenHeader, and their six 30 pt "‹" glyphs with them. The header ratchet is at zero.
+ *
  * ScreenHeader's title is not among them: the one header the canvas draws sets it at
  * 17 / 800 / -0.2, and the primitive now does too, measured on the device (12 pt cap height,
  * SF Bold at 17). US-CH2's 22 had no artboard behind it.
@@ -405,7 +408,7 @@ for (const file of sources(SRC)) {
  * validation gate, and `Button` has no `disabled` on purpose — a decision for that primitive,
  * not a bind. The 2 inputs at 18 / 700 are a Field adoption of the same shape.
  */
-const OFF_RAMP = 102;
+const OFF_RAMP = 96;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {

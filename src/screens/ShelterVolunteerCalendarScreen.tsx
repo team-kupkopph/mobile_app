@@ -15,6 +15,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -81,14 +82,7 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Volunteer schedule</Text>
-        <View style={styles.back} />
-      </View>
+      <ScreenHeader title="Volunteer schedule" onBack={() => navigation.goBack()} align="center" />
 
       {loadState(res, groups.length).kind !== "ready" ? (
         <View style={styles.centerFill}>
@@ -153,13 +147,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: {
-    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
-  },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, ...typography.section },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },

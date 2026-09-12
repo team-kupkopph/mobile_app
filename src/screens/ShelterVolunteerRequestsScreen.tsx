@@ -20,6 +20,7 @@ import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } 
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
+import { ScreenHeader } from "../components/ui";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -196,21 +197,13 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.title}>{shift ? shiftTypeLabel(shift.type) : "Requests"}</Text>
-          {!!shift && (
-            <Text style={styles.subtitle}>
-              {shiftWhenLabel(shift.starts_at, shift.ends_at)} · {shift.capacity} spot{shift.capacity === 1 ? "" : "s"}
-            </Text>
-          )}
-        </View>
-        <View style={styles.back} />
-      </View>
+      <ScreenHeader title={shift ? shiftTypeLabel(shift.type) : "Requests"} onBack={() => navigation.goBack()} align="center">
+        {!!shift && (
+          <Text style={styles.subtitle}>
+            {shiftWhenLabel(shift.starts_at, shift.ends_at)} · {shift.capacity} spot{shift.capacity === 1 ? "" : "s"}
+          </Text>
+        )}
+      </ScreenHeader>
 
       {!!banner && (
         <View style={styles.bannerBox}>
@@ -389,13 +382,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: {
-    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
-    flexDirection: "row", alignItems: "center", gap: 8
-  },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, ...typography.section, textAlign: "center" },
   subtitle: { marginTop: 3, color: colors.muted, ...typography.meta, textAlign: "center" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center", marginTop: 8 },

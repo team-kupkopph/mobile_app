@@ -15,7 +15,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -59,14 +59,7 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <TouchableOpacity testID="btn.back" onPress={() => navigation.goBack()} style={styles.back} hitSlop={12}
-          accessibilityRole="button" accessibilityLabel="Go back">
-          <Text style={styles.backGlyph}>‹</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Activity</Text>
-        <View style={styles.back} />
-      </View>
+      <ScreenHeader title="Activity" onBack={() => navigation.goBack()} align="center" />
 
       {!shift ? (
         <LoadStateView state={loadState(res)} subject="activity" onRetry={load}
@@ -160,13 +153,6 @@ const card = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  header: {
-    paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
-    flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
-  },
-  back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
-  backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, ...typography.section },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
