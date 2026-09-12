@@ -19,6 +19,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { Button } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -161,13 +162,11 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           <Stat n={counts.donations} label="Donations" />
         </View>
 
-        <TouchableOpacity
-          activeOpacity={0.85}
-          style={styles.primaryButton}
+        <Button
+          label="+  List an animal"
           onPress={() => navigation.navigate("listingForm", undefined)}
-        >
-          <Text style={styles.primaryText}>+  List an animal</Text>
-        </TouchableOpacity>
+          style={styles.primaryButton}
+        />
         <Text style={styles.primaryHint}>
           {verified ? "Your listings are public." : "Saved as a draft until you're verified."}
         </Text>
@@ -273,15 +272,7 @@ const styles = StyleSheet.create({
   },
   statNum: { color: colors.ink, fontSize: 26, fontWeight: "800" },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
-  primaryButton: {
-    height: 56,
-    marginTop: 22,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.teal
-  },
-  primaryText: { color: "#FFFFFF", fontSize: 20, fontWeight: "800" },
+  primaryButton: { marginTop: 22 },
   primaryHint: { marginTop: 12, color: colors.muted, ...typography.body, textAlign: "center" },
   footCard: {
     marginTop: 26,

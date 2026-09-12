@@ -3,13 +3,13 @@
 // already-decided match returns 409 match_decided — shown gracefully (the other party got there).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { matchReasons } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -84,12 +84,13 @@ export function MatchDetailScreen({ navigation, route }: Props) {
           </Text>
         ) : (
           <>
-            <TouchableOpacity style={styles.primaryBtn} onPress={() => decide("confirm")} disabled={busy}>
-              <Text style={styles.primaryLabel}>This is my pet</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryBtn} onPress={() => decide("dismiss")} disabled={busy}>
-              <Text style={styles.secondaryLabel}>Not a match</Text>
-            </TouchableOpacity>
+            <Button
+              label="This is my pet"
+              onPress={() => decide("confirm")}
+              loading={busy}
+              style={styles.primaryBtn}
+            />
+            <Button label="Not a match" onPress={() => decide("dismiss")} loading={busy} variant="secondary" style={styles.secondaryBtn} />
           </>
         )}
       </ScrollView>
@@ -111,8 +112,6 @@ const styles = StyleSheet.create({
   reasonsTitle: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   reasonsText: { marginTop: 6, color: colors.tealDark, fontSize: 14.5, lineHeight: 20 },
   decidedNote: { marginTop: 24, color: colors.muted, ...typography.body, textAlign: "center" },
-  primaryBtn: { marginTop: 24, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
-  primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" },
-  secondaryBtn: { marginTop: 14, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
-  secondaryLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" }
+  primaryBtn: { marginTop: 24 },
+  secondaryBtn: { marginTop: 14 },
 });

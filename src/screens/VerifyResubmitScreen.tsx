@@ -11,7 +11,7 @@ import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docLabel } from "../verifications";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyResubmit">;
@@ -97,17 +97,7 @@ export function VerifyResubmitScreen({ navigation, route }: Props) {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={resubmit}
-          style={[styles.submit, !fileUrl && styles.submitIdle]}
-        >
-          {submitting ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.submitText}>Resubmit for review</Text>
-          )}
-        </TouchableOpacity>
+        <Button label="Resubmit for review" onPress={resubmit} loading={submitting} style={styles.submit} />
         <Text style={styles.submitSub}>Back to under review · usually 1–2 business days</Text>
       </ScrollView>
     </View>
@@ -151,12 +141,6 @@ const styles = StyleSheet.create({
   readyText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   fine: { marginTop: 14, color: "#9a988f", ...typography.meta },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  submit: {
-    marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center",
-    backgroundColor: colors.teal, shadowColor: "#1F3A5F", shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12, shadowRadius: 8, elevation: 3
-  },
-  submitIdle: { backgroundColor: "#7FA8A6" },
-  submitText: { color: "#FFFFFF", fontSize: 22, fontWeight: "700" },
+  submit: { marginTop: 26 },
   submitSub: { marginTop: 12, color: colors.muted, ...typography.meta, textAlign: "center" }
 });

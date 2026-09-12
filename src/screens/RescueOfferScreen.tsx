@@ -3,14 +3,14 @@
 // Reference: screens/user/screen-rescue-offer.png. POST /reports/{id}/offers.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
@@ -81,16 +81,13 @@ export function RescueOfferScreen({ navigation, route }: Props) {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity
-          style={[styles.submit, !selected && styles.submitIdle]}
+        <Button
+          label="Send offer"
           onPress={submit}
-          activeOpacity={0.9}
-          disabled={submitting}
+          loading={submitting}
           accessibilityHint={selected ? undefined : "Choose how you can help first"}
-        >
-          {submitting ? <ActivityIndicator color={colors.white} />
-            : <Text style={styles.submitText}>Send offer</Text>}
-        </TouchableOpacity>
+          style={styles.submit}
+        />
       </View>
     </View>
   );
@@ -115,7 +112,5 @@ const styles = StyleSheet.create({
   optionHint: { marginTop: 3, color: colors.muted, ...typography.meta },
   fine: { marginTop: 18, color: colors.muted, ...typography.meta, lineHeight: 19 },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  submit: { marginTop: 22, marginBottom: 30, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitIdle: { backgroundColor: colors.tealIdle },
-  submitText: { color: colors.white, fontSize: 22, fontWeight: "700" }
+  submit: { marginTop: 22, marginBottom: 30 }
 });

@@ -11,7 +11,7 @@ import { PrefillWarning } from "../components/PrefillWarning";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -126,11 +126,12 @@ export function NeedFormScreen({ navigation, route }: Props) {
 
         {error && title.trim() ? <Text style={styles.error}>{error}</Text> : null}
 
-        <TouchableOpacity style={styles.primaryBtn} onPress={submit} disabled={busy}>
-          <Text style={styles.primaryLabel}>
-            {busy ? "Saving…" : editing ? "Save changes" : "Post need"}
-          </Text>
-        </TouchableOpacity>
+        <Button
+          label={editing ? "Save changes" : "Post need"}
+          onPress={submit}
+          loading={busy}
+          style={styles.primaryBtn}
+        />
       </ScrollView>
     </View>
   );
@@ -155,6 +156,5 @@ const styles = StyleSheet.create({
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },
   qty: { color: colors.ink, fontSize: 30, fontWeight: "800", minWidth: 40, textAlign: "center" },
-  primaryBtn: { marginTop: 30, height: 58, borderRadius: 29, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
-  primaryLabel: { color: colors.white, fontSize: 18, fontWeight: "700" }
+  primaryBtn: { marginTop: 30 }
 });

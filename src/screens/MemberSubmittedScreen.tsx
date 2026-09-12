@@ -3,11 +3,12 @@
 // navigate) so HomeScreen remounts and its useFocusEffect refetches /me — that's what flips on
 // the amber "Verified Member · Under review" banner built in M4.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, spacing, typography } from "../theme";
+import { Button } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
 
@@ -39,9 +40,7 @@ export function MemberSubmittedScreen({ navigation }: Props) {
 
         <Text style={styles.hint}>You can use everything else while you wait.</Text>
 
-        <TouchableOpacity activeOpacity={0.85} style={styles.doneButton} onPress={backToHome}>
-          <Text style={styles.doneText}>Back to home</Text>
-        </TouchableOpacity>
+        <Button label="Back to home" onPress={backToHome} style={styles.doneButton} />
       </View>
     </View>
   );
@@ -132,18 +131,5 @@ const styles = StyleSheet.create({
     ...typography.meta,
     textAlign: "center"
   },
-  doneButton: {
-    width: "100%",
-    height: 54,
-    marginTop: 26,
-    borderRadius: 27,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.teal
-  },
-  doneText: {
-    color: colors.white,
-    ...typography.subtitle,
-    fontWeight: "800"
-  }
+  doneButton: { width: "100%", marginTop: 26 }
 });

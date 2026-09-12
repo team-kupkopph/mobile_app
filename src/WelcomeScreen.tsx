@@ -6,6 +6,7 @@ import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { SocialProvider } from "./auth/socialAuth";
+import { Button } from "./components/ui/Button";
 import { SocialSignIn } from "./components/ui/SocialSignIn";
 import { TAP_SLOP } from "./touch";
 import { typography } from "./theme";
@@ -194,18 +195,7 @@ export function WelcomeScreen({
       {/* The action sheet. `gap` is what keeps the controls apart — see the header on why
           spacing, not hitSlop, is what makes a stack of controls pressable. */}
       <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) + 12 }]}>
-        <TouchableOpacity
-          testID="btn.welcome.getStarted"
-          activeOpacity={0.85}
-          onPress={onGetStarted}
-          accessibilityRole="button"
-          accessibilityLabel={copy.getStarted}
-          style={styles.primaryWrap}
-        >
-          <LinearGradient colors={["#238383", c.tealDk]} style={styles.primary}>
-            <Text style={styles.primaryText}>{copy.getStarted}</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        <Button testID="btn.welcome.getStarted" label={copy.getStarted} onPress={() => onGetStarted?.()} />
 
         {/* ⚠️ THIS SCREEN HAS NO ARTBOARD. The canvas designs the provider row on the Log in
             screen only (SignIn.dc.html), and Welcome is not drawn at all — so the row here is
@@ -341,21 +331,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
-  primaryWrap: {
-    borderRadius: 30,
-    shadowColor: "#12213A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 7,
-    elevation: 3,
-  },
-  primary: {
-    height: 60,
-    borderRadius: 30,          // rx = half the height: a true pill
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  primaryText: { color: c.white, fontSize: 20, lineHeight: 26, fontWeight: "700" },
 
 
   // Prominent by colour and weight rather than by a third box — and with an explicit

@@ -395,14 +395,24 @@ for (const file of sources(SRC)) {
  * ScreenHeader's title is not among them: the one header the canvas draws sets it at
  * 17 / 800 / -0.2, and the primitive now does too, measured on the device (12 pt cap height,
  * SF Bold at 17). US-CH2's 22 had no artboard behind it.
+ *
+ * 102, DOWN FROM 126, BY DELETION AGAIN: 45 hand-rolled full-width CTAs — flat teal pills at
+ * 54–60 with their own 18–22 / 700 label — became `<Button>`, the canvas's gradient pill with
+ * the panel's 17 / 800 label, and took 24 of the 28 off-ramp labels with them. The four that
+ * stay are the four buttons `Button` cannot yet be: AdjustPin's Save (`disabled={!ready}`
+ * until the map settles), ListingDetail's Inquire (disabled once sent) and PlaceRequest's
+ * Accept and Decline (disabled once decided). Each is a real "not possible now" state, not a
+ * validation gate, and `Button` has no `disabled` on purpose — a decision for that primitive,
+ * not a bind. The 2 inputs at 18 / 700 are a Field adoption of the same shape.
  */
-const OFF_RAMP = 126;
+const OFF_RAMP = 102;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
     // Guard the guard: scans in this repo have reported a plausible smaller number more
     // than once, and a guard that silently matches nothing passes forever.
-    expect(rawSites.length + bound.length).toBeGreaterThan(800);
+    // 876 before T1; 45 hand-rolled button labels left with their buttons for <Button>.
+    expect(rawSites.length + bound.length).toBeGreaterThan(750);
     expect(bound.length).toBeGreaterThan(150);
   });
 

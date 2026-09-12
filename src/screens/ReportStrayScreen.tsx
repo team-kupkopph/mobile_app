@@ -7,7 +7,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 import { useApi } from "../api/useApi";
 import { useOutbox } from "../outbox/OutboxProvider";
@@ -218,19 +218,14 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           </Text>
         ) : null}
 
-        <TouchableOpacity
+        <Button
           testID="btn.reportStray.submit"
-          style={[styles.submit, !coords && styles.submitIdle]}
+          label="Send report"
           onPress={submit}
-          activeOpacity={0.9}
-          accessibilityRole="button"
-          accessibilityLabel="Send report"
+          loading={submitting}
           accessibilityHint={coords ? undefined : "Waiting for your location"}
-          accessibilityState={{ busy: submitting }}
-        >
-          {submitting ? <ActivityIndicator color={colors.white} />
-            : <Text style={styles.submitText}>Send report</Text>}
-        </TouchableOpacity>
+          style={styles.submit}
+        />
       </ScrollView>
     </View>
   );
@@ -290,7 +285,5 @@ const styles = StyleSheet.create({
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: radii.tile, ...card },
   anonLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  submit: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  submitIdle: { backgroundColor: colors.tealIdle },
-  submitText: { color: colors.white, fontSize: 22, fontWeight: "700" }
+  submit: { marginTop: 26 }
 });

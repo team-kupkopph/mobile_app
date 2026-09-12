@@ -15,6 +15,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { Button } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -116,13 +117,12 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
             />
           </View>
 
-          <TouchableOpacity
-            style={styles.cancelButton}
-            activeOpacity={0.85}
+          <Button
+            label="Cancel activity"
             onPress={() => navigation.navigate("shelterVolunteerCancel", { shiftId })}
-          >
-            <Text style={styles.cancelButtonText}>Cancel activity</Text>
-          </TouchableOpacity>
+            variant="destructive"
+            style={styles.cancelButton}
+          />
         </ScrollView>
       )}
     </View>
@@ -187,9 +187,5 @@ const styles = StyleSheet.create({
   actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
   actionRowText: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   actionRowGlyph: { color: colors.muted, fontSize: 20, fontWeight: "700" },
-  cancelButton: {
-    marginTop: 24, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center",
-    backgroundColor: colors.dangerBg
-  },
-  cancelButtonText: { color: colors.danger, ...typography.subtitle, fontWeight: "800" }
+  cancelButton: { marginTop: 24 }
 });

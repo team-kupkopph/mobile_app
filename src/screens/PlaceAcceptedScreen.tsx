@@ -3,11 +3,12 @@
 // { pet_id }, not threaded through — so this is a plain confirmation, not a link-through.
 // The natural next stop is My pets (Task 8), now registered — this links straight there.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, spacing, squircle, typography } from "../theme";
+import { Button } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "placeAccepted">;
@@ -24,13 +25,7 @@ export function PlaceAcceptedScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.primary}
-          activeOpacity={0.9}
-          onPress={() => navigation.navigate("myPets")}
-        >
-          <Text style={styles.primaryText}>See my pets</Text>
-        </TouchableOpacity>
+        <Button label="See my pets" onPress={() => navigation.navigate("myPets")} style={styles.primary} />
       </ScrollView>
     </View>
   );
@@ -43,6 +38,5 @@ const styles = StyleSheet.create({
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },
-  primary: { marginTop: 40, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  primaryText: { color: colors.white, fontSize: 22, fontWeight: "700" }
+  primary: { marginTop: 40 }
 });

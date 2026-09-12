@@ -22,7 +22,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -104,25 +104,20 @@ export function DeleteAccountScreen({ navigation }: Props) {
         </View>
         {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
 
-        <TouchableOpacity
-          activeOpacity={0.85}
+        <Button
+          label="Delete my account"
           onPress={submit}
+          loading={busy}
+          variant="destructive"
           style={styles.dangerBtn}
-          accessibilityRole="button"
-          accessibilityLabel="Delete my account"
-        >
-          {busy ? <ActivityIndicator color={colors.white} />
-                : <Text style={styles.dangerBtnLabel}>Delete my account</Text>}
-        </TouchableOpacity>
-        <TouchableOpacity
- testID="btn.back"          activeOpacity={0.85}
+        />
+        <Button
+          testID="btn.back"
+          label="Keep my account"
           onPress={() => navigation.goBack()}
+          variant="secondary"
           style={styles.outlineBtn}
-          accessibilityRole="button"
-          accessibilityLabel="Keep my account"
-        >
-          <Text style={styles.outlineBtnLabel}>Keep my account</Text>
-        </TouchableOpacity>
+        />
       </ScrollView>
     </View>
   );
@@ -165,14 +160,8 @@ function Blocked({
           );
         })}
 
-        <TouchableOpacity activeOpacity={0.85} onPress={onBack} style={styles.tealBtn}
-                          accessibilityRole="button" accessibilityLabel="Try again">
-          <Text style={styles.tealBtnLabel}>Try again</Text>
-        </TouchableOpacity>
-        <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.goBack()} style={styles.outlineBtn}
-                          accessibilityRole="button" accessibilityLabel="Back to settings">
-          <Text style={styles.outlineBtnLabel}>Back to settings</Text>
-        </TouchableOpacity>
+        <Button label="Try again" onPress={onBack} style={styles.tealBtn} />
+        <Button label="Back to settings" onPress={() => navigation.goBack()} variant="secondary" style={styles.outlineBtn} />
       </ScrollView>
     </View>
   );
@@ -219,12 +208,9 @@ const styles = StyleSheet.create({
   fieldCaption: { fontSize: 11, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 },
   input: { fontSize: 18, fontWeight: "700", color: colors.ink, paddingVertical: 4 },
   error: { ...typography.meta, color: colors.danger, marginTop: 8 },
-  dangerBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.danger, alignItems: "center", justifyContent: "center" },
-  dangerBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
-  outlineBtn: { marginTop: 12, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", ...card },
-  outlineBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
-  tealBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
-  tealBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
+  dangerBtn: { marginTop: 22 },
+  outlineBtn: { marginTop: 12 },
+  tealBtn: { marginTop: 22 },
   warnCard: { borderRadius: radii.tile, backgroundColor: colors.warningBg, padding: 18 },
   warnTitle: { ...typography.subtitle, fontWeight: "800", color: colors.warning },
   warnBody: { ...typography.meta, color: colors.warning, marginTop: 6, lineHeight: 20 },
@@ -232,5 +218,5 @@ const styles = StyleSheet.create({
   blockerCard: { borderRadius: radii.tile, padding: 16, marginBottom: 12, ...card },
   blockerTitle: { ...typography.subtitle, fontWeight: "800", color: colors.ink },
   blockerDetail: { ...typography.meta, color: colors.muted, marginTop: 4 },
-  blockerAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginTop: 8 },
+  blockerAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginTop: 8 }
 });

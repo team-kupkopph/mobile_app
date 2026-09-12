@@ -16,7 +16,7 @@ import {
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { exportFilename, humanSize } from "../settings";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
@@ -147,16 +147,13 @@ export function ExportDataScreen({ navigation }: Props) {
 
         {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
 
-        <TouchableOpacity
-          activeOpacity={0.85}
+        <Button
+          label={ready ? "Share file" : "Build my export"}
           onPress={ready ? share : prepare}
-          style={styles.primaryBtn}
-          accessibilityRole="button"
+          loading={busy}
           accessibilityLabel={ready ? "Share file" : "Build my export"}
-        >
-          {busy ? <ActivityIndicator color={colors.white} />
-                : <Text style={styles.primaryBtnLabel}>{ready ? "Share file" : "Build my export"}</Text>}
-        </TouchableOpacity>
+          style={styles.primaryBtn}
+        />
       </ScrollView>
     </View>
   );
@@ -177,6 +174,5 @@ const styles = StyleSheet.create({
   bulletText: { flex: 1, ...typography.meta, color: colors.ink, lineHeight: 19 },
   footnote: { ...typography.meta, color: colors.muted, marginTop: 16, lineHeight: 19 },
   error: { ...typography.meta, color: colors.danger, marginTop: 12 },
-  primaryBtn: { marginTop: 22, height: 56, borderRadius: 28, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
-  primaryBtnLabel: { ...typography.subtitle, fontWeight: "700", color: colors.white },
+  primaryBtn: { marginTop: 22 }
 });

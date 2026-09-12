@@ -3,7 +3,7 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
@@ -11,7 +11,7 @@ import { loadState } from "../net";
 import { ChipTone, needProgressLabel, needStatusChip, NeedStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -53,10 +53,11 @@ export function ShelterNeedsScreen({ navigation }: Props) {
         <Text style={styles.note}>
           Post what your shelter needs. Givers pledge to bring items; you confirm once they arrive.
         </Text>
-        <TouchableOpacity style={styles.addBtn}
-          onPress={() => navigation.navigate("needForm", {})}>
-          <Text style={styles.addLabel}>+ Add a need</Text>
-        </TouchableOpacity>
+        <Button
+          label="+ Add a need"
+          onPress={() => navigation.navigate("needForm", {})}
+          style={styles.addBtn}
+        />
 
         {loadState(res, needs?.length).kind !== "ready" ? (
           <LoadStateView
@@ -92,8 +93,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   note: { color: colors.muted, ...typography.body, lineHeight: 21, marginBottom: 16 },
-  addBtn: { height: 54, borderRadius: 27, backgroundColor: colors.teal, alignItems: "center", justifyContent: "center", marginBottom: 20 },
-  addLabel: { color: colors.white, ...typography.subtitle, fontWeight: "700" },
+  addBtn: { marginBottom: 20 },
   empty: { marginTop: 30, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   needCard: { marginBottom: 12, padding: 18, borderRadius: 22, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
