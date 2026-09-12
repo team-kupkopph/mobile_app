@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colors, elevation, spacing } from "../../theme";
+import { colors, elevation, spacing, typography } from "../../theme";
 import { TAP_SLOP } from "../../touch";
 import { PressScale } from "./PressScale";
 
@@ -130,10 +130,17 @@ const styles = StyleSheet.create({
     // The glyph's own bearing sits it low in its line box; this re-centres it in the circle.
     marginTop: -4
   },
+  // ⚠️ THE CANVAS DRAWS ONE HEADER, AND ITS TITLE IS 17, NOT 22. Inquiry.dc.html is the only
+  // artboard with a back button, and its chrome sets the title at `17px / 800 / -.2px` — the
+  // panel's "Card title, button, field" row, with the tracking that row draws. The 22 came
+  // from US-CH2, which took the hand-rolled headers' most common size as the primitive's;
+  // no artboard ever drew it. `subtitle` is an open step, so weight and tracking are named
+  // here, as the ramp's rule requires.
   title: {
     color: colors.ink,
-    fontSize: 22,
+    ...typography.subtitle,
     fontWeight: "800",
+    letterSpacing: -0.2,
     flexShrink: 1
   },
   titleCentered: {
