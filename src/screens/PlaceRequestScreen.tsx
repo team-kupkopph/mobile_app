@@ -10,7 +10,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -18,7 +18,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 type Decision = "accept" | "decline";
@@ -82,7 +82,6 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
   }
 
   const alreadyDecided = inquiry != null && inquiry.status !== "active";
-  const busy = deciding !== null;
 
   return (
     <View style={styles.screen}>
@@ -132,25 +131,14 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <TouchableOpacity
-            style={[styles.acceptBtn, (busy || alreadyDecided) && styles.btnDisabled]}
-            activeOpacity={0.9}
-            onPress={() => decide("accept")}
-            disabled={busy || alreadyDecided}
-          >
-            {deciding === "accept" ? <ActivityIndicator color={colors.white} />
-              : <Text style={styles.acceptText}>Accept</Text>}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.declineBtn, (busy || alreadyDecided) && styles.btnDisabled]}
-            activeOpacity={0.9}
-            onPress={() => decide("decline")}
-            disabled={busy || alreadyDecided}
-          >
-            {deciding === "decline" ? <ActivityIndicator color={colors.danger} />
-              : <Text style={styles.declineText}>Decline</Text>}
-          </TouchableOpacity>
+          {/* A decided placement has no decision to make; the note above says which way it went.
+              `decide` guards on `deciding`, so the other button stays tappable but inert. */}
+          {!alreadyDecided && (
+            <>
+              <Button label="Accept" onPress={() => decide("accept")} loading={deciding === "accept"} style={styles.acceptBtn} />
+              <Button label="Decline" onPress={() => decide("decline")} loading={deciding === "decline"} variant="destructive" style={styles.declineBtn} />
+            </>
+          )}
         </ScrollView>
       )}
     </View>
@@ -179,10 +167,6 @@ const styles = StyleSheet.create({
   posterLine: { marginTop: 14, color: colors.muted, ...typography.meta },
   decidedNote: { marginTop: 20, color: colors.muted, ...typography.strong, fontWeight: "700", textAlign: "center" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
-  acceptBtn: { marginTop: 26, height: 60, borderRadius: 30, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  acceptText: { color: colors.white, fontSize: 20, fontWeight: "700" },
-  declineBtn: { marginTop: 12, height: 56, borderRadius: 28, alignItems: "center", justifyContent: "center",
-                backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.danger },
-  declineText: { color: colors.danger, fontSize: 18, fontWeight: "700" },
-  btnDisabled: { opacity: 0.5 }
+  acceptBtn: { marginTop: 26 },
+  declineBtn: { marginTop: 12 }
 });

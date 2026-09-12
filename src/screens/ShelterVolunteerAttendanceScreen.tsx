@@ -14,7 +14,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone } from "../shelterVolunteer";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -57,6 +57,7 @@ export function ShelterVolunteerAttendanceScreen({ navigation, route }: Props) {
   useFocusEffect(useCallback(() => { loadRoster(); }, [loadRoster]));
 
   async function markAttendance(signupId: string, outcome: "completed" | "no_show") {
+    if (busySignupId) return; // one row at a time; the buttons show `loading` for that row
     setBusySignupId(signupId);
     setBanner(null);
     const res = await api.post(`/shelter/signups/${signupId}/attendance`, { outcome });
@@ -120,26 +121,8 @@ export function ShelterVolunteerAttendanceScreen({ navigation, route }: Props) {
 
                 {row.status === "approved" && (
                   <View style={styles.actionsRow}>
-                    <TouchableOpacity
-                      style={[styles.noShowBtn, busy && styles.btnDisabled]}
-                      activeOpacity={0.85}
-                      disabled={busy}
-                      onPress={() => markAttendance(row.signup_id, "no_show")}
-                    >
-                      <Text style={styles.noShowText}>No-show</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.attendedBtn, busy && styles.btnDisabled]}
-                      activeOpacity={0.85}
-                      disabled={busy}
-                      onPress={() => markAttendance(row.signup_id, "completed")}
-                    >
-                      {busy ? (
-                        <ActivityIndicator color={colors.white} size="small" />
-                      ) : (
-                        <Text style={styles.attendedText}>Attended</Text>
-                      )}
-                    </TouchableOpacity>
+                    <Button size="small" variant="secondary" label="No-show" onPress={() => markAttendance(row.signup_id, "no_show")} style={styles.half} />
+                    <Button size="small" label="Attended" onPress={() => markAttendance(row.signup_id, "completed")} loading={busy} style={styles.half} />
                   </View>
                 )}
               </TouchableOpacity>
@@ -184,9 +167,5 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
-  noShowBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.greyPill },
-  noShowText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
-  attendedBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  attendedText: { color: colors.white, ...typography.meta, fontWeight: "800" },
-  btnDisabled: { opacity: 0.6 }
+  half: { flex: 1, alignSelf: "stretch" }
 });

@@ -376,8 +376,8 @@ for (const file of sources(SRC)) {
  * explicit line height is kept, because no heading step names one. Three more were dead
  * `headerTitle` styles the header conversion orphaned, deleted. What is left is, by name,
  * and adds up (28 + 2 + 43 + 20 + 13 + 10 + 7 + 3 = 126):
- *   · 28 hand-rolled button labels at 18-22 / 700 (`submitText`, `primaryText`,
- *     `primaryLabel`...) and 2 text inputs at 18 / 700. The panel's button and field row is
+ *   · (Since resolved to the 2 inputs.) 28 hand-rolled button labels at 18-22 / 700 (`submitText`,
+ *     `primaryText`, `primaryLabel`...) and 2 text inputs at 18 / 700. The panel's button and field row is
  *     17 / 700-800 and `Button` and `Field` already bind to it, so these are buttons and
  *     fields not on the primitive — the header story's shape, not the ramp's.
  *   · 43 glyphs drawn as text — the six ShelterVolunteer "‹" (screenHeader.test.ts's
@@ -392,6 +392,9 @@ for (const file of sources(SRC)) {
  *   · 7 large numerals (`statValue`, `feeValue`, `impactTotals`...) that the canvas never
  *     draws at all, so there is no evidence to snap them to.
  *   · 3 value labels at 18 / 700 (`recipientEmail`, `docName`, `fileName`).
+ * 92, DOWN FROM 96: the four gated buttons (AdjustPin, ListingDetail, PlaceRequest x2) are
+ * `Button` now, each with an honest state instead of a grey one — see buttonAdoption.test.ts.
+ *
  * 96, DOWN FROM 102: the last six hand-rolled headers — the ShelterVolunteer screens — went to
  * ScreenHeader, and their six 30 pt "‹" glyphs with them. The header ratchet is at zero.
  *
@@ -408,7 +411,7 @@ for (const file of sources(SRC)) {
  * validation gate, and `Button` has no `disabled` on purpose — a decision for that primitive,
  * not a bind. The 2 inputs at 18 / 700 are a Field adoption of the same shape.
  */
-const OFF_RAMP = 96;
+const OFF_RAMP = 92;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {

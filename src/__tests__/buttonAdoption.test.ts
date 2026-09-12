@@ -9,18 +9,21 @@
  * 48 are converted, plus the NGO verification submit the census missed (it fills with
  * `authColors.teal`). The remainder is enumerated BY NAME so the list can only shorten.
  *
- * ⚠️ WHY THE REMAINDER IS NOT "THE REST". `Button` has no `disabled` prop on purpose (see its
- * header: a submit disabled by validation is a product rule this app already fixed once). Five
- * of the seven sites below carry a `disabled` that is NOT a validation gate — a map that has
- * not settled, an inquiry already sent, a placement already decided, a geofence. Whether those
- * become a `Button` state or stay hand-rolled is a decision for the primitive, not a codemod.
- * Two are 46 pt row actions in a list, not CTAs.
- *
- * (Resolved.) ShelterVerify was an eighth: `disabled={!baseComplete}` — ID, billing, photos,
- * social, consent — with a handler that returned silently when un-ready. That is a validation
- * gate, the pattern `f93f74a` removed from eight screens and missed on this one. It now says
- * which document is missing and is a `Button`; the list below shrank by one, which is how this
- * file is meant to change.
+ * ⚠️ ZERO, AND A FLAT RULE FROM HERE — AND THE SEVEN THAT WERE HELD BACK WERE EACH DECIDED,
+ * NOT GIVEN A `disabled` PROP. `Button` still has none, on purpose (see its header). What the
+ * seven actually needed, read one at a time:
+ *   · AdjustPin's "Save this spot" was disabled until the map settled. Saving before it does
+ *     keeps the pin where it started — a valid answer — so the gate was cosmetic. Removed.
+ *   · ListingDetail's "Inquire to adopt" became a greyed "Inquiry sent" after sending. It is
+ *     now a note with that copy (e2e 20 asserts it) and a live "See my inquiries".
+ *   · PlaceRequest's Accept and Decline were greyed once the placement was decided, under a
+ *     note saying which way. A decided placement has no decision: they are not rendered.
+ *   · KawangGawaCheckin's "Check out" was greyed once checked out, under "Shift complete".
+ *     Same answer: not rendered once there is nothing to do.
+ *   · Attendance's and Requests' row actions were 46 pt hand-rolled pills because the
+ *     primitive was 54 and full-width. The panel declares a small button ("Label, small
+ *     button", drawn at 38 / 19), so `Button` has `size="small"` and the rows use it.
+ * The scan below is proved to still recognise a hand-rolled CTA by feeding it the shape.
  */
 import { readdirSync, readFileSync } from "fs";
 import { join } from "path";
@@ -36,9 +39,8 @@ const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\
  * by name and by the element that renders them.
  */
 type Site = { file: string; style: string; height: number };
-const sites: Site[] = [];
-for (const file of files) {
-  const src = strip(readFileSync(join(SCREENS, file), "utf8"));
+function scan(file: string, src: string): Site[] {
+  const out: Site[] = [];
   const re = /\n  (\w+): \{((?:[^{}]|\{[^{}]*\})*)\}/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(src))) {
@@ -49,9 +51,11 @@ for (const file of files) {
     if (!/backgroundColor: (colors\.(teal|tealDark|danger|dangerBg|white)|authColors\.teal)\b|\.\.\.card\b/.test(body)) continue;
     if (/icon|avatar|tile|dot|badge|chip|circle|pill|row|back$/i.test(style)) continue;
     if (!new RegExp("<TouchableOpacity\\b[^>]*styles\\." + style + "\\b").test(src)) continue;
-    sites.push({ file, style, height: Number(h[1]) });
+    out.push({ file, style, height: Number(h[1]) });
   }
+  return out;
 }
+const sites: Site[] = files.flatMap((file) => scan(file, strip(readFileSync(join(SCREENS, file), "utf8"))));
 
 const HAND_ROLLED = sites.map((s) => `${s.file.replace(/\.tsx$/, "")}:${s.style}`).sort();
 
@@ -61,20 +65,14 @@ describe("full-width CTAs are the Button primitive", () => {
     // drift would report "all converted" forever.
     const consumers = files.filter((f) => /<Button[\s/>]/.test(strip(readFileSync(join(SCREENS, f), "utf8"))));
     expect(consumers.length).toBeGreaterThan(30);
-    expect(HAND_ROLLED.length).toBeGreaterThan(0);
   });
 
-  it("has not grown a new hand-rolled CTA, and records each one that resolves", () => {
-    // Both directions: a new one fails the list, and converting one fails it too, so the
-    // name has to be removed here — the list can only ever be edited to get shorter.
-    expect(HAND_ROLLED).toEqual([
-      "AdjustPinScreen:save",                       // disabled until the map settles
-      "KawangGawaCheckinScreen:actionButton",       // disabled outside the geofence / window
-      "ListingDetailScreen:inquireBtn",             // disabled once the inquiry is sent
-      "PlaceRequestScreen:acceptBtn",               // disabled once decided
-      "PlaceRequestScreen:declineBtn",              // disabled once decided
-      "ShelterVolunteerAttendanceScreen:attendedBtn", // 46 pt row action, not a CTA
-      "ShelterVolunteerRequestsScreen:approveBtn"     // 46 pt row action, not a CTA
-    ]);
+  it("sees a hand-rolled CTA when one exists", () => {
+    const shape = 'const styles = StyleSheet.create({\n  submit: { height: 56, justifyContent: "center", backgroundColor: colors.teal }\n});\n<TouchableOpacity style={styles.submit} />';
+    expect(scan("Probe.tsx", shape)).toEqual([{ file: "Probe.tsx", style: "submit", height: 56 }]);
+  });
+
+  it("has no hand-rolled CTA left, and stays that way", () => {
+    expect(HAND_ROLLED).toEqual([]);
   });
 });

@@ -6,14 +6,14 @@
 // Center-pin pattern: the pin is fixed dead-centre and the map moves under it, so the coordinate is
 // always exactly what's under the pin — no fiddly marker-drag, and it reads the same on any device.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useRef, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useRef } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import MapView, { Region } from "react-native-maps";
 
 import { LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "adjustPin">;
@@ -22,7 +22,6 @@ export function AdjustPinScreen({ navigation, route }: Props) {
   const { lat, lng } = route.params;
   // The live centre of the map = where the pin points. Seeded with the incoming coords.
   const center = useRef<{ lat: number; lng: number }>({ lat, lng });
-  const [ready, setReady] = useState(false);
 
   const initialRegion: Region = {
     latitude: lat, longitude: lng,
@@ -47,7 +46,6 @@ export function AdjustPinScreen({ navigation, route }: Props) {
         style={StyleSheet.absoluteFill}
         initialRegion={initialRegion}
         onRegionChangeComplete={onRegionChangeComplete}
-        onMapReady={() => setReady(true)}
         showsUserLocation
         showsMyLocationButton={false}
       />
@@ -65,14 +63,9 @@ export function AdjustPinScreen({ navigation, route }: Props) {
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Move the map so the pin sits exactly where the animal is.</Text>
         <Text style={styles.cardSub}>This precise spot is shared only with rescuers on this report.</Text>
-        <TouchableOpacity
-          style={[styles.save, !ready && styles.saveIdle]}
-          onPress={save}
-          activeOpacity={0.9}
-          disabled={!ready}
-        >
-          <Text style={styles.saveText}>Save this spot</Text>
-        </TouchableOpacity>
+        {/* No gate on the map settling: saving before it does keeps the pin where it started,
+            which is a valid answer, and a greyed button says nothing about why. */}
+        <Button label="Save this spot" onPress={save} style={styles.save} />
       </View>
     </View>
   );
@@ -89,7 +82,5 @@ const styles = StyleSheet.create({
   card: { position: "absolute", left: 20, right: 20, bottom: 34, padding: 22, borderRadius: radii.card, ...card },
   cardTitle: { color: colors.ink, ...typography.section, lineHeight: 25 },
   cardSub: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 20 },
-  save: { marginTop: 18, height: 58, borderRadius: 29, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  saveIdle: { backgroundColor: colors.tealIdle },
-  saveText: { color: colors.white, fontSize: 21, fontWeight: "700" }
+  save: { marginTop: 18 }
 });

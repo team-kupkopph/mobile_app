@@ -20,7 +20,7 @@ import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } 
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -171,6 +171,7 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
   }
 
   async function doDecline(signupId: string) {
+    if (busySignupId) return; // one row at a time
     setBusySignupId(signupId);
     setBanner(null);
     const res = await api.post(`/shelter/signups/${signupId}/decline`);
@@ -261,26 +262,10 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
                   )}
 
                   <View style={styles.actionsRow}>
-                    <TouchableOpacity
-                      style={[styles.declineBtn, busy && styles.btnDisabled]}
-                      activeOpacity={0.85}
-                      disabled={busy}
-                      onPress={() => doDecline(row.signup_id)}
-                    >
-                      <Text style={styles.declineText}>Decline</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.approveBtn, approveBusy && styles.btnDisabled]}
-                      activeOpacity={0.85}
-                      disabled={approveBusy}
-                      onPress={() => onPressApprove(row.signup_id)}
-                    >
-                      {approveBusy ? (
-                        <ActivityIndicator color={colors.white} size="small" />
-                      ) : (
-                        <Text style={styles.approveText}>Approve</Text>
-                      )}
-                    </TouchableOpacity>
+                    <Button size="small" variant="secondary" label="Decline" onPress={() => doDecline(row.signup_id)} style={styles.half} />
+                    {/* `loading` while the shift itself is still loading: a request IS in flight, and
+                        approving before the type is known could skip a walking shift's picker. */}
+                    <Button size="small" label="Approve" onPress={() => onPressApprove(row.signup_id)} loading={approveBusy} style={styles.half} />
                   </View>
                 </View>
               );
@@ -404,11 +389,7 @@ const styles = StyleSheet.create({
   flagTitle: { color: colors.warningStrong, ...typography.meta, fontWeight: "800" },
   flagSub: { marginTop: 1, color: colors.warningStrong, ...typography.meta },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
-  declineBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.greyPill },
-  declineText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
-  approveBtn: { flex: 1, height: 46, borderRadius: 23, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
-  approveText: { color: colors.white, ...typography.meta, fontWeight: "800" },
-  btnDisabled: { opacity: 0.6 },
+  half: { flex: 1, alignSelf: "stretch" },
   pickerOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(18, 33, 58, 0.45)" },
   pickerSheet: { maxHeight: "78%", borderTopLeftRadius: 26, borderTopRightRadius: 26, backgroundColor: colors.page, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 28 },
   pickerHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
