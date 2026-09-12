@@ -67,9 +67,11 @@ describe("the inquiry ladder", () => {
   it("shows nothing the data cannot back", () => {
     expect(code).not.toMatch(/Replies in/);
     expect(code).not.toMatch(/Message \$\{|Message PAWS|label=\{`Message/);
-    // No date is rendered for a done step — the API sends none. "Done" is the honest meta.
-    expect(code).toMatch(/done \? "Done"/);
-    expect(code).not.toMatch(/toLocaleDateString|updated_at|created_at/);
+    // The date on a done step comes from the stage's own `updated_at` (backend #18) through
+    // stageMeta, which says "Done" when a server sent none — never the inquiry's created_at,
+    // never today.
+    expect(code).toMatch(/stageMeta\(st, stage\?\.updated_at\)/);
+    expect(code).not.toMatch(/created_at|new Date\(\)/);
     // ...and the header comment still explains all three, so the reasoning travels with the code.
     expect(screen).toMatch(/Replies in about a day/);
     expect(screen).toMatch(/Message PAWS Manila/);

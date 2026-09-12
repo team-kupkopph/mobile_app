@@ -80,6 +80,7 @@ export type ListingPet = {
   spayed_neutered?: boolean | null; vaccinated?: boolean | null;
   walkable?: boolean; temperament?: string | null;
 };
+export type ListingPoster = { account_id: string; name: string; is_shelter: boolean; city: string | null };
 export type Listing = {
   listing_id: string;
   pet: ListingPet;
@@ -87,6 +88,8 @@ export type Listing = {
   status: string;
   adoption_fee?: string;
   photo_url?: string | null;
+  /** On list cards since backend #18; optional so an older server still renders a deck. */
+  poster?: ListingPoster;
 };
 export type ListingDetail = {
   listing_id: string;
@@ -97,9 +100,14 @@ export type ListingDetail = {
   city: string;
   status: string;
   photos: string[];
-  poster: { account_id: string; name: string; is_shelter: boolean; city: string | null };
+  poster: ListingPoster;
 };
-export type InquiryStage = { stage_key: string; state: string };
+/**
+ * `updated_at` is null until the stage has moved — all six rows exist from the inquiry's first
+ * second, so a not_started row's own time would be the creation time, and the API withholds
+ * it (backend #18). `note` is the poster's, null when they wrote none.
+ */
+export type InquiryStage = { stage_key: string; state: string; updated_at?: string | null; note?: string | null };
 export type MyInquiry = {
   inquiry_id: string;
   listing: { listing_id: string; name: string; species: string };

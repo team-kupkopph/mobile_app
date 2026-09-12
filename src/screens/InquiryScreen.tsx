@@ -6,9 +6,9 @@
 // failure degrades the header rather than taking down the ladder.
 //
 // ⚠️ THREE THINGS THE ARTBOARD SHOWS THAT THIS SCREEN DOES NOT, and why:
-//   · A date on each done step ("Jul 12"). AdoptionStage has `updated_at`, but /me/inquiries
-//     serialises only {stage_key, state}. Rendering "Done" until the backend sends the date is
-//     honest; rendering today's date, or the inquiry's, would not be.
+//   · (Resolved by backend #18.) A date on each done step ("Jul 12") — /me/inquiries now sends
+//     each stage's `updated_at` (null until it has moved) and the poster's `note`, which is
+//     shown in place of the generic step text when they wrote one.
 //   · "Replies in about a day." No response-time data exists anywhere. Omitted rather than
 //     invented — the same rule as the fake clock the status bar used to show.
 //   · "Message PAWS Manila." There is no messaging feature (reportContent notes the message
@@ -27,7 +27,7 @@ import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, ladderStep, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, ladderStep, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -116,7 +116,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
   const poster = listing?.poster ?? null;
   const shelter = poster?.name ?? "the shelter";
   const { step, of } = ladderStep(inquiry.stages);
-  const byKey = new Map(inquiry.stages.map((s) => [s.stage_key, s.state]));
+  const byKey = new Map(inquiry.stages.map((s) => [s.stage_key, s]));
   const photo = listing?.photos?.[0];
 
   return (
@@ -154,12 +154,15 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
       <Card style={styles.ladder}>
         <Text style={styles.sectionLabel}>Your six steps</Text>
         {STAGE_ORDER.map((key, i) => {
-          const st = byKey.get(key) ?? "not_started";
+          const stage = byKey.get(key);
+          const st = stage?.state ?? "not_started";
           const done = st === "done", skipped = st === "skipped", current = st === "in_progress";
           const last = i === STAGE_ORDER.length - 1;
-          const meta = current ? "In progress" : done ? "Done" : skipped ? "Skipped" : "";
+          const meta = stageMeta(st, stage?.updated_at);
           const def = STAGE_STEP[key];
-          const note = skipped && def.skippedNote ? def.skippedNote({ pet, shelter }) : def.note({ pet, shelter });
+          // The poster's own note wins over the generic step text — it is what the artboard's
+          // "PAWS Manila waived the home visit for this listing" actually is.
+          const note = stage?.note || (skipped && def.skippedNote ? def.skippedNote({ pet, shelter }) : def.note({ pet, shelter }));
           const chip = stageStateChip(st);
           return (
             <PressScale key={key} scale={motion.pressScale} onPress={() => onToggle(key)}

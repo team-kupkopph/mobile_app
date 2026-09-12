@@ -9,11 +9,12 @@
 // in from 12 px over the next 66, a fling to ±520 in 260 ms, the two cards behind at
 // translateY 13n / scale 1 − 0.05n with the third at 55% opacity.
 //
-// ⚠️ WHAT THE ARTBOARD SHOWS THAT THE LIST PAYLOAD CANNOT: GET /listings carries no poster
-// and no distance, so the card has no shelter row and no "2 km" chip. The city sits in that
-// slot instead — real, and what "near you" actually means here — and the shelter is one tap
-// away on the listing. The Details overlay shows only the booleans the listing records
-// (see adoptDeck.factRows); "Good with children" and "House trained" have no field.
+// ⚠️ WHAT THE ARTBOARD SHOWS THAT THE LIST PAYLOAD CANNOT: GET /listings carries no distance,
+// so the card has no "2 km" chip; the city sits in that slot instead — real, and what "near
+// you" actually means here. The shelter row is drawn since backend #18 put `poster` on the
+// card (and left out, not faked, when an older server omits it). The Details overlay shows
+// only the booleans the listing records (see adoptDeck.factRows); "Good with children" and
+// "House trained" have no field.
 //
 // Persistence is device-local under the cache prefix (cache.readPref / writePref): there is
 // no server-side shortlist yet, so a save lives on this phone, for this account, and is
@@ -186,7 +187,22 @@ export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
                       <Chip label="Available" tone="success" />
                     </View>
                     <Text style={styles.meta} numberOfLines={1}>{cardMeta(l.pet)}</Text>
-                    <Text style={styles.fee}>{feeLabel(l.adoption_fee)}</Text>
+                    {l.poster ? (
+                      // The artboard's shelter row: a 34 pt tinted tile with initials, the name,
+                      // the verified chip, and the fee under the name.
+                      <View style={styles.posterRow}>
+                        <Avatar initials={posterInitials(l.poster.name)} tinted size={34} />
+                        <View style={styles.posterCopy}>
+                          <View style={styles.posterHead}>
+                            <Text style={styles.posterName} numberOfLines={1}>{l.poster.name}</Text>
+                            <Chip label={l.poster.is_shelter ? "Verified Shelter" : "Verified Member"} tone="success" dot={false} />
+                          </View>
+                          <Text style={styles.fee}>{feeLabel(l.adoption_fee)}</Text>
+                        </View>
+                      </View>
+                    ) : (
+                      <Text style={[styles.fee, styles.feeAlone]}>{feeLabel(l.adoption_fee)}</Text>
+                    )}
                   </View>
                 </PressScale>
               </Animated.View>
@@ -239,6 +255,11 @@ export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
   );
 }
 
+/** Same two-letter fallback the story and Home rows use. */
+function posterInitials(name: string) {
+  return name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? "").join("") || "?";
+}
+
 const styles = StyleSheet.create({
   positionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 6 },
   position: { ...typography.meta, fontWeight: "700", color: colors.muted },
@@ -277,7 +298,12 @@ const styles = StyleSheet.create({
   nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   name: { ...typography.hero, color: colors.ink, flexShrink: 1 },
   meta: { marginTop: 5, ...typography.body, color: colors.muted },
-  fee: { marginTop: 13, ...typography.meta, color: colors.muted },
+  fee: { marginTop: 2, ...typography.meta, color: colors.muted },
+  feeAlone: { marginTop: 13 },
+  posterRow: { flexDirection: "row", alignItems: "center", gap: 9, marginTop: 13 },
+  posterCopy: { flex: 1, minWidth: 0 },
+  posterHead: { flexDirection: "row", alignItems: "center", gap: 6 },
+  posterName: { ...typography.meta, fontWeight: "800", color: colors.ink, flexShrink: 1 },
 
   end: { padding: 24, alignItems: "center", justifyContent: "center" },
   endTitle: { marginTop: 20, ...typography.title, color: colors.ink, textAlign: "center" },

@@ -9,10 +9,11 @@
  * for the same reason the Components panel wins over incidental CSS. Pinned below, because a
  * later reader will find the fallback first.
  *
- * ⚠️ WHAT THE LIST PAYLOAD CANNOT BACK. The list card carries no poster and no distance, so
- * the deck card has no shelter row and no "2 km" chip; the city takes that slot. The Details
- * overlay shows only booleans the listing records — never the artboard's "Good with children"
- * or "House trained", which have no field. Each is asserted as absent.
+ * ⚠️ WHAT THE LIST PAYLOAD CANNOT BACK. The list card carries no distance, so the deck card
+ * has no "2 km" chip; the city takes that slot. The Details overlay shows only booleans the
+ * listing records — never the artboard's "Good with children" or "House trained", which have
+ * no field. Each is asserted as absent. (The shelter row WAS on this list until backend #18
+ * put `poster` on the card; it is now asserted present, and guarded by the field.)
  */
 import { existsSync, readFileSync } from "fs";
 import { dirname, join } from "path";
@@ -71,11 +72,18 @@ describe("the Adopt deck", () => {
 
   it("shows nothing GET /listings cannot back", () => {
     expect(code).not.toMatch(/km\b/);                      // no distance
-    expect(code).not.toMatch(/poster|initials|Verified/);  // no shelter row on the card
     expect(code).toMatch(/<Text style=\{styles\.cityChipText\}>\{l\.city\}<\/Text>/);
     expect(logicCode).not.toMatch(/Good with children|House trained/);
     expect(logic).toMatch(/Good with children/); // ...and the reason stays in the comment
     expect(logic).toMatch(/typeof pet\.vaccinated === "boolean"/);
+  });
+
+  it("draws the artboard's shelter row only from a poster the card actually carries", () => {
+    // The row: a 34 pt tinted tile with initials, the name, the verified chip that names its
+    // type, the fee under the name — and nothing when an older server sends no poster.
+    expect(code).toMatch(/\{l\.poster \? \(/);
+    expect(code).toMatch(/<Avatar initials=\{posterInitials\(l\.poster\.name\)\} tinted size=\{34\} \/>/);
+    expect(code).toMatch(/l\.poster\.is_shelter \? "Verified Shelter" : "Verified Member"/);
   });
 
   it("keeps every swipe recoverable, as the artboard insists", () => {
