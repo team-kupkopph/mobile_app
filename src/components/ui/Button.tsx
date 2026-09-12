@@ -71,7 +71,7 @@ export function Button({ label, onPress, variant = "primary", size = "regular", 
       accessibilityHint={accessibilityHint}
       accessibilityState={{ busy: !!loading }}
       testID={testID}
-      style={[styles.wrap, small && styles.smallWrap, style]}
+      style={[styles.wrap, variant === "primary" && elevation.cta, small && styles.smallWrap, style]}
     >
       {variant === "primary" ? (
         <LinearGradient colors={gradients.button} style={[styles.fill, small && styles.smallFill]}>
@@ -89,14 +89,16 @@ export function Button({ label, onPress, variant = "primary", size = "regular", 
 const styles = StyleSheet.create({
   wrap: {
     // pill(), not radii — this is half the height and the two move together.
-    borderRadius: pill(HEIGHT),
-    overflow: "hidden"
+    // ⚠️ No `overflow: "hidden"` here: on iOS it clips the shadow along with the children. The
+    // fill clips itself instead.
+    borderRadius: pill(HEIGHT)
   },
   fill: {
     height: HEIGHT,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: pill(HEIGHT)
+    borderRadius: pill(HEIGHT),
+    overflow: "hidden"
   },
   topHighlight: {
     position: "absolute",

@@ -27,7 +27,7 @@ import { advance, buildDeck, cardMeta, DeckState, Dir, endSummary, factRows, fee
 import { readPref, writePref } from "../cache";
 import { useReducedMotion } from "../useReducedMotion";
 import { AdoptIcon, CheckIcon, VolunteerIcon, XIcon } from "./AppIcons";
-import { Chip, PressScale } from "./ui";
+import { Avatar, Chip, PressScale } from "./ui";
 import { colors, elevation, gradients, motion, pill, radii, squircle, typography } from "../theme";
 
 const CARD_HEIGHT = 452;
@@ -194,7 +194,7 @@ export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
           })
         ) : (
           <View style={[styles.card, styles.end]} testID="deck.adopt.end">
-            <View style={styles.endTile}><AdoptIcon color={colors.teal} size={38} /></View>
+            <Avatar size={76}><AdoptIcon color={colors.teal} size={38} /></Avatar>
             <Text style={styles.endTitle}>That is everyone nearby</Text>
             <Text style={styles.endBody}>{endSummary(deck)}</Text>
             <Text style={styles.endNote}>Saved and hidden pets are remembered on this phone.</Text>
@@ -280,7 +280,6 @@ const styles = StyleSheet.create({
   fee: { marginTop: 13, ...typography.meta, color: colors.muted },
 
   end: { padding: 24, alignItems: "center", justifyContent: "center" },
-  endTile: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   endTitle: { marginTop: 20, ...typography.title, color: colors.ink, textAlign: "center" },
   endBody: { marginTop: 8, maxWidth: 250, ...typography.body, color: colors.muted, textAlign: "center" },
   endNote: { marginTop: 10, maxWidth: 250, ...typography.meta, color: colors.muted, textAlign: "center" },

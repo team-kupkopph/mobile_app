@@ -12,6 +12,14 @@ export const gradients = {
   danger: ["#C94A44", "#9E322D"] as const,
   /** The tinted pill behind an active tab. */
   activeTab: ["#EAF3F2", "#DCEAE8"] as const,
+  /**
+   * The pet / person tile — the untinted squircle behind a paw or a person's initials. The
+   * canvas draws it as `linear-gradient(150deg, #EDF5F4, #DDEBE9)` on Main, Adopt, Inquiry and
+   * the Components panel; the app filled it flat with `colors.soft` (#E7F0EF, the gradient's
+   * midpoint) in 56 places. Only the tiles take the gradient — chips, badges and notice boxes
+   * stay flat, as the canvas keeps them.
+   */
+  tile: ["#EDF5F4", "#DDEBE9"] as const,
 
   /**
    * Avatar tiles — the four the canvas gives organisations, each with the ink that sits on it.

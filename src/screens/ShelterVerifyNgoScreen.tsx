@@ -13,7 +13,7 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Avatar, Button, ScreenHeader } from "../components/ui";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -172,9 +172,9 @@ function DocSlot({
 }) {
   return (
     <TouchableOpacity activeOpacity={0.8} style={[styles.docCard, disabled && styles.docCardDisabled]} onPress={onPress} disabled={busy || disabled}>
-      <View style={styles.docIcon}>
+      <Avatar size={48}>
         <DocumentIcon color={authColors.teal} />
-      </View>
+      </Avatar>
       <View style={styles.docCopy}>
         <Text style={styles.docTitle}>{label}</Text>
         <Text style={styles.docSubtitle}>{hint}</Text>
@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
     ...elevation.soft
   },
   docCardDisabled: { opacity: 0.55 },
-  docIcon: { width: 48, height: 48, borderRadius: squircle(48), alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   docCopy: { flex: 1, marginLeft: 14 },
   docTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, ...typography.caption, fontWeight: "600" },
@@ -269,5 +268,5 @@ const styles = StyleSheet.create({
   },
   input: { color: colors.ink, ...typography.strong, fontWeight: "800", padding: 0 },
   formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },
-  submitButton: { marginTop: 22 },
+  submitButton: { marginTop: 22 }
 });
