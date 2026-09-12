@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, ladderStep, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -82,5 +82,30 @@ describe("STAGE_STEP", () => {
     }
     expect(STAGE_STEP.home_check.skippedNote!(ctx)).toBe("PAWS Manila waived the home visit for this listing.");
     expect(STAGE_STEP.interview.note(ctx)).toContain("Milo's");
+  });
+});
+
+describe("stageMeta", () => {
+  const now = new Date("2026-09-12T10:00:00Z");
+
+  it("shows the date a done stage moved, the way the artboard draws it", () => {
+    expect(stageMeta("done", "2026-07-12T03:21:00Z", now)).toMatch(/Jul 12/);
+  });
+
+  it("adds the year only when it differs", () => {
+    expect(stageMeta("done", "2025-07-12T03:21:00Z", now)).toMatch(/2025/);
+    expect(stageMeta("done", "2026-07-12T03:21:00Z", now)).not.toMatch(/2026/);
+  });
+
+  it("says Done, not an invented date, when the server sent none", () => {
+    expect(stageMeta("done", null, now)).toBe("Done");
+    expect(stageMeta("done", undefined, now)).toBe("Done");
+    expect(stageMeta("done", "not a date", now)).toBe("Done");
+  });
+
+  it("names the other states and says nothing for a step still to come", () => {
+    expect(stageMeta("in_progress", "2026-07-12T03:21:00Z", now)).toBe("In progress");
+    expect(stageMeta("skipped", null, now)).toBe("Skipped");
+    expect(stageMeta("not_started", null, now)).toBe("");
   });
 });

@@ -104,3 +104,20 @@ export function ladderStep(stages: InquiryStage[]): { step: number; of: number }
   const idx = STAGE_ORDER.findIndex((key) => !settled(key));
   return { step: idx === -1 ? STAGE_ORDER.length : idx + 1, of: STAGE_ORDER.length };
 }
+
+/**
+ * The right-hand label of a ladder step, as Inquiry.dc.html draws it: a short date on a step
+ * that has moved ("Jul 12"), "Skipped", "In progress", nothing on one still to come. "Done"
+ * only when the server sent no date — which it does not, since backend #18, but an older
+ * server still gets an honest word rather than an invented date.
+ */
+export function stageMeta(state: string, updatedAt?: string | null, now = new Date()): string {
+  if (state === "in_progress") return "In progress";
+  if (state === "skipped") return "Skipped";
+  if (state !== "done") return "";
+  if (!updatedAt) return "Done";
+  const d = new Date(updatedAt);
+  if (Number.isNaN(d.getTime())) return "Done";
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return d.toLocaleDateString(undefined, sameYear ? { month: "short", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" });
+}
