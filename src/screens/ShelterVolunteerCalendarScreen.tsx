@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 18, fontWeight: "800" },
+  title: { color: colors.ink, ...typography.section },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },

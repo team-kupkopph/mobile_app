@@ -94,7 +94,7 @@ export function ShelterTierScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
   content: { flex: 1, paddingHorizontal: spacing.lg },
-  title: { color: authColors.ink, fontSize: 24, fontWeight: "800", lineHeight: 30 },
+  title: { color: authColors.ink, ...typography.hero, lineHeight: 30 },
   caption: { marginTop: 6, color: authColors.muted, ...typography.meta, lineHeight: 20 },
   card: {
     marginTop: 28,
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   glyph: { color: authColors.teal, fontSize: 26, fontWeight: "900" },
   copy: { flex: 1, marginLeft: 18 },
-  cardTitle: { color: authColors.ink, fontSize: 18, fontWeight: "800" },
+  cardTitle: { color: authColors.ink, ...typography.section },
   cardBody: { marginTop: 6, color: authColors.muted, ...typography.meta, lineHeight: 17 },
   chevron: { color: authColors.muted, fontSize: 26, fontWeight: "700", marginLeft: 8 }
 });

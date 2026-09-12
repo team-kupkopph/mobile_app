@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 60, alignItems: "center" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
-  heading: { marginTop: 22, color: colors.ink, fontSize: 24, fontWeight: "800" },
+  heading: { marginTop: 22, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
   primaryButton: {
     width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",

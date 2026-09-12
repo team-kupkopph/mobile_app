@@ -161,11 +161,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     lineHeight: 28
   },
-  headerTitle: {
-    color: colors.ink,
-    fontSize: 18,
-    fontWeight: "800"
-  },
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: 60

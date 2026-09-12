@@ -152,8 +152,7 @@ const styles = StyleSheet.create({
   heading: {
     marginTop: 22,
     color: authColors.ink,
-    fontSize: 26,
-    fontWeight: "800"
+    ...typography.hero
   },
   subheading: {
     marginTop: 6,

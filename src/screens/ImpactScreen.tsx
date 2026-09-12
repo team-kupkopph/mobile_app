@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   statTile: { flex: 1, paddingVertical: 16, borderRadius: radii.tile, alignItems: "center", ...card },
   statValue: { color: colors.teal, fontSize: 26, fontWeight: "800" },
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "600" },
-  sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, fontSize: 20, fontWeight: "800" },
+  sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, ...typography.section },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   badgeTile: { width: "48%", marginBottom: 14, padding: 16, borderRadius: 22, alignItems: "center", ...card },
   badgeTileDim: { backgroundColor: colors.greyPill, shadowOpacity: 0 },

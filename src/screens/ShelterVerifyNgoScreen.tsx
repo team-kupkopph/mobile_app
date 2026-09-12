@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     ...elevation.soft
   },
   content: { paddingHorizontal: spacing.lg, paddingBottom: 60 },
-  heading: { marginTop: 6, color: colors.ink, fontSize: 24, fontWeight: "800" },
+  heading: { marginTop: 6, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 20 },
   docCard: {
     minHeight: 84,

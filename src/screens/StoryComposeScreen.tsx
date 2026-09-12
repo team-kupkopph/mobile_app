@@ -90,7 +90,7 @@ export function StoryComposeScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  h1: { color: colors.ink, fontSize: 24, fontWeight: "800", marginBottom: 14 },
+  h1: { color: colors.ink, ...typography.hero, marginBottom: 14 },
   photoTile: { height: 150, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
   photoTileSet: { borderStyle: "solid", borderColor: colors.teal, backgroundColor: colors.soft },
   photoLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },

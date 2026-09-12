@@ -238,7 +238,7 @@ const card = {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  h1: { color: colors.ink, fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
+  h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   currentChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
   mapWrap: { marginTop: 18, height: 150, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   handoffBtn: { flex: 1 },
   listBtnText: { color: colors.teal, ...typography.strong, fontWeight: "800" },
   resolvedNote: { marginTop: 24, color: colors.muted, fontSize: 16, lineHeight: 22 },
-  sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 18, fontWeight: "800" },
+  sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   radioList: { gap: 10 },
   radioRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: radii.tile, borderWidth: 2, borderColor: "transparent", ...card },
   radioRowActive: { borderColor: colors.teal },

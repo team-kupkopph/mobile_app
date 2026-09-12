@@ -225,8 +225,11 @@ function stepFor(r: Resolved): string | null {
     }
     if (String(tok.fontWeight ?? "400") !== r.weight) continue;
     if (Number(tok.letterSpacing ?? 0) !== r.tracking) continue;
-    const tl = tok.lineHeight === undefined ? null : Number(tok.lineHeight);
-    if (tl !== r.leading) continue;
+    // A closed step governs leading only when it names one. Only `body` does; a heading step
+    // names size, weight and tracking, so `{ ...typography.hero, lineHeight: 30 }` is on the
+    // ramp with its own leading — the same reading the open steps got in #68, applied to the
+    // property rather than to the step.
+    if (tok.lineHeight !== undefined && Number(tok.lineHeight) !== r.leading) continue;
     return name;
   }
   return null;
@@ -258,8 +261,7 @@ function sideEffects(r: Resolved, step: string): string[] {
   }
   if (String(tok.fontWeight ?? "400") !== r.weight) out.push("weight");
   if (Number(tok.letterSpacing ?? 0) !== r.tracking) out.push("tracking");
-  const tl = tok.lineHeight === undefined ? null : Number(tok.lineHeight);
-  if (tl !== r.leading) out.push("leading");
+  if (tok.lineHeight !== undefined && Number(tok.lineHeight) !== r.leading) out.push("leading");
   return out;
 }
 
@@ -365,8 +367,33 @@ for (const file of sources(SRC)) {
  * their 30 pt "‹" glyph style and their own title style with them. Neither was ever going to
  * bind to a step — a chevron is not text and a hand-rolled title is what the primitive
  * replaces — so this is the count shrinking because the drift was removed, not absorbed.
+ *
+ * 127, DOWN FROM 213 — THE HEADINGS ADOPT THE PANEL'S TRACKING, AND THAT IS ALL THEY ADOPT.
+ * Read by name, the "size plus something else" group was never one thing. 83 sites are
+ * headings, titles and names at weight 800 that differed from their step only in tracking
+ * (the panel's -0.3 to -0.6, which every artboard draws and no screen had) and by at most a
+ * point of size (23 -> 21 twice). They are bound; the weight is unchanged at every one, and an
+ * explicit line height is kept, because no heading step names one. Three more were dead
+ * `headerTitle` styles the header conversion orphaned, deleted. What is left is, by name,
+ * and adds up (28 + 2 + 42 + 20 + 13 + 10 + 7 + 3 + 2 = 127):
+ *   · 28 hand-rolled button labels at 18-22 / 700 (`submitText`, `primaryText`,
+ *     `primaryLabel`...) and 2 text inputs at 18 / 700. The panel's button and field row is
+ *     17 / 700-800 and `Button` and `Field` already bind to it, so these are buttons and
+ *     fields not on the primitive — the header story's shape, not the ramp's.
+ *   · 42 glyphs drawn as text — the six ShelterVolunteer "‹" (screenHeader.test.ts's
+ *     remainder), "›" chevrons, hearts, medals, avatar initials, OTP digits — no step is for.
+ *   · 20 small text sites at 10-11 / 400-700 — captions and footnotes below `meta`, which
+ *     the ramp's only 11 pt step (`label`, 800 / +0.8 / upper) does not describe. The tab
+ *     label is one of them, at the canvas's own 11 / 600 / +0.1.
+ *   · 13 body-copy sites at 16-17 / 400 with a line height — body copy one size above
+ *     `body`, a call the `body` step's 21 pt leading would also change.
+ *   · 10 half-point strays (14.5, 15.5).
+ *   · 7 large numerals (`statValue`, `feeValue`, `impactTotals`...) that the canvas never
+ *     draws at all, so there is no evidence to snap them to.
+ *   · 3 value labels at 18 / 700 (`recipientEmail`, `docName`, `fileName`).
+ *   · `ScreenHeader`'s own title, left and centred.
  */
-const OFF_RAMP = 213;
+const OFF_RAMP = 127;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {

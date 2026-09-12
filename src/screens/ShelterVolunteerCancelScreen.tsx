@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 19, fontWeight: "800" },
+  title: { color: colors.ink, ...typography.section },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60, alignItems: "center" },
   summaryCard: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   summaryTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   summaryWhen: { marginTop: 3, color: colors.teal, ...typography.meta, fontWeight: "700" },
   summarySub: { marginTop: 3, color: colors.muted, ...typography.meta },
-  question: { alignSelf: "flex-start", marginTop: 26, color: colors.ink, fontSize: 24, fontWeight: "800" },
+  question: { alignSelf: "flex-start", marginTop: 26, color: colors.ink, ...typography.hero },
   body: { alignSelf: "flex-start", marginTop: 10, color: colors.muted, ...typography.body },
   bannerBox: { width: "100%", marginTop: 18, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   keepLink: { marginTop: 16, height: 40, alignItems: "center", justifyContent: "center" },
   keepLinkText: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
-  heading: { marginTop: 22, color: colors.ink, fontSize: 24, fontWeight: "800" },
+  heading: { marginTop: 22, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },
   primaryButton: {
     width: "100%", height: 56, marginTop: 32, borderRadius: 28, alignItems: "center",

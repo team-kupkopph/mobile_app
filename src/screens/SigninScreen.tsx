@@ -188,8 +188,7 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 22,
     color: authColors.ink,
-    fontSize: 26,
-    fontWeight: "800"
+    ...typography.hero
   },
   caption: {
     marginTop: 5,

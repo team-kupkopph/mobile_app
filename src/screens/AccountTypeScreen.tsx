@@ -111,8 +111,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: authColors.ink,
-    fontSize: 24,
-    fontWeight: "800",
+    ...typography.hero,
     lineHeight: 30
   },
   caption: {
@@ -166,8 +165,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     color: authColors.ink,
-    fontSize: 18,
-    fontWeight: "800"
+    ...typography.section
   },
   cardBody: {
     marginTop: 6,

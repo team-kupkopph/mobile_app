@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   noteBannerTitle: { color: colors.danger, ...typography.subtitle, fontWeight: "800" },
   noteBannerBody: { marginTop: 6, color: colors.danger, ...typography.strong, fontWeight: "700", lineHeight: 21 },
   noteBannerHint: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 20 },
-  groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, fontSize: 20, fontWeight: "800" },
+  groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   docCard: {
     marginBottom: 14,
     borderRadius: 22,

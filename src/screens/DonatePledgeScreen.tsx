@@ -103,7 +103,7 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  needTitle: { color: colors.ink, fontSize: 26, fontWeight: "800" },
+  needTitle: { color: colors.ink, ...typography.hero },
   shelter: { marginTop: 4, color: colors.teal, ...typography.strong, fontWeight: "700" },
   note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
   label: { marginTop: 26, marginBottom: 12, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
@@ -119,6 +119,6 @@ const styles = StyleSheet.create({
   confirmWrap: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 140, paddingBottom: 60, alignItems: "center" },
   checkTile: { width: 84, height: 84, borderRadius: squircle(84), backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
   checkGlyph: { color: colors.success, fontSize: 44, fontWeight: "800" },
-  confirmTitle: { marginTop: 22, color: colors.ink, fontSize: 26, fontWeight: "800" },
+  confirmTitle: { marginTop: 22, color: colors.ink, ...typography.hero },
   confirmBody: { marginTop: 12, color: colors.muted, fontSize: 15.5, lineHeight: 23, textAlign: "center" }
 });

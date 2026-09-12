@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   hiddenText: { color: "#8A5A12", ...typography.meta, fontWeight: "600" },
   photo: { height: 280, borderRadius: radii.field, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
-  authorName: { color: colors.ink, fontSize: 18, fontWeight: "800" },
+  authorName: { color: colors.ink, ...typography.section },
   city: { color: colors.muted, ...typography.meta, marginTop: 2 },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },

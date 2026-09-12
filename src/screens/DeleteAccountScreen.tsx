@@ -205,7 +205,7 @@ function Header({ title, navigation }: { title: string; navigation: Props["navig
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { padding: 20, paddingBottom: 48 },
-  h1: { fontSize: 26, fontWeight: "800", color: colors.ink, letterSpacing: -0.4 },
+  h1: { ...typography.hero, color: colors.ink },
   lede: { ...typography.body, color: colors.muted, marginTop: 8 },
   columns: { flexDirection: "row", gap: 12, marginTop: 20 },
   column: { flex: 1, borderRadius: radii.tile, padding: 16, ...card },

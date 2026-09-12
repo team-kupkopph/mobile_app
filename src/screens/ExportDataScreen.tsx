@@ -165,7 +165,7 @@ export function ExportDataScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { padding: 20, paddingBottom: 48 },
-  h1: { fontSize: 26, fontWeight: "800", color: colors.ink, letterSpacing: -0.4, marginTop: 8 },
+  h1: { ...typography.hero, color: colors.ink, marginTop: 8 },
   lede: { ...typography.body, color: colors.muted, marginTop: 8 },
   fileCard: { borderRadius: radii.tile, padding: 16, marginTop: 20, ...card },
   fileName: { ...typography.strong, fontWeight: "700", color: colors.ink },

@@ -166,11 +166,11 @@ const styles = StyleSheet.create({
   },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", ...card },
   backGlyph: { color: colors.ink, fontSize: 30, fontWeight: "800", marginTop: -4 },
-  title: { color: colors.ink, fontSize: 20, fontWeight: "800" },
+  title: { color: colors.ink, ...typography.section },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  heroTitle: { color: colors.ink, fontSize: 22, fontWeight: "800" },
+  heroTitle: { color: colors.ink, ...typography.title },
   heroWhen: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
   heroOrg: { marginTop: 2, color: colors.muted, ...typography.meta },
   infoCard: {

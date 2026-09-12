@@ -167,8 +167,7 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 18,
     color: authColors.ink,
-    fontSize: 22,
-    fontWeight: "800",
+    ...typography.title,
     textAlign: "center"
   },
   body: {

@@ -117,8 +117,7 @@ const styles = StyleSheet.create({
   title: {
     marginTop: 20,
     color: authColors.ink,
-    fontSize: 24,
-    fontWeight: "800",
+    ...typography.hero,
     textAlign: "center"
   },
   caption: {
