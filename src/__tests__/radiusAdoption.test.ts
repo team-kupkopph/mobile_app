@@ -247,7 +247,7 @@ describe("screens take corner radii from the theme", () => {
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.
-    expect(sites.filter(isPill).length).toBeGreaterThan(110);
+    expect(sites.filter(isPill).length).toBeGreaterThan(100);
   });
 
   it("leaves no container literal that already equals a step", () => {

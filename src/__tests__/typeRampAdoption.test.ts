@@ -447,8 +447,9 @@ for (const file of sources(SRC)) {
  *     among them unified at the canvas's 19 / 700.
  */
 const OFF_RAMP = 0;
-/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. */
-const GLYPHS = 33;
+/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. (32: the guest Home's
+ *  "See nearby strays ›" row went with the V1 guest Home; Home's rows are shared now.) */
+const GLYPHS = 32;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
