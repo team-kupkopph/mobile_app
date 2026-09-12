@@ -21,8 +21,8 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { colors, elevation, radii, typography } from "../theme";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -88,21 +88,17 @@ export function DeleteAccountScreen({ navigation }: Props) {
           These stay so the animals' records stay whole. Nothing in them points back to you.
         </Text>
 
-        <Text style={styles.fieldLabel}>TYPE {CONFIRM_WORD} TO CONFIRM</Text>
-        <View style={styles.field}>
-          <Text style={styles.fieldCaption}>CONFIRMATION</Text>
-          <TextInput
-            value={typed}
-            onChangeText={(v) => { setTyped(v); setError(undefined); }}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            style={styles.input}
-            placeholder={CONFIRM_WORD}
-            placeholderTextColor="#C6C4BC"
-            accessibilityLabel={`Type ${CONFIRM_WORD} to confirm deleting your account`}
-          />
-        </View>
-        {error ? <Text style={styles.error} accessibilityLiveRegion="polite">{error}</Text> : null}
+        {/* The instruction is the field's own label; Field renders the error under the box, live. */}
+        <Field
+          label={`Type ${CONFIRM_WORD} to confirm`}
+          value={typed}
+          onChangeText={(v) => { setTyped(v); setError(undefined); }}
+          autoCapitalize="characters"
+          autoCorrect={false}
+          placeholder={CONFIRM_WORD}
+          accessibilityLabel={`Type ${CONFIRM_WORD} to confirm deleting your account`}
+          error={error}
+        />
 
         <Button
           label="Delete my account"
@@ -203,11 +199,6 @@ const styles = StyleSheet.create({
   bullet: { width: 6, height: 6, borderRadius: 3, marginTop: 6, marginRight: 8 },
   bulletText: { flex: 1, ...typography.meta, color: colors.ink, lineHeight: 18 },
   reason: { ...typography.meta, color: colors.muted, marginTop: 16, lineHeight: 19 },
-  fieldLabel: { ...typography.label, color: colors.muted, marginTop: 26 },
-  field: { borderRadius: radii.tile, paddingHorizontal: 18, paddingVertical: 12, marginTop: 8, ...card },
-  fieldCaption: { ...typography.caption, fontWeight: "600", color: colors.muted, letterSpacing: 0.4 },
-  input: { ...typography.subtitle, fontWeight: "700", color: colors.ink, paddingVertical: 4 },
-  error: { ...typography.meta, color: colors.danger, marginTop: 8 },
   dangerBtn: { marginTop: 22 },
   outlineBtn: { marginTop: 12 },
   tealBtn: { marginTop: 22 },

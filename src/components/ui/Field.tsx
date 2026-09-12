@@ -25,7 +25,11 @@ type FieldProps = {
   style?: StyleProp<ViewStyle>;
 } & Pick<
   TextInputProps,
-  "placeholder" | "keyboardType" | "autoCapitalize" | "testID" | "autoComplete" | "returnKeyType" | "onSubmitEditing"
+  | "placeholder" | "keyboardType" | "autoCapitalize" | "autoCorrect" | "testID" | "autoComplete"
+  | "returnKeyType" | "onSubmitEditing" | "maxLength" | "autoFocus" | "accessibilityLabel"
+  // A notes / description field. The box grows from a three-line minimum and the text starts
+  // at the top; the label stays inside, as it does for a single line.
+  | "multiline" | "numberOfLines"
 >;
 
 export function Field({
@@ -54,7 +58,7 @@ export function Field({
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholderTextColor={colors.muted}
-            style={[styles.input, readOnly && styles.inputReadOnly]}
+            style={[styles.input, input.multiline && styles.inputMultiline, readOnly && styles.inputReadOnly]}
           />
           {onToggleSecure ? (
             <TouchableOpacity
@@ -121,6 +125,7 @@ const styles = StyleSheet.create({
     color: colors.ink
   },
   inputReadOnly: { color: colors.muted },
+  inputMultiline: { minHeight: 66, textAlignVertical: "top", lineHeight: 22 },
   accessory: { marginLeft: spacing.sm, width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   eye: {
     width: 22,

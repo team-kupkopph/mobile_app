@@ -2,13 +2,12 @@
 // every flaggable target type (route.params.targetType) — POST /moderation/flags.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
-
+import { colors, spacing } from "../theme";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportContent">;
 
@@ -41,31 +40,22 @@ export function ReportContentScreen({ navigation, route }: Props) {
       <ScreenHeader title="Report this" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
-        <Text style={styles.label}>What's wrong?</Text>
-        <TextInput
-          style={styles.notes}
+        <Field
+          label="What's wrong?"
           value={reason}
           onChangeText={setReason}
           multiline
           placeholder="Spam, a fake listing, abusive contact…"
-          placeholderTextColor={colors.faintDeprecated}
+          error={error ? error : undefined}
         />
-        {error ? <Text style={styles.error}>{error}</Text> : null}
         <Button label="Send report" onPress={submit} loading={submitting} style={styles.submit} />
       </View>
     </View>
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20 },
-  label: { marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  notes: { minHeight: 120, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
-  error: { marginTop: 14, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }
 });

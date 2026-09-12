@@ -4,7 +4,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
@@ -15,7 +15,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { advanceableStatuses, sagipTitle, strayChip } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, Field, ScreenHeader } from "../components/ui";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -177,25 +177,21 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                 })}
               </View>
 
-              <Text style={styles.label}>Note (optional)</Text>
-              <TextInput
-                style={styles.notes}
+              <Field
+                label="Note (optional)"
                 value={note}
                 onChangeText={setNote}
                 placeholder="What happened at this step?"
-                placeholderTextColor={colors.muted}
                 multiline
               />
 
               {target === "resolved" ? (
                 <>
-                  <Text style={styles.label}>Outcome (optional)</Text>
-                  <TextInput
-                    style={styles.notes}
+                  <Field
+                    label="Outcome (optional)"
                     value={outcomeNotes}
                     onChangeText={setOutcomeNotes}
                     placeholder="How this case ended — reunited, adopted, in foster care…"
-                    placeholderTextColor={colors.muted}
                     multiline
                   />
                   <TouchableOpacity style={styles.photoBtn} onPress={addOutcomePhoto} activeOpacity={0.85}>
@@ -246,8 +242,6 @@ const styles = StyleSheet.create({
   radioActive: { borderColor: colors.teal },
   radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.teal },
   radioLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
-  label: { marginTop: 22, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  notes: { minHeight: 80, borderRadius: radii.tile, padding: 16, color: colors.ink, ...typography.subtitle, textAlignVertical: "top", ...card },
   photoBtn: { marginTop: 14, height: 64, borderRadius: radii.tile, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
