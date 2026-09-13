@@ -96,13 +96,32 @@ describe("the Adopt deck", () => {
     expect(deck).toMatch(/testID="btn\.adopt\.save"/);
   });
 
-  it("persists under the cache prefix, so a session end wipes it", () => {
-    expect(deck).toMatch(/readPref<string\[\]>\("adopt\.saved"\)/);
-    expect(deck).toMatch(/writePref\("adopt\.hidden", next\.hidden\)/);
+  it("keeps the shortlist on the account, with the phone's copy under the cache prefix", () => {
+    // The deck no longer reads or writes the prefs itself — useShortlist does, and syncs.
+    expect(deck).toMatch(/const shortlist = useShortlist\(\)/);
+    expect(deck).not.toMatch(/readPref|writePref/);
+    const hook = read("useShortlist.ts");
+    expect(hook).toMatch(/readPref<string\[\]>\("adopt\.saved"\)/);
+    expect(hook).toMatch(/api\.get\("\/me\/shortlist"\)/);
+    expect(hook).toMatch(/api\.put\(`\/me\/shortlist\/\$\{op\.id\}`, \{ kind: op\.kind \}\)/);
+    expect(hook).toMatch(/api\.del\(`\/me\/shortlist\/\$\{op\.id\}`\)/);
+    // The phone's copy still lives under the cache prefix, so a session end wipes it and the
+    // account's copy is what comes back — the pending queue too, so nothing leaks between accounts.
+    expect(hook).toMatch(/writePref\("adopt\.pending", pending\)/);
     expect(read("cache.ts")).toMatch(/PREFIX \+ "pref\." \+ name/);
     expect(read("cache.ts")).toMatch(/keys\.filter\(\(k\) => k\.startsWith\(PREFIX\)\)/);
-    // ...and says so, rather than implying a server-side shortlist that does not exist.
-    expect(code).toMatch(/remembered on this phone/);
+    // ...and the end card says which of the two it is right now, never more than is true.
+    expect(code).toMatch(/remembered on your account/);
+    expect(code).toMatch(/remembered on this phone for now/);
+  });
+
+  it("rebuilds the deck only when the shortlist changed from outside, never after its own swipe", () => {
+    // Rebuilding on every list change would reset the deck's position after each swipe; the
+    // hook's `generation` bumps only on load and on the account's merge.
+    expect(deck).toMatch(/\[ids, shortlist\.loaded, shortlist\.generation\]/);
+    const update = /const update = useCallback\(([\s\S]*?)\}, \[persist, flush\]\);/.exec(read("useShortlist.ts"));
+    expect(update).not.toBeNull();
+    expect(update![1]).not.toMatch(/generation/);
   });
 
   it("honours reduced motion by skipping the fling, not the outcome", () => {
