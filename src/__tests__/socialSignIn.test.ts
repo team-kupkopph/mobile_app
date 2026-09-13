@@ -21,7 +21,6 @@
 import { existsSync, readFileSync } from "fs";
 import { dirname, join } from "path";
 
-import { signInWithProvider } from "../auth/socialAuth";
 import { typography } from "../theme";
 
 const SRC = join(__dirname, "..");
@@ -98,41 +97,15 @@ describe("the provider row", () => {
     }
   });
 
-  describe("says the same honest thing for both providers while the seam is unfilled", () => {
-    const keys = ["EXPO_PUBLIC_GOOGLE_CLIENT_ID", "EXPO_PUBLIC_APPLE_CLIENT_ID"] as const;
-    const prev: Record<string, string | undefined> = {};
-    beforeEach(() => { for (const k of keys) prev[k] = process.env[k]; });
-    afterEach(() => {
-      for (const k of keys) {
-        if (prev[k] === undefined) delete process.env[k];
-        else process.env[k] = prev[k];
-      }
-    });
-
-    it("with no client id: both decline as not_configured", async () => {
-      for (const k of keys) delete process.env[k];
-      await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "not_configured" });
-      await expect(signInWithProvider("apple")).resolves.toEqual({ ok: false, reason: "not_configured" });
-    });
-
-    it("with a client id but no SDK: STILL not_configured, never a fabricated identity", async () => {
-      // ⚠️ THIS IS THE ASSERTION THAT MATTERS. The env gate above short-circuits before the
-      // seam body runs, so a body that returned a made-up token would pass the first test
-      // and hand the backend an id_token it has to reject. Proved by making the body return
-      // a fake identity: this test went red and the one above stayed green.
-      for (const k of keys) process.env[k] = "dummy-client-id-for-this-test";
-      await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "not_configured" });
-      await expect(signInWithProvider("apple")).resolves.toEqual({ ok: false, reason: "not_configured" });
-    });
-  });
-
-  it("did not install a provider SDK ahead of the credentials", () => {
-    // The recorded decision in socialAuth.ts and accounts/social.py. Reversing it is a
-    // deliberate act once S0-05 / S0-06 land, not a side effect of building the row.
+  it("keeps the SDK-before-credentials rule for the provider that is still paperwork", () => {
+    // 2026-09-13: S0-06 (Google) landed and expo-auth-session is installed for it —
+    // googleSignIn.test.ts covers that flow. S0-05 (Apple) is deferred to before launch, so
+    // its SDK stays out until its credentials exist. Reversing THIS is the deliberate act
+    // that closes the Guideline 4.8 gap; see googleSignIn.test.ts for why the gap is named.
     const pkg = JSON.parse(readFileSync(join(SRC, "..", "package.json"), "utf8"));
     const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+    expect(deps["expo-auth-session"]).toBeDefined();
     expect(deps["expo-apple-authentication"]).toBeUndefined();
-    expect(deps["expo-auth-session"]).toBeUndefined();
   });
 });
 

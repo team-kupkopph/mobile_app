@@ -2,7 +2,12 @@ import { Alert } from "react-native";
 import type { NavigationProp } from "@react-navigation/native";
 
 import type { RootStackParamList } from "../navigation/types";
-import { NOT_CONFIGURED_MESSAGE, type SocialProvider, signInWithProvider } from "./socialAuth";
+import {
+  APPLE_COMING_SOON_MESSAGE,
+  NOT_CONFIGURED_MESSAGE,
+  type SocialProvider,
+  signInWithProvider,
+} from "./socialAuth";
 
 /**
  * The one social sign-in handler, shared by every screen that renders the provider row.
@@ -24,6 +29,13 @@ export function useSocialSignIn(navigation: NavigationProp<RootStackParamList>) 
       return;
     }
     if (res.reason === "cancelled") return;
+    if (res.reason === "coming_soon") {
+      // Apple, while S0-05 is unpaid and Google is live. Its own sheet, so the copy can
+      // name Apple and point at the two ways that work today (socialAuth.ts explains the
+      // Guideline 4.8 gate this state sits behind).
+      Alert.alert("Sign in with Apple is coming soon", APPLE_COMING_SOON_MESSAGE);
+      return;
+    }
     Alert.alert(
       res.reason === "not_configured" ? "Not available yet" : "Sign-in failed",
       res.reason === "not_configured" ? NOT_CONFIGURED_MESSAGE : "Please try again."

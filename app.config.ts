@@ -13,6 +13,19 @@ import { ConfigContext, ExpoConfig } from "expo/config";
 
 const TEAL = "#1C6B6B";
 
+// US-A2 / S0-06 · Google sign-in returns to the reversed-client-id scheme, which the binary
+// has to own. Derived from the same env var socialAuth.ts reads at run time. This is a COPY of
+// src/auth/googleScheme.ts — Expo evaluates this file itself and cannot resolve a .ts import
+// from it — and googleSignIn.test.ts holds both copies to the same two literals so they cannot
+// drift. Unset → no extra scheme, and the seam answers "not configured" (never a hang).
+function googleIosUrlScheme(clientId: string): string {
+  const suffix = ".apps.googleusercontent.com";
+  const head = clientId.endsWith(suffix) ? clientId.slice(0, -suffix.length) : clientId;
+  return `com.googleusercontent.apps.${head}`;
+}
+const googleClientId = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
+const googleScheme = googleClientId ? googleIosUrlScheme(googleClientId) : undefined;
+
 /** Which EAS profile is building. `development` locally, set by eas.json otherwise. */
 const profile = process.env.EAS_BUILD_PROFILE ?? "development";
 const isDev = profile === "development";
@@ -38,7 +51,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: "portrait",
   userInterfaceStyle: "light",
   icon: "./assets/icon.png",
-  scheme: "kupkop",          // the deep-link scheme notifications route through (US-P3)
+  // "kupkop" is the deep-link scheme notifications route through (US-P3); the second, when
+  // present, is Google's return scheme (above). Expo accepts a list.
+  scheme: googleScheme ? ["kupkop", googleScheme] : "kupkop",
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",
@@ -87,6 +102,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-asset",
     "expo-secure-store",
+    "expo-web-browser",        // the auth sheet Google sign-in opens (US-A2 / S0-06)
     [
       "expo-location",
       {
