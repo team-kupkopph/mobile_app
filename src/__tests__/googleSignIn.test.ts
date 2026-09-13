@@ -21,9 +21,11 @@ const CLIENT = "845428226259-abc123.apps.googleusercontent.com";
 // The SDK is mocked at the module boundary; what is under test is everything around the
 // prompt — redirect, nonce, the id_token → identity mapping, and the reasons.
 const mockPromptAsync = jest.fn();
+const mockExchange = jest.fn();
 jest.mock("expo-auth-session", () => ({
-  AuthRequest: jest.fn().mockImplementation((cfg: unknown) => ({ cfg, promptAsync: mockPromptAsync })),
-  ResponseType: { IdToken: "id_token" },
+  AuthRequest: jest.fn().mockImplementation((cfg: unknown) => ({ cfg, codeVerifier: "verifier-abc", promptAsync: mockPromptAsync })),
+  exchangeCodeAsync: (...args: unknown[]) => mockExchange(...args),
+  ResponseType: { Code: "code", IdToken: "id_token" },
 }));
 jest.mock("expo-web-browser", () => ({ maybeCompleteAuthSession: jest.fn() }));
 jest.mock("expo-crypto", () => ({ randomUUID: () => "nonce-1234" }));
@@ -35,7 +37,7 @@ function fakeIdToken(payload: Record<string, unknown>): string {
 
 const keys = ["EXPO_PUBLIC_GOOGLE_CLIENT_ID", "EXPO_PUBLIC_APPLE_CLIENT_ID"] as const;
 const prev: Record<string, string | undefined> = {};
-beforeEach(() => { for (const k of keys) { prev[k] = process.env[k]; delete process.env[k]; } mockPromptAsync.mockReset(); });
+beforeEach(() => { for (const k of keys) { prev[k] = process.env[k]; delete process.env[k]; } mockPromptAsync.mockReset(); mockExchange.mockReset(); });
 afterEach(() => { for (const k of keys) { if (prev[k] === undefined) delete process.env[k]; else process.env[k] = prev[k]; } });
 
 describe("the Google iOS URL scheme", () => {
@@ -74,21 +76,35 @@ describe("signInWithProvider('google')", () => {
     expect(mockPromptAsync).not.toHaveBeenCalled();
   });
 
-  it("returns the provider's id_token and email on success, with the nonce it sent", async () => {
+  it("asks for a CODE with PKCE, exchanges it, and returns the id_token + email with the nonce it sent", async () => {
+    // ⚠️ Found on device, not by the first version of this test: Google's installed-app (iOS)
+    // clients answer `response_type=id_token` with "Error 400: unsupported_response_type".
+    // They require the authorization-code flow with PKCE, and the id_token comes back from
+    // the code exchange. No client secret is involved — that is what PKCE is for.
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID = CLIENT;
     const idToken = fakeIdToken({ email: "ana@example.com", nonce: "nonce-1234", sub: "g-1" });
-    mockPromptAsync.mockResolvedValue({ type: "success", params: { id_token: idToken } });
+    mockPromptAsync.mockResolvedValue({ type: "success", params: { code: "auth-code-1" } });
+    mockExchange.mockResolvedValue({ idToken });
     await expect(signInWithProvider("google")).resolves.toEqual({
       ok: true, identity: { provider: "google", idToken, email: "ana@example.com" },
     });
-    // The request was built for OUR client, the reversed-scheme redirect, an id_token, and the nonce.
+    // The request was built for OUR client, the reversed-scheme redirect, a code, PKCE, and the nonce.
     const { AuthRequest } = jest.requireMock("expo-auth-session");
     const cfg = AuthRequest.mock.calls[0][0];
     expect(cfg.clientId).toBe(CLIENT);
     expect(cfg.redirectUri).toBe("com.googleusercontent.apps.845428226259-abc123:/oauthredirect");
-    expect(cfg.responseType).toBe("id_token");
+    expect(cfg.responseType).toBe("code");
+    expect(cfg.usePKCE).toBe(true);
     expect(cfg.extraParams.nonce).toBe("nonce-1234");
     expect(cfg.scopes).toEqual(["openid", "email", "profile"]);
+    // The exchange sends the code back with the SAME client, redirect and the PKCE verifier.
+    const [xcfg, discovery] = mockExchange.mock.calls[0];
+    expect(xcfg).toEqual({
+      clientId: CLIENT, code: "auth-code-1",
+      redirectUri: "com.googleusercontent.apps.845428226259-abc123:/oauthredirect",
+      extraParams: { code_verifier: "verifier-abc" },
+    });
+    expect(discovery.tokenEndpoint).toBe("https://oauth2.googleapis.com/token");
   });
 
   it("is cancelled when the person dismisses the sheet — the one quiet exit", async () => {
@@ -101,18 +117,25 @@ describe("signInWithProvider('google')", () => {
 
   it("fails — never succeeds — on a replayed token whose nonce is not the one it sent", async () => {
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID = CLIENT;
-    const idToken = fakeIdToken({ email: "ana@example.com", nonce: "someone-elses" });
-    mockPromptAsync.mockResolvedValue({ type: "success", params: { id_token: idToken } });
+    mockPromptAsync.mockResolvedValue({ type: "success", params: { code: "c" } });
+    mockExchange.mockResolvedValue({ idToken: fakeIdToken({ email: "ana@example.com", nonce: "someone-elses" }) });
     await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "failed" });
   });
 
-  it("fails on a success with no id_token, or an error result, or a thrown SDK", async () => {
+  it("fails on a success with no code, an exchange with no id_token, an error result, or a thrown SDK", async () => {
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID = CLIENT;
     mockPromptAsync.mockResolvedValue({ type: "success", params: {} });
+    await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "failed" });
+    expect(mockExchange).not.toHaveBeenCalled();
+    mockPromptAsync.mockResolvedValue({ type: "success", params: { code: "c" } });
+    mockExchange.mockResolvedValue({ idToken: undefined });
     await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "failed" });
     mockPromptAsync.mockResolvedValue({ type: "error", params: {} });
     await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "failed" });
     mockPromptAsync.mockRejectedValue(new Error("boom"));
+    await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "failed" });
+    mockPromptAsync.mockResolvedValue({ type: "success", params: { code: "c" } });
+    mockExchange.mockRejectedValue(new Error("token endpoint 400"));
     await expect(signInWithProvider("google")).resolves.toEqual({ ok: false, reason: "failed" });
   });
 });

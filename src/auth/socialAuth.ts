@@ -3,12 +3,15 @@
 // STATUS 2026-09-13: GOOGLE IS WIRED (S0-06 landed — a Google Cloud project with iOS + Web OAuth
 // clients). APPLE IS NOT (S0-05, the paid Developer Program, is deferred to before launch).
 //
-// The Google flow is expo-auth-session's imperative AuthRequest asking for an id_token directly
-// (response_type=id_token + nonce, the same request Google.useIdTokenAuthRequest builds), returned
-// to the reversed-client-id scheme the binary registers (app.config.ts, via googleScheme.ts).
-// The token goes to POST /auth/social/google, where the backend verifies signature, issuer,
+// The Google flow is expo-auth-session's imperative AuthRequest in the authorization-CODE flow
+// with PKCE, returned to the reversed-client-id scheme the binary registers (app.config.ts, via
+// googleScheme.ts), then exchangeCodeAsync at Google's token endpoint, which returns the id_token.
+// ⚠️ Not response_type=id_token: Google's installed-app (iOS) clients refuse it with "Error 400:
+// unsupported_response_type" — found on device 2026-09-13. PKCE is what makes the exchange safe
+// without a client secret, which an app must never carry.
+// The id_token goes to POST /auth/social/google, where the backend verifies signature, issuer,
 // expiry and — the part that matters — that its audience is one of OUR client ids. The client
-// checks only what it can: that the nonce is the one it sent.
+// checks only what it can: that the token carries the nonce this request sent.
 //
 // ⚠️ APPLE IS "COMING SOON", AND THAT IS A NAMED STATE, NOT A GAP. App Store Review Guideline
 // 4.8 requires Sign in with Apple wherever Google is offered. The row still renders both buttons
@@ -69,19 +72,26 @@ const GOOGLE_DISCOVERY: AuthSession.DiscoveryDocument = {
 async function acquireGoogle(clientId: string): Promise<SocialResult> {
   const nonce = Crypto.randomUUID();
   try {
+    // Must be the scheme app.config.ts registered from the same env var — see googleScheme.ts.
+    const redirectUri = `${googleIosUrlScheme(clientId)}:/oauthredirect`;
     const request = new AuthSession.AuthRequest({
       clientId,
-      // Must be the scheme app.config.ts registered from the same env var — see googleScheme.ts.
-      redirectUri: `${googleIosUrlScheme(clientId)}:/oauthredirect`,
+      redirectUri,
       scopes: ["openid", "email", "profile"],
-      responseType: AuthSession.ResponseType.IdToken,
-      usePKCE: false,
+      responseType: AuthSession.ResponseType.Code,
+      usePKCE: true,
       extraParams: { nonce },
     });
     const result = await request.promptAsync(GOOGLE_DISCOVERY);
     if (result.type === "cancel" || result.type === "dismiss") return { ok: false, reason: "cancelled" };
     if (result.type !== "success") return { ok: false, reason: "failed" };
-    const idToken = result.params.id_token;
+    const code = result.params.code;
+    if (!code) return { ok: false, reason: "failed" };
+    const tokens = await AuthSession.exchangeCodeAsync(
+      { clientId, code, redirectUri, extraParams: { code_verifier: request.codeVerifier ?? "" } },
+      GOOGLE_DISCOVERY,
+    );
+    const idToken = tokens.idToken;
     if (!idToken) return { ok: false, reason: "failed" };
     const payload = decodeIdTokenPayload(idToken);
     // A token that does not carry the nonce this request sent is not the answer to this request.
