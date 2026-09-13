@@ -16,16 +16,18 @@
 // only the booleans the listing records (see adoptDeck.factRows); "Good with children" and
 // "House trained" have no field.
 //
-// Persistence is device-local under the cache prefix (cache.readPref / writePref): there is
-// no server-side shortlist yet, so a save lives on this phone, for this account, and is
-// wiped with the session. Said plainly on the end card rather than implied.
+// Persistence is the account's, through useShortlist: the phone's copy renders first, the
+// account's list (GET /me/shortlist, backend #19) is merged in once, and every swipe is
+// written back optimistically with an idempotent PUT / DELETE that survives a dead spot. The
+// phone's copy still lives under the cache prefix, so signing out wipes it and the account's
+// comes back on the next sign-in. The end card says which of the two it is at the moment.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Image, PanResponder, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Listing } from "../api/types";
 import { advance, buildDeck, cardMeta, DeckState, Dir, endSummary, factRows, feeLabel, showHidden, topId, undo } from "../adoptDeck";
-import { readPref, writePref } from "../cache";
+import { useShortlist } from "../useShortlist";
 import { useReducedMotion } from "../useReducedMotion";
 import { AdoptIcon, CheckIcon, VolunteerIcon, XIcon } from "./AppIcons";
 import { Avatar, Chip, PressScale } from "./ui";
@@ -53,21 +55,23 @@ export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
   const [deck, setDeck] = useState<DeckState | null>(null);
   const [facts, setFacts] = useState(false);
 
-  // Load the persisted shortlist / hidden list once, then rebuild whenever the feed changes
-  // (a filter chip, a refetch) while keeping what the person has already decided.
+  // The shortlist arrives from the phone first and the account a moment later; the deck is
+  // rebuilt whenever either that or the feed changes (a filter chip, a refetch), keeping the
+  // person's answers. `gone` — the undo stack — is session-only and survives a rebuild.
+  const shortlist = useShortlist();
   useEffect(() => {
-    let alive = true;
-    Promise.all([readPref<string[]>("adopt.saved"), readPref<string[]>("adopt.hidden")]).then(([saved, hidden]) => {
-      if (alive) setDeck((prev) => buildDeck(ids, prev?.saved ?? saved ?? [], prev?.hidden ?? hidden ?? []));
+    if (!shortlist.loaded) return;
+    setDeck((prev) => {
+      const next = buildDeck(ids, shortlist.list.saved, shortlist.list.hidden);
+      return prev ? { ...next, gone: prev.gone.filter((g) => ids.includes(g.id)) } : next;
     });
-    return () => { alive = false; };
-  }, [ids]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `generation` stands in for `list`: only an outside change rebuilds
+  }, [ids, shortlist.loaded, shortlist.generation]);
 
   function commit(next: DeckState) {
     setDeck(next);
     setFacts(false);
-    void writePref("adopt.saved", next.saved);
-    void writePref("adopt.hidden", next.hidden);
+    shortlist.update({ saved: next.saved, hidden: next.hidden });
   }
 
   // The top card's drag. One Animated.Value drives translateX, rotation and both stamps, so
@@ -213,7 +217,12 @@ export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
             <Avatar size={76}><AdoptIcon color={colors.teal} size={38} /></Avatar>
             <Text style={styles.endTitle}>That is everyone nearby</Text>
             <Text style={styles.endBody}>{endSummary(deck)}</Text>
-            <Text style={styles.endNote}>Saved and hidden pets are remembered on this phone.</Text>
+            <Text style={styles.endNote}>
+              {shortlist.synced
+                ? "Saved and hidden pets are remembered on your account."
+                // True whether the sync is owed to a dead spot or to a server that predates it.
+                : "Saved and hidden pets are remembered on this phone for now."}
+            </Text>
             {deck.hidden.length ? (
               <PressScale scale={motion.ctaScale} dip onPress={() => commit(showHidden(deck, ids))}
                 accessibilityRole="button" testID="btn.adopt.showHidden" style={styles.endButton}>
