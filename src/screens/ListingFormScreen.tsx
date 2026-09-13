@@ -46,6 +46,9 @@ export function ListingFormScreen({ navigation, route }: Props) {
   // form says so up front rather than letting someone list a pet into silence — and only to
   // the people it applies to. It used to say "until your account is verified" to everyone,
   // including a Verified Member reading it on a screen they had every right to use.
+  // The gate is READ from /me, not re-derived here: `shelter.verification_status` is the
+  // latest request, and a tier-1 shelter mid-upgrade is "pending" there while its listings
+  // are public (decision 16). The client owns no copy of the predicate.
   const [me, setMe] = useState<Me | null>(null);
   useEffect(() => {
     let alive = true;
@@ -54,8 +57,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount
   }, []);
   const verifiedPoster = me
-    ? me.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved")
-      || me.shelter?.verification_status === "approved"
+    ? me.is_verified_rescuer
     : null; // unknown until /me answers; no notice is shown while unknown
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);

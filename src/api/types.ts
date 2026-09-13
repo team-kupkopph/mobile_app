@@ -19,6 +19,10 @@ export type Me = {
   phone: string | null; photo_url: string | null;
   capabilities: Capability[];
   shelter: { tier: ShelterTier; verification_status: VerificationStatus | null } | null;
+  // The GATE, served: may this account's listings be shown (backend `public_poster_q` —
+  // approved `rescuer` capability, or ANY approved shelter_org). `shelter.verification_status`
+  // is the LATEST request for display; a tier-1 mid-upgrade is pending there and true here.
+  is_verified_rescuer: boolean;
   settings: Record<string, boolean>;
 };
 export type ApiError = { code: string; message: string; field?: string; details?: any };
