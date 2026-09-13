@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AdoptDeck } from "../components/AdoptDeck";
 import { InquiryList } from "../components/InquiryList";
-import { PressScale, SegmentedControl } from "../components/ui";
+import { Button, PressScale, SegmentedControl } from "../components/ui";
 import { motion, spacing, tabBarClearance, typography } from "../theme";
 
 import { Listing } from "../api/types";
@@ -63,11 +63,11 @@ export function AdoptScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <View style={styles.header}>
         <Text style={styles.title}>Adopt</Text>
-        <View style={styles.headerLinks}>
-          <TouchableOpacity onPress={() => navigation.navigate("listingForm", undefined)} hitSlop={TAP_SLOP}>
-            <Text style={styles.headerLink}>+ List</Text>
-          </TouchableOpacity>
-        </View>
+        {/* The canvas puts a 44 pt control in this slot. A text link read as a caption and
+            was missed; the small primary Button is the panel's "small button", and reads as
+            the action it is. Everyone signed in may draft a listing (decision 2); the form
+            says when it will be seen. */}
+        <Button size="small" label="+ List" testID="btn.adopt.list" onPress={() => navigation.navigate("listingForm", undefined)} />
       </View>
 
       {/* The canvas's Adopt artboard puts these two views behind a segmented control rather
@@ -141,8 +141,6 @@ const styles = StyleSheet.create({
   header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4, flexDirection: "row",
             alignItems: "center", justifyContent: "space-between" },
   title: { color: colors.ink, ...typography.hero },
-  headerLinks: { flexDirection: "row", gap: 16 },
-  headerLink: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   segmented: { marginHorizontal: 26, marginTop: 14 },
   filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: spacing.lg, paddingTop: 14, paddingBottom: 4 },
   filterChip: { paddingHorizontal: 16, height: 36, borderRadius: 18, alignItems: "center",

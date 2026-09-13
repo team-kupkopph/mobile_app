@@ -16,7 +16,9 @@ import { useApi } from "../api/useApi";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
+import { TAP_SLOP } from "../touch";
 import { RootStackParamList } from "../navigation/types";
+import { Me } from "../api/types";
 import { colors, radii, spacing, typography } from "../theme";
 import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 
@@ -39,6 +41,22 @@ export function ListingFormScreen({ navigation, route }: Props) {
   const [description, setDescription] = useState("");
   const [fee, setFee] = useState("0");
   const [city, setCity] = useState(homeCity ?? "");
+  // Whether this listing will be SEEN. Decision 2: anyone signed in may draft one, and only a
+  // Verified Member's or a verified shelter's appears in /listings (public_poster_q). The
+  // form says so up front rather than letting someone list a pet into silence — and only to
+  // the people it applies to. It used to say "until your account is verified" to everyone,
+  // including a Verified Member reading it on a screen they had every right to use.
+  const [me, setMe] = useState<Me | null>(null);
+  useEffect(() => {
+    let alive = true;
+    api.get("/me").then((r) => { if (alive && r.ok) setMe(r.data); });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount
+  }, []);
+  const verifiedPoster = me
+    ? me.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved")
+      || me.shelter?.verification_status === "approved"
+    : null; // unknown until /me answers; no notice is shown while unknown
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [wasPublic, setWasPublic] = useState<string | null>(null); // listing.status, edit mode only
@@ -157,6 +175,21 @@ export function ListingFormScreen({ navigation, route }: Props) {
             + "it with blanks, so this form can't be saved yet — check your connection and "
             + "reopen it."} />
         ) : null}
+        {!isEdit && verifiedPoster === false ? (
+          <View style={styles.visibilityNote} accessibilityRole="text">
+            <Text style={styles.visibilityTitle}>
+              {me?.shelter ? "It appears once your shelter is verified" : "It appears once you're a Verified Member"}
+            </Text>
+            <Text style={styles.visibilityBody}>
+              You can list now. It stays a draft nobody else sees, and goes public on its own once you're approved.
+            </Text>
+            {!me?.shelter ? (
+              <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("memberUpgrade")}>
+                <Text style={styles.visibilityLink}>Get verified ›</Text>
+              </TouchableOpacity>
+            ) : null}
+          </View>
+        ) : null}
         {isEdit && wasPublic && wasPublic !== "available" ? (
           <View style={styles.statusNote}>
             <Text style={styles.statusNoteText}>
@@ -164,12 +197,6 @@ export function ListingFormScreen({ navigation, route }: Props) {
             </Text>
           </View>
         ) : null}
-        {!isEdit ? (
-          <Text style={styles.draftNote}>
-            Saved as a draft until your account is verified — it goes public automatically once approved.
-          </Text>
-        ) : null}
-
         <Field label="Name" value={name} onChangeText={setName} placeholder="Bantay" />
 
         <Text style={styles.label}>Animal</Text>
@@ -248,11 +275,14 @@ function Segmented({ options, value, onChange }: {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  draftNote: { marginTop: 4, marginBottom: 6, color: colors.teal, ...typography.meta, fontWeight: "600", lineHeight: 19 },
   statusNote: { marginTop: 4, marginBottom: 6, padding: 14, borderRadius: radii.notice, backgroundColor: colors.warningBg },
   statusNoteText: { color: colors.warningStrong, ...typography.meta, fontWeight: "600", lineHeight: 18 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
+  visibilityNote: { marginBottom: 6, padding: 14, borderRadius: radii.notice, backgroundColor: colors.soft },
+  visibilityTitle: { color: colors.ink, ...typography.strong, fontWeight: "700" },
+  visibilityBody: { marginTop: 4, color: colors.muted, ...typography.meta, lineHeight: 19 },
+  visibilityLink: { marginTop: 8, color: colors.tealDark, ...typography.meta, fontWeight: "800" },
   photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
