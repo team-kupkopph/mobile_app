@@ -4,20 +4,46 @@
  *
  * ⚠️ The form used to print "Saved as a draft until your account is verified" to EVERYONE,
  * a Verified Member included, on a screen they had every right to use. The notice is now
- * derived from /me with the same predicate the backend's `public_poster_q` uses — an approved
- * `rescuer` capability (the Verified Member badge) or an approved shelter — and rendered only
- * when that predicate is known to be false. Unknown (the fetch has not answered) shows nothing.
+ * read from /me's `is_verified_rescuer` — the backend's own `public_poster_q` predicate, served —
+ * and rendered only when that is known to be false. Unknown (the fetch has not answered) shows
+ * nothing.
+ *
+ * ⚠️ The first version re-derived the predicate on the client from `capabilities` and
+ * `shelter.verification_status`. That status is the LATEST shelter_org request (what a dashboard
+ * displays), while the gate is "any approved" (decision 16) — so a tier-1 shelter mid-upgrade,
+ * whose listings the backend was publishing, was told they would not appear. The client owns
+ * no copy of the predicate now; this test forbids one coming back.
  */
 import { readFileSync } from "fs";
 import { join } from "path";
+import { Me } from "../api/types";
 
 const form = readFileSync(join(__dirname, "..", "screens", "ListingFormScreen.tsx"), "utf8");
 const adopt = readFileSync(join(__dirname, "..", "screens", "AdoptScreen.tsx"), "utf8");
+const shelterProfile = readFileSync(join(__dirname, "..", "screens", "ShelterProfileScreen.tsx"), "utf8");
 
 describe("the listing form's visibility notice", () => {
-  it("derives 'verified poster' the way public_poster_q does", () => {
-    expect(form).toMatch(/c\.capability === "rescuer" && c\.status === "approved"/);
-    expect(form).toMatch(/me\.shelter\?\.verification_status === "approved"/);
+  it("reads the gate /me serves and does not re-derive it", () => {
+    expect(form).toMatch(/me\.is_verified_rescuer/);
+    expect(form).not.toMatch(/c\.capability === "rescuer"/);        // the client-side copy, gone
+    expect(form).not.toMatch(/verification_status === "approved"/);  // the LATEST status is not the gate
+  });
+
+  it("is a gate the shelter profile reads the same way", () => {
+    expect(shelterProfile).toMatch(/is_verified_rescuer/);
+    expect(shelterProfile).not.toMatch(/verification_status !== "approved"/);
+  });
+
+  it("types the served gate on Me, so the divergent shelter is representable", () => {
+    // A tier-1 shelter with an in-flight tier-2 upgrade: latest request pending, listings shown.
+    const midUpgrade: Me = {
+      account_id: "a", account_type: "shelter", display_name: "T1", email: "t1@x", email_verified_at: null,
+      phone: null, photo_url: null, capabilities: [],
+      shelter: { tier: "community_rescue", verification_status: "pending" },
+      is_verified_rescuer: true, settings: {},
+    };
+    expect(midUpgrade.is_verified_rescuer).toBe(true);
+    expect(midUpgrade.shelter?.verification_status).toBe("pending");
   });
 
   it("shows the notice only when verification is known to be false, and never on edit", () => {

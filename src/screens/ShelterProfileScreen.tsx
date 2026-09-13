@@ -46,7 +46,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
       // derived from /me — so /me failing takes the whole screen, while the dashboard
       // counts below are SECONDARY and degrade on their own.
       // US-R1 · keep the RESULT. Discarding it left `me` null, and `gated` below is derived
-      // as `me?.shelter?.verification_status !== "approved"` — so a failed /me showed an
+      // as `!me?.is_verified_rescuer` — so a failed /me showed an
       // APPROVED shelter its own account as unverified and gated, with every capability
       // apparently revoked. The counts fell back to zero on the same failure.
       api.get("/me").then((r) => {
@@ -71,7 +71,9 @@ export function ShelterProfileScreen({ navigation }: Props) {
   const tier = me?.shelter?.tier ?? "community_rescue";
   const isTier1 = tier === "community_rescue";
   // Gated until APPROVED — pending, needs_info, rejected and "never submitted" all gate.
-  const gated = me?.shelter?.verification_status !== "approved";
+  // Read from /me's served gate ("any approved", decision 16), not the LATEST request's
+  // status: a tier-1 mid-upgrade is pending there and must NOT read as gated here.
+  const gated = !me?.is_verified_rescuer;
   const badge = isTier1 ? "Verified Rescue" : "Verified Shelter";
   const sub = isTier1 ? "Community rescue" : "Registered NGO";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
