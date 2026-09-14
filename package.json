@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "surface": "node scripts/derive-surface.mjs"
+    "surface": "node scripts/derive-surface.mjs",
+    "surface:v3": "node scripts/surface-v3.cjs"
   },
   "jest": {
     "preset": "jest-expo"
