@@ -8,6 +8,7 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ShelterTier } from "../api/types";
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { isReturningSocialAccount } from "../auth/socialRouting";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { elevation, radii, spacing, typography } from "../theme";
@@ -52,6 +53,13 @@ export function ShelterTierScreen({ navigation, route }: Props) {
       });
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
+        if (isReturningSocialAccount(res.data)) {
+          // Test-plan F8: an existing account (the server ignored `account_type` and the tier
+          // was never sent) — this was a sign-in. Home, not shelter setup for an account that
+          // may well be personal.
+          navigation.reset({ index: 0, routes: [{ name: "home" }] });
+          return;
+        }
         navigation.navigate("shelterSetup", { tier });
         return;
       }
