@@ -84,6 +84,10 @@ export function SigninScreen({ navigation }: Props) {
         navigation.reset({ index: 0, routes: [{ name: "home" }] });
         return;
       }
+      if (res.status === 0) {
+        setError("Couldn't reach the server. Check your connection and try again.");
+        return;
+      }
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);

@@ -80,6 +80,10 @@ export function SignupScreen({ navigation, route }: Props) {
         navigation.navigate("otp", { email: email.trim(), mode: "signup", tier });
         return;
       }
+      if (res.status === 0) {
+        setFormError("Couldn't reach the server. Check your connection and try again.");
+        return;
+      }
       setFormError(res.data?.error?.message ?? "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
