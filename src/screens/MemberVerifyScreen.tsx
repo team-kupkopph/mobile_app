@@ -1,7 +1,8 @@
 // US-A4 step 2 — reference: screens/user/screen-member-verify.png.
 // just asks the backend for a placeholder file_url — there's no real picker, no image bytes, no
-// expo-image-picker. Submit is gated on three things: a presigned gov-ID file_url, a non-empty
-// social_proof_url, and the DPA consent checkbox. A 422 from POST /verifications means consent
+// expo-image-picker. Submit is gated on three things: a presigned gov-ID file_url, an http(s)
+// social_proof_url (F9 — socialLink.ts, warn-don't-block on an unknown host), and the DPA
+// consent checkbox. A 422 from POST /verifications means consent
 // wasn't accepted server-side, surfaced as a friendly inline error.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
@@ -13,6 +14,7 @@ import { uploadErrorMessage } from "../upload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
+import { normalizeSocialLink, socialLinkError, socialLinkNote } from "../socialLink";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { Button, Field, ScreenHeader } from "../components/ui";
 
@@ -23,11 +25,10 @@ export function MemberVerifyScreen({ navigation }: Props) {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [socialUrl, setSocialUrl] = useState("");
+  const [socialError, setSocialError] = useState<string | undefined>(undefined);
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-
-  const canSubmit = !!fileUrl && socialUrl.trim().length > 0 && consent;
 
   async function presignDoc() {
     const res = await pickAndUpload(api, "verification_doc");
@@ -61,10 +62,9 @@ export function MemberVerifyScreen({ navigation }: Props) {
       setError("Upload a photo of your ID first.");
       return;
     }
-    if (socialUrl.trim().length === 0) {
-      setError("Add a link to your Facebook profile.");
-      return;
-    }
+    const linkError = socialLinkError(socialUrl);
+    setSocialError(linkError);
+    if (linkError) return;
     if (!consent) {
       setError("Tick the consent box to continue.");
       return;
@@ -87,7 +87,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
 
       const res = await api.post("/verifications", {
         type: "rescuer",
-        social_proof_url: socialUrl.trim(),
+        social_proof_url: normalizeSocialLink(socialUrl),
         consent_version: DOC_CONSENT_VERSION,
         documents: [{ doc_type: "gov_id", file_url: url }]
       });
@@ -139,12 +139,14 @@ export function MemberVerifyScreen({ navigation }: Props) {
         <Field
           label="Social link"
           value={socialUrl}
-          onChangeText={setSocialUrl}
+          onChangeText={(t) => { setSocialUrl(t); setSocialError(undefined); }}
+          error={socialError}
           placeholder="facebook.com/your.name"
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
         />
+        {!!socialLinkNote(socialUrl) && <Text style={styles.fieldNote}>{socialLinkNote(socialUrl)}</Text>}
 
         <TouchableOpacity
           activeOpacity={0.85}
@@ -289,6 +291,12 @@ const styles = StyleSheet.create({
     ...typography.meta,
     fontWeight: "700",
     lineHeight: 19
+  },
+  fieldNote: {
+    marginTop: 8,
+    marginHorizontal: 16,
+    color: colors.muted,
+    ...typography.caption
   },
   formError: {
     marginTop: 14,
