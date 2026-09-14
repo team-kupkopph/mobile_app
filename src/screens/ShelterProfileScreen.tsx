@@ -13,7 +13,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { Me, ShelterDashboard } from "../api/types";
+import { Me, ShelterDashboard, ShelterTier } from "../api/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
@@ -23,9 +23,20 @@ import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
+import { ShelterVerificationCard, shelterVerificationCard } from "../shelterDashboard";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
+
+// F13 · one card per derived state, mirroring the dashboard's BANNER. "incomplete" is the
+// shelter that chose "I'll upload these later" — it has NO request, so "Under review" was
+// a lie the dashboard didn't tell ("Documents not sent yet · Upload ›" on the same account).
+// "rejected" reuses US-V4's title from VerifyDocumentsScreen; it routes there for the note.
+const CARD: Record<ShelterVerificationCard, { title: string; body: string }> = {
+  incomplete: { title: "Documents not sent yet", body: "Upload your documents to get approved" },
+  pending: { title: "Under review", body: "Track your documents" },
+  rejected: { title: "Not verified", body: "Fix the flagged files and resubmit" }
+};
 
 export function ShelterProfileScreen({ navigation }: Props) {
   // The status bar is real now (App.tsx), so the first thing on screen has to start below
@@ -68,12 +79,14 @@ export function ShelterProfileScreen({ navigation }: Props) {
     ? undefined
     : activeShifts === 0 ? "None" : `${activeShifts} active`;
 
-  const tier = me?.shelter?.tier ?? "community_rescue";
+  const tier: ShelterTier = me?.shelter?.tier ?? "community_rescue";
   const isTier1 = tier === "community_rescue";
   // Gated until APPROVED — pending, needs_info, rejected and "never submitted" all gate.
   // Read from /me's served gate ("any approved", decision 16), not the LATEST request's
   // status: a tier-1 mid-upgrade is pending there and must NOT read as gated here.
   const gated = !me?.is_verified_rescuer;
+  // F13 · WHICH gated state — never from `gated` alone (see shelterVerificationCard).
+  const card = shelterVerificationCard(dash, me);
   const badge = isTier1 ? "Verified Rescue" : "Verified Shelter";
   const sub = isTier1 ? "Community rescue" : "Registered NGO";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
@@ -118,7 +131,8 @@ export function ShelterProfileScreen({ navigation }: Props) {
           {gated ? (
             <View style={[styles.chip, styles.chipWarn]}>
               <ClockIcon color={colors.warningStrong} size={16} />
-              <Text style={styles.chipWarnText}>Under review</Text>
+              {/* F13 · the chip told the card's lie too: "Under review" with nothing sent. */}
+              <Text style={styles.chipWarnText}>{card === "pending" ? "Under review" : "Not verified"}</Text>
             </View>
           ) : (
             <View style={[styles.chip, styles.chipVerified]}>
@@ -163,14 +177,20 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
           {gated ? (
             // The one outstanding thing — an accent, not a row, so it reads as the next action.
+            // Not-submitted goes to the verify FORM (the dashboard's Upload › route); a
+            // submitted request, reviewed or not, goes to its document status.
             <TouchableOpacity
               activeOpacity={0.85}
               style={styles.accentWarn}
-              onPress={() => navigation.navigate("verifyDocuments")}
+              onPress={() =>
+                card === "incomplete"
+                  ? navigation.navigate("shelterVerify", { tier })
+                  : navigation.navigate("verifyDocuments")
+              }
             >
               <View style={styles.accentCopy}>
-                <Text style={styles.accentWarnTitle}>Under review</Text>
-                <Text style={styles.accentWarnBody}>Track your documents</Text>
+                <Text style={styles.accentWarnTitle}>{CARD[card].title}</Text>
+                <Text style={styles.accentWarnBody}>{CARD[card].body}</Text>
               </View>
               <Text style={styles.accentWarnChev}>›</Text>
             </TouchableOpacity>
