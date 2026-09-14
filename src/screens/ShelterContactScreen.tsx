@@ -7,6 +7,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
+import { normalizePhMobile, phoneError } from "../phone";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { spacing, typography } from "../theme";
 
@@ -54,7 +55,7 @@ export function ShelterContactScreen({ navigation, route }: Props) {
   }, []);
 
   const [nameError, setNameError] = useState<string | undefined>(undefined);
-  const [phoneError, setPhoneError] = useState<string | undefined>(undefined);
+  const [phoneErr, setPhoneError] = useState<string | undefined>(undefined);
 
   /**
    * Design-system rule: NEVER disable a submit button because of validation. A greyed button
@@ -65,23 +66,26 @@ export function ShelterContactScreen({ navigation, route }: Props) {
     if (submitting) return;
     setError(undefined);
     const missingName = name.trim().length === 0 ? "Enter a contact name." : undefined;
-    const missingPhone = phone.trim().length === 0 ? "Enter a mobile number." : undefined;
+    // F12 · format on submit too (blur can be skipped by tapping the button straight from the
+    // keyboard), and what is sent is the E.164 form — the same number the server dedupes on.
+    const badPhone = phoneError(phone);
     setNameError(missingName);
-    setPhoneError(missingPhone);
-    if (missingName || missingPhone) return;
+    setPhoneError(badPhone);
+    if (missingName || badPhone) return;
+    const e164 = normalizePhMobile(phone)!;
     setSubmitting(true);
     try {
       const patch = await api.patch("/shelter/profile", {
         contact_person_name: name.trim(),
         contact_person_role: role.trim(),
-        official_phone: phone.trim(),
+        official_phone: e164,
         ...(website.trim() ? { website_url: website.trim() } : {})
       });
       if (!patch.ok) {
         setError(patch.data?.error?.message ?? "Couldn't save your contact details. Try again.");
         return;
       }
-      const sms = await api.post("/me/phone", { phone: phone.trim() });
+      const sms = await api.post("/me/phone", { phone: e164 });
       if (sms.status === 409) {
         setError("That number can't be used. Try another.");
         return;
@@ -90,7 +94,7 @@ export function ShelterContactScreen({ navigation, route }: Props) {
         setError(sms.data?.error?.message ?? "Couldn't send the code. Try again.");
         return;
       }
-      navigation.navigate("shelterPhoneVerify", { tier, phone: phone.trim() });
+      navigation.navigate("shelterPhoneVerify", { tier, phone: e164 });
     } finally {
       setSubmitting(false);
     }
@@ -110,8 +114,9 @@ export function ShelterContactScreen({ navigation, route }: Props) {
           autoCapitalize="words"
         />
         <FormField label="Role (optional)" value={role} onChangeText={setRole} autoCapitalize="words" />
-        <FormField label="Mobile number" value={phone} error={phoneError}
-          onChangeText={(v) => { setPhone(v); if (phoneError) setPhoneError(undefined); }}
+        <FormField label="Mobile number" value={phone} error={phoneErr}
+          onChangeText={(v) => { setPhone(v); if (phoneErr) setPhoneError(undefined); }}
+          onBlur={() => { if (phone.trim()) setPhoneError(phoneError(phone)); }}
           keyboardType="phone-pad" />
         <FormField label="Website / Facebook (optional)" value={website} onChangeText={setWebsite} autoCapitalize="none" keyboardType="url" />
 

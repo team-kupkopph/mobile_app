@@ -27,13 +27,15 @@ type FieldProps = {
   TextInputProps,
   | "placeholder" | "keyboardType" | "autoCapitalize" | "autoCorrect" | "testID" | "autoComplete"
   | "returnKeyType" | "onSubmitEditing" | "maxLength" | "autoFocus" | "accessibilityLabel"
+  // Format rules fire on blur, not per keystroke (dev/onboarding-validation.md rule 2).
+  | "onBlur"
   // A notes / description field. The box grows from a three-line minimum and the text starts
   // at the top; the label stays inside, as it does for a single line.
   | "multiline" | "numberOfLines"
 >;
 
 export function Field({
-  label, value, onChangeText, error, readOnly, secure, onToggleSecure, accessory, style, ...input
+  label, value, onChangeText, error, readOnly, secure, onToggleSecure, accessory, style, onBlur, ...input
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
   const state = error ? "error" : focused ? "focused" : readOnly ? "readOnly" : "rest";
@@ -56,7 +58,7 @@ export function Field({
             onChangeText={onChangeText}
             editable={!readOnly}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={(e) => { setFocused(false); onBlur?.(e); }}
             placeholderTextColor={colors.muted}
             style={[styles.input, input.multiline && styles.inputMultiline, readOnly && styles.inputReadOnly]}
           />

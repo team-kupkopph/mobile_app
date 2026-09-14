@@ -82,6 +82,8 @@ type FormFieldProps = {
    */
   returnKeyType?: TextInputProps["returnKeyType"];
   onSubmitEditing?: () => void;
+  /** Format rules fire on blur, not per keystroke (dev/onboarding-validation.md rule 2). */
+  onBlur?: () => void;
   /**
    * US-X2 · a stable selector for the E2E suite. React Native maps `testID` to the platform
    * accessibility identifier, which is what Maestro's `id:` matches on.
@@ -96,7 +98,7 @@ type FormFieldProps = {
 
 export function FormField({
   label, value, onChangeText, secure, onToggleSecure, autoCapitalize, keyboardType,
-  autoComplete, error, testID, returnKeyType, onSubmitEditing
+  autoComplete, error, testID, returnKeyType, onSubmitEditing, onBlur
 }: FormFieldProps) {
   // ⚠️ A THIN ADAPTER, not a second implementation. Seventeen screens call this; changing them
   // all at once would be a 17-file diff nobody can review, so the kit keeps its signature and
@@ -116,6 +118,7 @@ export function FormField({
       testID={testID}
       returnKeyType={returnKeyType}
       onSubmitEditing={onSubmitEditing}
+      onBlur={onBlur}
     />
   );
 }

@@ -14,6 +14,7 @@ import {
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
+import { normalizePhMobile, phoneError } from "../phone";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { radii, spacing, typography } from "../theme";
 
@@ -45,13 +46,16 @@ export function VerifyPhoneScreen({ navigation }: Props) {
 
   const code = digits.join("");
 
+  // F12 · what is sent (and resent) is the E.164 form — the same number the server dedupes on.
+  const e164 = normalizePhMobile(phone);
+
   async function sendCode() {
-    const trimmed = phone.trim();
-    if (!trimmed) { setEnterError("Enter your mobile number."); return; }
+    const bad = phoneError(phone);
+    if (bad) { setEnterError(bad); return; }
     if (sending) return;
     setSending(true);
     setEnterError(undefined);
-    const res = await api.post("/me/phone", { phone: trimmed });
+    const res = await api.post("/me/phone", { phone: e164 });
     setSending(false);
     if (res.ok || res.status === 202) {
       setStep("code");
@@ -121,7 +125,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
   async function resend() {
     if (cooldown > 0) return;
     setResendNotice(undefined);
-    await api.post("/me/phone", { phone: phone.trim() });
+    await api.post("/me/phone", { phone: e164 });
     setResendNotice("We sent a new code.");
     setCooldown(RESEND_COOLDOWN_SECONDS);
     setDigits(Array(CODE_LENGTH).fill(""));
@@ -147,6 +151,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
                 label="Mobile number"
                 value={phone}
                 onChangeText={(v) => { setPhone(v); if (enterError) setEnterError(undefined); }}
+                onBlur={() => { if (phone.trim()) setEnterError(phoneError(phone)); }}
                 keyboardType="phone-pad"
                 autoComplete="tel"
                 error={enterError}
@@ -163,7 +168,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
           <>
             <Text style={styles.title}>Enter the code</Text>
             <Text style={styles.caption}>We texted a 6-digit code to</Text>
-            <Text style={styles.phoneText}>{phone}</Text>
+            <Text style={styles.phoneText}>{e164}</Text>
 
             <View style={styles.otpRow}>
               {digits.map((digit, index) => (
