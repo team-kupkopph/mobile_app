@@ -67,6 +67,12 @@ export function SignupScreen({ navigation, route }: Props) {
         consent_version: TERMS_VERSION
       });
       if (res.status === 409) {
+        if (res.data?.error?.code === "email_unverified") {
+          // F4 · the person's own account, still unverified: the server re-sent the code —
+          // continue to verification instead of "already registered" with no way forward.
+          navigation.navigate("otp", { email: email.trim(), mode: "signup", tier });
+          return;
+        }
         setEmailError("That email is already registered.");
         return;
       }
