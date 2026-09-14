@@ -23,6 +23,7 @@ import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
 import { radii, spacing, typography } from "../theme";
+import { resendOutcome } from "../otpResend";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -130,11 +131,14 @@ export function OtpScreen({ navigation, route }: Props) {
     setResending(true);
     setResendNotice(undefined);
     try {
-      await api.post("/auth/email/resend", { email });
-      setResendNotice("We sent a new code.");
-      setCooldown(RESEND_COOLDOWN_SECONDS);
-      setDigits(Array(CODE_LENGTH).fill(""));
-      inputRefs.current[0]?.focus();
+      const res = await api.post("/auth/email/resend", { email });
+      const out = resendOutcome(res);
+      setResendNotice(out.notice);
+      setCooldown(out.cooldown);
+      if (out.ok) {
+        setDigits(Array(CODE_LENGTH).fill(""));
+        inputRefs.current[0]?.focus();
+      }
     } finally {
       setResending(false);
     }
