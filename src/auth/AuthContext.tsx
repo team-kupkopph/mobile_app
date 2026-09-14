@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
 import { clearCache } from "../cache";
+import { signOutWithRevoke } from "./logout";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Tokens = { access: string; refresh: string } | null;
@@ -66,7 +67,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut() {
-    await setTokens(null); // also clears the cached city — see the comment in setTokens()
+    // F15 · revoke the refresh token server-side first (bounded, best-effort — see
+    // ./logout.ts), THEN wipe. setTokens(null) also clears the cached city and the read
+    // cache — see the comment in setTokens().
+    await signOutWithRevoke(tokens, () => setTokens(null));
   }
 
   return (
