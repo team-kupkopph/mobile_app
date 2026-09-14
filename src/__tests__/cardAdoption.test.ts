@@ -16,6 +16,9 @@
  * would make the "no longer matches must leave the list" assertion fail on this PR's very
  * first run, for screens this guard has no conversion work to record.
  * Verified against `pnpm surface:v3`'s elevationSpreaders list; re-check if that list moves.
+ *
+ * Task A1 (shell roots) converts ShelterDashboardScreen and ShelterProfileScreen onto <Card>,
+ * so those two leave the list here — 24 -> 22.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -30,8 +33,6 @@ const SPREADS_ELEVATION = /\.\.\.elevation\./;
  * Each conversion story (adopting <Card>) removes exactly its screens.
  */
 const CARD_HOLDOUTS: string[] = [
-  "ShelterDashboardScreen",
-  "ShelterProfileScreen",
   "ListingDetailScreen",
   "PlaceRequestScreen",
   "DonateScreen",

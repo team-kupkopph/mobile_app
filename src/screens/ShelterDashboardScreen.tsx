@@ -14,12 +14,13 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { AlertIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button } from "../components/ui";
+import { colors, radii, spacing, typography } from "../theme";
+import { Button, Card } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -92,6 +93,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   if (!dash && loadState(res).kind !== "ready" && loadState(res).kind !== "empty") {
     return (
       <View style={[styles.screen, { paddingTop: insets.top }]}>
+        <ScreenBackdrop />
         {/* The inset belongs here, not in LoadStateView: this branch replaces the whole
             body, and most LoadStateView call sites are inline placeholders in a ScrollView.
             See __tests__/safeAreaOnFailure.test.ts. */}
@@ -109,6 +111,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.shelterDashboard">
+      <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <Text style={styles.orgName}>{me?.display_name ?? "Your shelter"}</Text>
@@ -143,16 +146,18 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             </View>
           </View>
         ) : banner ? (
-          <TouchableOpacity activeOpacity={0.85} style={styles.banner} onPress={onBannerPress}>
-            <View style={styles.bannerIcon}>
-              {state === "pending" ? <ClockIcon color="#633806" size={34} /> : <AlertIcon color="#633806" size={34} />}
-            </View>
-            <View style={styles.bannerCopy}>
-              <Text style={styles.bannerTitle}>{banner.title}</Text>
-              <Text style={styles.bannerBody}>{banner.l1}</Text>
-              <Text style={styles.bannerBody}>{banner.l2}</Text>
-            </View>
-            <Text style={styles.bannerCta}>{banner.cta}</Text>
+          <TouchableOpacity activeOpacity={0.85} onPress={onBannerPress}>
+            <Card tone="hero" accent={colors.warningStrong} style={styles.banner}>
+              <View style={styles.bannerIcon}>
+                {state === "pending" ? <ClockIcon color="#633806" size={34} /> : <AlertIcon color="#633806" size={34} />}
+              </View>
+              <View style={styles.bannerCopy}>
+                <Text style={styles.bannerTitle}>{banner.title}</Text>
+                <Text style={styles.bannerBody}>{banner.l1}</Text>
+                <Text style={styles.bannerBody}>{banner.l2}</Text>
+              </View>
+              <Text style={styles.bannerCta}>{banner.cta}</Text>
+            </Card>
           </TouchableOpacity>
         ) : null}
 
@@ -172,7 +177,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         </Text>
 
         {!verified ? (
-          <View style={styles.footCard}>
+          <Card accent={colors.teal} style={styles.footCard}>
             <View style={styles.footCopy}>
               <Text style={styles.footTitle}>{state === "pending" ? "Draft your listings while you wait" : "Finish verifying to go live"}</Text>
               <Text style={styles.footBody}>
@@ -182,7 +187,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.8} onPress={onBannerPress}>
               <Text style={styles.footCta}>{state === "pending" ? "Start ›" : "Continue ›"}</Text>
             </TouchableOpacity>
-          </View>
+          </Card>
         ) : null}
       </ScrollView>
 
@@ -193,10 +198,10 @@ export function ShelterDashboardScreen({ navigation }: Props) {
 
 function Stat({ n, label }: { n: number; label: string }) {
   return (
-    <View style={styles.statCard}>
+    <Card style={styles.statCard}>
       <Text style={styles.statNum}>{n}</Text>
       <Text style={styles.statLabel}>{label}</Text>
-    </View>
+    </Card>
   );
 }
 
@@ -240,12 +245,10 @@ const styles = StyleSheet.create({
   banner: {
     minHeight: 108,
     marginTop: 20,
-    borderRadius: radii.hero,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    paddingVertical: 16,
-    backgroundColor: colors.warningBg
+    paddingVertical: 16
   },
   bannerIcon: {
     width: 46,
@@ -263,12 +266,9 @@ const styles = StyleSheet.create({
   statCard: {
     width: "31%",
     height: 104,
-    borderRadius: radii.card,
     alignItems: "flex-start",
     justifyContent: "center",
-    paddingHorizontal: 18,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
+    paddingHorizontal: 18
   },
   statNum: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
@@ -277,11 +277,9 @@ const styles = StyleSheet.create({
   footCard: {
     marginTop: 26,
     minHeight: 100,
-    borderRadius: radii.card,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 24,
-    backgroundColor: colors.soft
+    paddingHorizontal: 24
   },
   footCopy: { flex: 1 },
   footTitle: { color: "#14504F", ...typography.subtitle, fontWeight: "800" },

@@ -4,6 +4,11 @@
 // <ScreenBackdrop> + <Card> — was only 7 owner screens. This test locks the re-derived
 // baseline `surfaceV3()` measures, so the 35-screen conversion has ground truth instead
 // of a remembered number.
+//
+// Task A1 (shell roots) converts ShelterDashboardScreen and ShelterProfileScreen onto
+// <ScreenBackdrop> — the first two of the 34 in-scope screens to land — so the baseline
+// grows from 7 to 9 here. Each conversion story updates this the same way it updates the
+// named holdout lists in backdropAdoption.test.ts / cardAdoption.test.ts.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -13,7 +18,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the seven V3 owner screens by backdrop", () => {
+  it("found the nine V3 screens on the backdrop (7 owner + 2 shell roots)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "HomeGuestScreen",
@@ -21,6 +26,8 @@ describe("surface, re-derived", () => {
       "InquiryScreen",
       "MyInquiriesScreen",
       "ProfileScreen",
+      "ShelterDashboardScreen",
+      "ShelterProfileScreen",
       "SigninScreen"
     ]);
   });

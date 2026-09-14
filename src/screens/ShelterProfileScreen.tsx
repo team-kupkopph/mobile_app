@@ -20,11 +20,13 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { useAuth } from "../auth/AuthContext";
-import { CheckIcon, ClockIcon, LockIcon } from "../components/AppIcons";
+import { LockIcon } from "../components/AppIcons";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
+import { Card, Chip } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterVerificationCard, shelterVerificationCard } from "../shelterDashboard";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
+import { colors, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -99,6 +101,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
   if (!me && loadState(res).kind !== "ready" && loadState(res).kind !== "empty") {
     return (
       <View style={[styles.screen, { paddingTop: insets.top }]}>
+        <ScreenBackdrop />
         {/* The inset belongs here, not in LoadStateView: this branch replaces the whole
             body, and most LoadStateView call sites are inline placeholders in a ScrollView.
             See __tests__/safeAreaOnFailure.test.ts. */}
@@ -119,32 +122,30 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.shelterProfile">
+      <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle}>Profile</Text>
 
-        <View style={styles.identityCard}>
+        <Card tone="hero" style={styles.identityCard}>
           <View style={styles.avatar}>
             <Text style={styles.avatarGlyph}>{isTier1 ? "♥" : "▦"}</Text>
           </View>
           <Text style={styles.orgName}>{me?.display_name ?? "Your shelter"}</Text>
 
           {gated ? (
-            <View style={[styles.chip, styles.chipWarn]}>
-              <ClockIcon color={colors.warningStrong} size={16} />
-              {/* F13 · the chip told the card's lie too: "Under review" with nothing sent. */}
-              <Text style={styles.chipWarnText}>{card === "pending" ? "Under review" : "Not verified"}</Text>
-            </View>
+            // F13 · the chip told the card's lie too: "Under review" with nothing sent.
+            <Chip
+              tone="warning"
+              dot={false}
+              label={card === "pending" ? "Under review" : "Not verified"}
+              style={styles.chip}
+            />
           ) : (
-            <View style={[styles.chip, styles.chipVerified]}>
-              <View style={styles.verifiedDot}>
-                <CheckIcon color="#FFFFFF" size={10} />
-              </View>
-              <Text style={styles.chipVerifiedText}>{badge}</Text>
-            </View>
+            <Chip tone="info" dot={false} label={badge} style={styles.chip} />
           )}
 
           <Text style={styles.orgSub}>{sub}</Text>
-        </View>
+        </Card>
 
         <View style={styles.statRow}>
           <Stat n={counts.draft_listings} label={gated ? (isTier1 ? "Draft" : "Drafts") : "Listings"} />
@@ -153,7 +154,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
         </View>
 
         <Text style={styles.groupTitle}>Organization</Text>
-        <View style={styles.group}>
+        <Card style={styles.group}>
           <Row label="Organization details" />
           {/* US-Q1 · was a dead row (no onPress at all, same shape as the "+ List an
               animal" dead button US-A2 found) — upload works pre-approval (decision 2's
@@ -205,16 +206,16 @@ export function ShelterProfileScreen({ navigation }: Props) {
           ) : (
             <Row label="Verification" value={badge} last />
           )}
-        </View>
+        </Card>
 
         <Text style={styles.groupTitle}>Account</Text>
-        <View style={styles.group}>
+        <Card style={styles.group}>
           <Row label="Account settings" />
           <Row label="Help & support" />
           <TouchableOpacity activeOpacity={0.8} style={styles.row} onPress={signOut}>
             <Text style={styles.rowDanger}>Log out</Text>
           </TouchableOpacity>
-        </View>
+        </Card>
       </ScrollView>
 
       <ShelterTabs
@@ -227,10 +228,10 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
 function Stat({ n, label }: { n: number; label: string }) {
   return (
-    <View style={styles.statCard}>
+    <Card style={styles.statCard}>
       <Text style={styles.statNum}>{n}</Text>
       <Text style={styles.statLabel}>{label}</Text>
-    </View>
+    </Card>
   );
 }
 
@@ -268,11 +269,8 @@ const styles = StyleSheet.create({
   pageTitle: { color: colors.ink, ...typography.display },
   identityCard: {
     marginTop: 16,
-    borderRadius: radii.card,
     alignItems: "center",
-    paddingVertical: 26,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
+    paddingVertical: 26
   },
   avatar: {
     width: 96,
@@ -285,45 +283,22 @@ const styles = StyleSheet.create({
   avatarGlyph: { color: "#FFFFFF", fontSize: 40, fontWeight: "900" },
   orgName: { marginTop: 16, color: colors.ink, ...typography.hero },
   chip: {
-    marginTop: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 18,
-    height: 38,
-    borderRadius: 19
+    marginTop: 12
   },
-  chipWarn: { backgroundColor: colors.warningBg },
-  chipWarnText: { color: colors.warningStrong, ...typography.strong, fontWeight: "800" },
-  chipVerified: { backgroundColor: colors.infoBg },
-  verifiedDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.teal
-  },
-  chipVerifiedText: { color: colors.tealDark, ...typography.strong, fontWeight: "800" },
   orgSub: { marginTop: 10, color: colors.muted, ...typography.body },
   statRow: { marginTop: 20, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
     width: "31%",
     height: 100,
-    borderRadius: radii.card,
     justifyContent: "center",
-    paddingHorizontal: 18,
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
+    paddingHorizontal: 18
   },
   statNum: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   group: {
-    borderRadius: radii.card,
-    overflow: "hidden",
-    backgroundColor: "#FFFFFF",
-    ...elevation.soft
+    padding: 0,
+    overflow: "hidden"
   },
   row: {
     minHeight: 58,
