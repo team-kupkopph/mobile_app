@@ -92,6 +92,13 @@ export function OtpScreen({ navigation, route }: Props) {
       const res = await api.post("/auth/email/verify", { email, code });
       if (res.status === 400) {
         const attemptsLeft = res.data?.error?.details?.attempts_left;
+        if (attemptsLeft === 0) {
+          // `attempts_left: 0` means the next attempt is already refused — that's a lockout,
+          // and printing "0 tries left" next to a still-enabled input reads as a bug, not a
+          // limit. Route straight to the same screen the server's own 423 lockout uses below.
+          navigation.replace("otpLocked", { email });
+          return;
+        }
         setError(`Incorrect code. ${attemptsLeft} tries left.`);
         setDigits(Array(CODE_LENGTH).fill(""));
         inputRefs.current[0]?.focus();
