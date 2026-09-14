@@ -9,6 +9,7 @@ import { ActivityIndicator, Alert, Image, ImageSourcePropType, StyleSheet, Text,
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { isReturningSocialAccount } from "../auth/socialRouting";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, authColors } from "./AuthFormKit";
 import { colors, elevation, radii, spacing, typography } from "../theme";
@@ -38,6 +39,15 @@ export function AccountTypeScreen({ navigation, route }: Props) {
       });
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
+        if (isReturningSocialAccount(res.data)) {
+          // Test-plan F8: the identity (or its email) already had an account, so this was a
+          // sign-in, not a signup — land on home like OtpScreen's unverified-resume branch, not
+          // on the "You're in!" recap. The returning user still saw this chooser for one tap:
+          // the backend decides identity on the same call that creates the account, so the
+          // client cannot know it is talking to a returning user before it asks.
+          navigation.reset({ index: 0, routes: [{ name: "home" }] });
+          return;
+        }
         navigation.navigate("signupSuccess");
         return;
       }
