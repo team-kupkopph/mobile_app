@@ -3,6 +3,7 @@
 // tier 1 (community_rescue): submit POST /verifications now, or defer -> shelter-dashboard-incomplete.
 // tier 2 (registered_ngo): NEVER "Submit for review" here — gather the base set and Continue to the
 //   NGO papers (step 2), which submits base + SEC/BAI in one request (server enforces tier1 -> tier2).
+// The social link is validated here for both tiers (F9 — socialLink.ts); step 2 only forwards it.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -12,6 +13,7 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
+import { normalizeSocialLink, socialLinkError, socialLinkNote } from "../socialLink";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
@@ -29,6 +31,7 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
   const [billing, setBilling] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [social, setSocial] = useState("");
+  const [socialError, setSocialError] = useState<string | undefined>(undefined);
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -83,17 +86,16 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
       setError(`Add ${MIN_PHOTOS - photos.length} more rescue photo${MIN_PHOTOS - photos.length === 1 ? "" : "s"}.`);
       return;
     }
-    if (social.trim().length === 0) {
-      setError("Enter your Facebook page (facebook.com/your.shelter).");
-      return;
-    }
+    const linkError = socialLinkError(social);
+    setSocialError(linkError);
+    if (linkError) return;
     if (!consent) {
       setError("Tick the consent box to continue.");
       return;
     }
     if (isNgo) {
       // Step 1 of 2: hand the base set to the NGO step; it submits everything together.
-      navigation.navigate("shelterVerifyNgo", { baseDocs: baseDocs(), socialUrl: social.trim() });
+      navigation.navigate("shelterVerifyNgo", { baseDocs: baseDocs(), socialUrl: normalizeSocialLink(social) });
       return;
     }
     setSubmitting(true);
@@ -101,7 +103,7 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
     try {
       const res = await api.post("/verifications", {
         type: "shelter_org",
-        social_proof_url: social.trim(),
+        social_proof_url: normalizeSocialLink(social),
         consent_version: DOC_CONSENT_VERSION,
         documents: baseDocs()
       });
@@ -146,12 +148,14 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
         <Field
           label="Social link"
           value={social}
-          onChangeText={setSocial}
+          onChangeText={(t) => { setSocial(t); setSocialError(undefined); }}
+          error={socialError}
           placeholder="facebook.com/your.shelter"
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="url"
         />
+        {!!socialLinkNote(social) && <Text style={styles.fieldNote}>{socialLinkNote(social)}</Text>}
 
         <TouchableOpacity activeOpacity={0.85} style={styles.consentRow} onPress={() => setConsent((v) => !v)}>
           <View style={[styles.consentBox, consent && styles.consentBoxChecked]}>{consent && <CheckIcon color="#FFFFFF" size={13} />}</View>
@@ -272,6 +276,7 @@ const styles = StyleSheet.create({
   },
   consentBoxChecked: { backgroundColor: authColors.teal },
   consentText: { flex: 1, color: colors.tealDark, ...typography.meta, fontWeight: "700", lineHeight: 19 },
+  fieldNote: { marginTop: 8, marginHorizontal: 16, color: colors.muted, ...typography.caption },
   formError: { marginTop: 14, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { marginTop: 20 },
   deferLink: { marginTop: 18, color: "#08716D", ...typography.meta, fontWeight: "800", textAlign: "center" }
