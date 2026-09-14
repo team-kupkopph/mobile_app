@@ -8,6 +8,9 @@
  * its own screens from BACKDROP_HOLDOUTS by name — so the list is the plan, not a summary of it.
  *
  * Starts at all 34: no in-scope screen has been converted yet in this PR.
+ *
+ * Task A1 (shell roots) converts ShelterDashboardScreen and ShelterProfileScreen onto
+ * <ScreenBackdrop>, so those two leave the list here — 34 -> 32.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -18,7 +21,9 @@ const read = (n: string) => readFileSync(join(SCREENS, `${n}.tsx`), "utf8");
 const HAS_BACKDROP = /<ScreenBackdrop\b/;
 
 /** Named holdouts. Each conversion story removes exactly its screens. Starts at all 34. */
-const BACKDROP_HOLDOUTS: string[] = [...V3_SCOPE];
+const BACKDROP_HOLDOUTS: string[] = V3_SCOPE.filter(
+  (n) => n !== "ShelterDashboardScreen" && n !== "ShelterProfileScreen"
+);
 
 describe("V3 screens sit on the backdrop", () => {
   it("found screens to classify", () => {
