@@ -7,6 +7,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { TERMS_VERSION } from "../consent";
 import { passwordError } from "../passwordRules";
+import { emailError as emailFormatError, nameError as nameFormatError } from "../signupRules";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
@@ -44,13 +45,17 @@ export function SignupScreen({ navigation, route }: Props) {
     // rule" while the button carried `disabled={!canSubmit}`. The claim is now true.
     const missingName = name.trim().length === 0 ? "Enter your name." : undefined;
     const missingEmail = email.trim().length === 0 ? "Enter your email." : undefined;
-    setNameError(missingName);
-    setEmailError(missingEmail);
+    // A-N3 / A-N4b: format rules (email shape, name length) run here too, so a person who
+    // never blurs the field before pressing submit still gets caught.
+    const nameFormat = missingName ? undefined : nameFormatError(name);
+    const emailFormat = missingEmail ? undefined : emailFormatError(email);
+    setNameError(missingName ?? nameFormat);
+    setEmailError(missingEmail ?? emailFormat);
     if (password.length === 0) {
       setPasswordFieldError("Enter a password.");
       return;
     }
-    if (missingName || missingEmail) return;
+    if (missingName || missingEmail || nameFormat || emailFormat) return;
     // Client-side strength check (server enforces the same rule as a backstop).
     const pwError = passwordError(password);
     setPasswordFieldError(pwError);
@@ -102,6 +107,7 @@ export function SignupScreen({ navigation, route }: Props) {
             setName(value);
             if (nameError) setNameError(undefined);
           }}
+          onBlur={() => { if (name.trim()) setNameError(nameFormatError(name)); }}
           autoCapitalize="words"
           autoComplete={isShelter ? undefined : "name"}
         />
@@ -113,6 +119,7 @@ export function SignupScreen({ navigation, route }: Props) {
             setEmail(value);
             if (emailError) setEmailError(undefined);
           }}
+          onBlur={() => { if (email.trim()) setEmailError(emailFormatError(email)); }}
           autoCapitalize="none"
           keyboardType="email-address"
           autoComplete="email"
