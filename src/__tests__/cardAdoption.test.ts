@@ -19,6 +19,11 @@
  *
  * Task A1 (shell roots) converts ShelterDashboardScreen and ShelterProfileScreen onto <Card>,
  * so those two leave the list here — 24 -> 22.
+ *
+ * Task A2 (shelter listings + needs) converts ListingDetailScreen, PlaceRequestScreen and
+ * ShelterNeedsScreen onto <Card> — 22 -> 19. ListingFormScreen (the fourth screen in that
+ * task) never spread `...elevation.*` in the first place (see the note above) and so was
+ * never in this list.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -33,12 +38,9 @@ const SPREADS_ELEVATION = /\.\.\.elevation\./;
  * Each conversion story (adopting <Card>) removes exactly its screens.
  */
 const CARD_HOLDOUTS: string[] = [
-  "ListingDetailScreen",
-  "PlaceRequestScreen",
   "DonateScreen",
   "DonatePledgeScreen",
   "MyDonationsScreen",
-  "ShelterNeedsScreen",
   "ShelterVolunteerScreen",
   "ShelterVolunteerCreateScreen",
   "ShelterVolunteerEditScreen",

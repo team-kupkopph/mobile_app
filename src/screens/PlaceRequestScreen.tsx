@@ -16,9 +16,10 @@ import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { colors, radii, spacing, typography } from "../theme";
+import { Button, Card, ScreenHeader } from "../components/ui";
 
 
 type Decision = "accept" | "decline";
@@ -85,6 +86,7 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Placement offer" onBack={() => navigation.goBack()} />
 
       {!inquiry ? (
@@ -107,13 +109,13 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
 
           {listing?.description ? <Text style={styles.body}>{listing.description}</Text> : null}
 
-          <View style={styles.feeCard}>
+          <Card style={styles.feeCard}>
             <Text style={styles.feeLabel}>Adoption fee</Text>
             <Text style={styles.feeValue}>
               {listing && Number(listing.adoption_fee) > 0
                 ? `₱${Number(listing.adoption_fee).toLocaleString()}` : "Free"}
             </Text>
-          </View>
+          </Card>
 
           {listing?.poster ? (
             <Text style={styles.posterLine}>
@@ -149,10 +151,6 @@ function capitalize(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
@@ -160,8 +158,8 @@ const styles = StyleSheet.create({
   name: { color: colors.ink, ...typography.hero },
   sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   body: { marginTop: 14, color: colors.ink, ...typography.body },
-  feeCard: { marginTop: 18, padding: 18, borderRadius: radii.tile, flexDirection: "row",
-             alignItems: "center", justifyContent: "space-between", ...card },
+  feeCard: { marginTop: 18, padding: 18, flexDirection: "row",
+             alignItems: "center", justifyContent: "space-between" },
   feeLabel: { color: colors.muted, ...typography.strong, fontWeight: "700" },
   feeValue: { color: colors.ink, ...typography.section },
   posterLine: { marginTop: 14, color: colors.muted, ...typography.meta },

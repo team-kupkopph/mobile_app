@@ -7,18 +7,19 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, Card, ScreenHeader } from "../components/ui";
 
 import { ListingDetail } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { useAuth } from "../auth/AuthContext";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, radii, spacing, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
@@ -97,6 +98,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.listingDetail">
+      <ScreenBackdrop />
       <ScreenHeader
         title="Adopt"
         onBack={() => navigation.goBack()}
@@ -132,12 +134,12 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             {listing.pet.walkable ? <Tag text="Walkable" /> : null}
           </View>
 
-          <View style={styles.feeCard}>
+          <Card style={styles.feeCard}>
             <Text style={styles.feeLabel}>Adoption fee</Text>
             <Text style={styles.feeValue}>
               {Number(listing.adoption_fee) > 0 ? `₱${Number(listing.adoption_fee).toLocaleString()}` : "Free"}
             </Text>
-          </View>
+          </Card>
 
           {listing.description ? (
             <>
@@ -215,10 +217,6 @@ function capitalize(s: string | null | undefined): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
@@ -231,8 +229,8 @@ const styles = StyleSheet.create({
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
   tag: { backgroundColor: colors.soft, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   tagText: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
-  feeCard: { marginTop: 18, padding: 18, borderRadius: radii.tile, flexDirection: "row",
-             alignItems: "center", justifyContent: "space-between", ...card },
+  feeCard: { marginTop: 18, padding: 18, flexDirection: "row",
+             alignItems: "center", justifyContent: "space-between" },
   feeLabel: { color: colors.muted, ...typography.strong, fontWeight: "700" },
   feeValue: { color: colors.ink, ...typography.section },
   sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, ...typography.section },

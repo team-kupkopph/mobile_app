@@ -9,6 +9,10 @@
 // <ScreenBackdrop> — the first two of the 34 in-scope screens to land — so the baseline
 // grows from 7 to 9 here. Each conversion story updates this the same way it updates the
 // named holdout lists in backdropAdoption.test.ts / cardAdoption.test.ts.
+//
+// Task A2 (shelter listings + needs) converts ListingFormScreen, ListingDetailScreen,
+// PlaceRequestScreen and ShelterNeedsScreen onto <ScreenBackdrop> — the baseline grows
+// from 9 to 13 here.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -18,15 +22,19 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the nine V3 screens on the backdrop (7 owner + 2 shell roots)", () => {
+  it("found the thirteen V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "HomeGuestScreen",
       "HomeScreen",
       "InquiryScreen",
+      "ListingDetailScreen",
+      "ListingFormScreen",
       "MyInquiriesScreen",
+      "PlaceRequestScreen",
       "ProfileScreen",
       "ShelterDashboardScreen",
+      "ShelterNeedsScreen",
       "ShelterProfileScreen",
       "SigninScreen"
     ]);

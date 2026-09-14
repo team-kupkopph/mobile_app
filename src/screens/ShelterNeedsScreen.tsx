@@ -8,18 +8,17 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ChipTone, needProgressLabel, needStatusChip, NeedStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { colors, spacing, typography } from "../theme";
+import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-const CHIP: Record<ChipTone, { bg: string; fg: string }> = {
-  ok: { bg: colors.successBg, fg: colors.success },
-  warn: { bg: colors.warningBg, fg: colors.warning },
-  muted: { bg: colors.greyPill, fg: colors.muted }
+/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
+const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
+  ok: "success",
+  warn: "warning",
+  muted: "neutral"
 };
 
 type Need = {
@@ -48,6 +47,7 @@ export function ShelterNeedsScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Wishlist" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.note}>
@@ -69,17 +69,17 @@ export function ShelterNeedsScreen({ navigation }: Props) {
           (needs ?? []).map((need) => {
             const chip = needStatusChip(need.status);
             return (
-              <TouchableOpacity key={need.need_id} style={styles.needCard} activeOpacity={0.8}
+              <TouchableOpacity key={need.need_id} activeOpacity={0.8}
                 onPress={() => navigation.navigate("needPledges", { need })}>
-                <View style={styles.row}>
-                  <Text style={styles.needTitle}>{need.title}</Text>
-                  <View style={[styles.chip, { backgroundColor: CHIP[chip.tone].bg }]}>
-                    <Text style={[styles.chipText, { color: CHIP[chip.tone].fg }]}>{chip.label}</Text>
+                <Card style={styles.needCard}>
+                  <View style={styles.row}>
+                    <Text style={styles.needTitle}>{need.title}</Text>
+                    <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
                   </View>
-                </View>
-                <Text style={styles.meta}>
-                  {need.category} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
-                </Text>
+                  <Text style={styles.meta}>
+                    {need.category} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
+                  </Text>
+                </Card>
               </TouchableOpacity>
             );
           })
@@ -95,10 +95,8 @@ const styles = StyleSheet.create({
   note: { color: colors.muted, ...typography.body, lineHeight: 21, marginBottom: 16 },
   addBtn: { marginBottom: 20 },
   empty: { marginTop: 30, color: colors.muted, ...typography.subtitle, textAlign: "center" },
-  needCard: { marginBottom: 12, padding: 18, borderRadius: radii.card, ...card },
+  needCard: { marginBottom: 12, padding: 18 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
-  chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, ...typography.meta, textTransform: "capitalize" }
 });
