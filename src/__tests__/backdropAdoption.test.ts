@@ -11,6 +11,10 @@
  *
  * Task A1 (shell roots) converts ShelterDashboardScreen and ShelterProfileScreen onto
  * <ScreenBackdrop>, so those two leave the list here — 34 -> 32.
+ *
+ * Task A2 (shelter listings + needs) converts ListingFormScreen, ListingDetailScreen,
+ * PlaceRequestScreen and ShelterNeedsScreen onto <ScreenBackdrop>, so those four leave
+ * the list here — 32 -> 28.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -22,7 +26,13 @@ const HAS_BACKDROP = /<ScreenBackdrop\b/;
 
 /** Named holdouts. Each conversion story removes exactly its screens. Starts at all 34. */
 const BACKDROP_HOLDOUTS: string[] = V3_SCOPE.filter(
-  (n) => n !== "ShelterDashboardScreen" && n !== "ShelterProfileScreen"
+  (n) =>
+    n !== "ShelterDashboardScreen" &&
+    n !== "ShelterProfileScreen" &&
+    n !== "ListingFormScreen" &&
+    n !== "ListingDetailScreen" &&
+    n !== "PlaceRequestScreen" &&
+    n !== "ShelterNeedsScreen"
 );
 
 describe("V3 screens sit on the backdrop", () => {

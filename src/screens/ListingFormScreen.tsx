@@ -14,6 +14,7 @@ import {
 
 import { useApi } from "../api/useApi";
 import { PrefillWarning } from "../components/PrefillWarning";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
 import { TAP_SLOP } from "../touch";
@@ -159,6 +160,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
   if (loading) {
     return (
       <View style={styles.screen}>
+        <ScreenBackdrop />
         <ScreenHeader title="Edit listing" onBack={() => navigation.goBack()} />
         <ActivityIndicator style={{ marginTop: 60 }} color={colors.teal} />
       </View>
@@ -167,6 +169,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title={isEdit ? "Edit listing" : "List an animal"} onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
