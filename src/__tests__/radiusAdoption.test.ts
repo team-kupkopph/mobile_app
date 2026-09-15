@@ -256,7 +256,12 @@ describe("screens take corner radii from the theme", () => {
     // A5 (2026-09-16): MemberUpgradeScreen/MemberVerifyScreen/MemberSubmittedScreen retired
     // N additional radii-token sites during the ScreenBackdrop + Card conversion (dead backButton
     // styles removed alongside). Floor moves 335 -> 330.
-    expect(sites.length).toBeGreaterThan(330);
+    // 2026-09-15 — A6 (Sagip rescuer, the last A-story) bound five more literal container
+    // radii to <Card>: MyRescuesScreen's card, MyOffersScreen's card and RescueMapScreen's
+    // card (all radii.field), RescueOfferScreen's optionCard (radii.field), and
+    // RescueUpdateScreen's radioRow (radii.tile) — five sites off this scan. Floor moves
+    // 330 -> 322.
+    expect(sites.length).toBeGreaterThan(322);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.

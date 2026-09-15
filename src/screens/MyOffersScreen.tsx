@@ -12,8 +12,10 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL, offerStatusChip, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { colors, spacing, typography } from "../theme";
+import { CheckIcon } from "../components/AppIcons";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Button, Card, ScreenHeader } from "../components/ui";
 
 const TONE = {
   teal: { bg: colors.infoBg, fg: colors.tealDark }, green: { bg: colors.successBg, fg: colors.success },
@@ -65,13 +67,26 @@ export function MyOffersScreen({ navigation }: Props) {
     ]);
   }
 
+  const state = loadState(res, offers.length);
+
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="My offers" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {loadState(res, offers.length).kind !== "ready" ? (
+        {state.kind === "empty" ? (
+          // The "done" layout (A5's MemberSubmittedScreen pattern): an empty offer list is a
+          // perfectly ordinary state (§13.3 — empty is not a failure), so it gets the same
+          // reassuring hero-Card treatment as the confirmation screens rather than the plain
+          // shared LoadStateView text.
+          <Card tone="hero" style={styles.doneCard}>
+            <View style={styles.doneIcon}><CheckIcon color={colors.white} size={30} /></View>
+            <Text style={styles.doneTitle}>You haven't offered to help on anything yet.</Text>
+            <Button label="Go back" onPress={() => navigation.goBack()} style={styles.doneButton} />
+          </Card>
+        ) : state.kind !== "ready" ? (
           <LoadStateView
-            state={loadState(res, offers.length)}
+            state={state}
             emptyTitle="You haven't offered to help on anything yet."
             onRetry={load}
           />
@@ -88,29 +103,30 @@ export function MyOffersScreen({ navigation }: Props) {
                   return (
                     <TouchableOpacity
                       key={o.offer_id}
-                      style={styles.card}
                       activeOpacity={0.85}
                       onPress={() => navigation.navigate("reportDetail", { reportId: o.report.report_id })}
                     >
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.cardTitle}>{sagipTitle(o.report.species, o.report.condition)}</Text>
-                        <Text style={styles.cardMeta}>
-                          {OFFER_TYPE_LABEL[o.offer_type]}{o.report.city ? " · " + o.report.city : ""}
-                        </Text>
-                      </View>
-                      <View style={styles.rightCol}>
-                        <View style={[styles.chip, { backgroundColor: tone.bg }]}>
-                          <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
+                      <Card style={styles.card}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.cardTitle}>{sagipTitle(o.report.species, o.report.condition)}</Text>
+                          <Text style={styles.cardMeta}>
+                            {OFFER_TYPE_LABEL[o.offer_type]}{o.report.city ? " · " + o.report.city : ""}
+                          </Text>
                         </View>
-                        {o.status === "open" ? (
-                          <TouchableOpacity
-                            onPress={(e) => { e.stopPropagation(); withdraw(o); }} hitSlop={TAP_SLOP}
-                            style={styles.withdrawBtn}
-                          >
-                            <Text style={styles.withdrawText}>Withdraw</Text>
-                          </TouchableOpacity>
-                        ) : null}
-                      </View>
+                        <View style={styles.rightCol}>
+                          <View style={[styles.chip, { backgroundColor: tone.bg }]}>
+                            <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
+                          </View>
+                          {o.status === "open" ? (
+                            <TouchableOpacity
+                              onPress={(e) => { e.stopPropagation(); withdraw(o); }} hitSlop={TAP_SLOP}
+                              style={styles.withdrawBtn}
+                            >
+                              <Text style={styles.withdrawText}>Withdraw</Text>
+                            </TouchableOpacity>
+                          ) : null}
+                        </View>
+                      </Card>
                     </TouchableOpacity>
                   );
                 })}
@@ -123,16 +139,16 @@ export function MyOffersScreen({ navigation }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   section: { marginBottom: 22 },
   sectionTitle: { marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
+  doneCard: { marginTop: 40, alignItems: "center" },
+  doneIcon: { width: 76, height: 76, borderRadius: 38, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
+  doneTitle: { marginTop: 18, color: colors.ink, ...typography.subtitle, fontWeight: "800", textAlign: "center" },
+  doneButton: { marginTop: 24, width: "100%" },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   rightCol: { alignItems: "flex-end", gap: 8 },

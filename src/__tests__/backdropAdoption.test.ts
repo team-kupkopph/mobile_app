@@ -1,11 +1,11 @@
 /**
- * Task A0.2 · the backdrop adoption ratchet.
+ * Task A0.2 · the backdrop adoption guard.
  *
  * Actual V3 surface adoption is 7 owner screens on <ScreenBackdrop>. The other 34 screens
  * in spec §4.2's scope (see v3Scope.ts for why 34, not the plan's 35) do not sit on it yet.
- * This is a RATCHET with a NAMED holdout list, in the shape of themeAdoption.test.ts, but
- * unlike that guard's flat `REMAINING = 0` count, each conversion story here removes exactly
- * its own screens from BACKDROP_HOLDOUTS by name — so the list is the plan, not a summary of it.
+ * This STARTED as a RATCHET with a NAMED holdout list, in the shape of themeAdoption.test.ts —
+ * unlike that guard's flat `REMAINING = 0` count, each conversion story removed exactly its own
+ * screens from BACKDROP_HOLDOUTS by name, so the list was the plan, not a summary of it.
  *
  * Starts at all 34: no in-scope screen has been converted yet in this PR.
  *
@@ -24,6 +24,15 @@
  *
  * Task A5 (verified member) converts MemberUpgradeScreen, MemberVerifyScreen and
  * MemberSubmittedScreen onto <ScreenBackdrop>, so those three leave the list here — 15 -> 12.
+ *
+ * ZERO, AND IT IS NO LONGER A RATCHET (the `themeAdoption` precedent). Task A6 (Sagip rescuer)
+ * converts the last twelve in-scope screens — MyRescuesScreen, MyOffersScreen, RescueMapScreen,
+ * RescueListScreen, RescueListedScreen, RescueOfferScreen, RescueOfferSentScreen,
+ * RescuePlaceScreen, RescuePlaceConfirmScreen, RescuePlaceSentScreen, RescueUpdateScreen,
+ * PlaceAcceptedScreen — onto <ScreenBackdrop>, so those twelve leave the list here — 12 -> 0.
+ * BACKDROP_HOLDOUTS stays `[]` from here: this is now a FLAT RULE, not "how many are left". A
+ * screen inside V3_SCOPE that lacks <ScreenBackdrop> is a regression, full stop — raising this
+ * list is not "recording progress", it is reintroducing the surface V3 was written to end.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -33,32 +42,8 @@ const SCREENS = join(__dirname, "..", "screens");
 const read = (n: string) => readFileSync(join(SCREENS, `${n}.tsx`), "utf8");
 const HAS_BACKDROP = /<ScreenBackdrop\b/;
 
-/** Named holdouts. Each conversion story removes exactly its screens. Starts at all 34. */
-const BACKDROP_HOLDOUTS: string[] = V3_SCOPE.filter(
-  (n) =>
-    n !== "ShelterDashboardScreen" &&
-    n !== "ShelterProfileScreen" &&
-    n !== "ListingFormScreen" &&
-    n !== "ListingDetailScreen" &&
-    n !== "PlaceRequestScreen" &&
-    n !== "ShelterNeedsScreen" &&
-    n !== "DonationQrScreen" &&
-    n !== "DonateScreen" &&
-    n !== "DonatePledgeScreen" &&
-    n !== "MyDonationsScreen" &&
-    n !== "ShelterVolunteerScreen" &&
-    n !== "ShelterVolunteerCreateScreen" &&
-    n !== "ShelterVolunteerEditScreen" &&
-    n !== "ShelterVolunteerDetailScreen" &&
-    n !== "ShelterVolunteerRequestsScreen" &&
-    n !== "ShelterVolunteerAttendanceScreen" &&
-    n !== "ShelterVolunteerCalendarScreen" &&
-    n !== "ShelterVolunteerActivityScreen" &&
-    n !== "ShelterVolunteerCancelScreen" &&
-    n !== "MemberUpgradeScreen" &&
-    n !== "MemberVerifyScreen" &&
-    n !== "MemberSubmittedScreen"
-);
+/** Flat rule at zero — every V3 scope screen must be converted. */
+const BACKDROP_HOLDOUTS: string[] = [];
 
 describe("V3 screens sit on the backdrop", () => {
   it("found screens to classify", () => {
