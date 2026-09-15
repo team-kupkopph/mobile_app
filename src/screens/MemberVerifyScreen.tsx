@@ -14,9 +14,10 @@ import { uploadErrorMessage } from "../upload";
 import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { normalizeSocialLink, socialLinkError, socialLinkNote } from "../socialLink";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, Field, ScreenHeader } from "../components/ui";
+import { colors, radii, spacing, squircle, typography } from "../theme";
+import { Button, Card, Field, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
@@ -108,32 +109,35 @@ export function MemberVerifyScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>Quick verification</Text>
         <Text style={styles.subheading}>Two things and you're set.</Text>
 
-        <TouchableOpacity activeOpacity={0.8} style={styles.docCard} onPress={handleUpload} disabled={uploading}>
-          <View style={styles.docIcon}>
-            <DocumentIcon color={colors.teal} />
-          </View>
-          <View style={styles.docCopy}>
-            <Text style={styles.docTitle}>Valid government ID</Text>
-            <Text style={styles.docSubtitle}>A clear photo of your ID · Required</Text>
-          </View>
-          {uploading ? (
-            <ActivityIndicator color={colors.teal} />
-          ) : fileUrl ? (
-            <View style={styles.docDone}>
-              <View style={styles.docCheck}>
-                <CheckIcon color={colors.white} size={12} />
-              </View>
-              <Text style={styles.docDoneText}>Uploaded</Text>
+        <TouchableOpacity activeOpacity={0.8} onPress={handleUpload} disabled={uploading}>
+          <Card style={styles.docCard}>
+            <View style={styles.docIcon}>
+              <DocumentIcon color={colors.teal} />
             </View>
-          ) : (
-            <Text style={styles.docUploadLink}>Upload</Text>
-          )}
+            <View style={styles.docCopy}>
+              <Text style={styles.docTitle}>Valid government ID</Text>
+              <Text style={styles.docSubtitle}>A clear photo of your ID · Required</Text>
+            </View>
+            {uploading ? (
+              <ActivityIndicator color={colors.teal} />
+            ) : fileUrl ? (
+              <View style={styles.docDone}>
+                <View style={styles.docCheck}>
+                  <CheckIcon color={colors.white} size={12} />
+                </View>
+                <Text style={styles.docDoneText}>Uploaded</Text>
+              </View>
+            ) : (
+              <Text style={styles.docUploadLink}>Upload</Text>
+            )}
+          </Card>
         </TouchableOpacity>
 
         <Field
@@ -181,18 +185,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.page
   },
-  backButton: {
-    position: "absolute",
-    left: 26,
-    bottom: 12,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.white,
-    ...elevation.soft
-  },
   content: {
     paddingHorizontal: spacing.lg,
     paddingBottom: 60
@@ -210,13 +202,10 @@ const styles = StyleSheet.create({
   docCard: {
     minHeight: 84,
     marginTop: 24,
-    borderRadius: radii.card,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: colors.white,
-    ...elevation.soft
+    paddingVertical: 14
   },
   docIcon: {
     width: 48,

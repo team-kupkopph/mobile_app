@@ -19,6 +19,9 @@
 //
 // Task A4 (shelter volunteer) converts all nine ShelterVolunteer* screens onto
 // <ScreenBackdrop> — the baseline grows from 17 to 26 here.
+//
+// Task A5 (verified member) converts MemberUpgradeScreen, MemberVerifyScreen and
+// MemberSubmittedScreen onto <ScreenBackdrop> — the baseline grows from 26 to 29 here.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -28,7 +31,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the twenty-six V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer)", () => {
+  it("found the twenty-nine V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "DonatePledgeScreen",
@@ -39,6 +42,9 @@ describe("surface, re-derived", () => {
       "InquiryScreen",
       "ListingDetailScreen",
       "ListingFormScreen",
+      "MemberSubmittedScreen",
+      "MemberUpgradeScreen",
+      "MemberVerifyScreen",
       "MyDonationsScreen",
       "MyInquiriesScreen",
       "PlaceRequestScreen",
