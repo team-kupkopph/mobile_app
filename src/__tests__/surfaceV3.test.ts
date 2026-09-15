@@ -13,6 +13,9 @@
 // Task A2 (shelter listings + needs) converts ListingFormScreen, ListingDetailScreen,
 // PlaceRequestScreen and ShelterNeedsScreen onto <ScreenBackdrop> — the baseline grows
 // from 9 to 13 here.
+//
+// Task A3 (shelter donations) converts DonationQrScreen, DonateScreen, DonatePledgeScreen
+// and MyDonationsScreen onto <ScreenBackdrop> — the baseline grows from 13 to 17 here.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -22,14 +25,18 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the thirteen V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs)", () => {
+  it("found the seventeen V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
+      "DonatePledgeScreen",
+      "DonateScreen",
+      "DonationQrScreen",
       "HomeGuestScreen",
       "HomeScreen",
       "InquiryScreen",
       "ListingDetailScreen",
       "ListingFormScreen",
+      "MyDonationsScreen",
       "MyInquiriesScreen",
       "PlaceRequestScreen",
       "ProfileScreen",

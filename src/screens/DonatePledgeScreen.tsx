@@ -6,15 +6,12 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, pill, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { colors, pill, spacing, squircle, typography } from "../theme";
+import { Button, Card, ScreenHeader } from "../components/ui";
 
-
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
 
 type Props = NativeStackScreenProps<RootStackParamList, "donatePledge">;
 
@@ -44,6 +41,7 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
   if (done) {
     return (
       <View style={styles.screen}>
+        <ScreenBackdrop />
         <ScrollView contentContainerStyle={styles.confirmWrap}>
           <View style={styles.checkTile}><Text style={styles.checkGlyph}>✓</Text></View>
           <Text style={styles.confirmTitle}>Pledge recorded</Text>
@@ -64,6 +62,7 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Pledge" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.needTitle}>{needTitle}</Text>
@@ -74,7 +73,7 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
         </Text>
 
         <Text style={styles.label}>How many can you give?</Text>
-        <View style={styles.stepper}>
+        <Card style={styles.stepper}>
           <TouchableOpacity style={styles.stepBtn} onPress={() => setQty((q) => Math.max(1, q - 1))} hitSlop={TAP_SLOP}
             accessibilityRole="button" accessibilityLabel="Decrease pledge quantity"
             accessibilityValue={{ now: qty }}>
@@ -87,7 +86,7 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
             accessibilityValue={{ now: qty }}>
             <Text style={styles.stepGlyph}>+</Text>
           </TouchableOpacity>
-        </View>
+        </Card>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -105,7 +104,7 @@ const styles = StyleSheet.create({
   note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
   label: { marginTop: 26, marginBottom: 12, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   // A control track is a pill of its height, as SegmentedControl's is: 8 + 52 + 8.
-  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", height: 68, padding: 8, borderRadius: pill(68), ...card },
+  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", height: 68, padding: 8, borderRadius: pill(68) },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },
   qty: { color: colors.ink, fontSize: 30, fontWeight: "800", minWidth: 40, textAlign: "center" },
