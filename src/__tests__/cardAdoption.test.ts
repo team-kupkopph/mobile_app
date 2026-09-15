@@ -38,9 +38,6 @@ const SPREADS_ELEVATION = /\.\.\.elevation\./;
  * Each conversion story (adopting <Card>) removes exactly its screens.
  */
 const CARD_HOLDOUTS: string[] = [
-  "DonateScreen",
-  "DonatePledgeScreen",
-  "MyDonationsScreen",
   "ShelterVolunteerScreen",
   "ShelterVolunteerCreateScreen",
   "ShelterVolunteerEditScreen",

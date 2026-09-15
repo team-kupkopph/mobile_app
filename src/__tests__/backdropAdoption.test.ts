@@ -32,7 +32,11 @@ const BACKDROP_HOLDOUTS: string[] = V3_SCOPE.filter(
     n !== "ListingFormScreen" &&
     n !== "ListingDetailScreen" &&
     n !== "PlaceRequestScreen" &&
-    n !== "ShelterNeedsScreen"
+    n !== "ShelterNeedsScreen" &&
+    n !== "DonationQrScreen" &&
+    n !== "DonateScreen" &&
+    n !== "DonatePledgeScreen" &&
+    n !== "MyDonationsScreen"
 );
 
 describe("V3 screens sit on the backdrop", () => {
