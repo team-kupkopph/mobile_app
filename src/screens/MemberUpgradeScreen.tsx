@@ -7,8 +7,9 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { AdoptIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, radii, spacing, typography } from "../theme";
+import { Button, Card, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberUpgrade">;
 
@@ -22,10 +23,12 @@ const UNLOCKS = [
 export function MemberUpgradeScreen({ navigation }: Props) {
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
-        <View style={styles.hero}>
+        {/* The You artboard's hero: the one tinted Card in scope for this task. */}
+        <Card tone="hero" style={styles.heroCard}>
           <View style={styles.heroIcon}>
             <UserBadgeIcon color={colors.white} />
           </View>
@@ -33,7 +36,7 @@ export function MemberUpgradeScreen({ navigation }: Props) {
             <Text style={styles.heroTitle}>Become a Verified Member</Text>
             <Text style={styles.heroText}>One quick check unlocks adopting & rescue tools.</Text>
           </View>
-        </View>
+        </Card>
 
         <Text style={styles.sectionTitle}>What you unlock</Text>
         {UNLOCKS.map((line) => (
@@ -61,28 +64,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.page
   },
-  backButton: {
-    position: "absolute",
-    left: 26,
-    bottom: 12,
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.white,
-    ...elevation.soft
-  },
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg
   },
-  hero: {
+  heroCard: {
     marginTop: 10,
-    borderRadius: radii.field,
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
+    // The one tinted Card in scope for this task — the You artboard's hero tile.
     backgroundColor: colors.teal
   },
   heroIcon: {

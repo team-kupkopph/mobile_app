@@ -27,6 +27,11 @@
  *
  * Task A4 (shelter volunteer) converts all nine ShelterVolunteer* screens onto <Card>,
  * so those nine leave the list here — 19 -> 10.
+ *
+ * Task A5 (verified member) converts MemberUpgradeScreen and MemberVerifyScreen onto <Card>
+ * — those two leave the list here — 10 -> 5. MemberSubmittedScreen (the third screen in this
+ * task) never spread `...elevation.*` in the first place (see the note above) and so was never
+ * in this list.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -41,8 +46,6 @@ const SPREADS_ELEVATION = /\.\.\.elevation\./;
  * Each conversion story (adopting <Card>) removes exactly its screens.
  */
 const CARD_HOLDOUTS: string[] = [
-  "MemberUpgradeScreen",
-  "MemberVerifyScreen",
   "MyRescuesScreen",
   "MyOffersScreen",
   "RescueMapScreen",

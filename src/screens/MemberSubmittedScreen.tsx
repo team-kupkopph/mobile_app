@@ -7,8 +7,9 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, radii, spacing, typography } from "../theme";
-import { Button } from "../components/ui";
+import { Button, Card } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
 
@@ -19,28 +20,32 @@ export function MemberSubmittedScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <View style={styles.content}>
-        <View style={styles.checkCircle}>
-          <View style={styles.checkMarkStem} />
-          <View style={styles.checkMarkKick} />
-        </View>
-
-        <Text style={styles.heading}>Request submitted</Text>
-        <Text style={styles.subheading}>We've got your ID and social link.</Text>
-
-        <View style={styles.noticeBar}>
-          <View style={styles.noticeIcon}>
-            <ClockIcon color={colors.teal} size={26} />
+        {/* The "done" layout: one hero Card carrying the check glyph, title, body and CTA. */}
+        <Card tone="hero" style={styles.doneCard}>
+          <View style={styles.checkCircle}>
+            <View style={styles.checkMarkStem} />
+            <View style={styles.checkMarkKick} />
           </View>
-          <View style={styles.noticeCopy}>
-            <Text style={styles.noticeTitle}>This takes a few days</Text>
-            <Text style={styles.noticeBody}>A person reviews every request — usually 2-3 business days. We'll notify you.</Text>
+
+          <Text style={styles.heading}>Request submitted</Text>
+          <Text style={styles.subheading}>We've got your ID and social link.</Text>
+
+          <View style={styles.noticeBar}>
+            <View style={styles.noticeIcon}>
+              <ClockIcon color={colors.teal} size={26} />
+            </View>
+            <View style={styles.noticeCopy}>
+              <Text style={styles.noticeTitle}>This takes a few days</Text>
+              <Text style={styles.noticeBody}>A person reviews every request — usually 2-3 business days. We'll notify you.</Text>
+            </View>
           </View>
-        </View>
 
-        <Text style={styles.hint}>You can use everything else while you wait.</Text>
+          <Text style={styles.hint}>You can use everything else while you wait.</Text>
 
-        <Button label="Back to home" onPress={backToHome} style={styles.doneButton} />
+          <Button label="Back to home" onPress={backToHome} style={styles.doneButton} />
+        </Card>
       </View>
     </View>
   );
@@ -56,6 +61,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.lg,
     paddingTop: 90,
+    alignItems: "center"
+  },
+  doneCard: {
+    width: "100%",
     alignItems: "center"
   },
   checkCircle: {
