@@ -248,13 +248,19 @@ describe("screens take depth from the theme", () => {
     // than once, and a guard that matches nothing passes forever.
     // Floors, not targets: hand-rolled fields and buttons carried their own `...card` and
     // `...elevation.soft` until they became Field and Button, which shadow once each.
-    expect(bound.length).toBeGreaterThan(70);
     // 79, DOWN FROM 80 — A3 removed the local `const card = { ...elevation.soft }` object
     // DonateScreen, DonatePledgeScreen and MyDonationsScreen each spread into a View style;
     // their surfaces are <Card> now, which owns elevation.card internally, off this scan.
     // Each removed local `...elevation.soft` spread was itself a "bound" site, so `bound`
     // drops by 3. The floor moves down with them.
-    expect(bound.length + handRolled.length).toBeGreaterThan(75);
+    // 2026-09-15 — A4 (shelter volunteer) removed nine more local `const card = { ...elevation.soft }`
+    // objects, one per ShelterVolunteerScreen/Create/Edit/Detail/Requests/Attendance/Calendar/
+    // Activity/Cancel: each screen's list-row or summary surface is <Card> now (Create's and
+    // Edit's small 48pt activity-type filter chip kept its flat white pill styling instead —
+    // Card's own padding/radius don't fit a fixed-height selector control, so it just lost its
+    // shadow rather than becoming <Card>). 79 -> 70. Both floors below move down with it.
+    expect(bound.length).toBeGreaterThan(60);
+    expect(bound.length + handRolled.length).toBeGreaterThan(65);
   });
 
   it("leaves no hand-rolled shadow that reproduces a step exactly", () => {

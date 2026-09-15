@@ -24,8 +24,9 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift, blastRadiusCopy } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Avatar, Button, ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, radii, spacing, typography } from "../theme";
+import { Avatar, Button, Card, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -111,6 +112,7 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Cancel activity" onBack={() => navigation.goBack()} align="center" />
 
       {phase === "done" ? (
@@ -137,7 +139,7 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.summaryCard}>
+          <Card tone="hero" style={styles.summaryCard}>
             <Avatar size={48}>
               <VolunteerIcon color={colors.teal} size={26} />
             </Avatar>
@@ -148,7 +150,7 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
                 {affected} volunteer{affected === 1 ? "" : "s"} signed up
               </Text>
             </View>
-          </View>
+          </Card>
 
           <Text style={styles.question}>Cancel this activity?</Text>
           <Text style={styles.body}>{blastRadiusCopy(affected)}</Text>
@@ -185,17 +187,12 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
 }
 
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60, alignItems: "center" },
   summaryCard: {
-    width: "100%", flexDirection: "row", alignItems: "center", gap: 14,
-    borderRadius: radii.field, padding: 18, ...card
+    width: "100%", flexDirection: "row", alignItems: "center", gap: 14, padding: 18
   },
   summaryTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   summaryWhen: { marginTop: 3, color: colors.teal, ...typography.meta, fontWeight: "700" },

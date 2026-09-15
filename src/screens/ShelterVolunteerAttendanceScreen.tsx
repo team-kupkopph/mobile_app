@@ -13,8 +13,9 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone } from "../shelterVolunteer";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Avatar, Button, ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, radii, spacing, typography } from "../theme";
+import { Avatar, Button, Card, ScreenHeader } from "../components/ui";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -76,6 +77,7 @@ export function ShelterVolunteerAttendanceScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Attendance" onBack={() => navigation.goBack()} align="center" />
 
       {!!banner && (
@@ -99,30 +101,31 @@ export function ShelterVolunteerAttendanceScreen({ navigation, route }: Props) {
             return (
               <TouchableOpacity
                 key={row.signup_id}
-                style={styles.card}
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate("shelterVolunteerDetail", { signupId: row.signup_id })}
               >
-                <View style={styles.cardTop}>
-                  <Avatar initials={initials(row.volunteer.display_name)} size={44} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.name}>{row.volunteer.display_name}</Text>
+                <Card style={styles.card}>
+                  <View style={styles.cardTop}>
+                    <Avatar initials={initials(row.volunteer.display_name)} size={44} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.name}>{row.volunteer.display_name}</Text>
+                    </View>
+                    {row.status !== "approved" && (
+                      <View style={[styles.chip, CHIP_STYLE[OUTCOME_CHIP[row.status].tone]]}>
+                        <Text style={[styles.chipText, CHIP_TEXT_STYLE[OUTCOME_CHIP[row.status].tone]]}>
+                          {OUTCOME_CHIP[row.status].label}
+                        </Text>
+                      </View>
+                    )}
                   </View>
-                  {row.status !== "approved" && (
-                    <View style={[styles.chip, CHIP_STYLE[OUTCOME_CHIP[row.status].tone]]}>
-                      <Text style={[styles.chipText, CHIP_TEXT_STYLE[OUTCOME_CHIP[row.status].tone]]}>
-                        {OUTCOME_CHIP[row.status].label}
-                      </Text>
+
+                  {row.status === "approved" && (
+                    <View style={styles.actionsRow}>
+                      <Button size="small" variant="secondary" label="No-show" onPress={() => markAttendance(row.signup_id, "no_show")} style={styles.half} />
+                      <Button size="small" label="Attended" onPress={() => markAttendance(row.signup_id, "completed")} loading={busy} style={styles.half} />
                     </View>
                   )}
-                </View>
-
-                {row.status === "approved" && (
-                  <View style={styles.actionsRow}>
-                    <Button size="small" variant="secondary" label="No-show" onPress={() => markAttendance(row.signup_id, "no_show")} style={styles.half} />
-                    <Button size="small" label="Attended" onPress={() => markAttendance(row.signup_id, "completed")} loading={busy} style={styles.half} />
-                  </View>
-                )}
+                </Card>
               </TouchableOpacity>
             );
           })}
@@ -146,10 +149,6 @@ const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
   done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.danger }
 };
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
@@ -157,7 +156,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
-  card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
+  card: { padding: 16, marginBottom: 14 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },

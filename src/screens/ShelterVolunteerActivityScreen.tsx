@@ -14,8 +14,9 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, spacing, typography } from "../theme";
+import { Button, Card, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -59,6 +60,7 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Activity" onBack={() => navigation.goBack()} align="center" />
 
       {!shift ? (
@@ -77,7 +79,7 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
             </View>
           </View>
 
-          <View style={styles.infoCard}>
+          <Card style={styles.infoCard}>
             <View style={{ flex: 1 }}>
               <Text style={styles.infoTitle}>
                 {shift.capacity - shift.slots_left} of {shift.capacity} spots filled
@@ -91,10 +93,10 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
                 {STATUS_CHIP[shift.status].label}
               </Text>
             </View>
-          </View>
+          </Card>
 
           <Text style={styles.sectionLabel}>Manage</Text>
-          <View style={styles.actionCard}>
+          <Card style={styles.actionCard}>
             <ActionRow
               label="View requests"
               onPress={() => navigation.navigate("shelterVolunteerRequests", { shiftId })}
@@ -108,7 +110,7 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
               last
               onPress={() => navigation.navigate("shelterVolunteerEdit", { shiftId })}
             />
-          </View>
+          </Card>
 
           <Button
             label="Cancel activity"
@@ -147,10 +149,6 @@ const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
   danger: { color: colors.warningStrong }
 };
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
@@ -160,15 +158,15 @@ const styles = StyleSheet.create({
   heroWhen: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
   heroOrg: { marginTop: 2, color: colors.muted, ...typography.meta },
   infoCard: {
-    marginTop: 24, borderRadius: radii.field, paddingHorizontal: 20, paddingVertical: 18,
-    flexDirection: "row", alignItems: "center", gap: 12, ...card
+    marginTop: 24, paddingHorizontal: 20, paddingVertical: 18,
+    flexDirection: "row", alignItems: "center", gap: 12
   },
   infoTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoSub: { marginTop: 4, color: colors.muted, ...typography.meta },
   statusChip: { paddingHorizontal: 14, height: 32, borderRadius: 16, justifyContent: "center" },
   statusChipText: { ...typography.meta, fontWeight: "800" },
   sectionLabel: { marginTop: 28, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
-  actionCard: { borderRadius: radii.field, overflow: "hidden", ...card },
+  actionCard: { padding: 0, overflow: "hidden" },
   actionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, height: 60 },
   actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
   actionRowText: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
