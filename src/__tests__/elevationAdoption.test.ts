@@ -249,7 +249,12 @@ describe("screens take depth from the theme", () => {
     // Floors, not targets: hand-rolled fields and buttons carried their own `...card` and
     // `...elevation.soft` until they became Field and Button, which shadow once each.
     expect(bound.length).toBeGreaterThan(70);
-    expect(bound.length + handRolled.length).toBeGreaterThan(80);
+    // 79, DOWN FROM 80 — A3 removed the local `const card = { ...elevation.soft }` object
+    // DonateScreen, DonatePledgeScreen and MyDonationsScreen each spread into a View style;
+    // their surfaces are <Card> now, which owns elevation.card internally, off this scan.
+    // Each removed local `...elevation.soft` spread was itself a "bound" site, so `bound`
+    // drops by 3. The floor moves down with them.
+    expect(bound.length + handRolled.length).toBeGreaterThan(75);
   });
 
   it("leaves no hand-rolled shadow that reproduces a step exactly", () => {

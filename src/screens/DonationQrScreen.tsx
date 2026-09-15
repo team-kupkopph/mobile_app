@@ -8,6 +8,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View
 
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radii, spacing, typography } from "../theme";
 import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
@@ -55,6 +56,7 @@ export function DonationQrScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Donation QR" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

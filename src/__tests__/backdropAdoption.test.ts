@@ -15,6 +15,9 @@
  * Task A2 (shelter listings + needs) converts ListingFormScreen, ListingDetailScreen,
  * PlaceRequestScreen and ShelterNeedsScreen onto <ScreenBackdrop>, so those four leave
  * the list here — 32 -> 28.
+ *
+ * Task A3 (shelter donations) converts DonationQrScreen, DonateScreen, DonatePledgeScreen
+ * and MyDonationsScreen onto <ScreenBackdrop>, so those four leave the list here — 28 -> 24.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -32,7 +35,11 @@ const BACKDROP_HOLDOUTS: string[] = V3_SCOPE.filter(
     n !== "ListingFormScreen" &&
     n !== "ListingDetailScreen" &&
     n !== "PlaceRequestScreen" &&
-    n !== "ShelterNeedsScreen"
+    n !== "ShelterNeedsScreen" &&
+    n !== "DonationQrScreen" &&
+    n !== "DonateScreen" &&
+    n !== "DonatePledgeScreen" &&
+    n !== "MyDonationsScreen"
 );
 
 describe("V3 screens sit on the backdrop", () => {

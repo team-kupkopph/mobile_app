@@ -11,20 +11,17 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ChipTone, pledgeIsCancellable, pledgeStatusChip, PledgeStatus } from "../community";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, pill, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { colors, pill, spacing, typography } from "../theme";
+import { Card, Chip, ScreenHeader } from "../components/ui";
 
-
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
-const CHIP: Record<ChipTone, { bg: string; fg: string }> = {
-  ok: { bg: colors.successBg, fg: colors.success },
-  warn: { bg: colors.warningBg, fg: colors.warning },
-  muted: { bg: colors.greyPill, fg: colors.muted }
+/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
+const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
+  ok: "success",
+  warn: "warning",
+  muted: "neutral"
 };
 
 type Pledge = {
@@ -71,6 +68,7 @@ export function MyDonationsScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="My donations" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loadState(res, pledges?.length).kind !== "ready" ? (
@@ -84,12 +82,10 @@ export function MyDonationsScreen({ navigation }: Props) {
           (pledges ?? []).map((p) => {
             const chip = pledgeStatusChip(p.status);
             return (
-              <View key={p.pledge_id} style={styles.pledgeCard}>
+              <Card key={p.pledge_id} style={styles.pledgeCard}>
                 <View style={styles.row}>
                   <Text style={styles.needTitle}>{p.need.title}</Text>
-                  <View style={[styles.chip, { backgroundColor: CHIP[chip.tone].bg }]}>
-                    <Text style={[styles.chipText, { color: CHIP[chip.tone].fg }]}>{chip.label}</Text>
-                  </View>
+                  <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
                 </View>
                 <Text style={styles.meta}>{p.need.shelter_name} · pledged {p.quantity}</Text>
                 {pledgeIsCancellable(p.status) ? (
@@ -100,7 +96,7 @@ export function MyDonationsScreen({ navigation }: Props) {
                     </Text>
                   </TouchableOpacity>
                 ) : null}
-              </View>
+              </Card>
             );
           })
         )}
@@ -113,11 +109,9 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   empty: { marginTop: 40, color: colors.muted, ...typography.body, textAlign: "center" },
-  pledgeCard: { marginBottom: 14, padding: 18, borderRadius: radii.card, ...card },
+  pledgeCard: { marginBottom: 14, padding: 18 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
-  chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, ...typography.body },
   cancelBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: "#FBEEEC" },
   cancelLabel: { color: colors.danger, ...typography.strong, fontWeight: "700" }

@@ -243,7 +243,10 @@ describe("screens take corner radii from the theme", () => {
   it("found radii to classify", () => {
     // Guard the guard: scans here have reported a plausible smaller number more than once.
     // 479 before Track R; hand-rolled buttons and headers took their radii with them since.
-    expect(sites.length).toBeGreaterThan(350);
+    // 349, DOWN FROM 350 — A3 bound DonateScreen's qrCard/needCard and MyDonationsScreen's
+    // pledgeCard to <Card> (which owns radii.card internally, off this scan), removing 3
+    // literal `borderRadius: radii.card` sites. The floor moves down with them.
+    expect(sites.length).toBeGreaterThan(345);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.

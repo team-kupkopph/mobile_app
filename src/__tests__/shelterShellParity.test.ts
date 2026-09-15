@@ -83,3 +83,19 @@ describeParity("the shelter shell matches the anchor artboards", () => {
     expect(rescue["done-layout"]).toBe("true");
   });
 });
+
+// Decision 5 (A3) · the donation QR must render at full contrast — Card is white by
+// default, but the explicit `backgroundColor: colors.white` fill is kept in source so a
+// future tone change to Card can never tint the code. Unlike the rest of this file, this
+// check is a plain source-code assertion, not gated on the design/mobile-v3 canvas being
+// present, so it always runs.
+//
+// Note: the QR image itself lives on the public donor-facing `DonateScreen` (its
+// `qrCard` style), not on `DonationQrScreen` (the shelter's own upload form, which has
+// no QR preview) — see spec §5's "Donate" row and the `ShelterDonateScreen` footnote,
+// which are explicit that the two are different screens.
+describe("donation QR contrast (decision 5)", () => {
+  it("DonateScreen's qrCard keeps an explicit white fill", () => {
+    expect(read("screens/DonateScreen.tsx")).toMatch(/qrCard: \{[^}]*backgroundColor: colors\.white/);
+  });
+});

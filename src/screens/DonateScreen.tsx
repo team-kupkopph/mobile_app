@@ -10,10 +10,11 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { needProgressLabel } from "../community";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, pill, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { colors, pill, radii, spacing, typography } from "../theme";
+import { Card, ScreenHeader } from "../components/ui";
 
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
@@ -53,6 +54,7 @@ export function DonateScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Donate" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -68,11 +70,13 @@ export function DonateScreen({ navigation, route }: Props) {
           />
         ) : qrs && qrs.length > 0 ? (
           qrs.map((qr) => (
-            <View key={qr.provider} style={styles.qrCard}>
+            // Decision 5 · the code must render at full contrast — Card is white by default,
+            // but the explicit fill is kept so a future tone change can't tint the code.
+            <Card key={qr.provider} style={styles.qrCard}>
               <Text style={styles.provider}>{PROVIDER_LABEL[qr.provider] ?? qr.provider}</Text>
               <Image source={{ uri: qr.qr_image_url }} style={styles.qrImage} resizeMode="contain" />
               <Text style={styles.accountName}>{qr.account_name}</Text>
-            </View>
+            </Card>
           ))
         ) : null}
 
@@ -83,7 +87,7 @@ export function DonateScreen({ navigation, route }: Props) {
               Pledge to bring what {orgName} needs. They confirm once it arrives.
             </Text>
             {needs.map((need) => (
-              <View key={need.need_id} style={styles.needCard}>
+              <Card key={need.need_id} style={styles.needCard}>
                 <Text style={styles.needTitle}>{need.title}</Text>
                 <Text style={styles.needMeta}>
                   {need.category} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
@@ -94,7 +98,7 @@ export function DonateScreen({ navigation, route }: Props) {
                   })}>
                   <Text style={styles.pledgeLabel}>Pledge</Text>
                 </TouchableOpacity>
-              </View>
+              </Card>
             ))}
           </View>
         ) : null}
@@ -108,16 +112,12 @@ export function DonateScreen({ navigation, route }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   orgName: { color: colors.ink, ...typography.hero },
   offPlatformNote: { marginTop: 8, marginBottom: 20, color: colors.muted, ...typography.meta, lineHeight: 20 },
-  qrCard: { marginBottom: 18, padding: 20, borderRadius: radii.card, alignItems: "center", ...card },
+  qrCard: { marginBottom: 18, padding: spacing.lg, alignItems: "center", backgroundColor: colors.white },
   provider: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
   qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: radii.chip, backgroundColor: colors.border },
   accountName: { marginTop: 14, color: colors.ink, ...typography.strong, fontWeight: "700" },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   wishlist: { marginTop: 28 },
   sectionTitle: { color: colors.ink, ...typography.section },
   sectionNote: { marginTop: 6, marginBottom: 14, color: colors.muted, ...typography.meta, lineHeight: 20 },
-  needCard: { marginBottom: 12, padding: 18, borderRadius: radii.card, ...card },
+  needCard: { marginBottom: 12, padding: 18 },
   needTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   needMeta: { marginTop: 6, color: colors.muted, ...typography.meta, textTransform: "capitalize" },
   pledgeBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
