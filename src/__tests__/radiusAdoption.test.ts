@@ -246,7 +246,14 @@ describe("screens take corner radii from the theme", () => {
     // 349, DOWN FROM 350 — A3 bound DonateScreen's qrCard/needCard and MyDonationsScreen's
     // pledgeCard to <Card> (which owns radii.card internally, off this scan), removing 3
     // literal `borderRadius: radii.card` sites. The floor moves down with them.
-    expect(sites.length).toBeGreaterThan(345);
+    // 2026-09-15 — A4 (shelter volunteer) bound nine more literal container radii to <Card>:
+    // ShelterVolunteerScreen's card (radii.field), ShelterVolunteerDetailScreen's card
+    // (radii.field), ShelterVolunteerRequestsScreen's card and animalCard (radii.field,
+    // radii.card), ShelterVolunteerAttendanceScreen's card (radii.field),
+    // ShelterVolunteerCalendarScreen's card (radii.tile), ShelterVolunteerActivityScreen's
+    // infoCard and actionCard (radii.field ×2), and ShelterVolunteerCancelScreen's
+    // summaryCard (radii.field) — nine sites off this scan. 349 -> 340.
+    expect(sites.length).toBeGreaterThan(335);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.

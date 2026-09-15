@@ -12,8 +12,9 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ChipTone, VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, spacing, typography } from "../theme";
+import { Card, ScreenHeader } from "../components/ui";
 
 function formatAddress(addr: { line1: string; barangay: string; city: string; province: string }): string {
   return [addr.line1, addr.barangay, addr.city, addr.province].filter(Boolean).join(", ");
@@ -48,6 +49,7 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Volunteer" onBack={() => navigation.goBack()} align="center" />
 
       {!detail ? (
@@ -55,7 +57,7 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.card}>
+          <Card style={styles.card}>
             <Text style={styles.name}>{detail.display_name}</Text>
             {!!chip && (
               <View style={[styles.chip, CHIP_STYLE[chip.tone]]}>
@@ -66,11 +68,11 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
               {detail.reliability.shifts_completed} shift{detail.reliability.shifts_completed === 1 ? "" : "s"} ·{" "}
               {detail.reliability.no_shows} no-show{detail.reliability.no_shows === 1 ? "" : "s"}
             </Text>
-          </View>
+          </Card>
 
           <Text style={styles.sectionLabel}>Contact</Text>
           {detail.contact ? (
-            <View style={styles.card}>
+            <Card style={styles.card}>
               {!!detail.contact.phone && (
                 <View style={styles.contactRow}>
                   <Text style={styles.contactLabel}>Phone</Text>
@@ -87,11 +89,11 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
                   <Text style={styles.contactValue}>{formatAddress(detail.contact.address)}</Text>
                 </View>
               )}
-            </View>
+            </Card>
           ) : (
-            <View style={styles.card}>
+            <Card style={styles.card}>
               <Text style={styles.mutedNote}>Contact not shared for this shift</Text>
-            </View>
+            </Card>
           )}
         </ScrollView>
       )}
@@ -107,14 +109,10 @@ const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
   done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.warningStrong }
 };
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
-  card: { borderRadius: radii.field, padding: 18, marginBottom: 18, ...card },
+  card: { padding: 18, marginBottom: 18 },
   name: { color: colors.ink, ...typography.section },
   chip: { alignSelf: "flex-start", marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },

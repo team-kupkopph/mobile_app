@@ -14,8 +14,9 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, spacing, typography } from "../theme";
+import { Card, ScreenHeader } from "../components/ui";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -82,6 +83,7 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Volunteer schedule" onBack={() => navigation.goBack()} align="center" />
 
       {loadState(res, groups.length).kind !== "ready" ? (
@@ -93,36 +95,38 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {groups.map((group) => (
-            <View key={group.key} style={styles.section}>
-              <Text style={styles.sectionHeading}>{group.heading}</Text>
-              {group.shifts.map((s) => {
-                const chip = STATUS_CHIP[s.status];
-                const signedUp = s.capacity - s.slots_left;
-                return (
-                  <TouchableOpacity
-                    key={s.shift_id}
-                    style={styles.card}
-                    activeOpacity={0.85}
-                    onPress={() => navigation.navigate("shelterVolunteerActivity", { shiftId: s.shift_id })}
-                  >
-                    <View style={styles.cardIcon}>
-                      <VolunteerIcon color={colors.teal} size={22} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
-                      <Text style={styles.cardMeta}>
-                        {timeRangeLabel(s.starts_at, s.ends_at)} · {signedUp} / {s.capacity} signed up
-                      </Text>
-                    </View>
-                    <View style={[styles.statusChip, STATUS_STYLE[chip.tone]]}>
-                      <Text style={[styles.statusChipText, STATUS_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ))}
+          <Card style={styles.grid}>
+            {groups.map((group) => (
+              <View key={group.key} style={styles.section}>
+                <Text style={styles.sectionHeading}>{group.heading}</Text>
+                {group.shifts.map((s) => {
+                  const chip = STATUS_CHIP[s.status];
+                  const signedUp = s.capacity - s.slots_left;
+                  return (
+                    <TouchableOpacity
+                      key={s.shift_id}
+                      style={styles.card}
+                      activeOpacity={0.85}
+                      onPress={() => navigation.navigate("shelterVolunteerActivity", { shiftId: s.shift_id })}
+                    >
+                      <View style={styles.cardIcon}>
+                        <VolunteerIcon color={colors.teal} size={22} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
+                        <Text style={styles.cardMeta}>
+                          {timeRangeLabel(s.starts_at, s.ends_at)} · {signedUp} / {s.capacity} signed up
+                        </Text>
+                      </View>
+                      <View style={[styles.statusChip, STATUS_STYLE[chip.tone]]}>
+                        <Text style={[styles.statusChipText, STATUS_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
+          </Card>
         </ScrollView>
       )}
     </View>
@@ -141,10 +145,6 @@ const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
   danger: { color: colors.warningStrong }
 };
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
@@ -152,7 +152,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   section: { marginBottom: 22 },
   sectionHeading: { marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: radii.tile, marginBottom: 10, ...card },
+  grid: { padding: spacing.sm },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, marginBottom: 10 },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
