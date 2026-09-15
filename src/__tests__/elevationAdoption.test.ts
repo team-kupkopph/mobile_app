@@ -259,8 +259,12 @@ describe("screens take depth from the theme", () => {
     // Edit's small 48pt activity-type filter chip kept its flat white pill styling instead —
     // Card's own padding/radius don't fit a fixed-height selector control, so it just lost its
     // shadow rather than becoming <Card>). 79 -> 70. Both floors below move down with it.
-    expect(bound.length).toBeGreaterThan(60);
-    expect(bound.length + handRolled.length).toBeGreaterThan(65);
+    // 2026-09-15 — A6 (Sagip rescuer, the last A-story) removed five more local
+    // `const card = { ...elevation.soft }` objects: MyRescuesScreen, MyOffersScreen,
+    // RescueMapScreen, RescueOfferScreen and RescueUpdateScreen — each screen's list-row or
+    // option-row surface is <Card> now. 70 -> 62 (bound). The floor below moves down with it.
+    expect(bound.length).toBeGreaterThan(55);
+    expect(bound.length + handRolled.length).toBeGreaterThan(57);
   });
 
   it("leaves no hand-rolled shadow that reproduces a step exactly", () => {

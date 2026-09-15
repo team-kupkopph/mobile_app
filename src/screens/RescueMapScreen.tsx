@@ -19,7 +19,9 @@ import { RootStackParamList } from "../navigation/types";
 import { useCachedFeed } from "../useCachedFeed";
 import { isOffline, loadState } from "../net";
 import { relTime, sagipTitle, strayChip } from "../sagip";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, radii, spacing, typography } from "../theme";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Card } from "../components/ui";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -62,6 +64,9 @@ export function RescueMapScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.rescueMap">
+      {/* decision 4: MapView and its style are untouched — the backdrop sits behind the
+          header and the report-list sheet below the map only. */}
+      <ScreenBackdrop />
       <ScreenHeader title="Nearby strays" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* City-scoped backdrop: centred on the city + search radius. No per-report pins (§12.5) —
@@ -115,17 +120,18 @@ export function RescueMapScreen({ navigation }: Props) {
             return (
               <TouchableOpacity
                 key={r.report_id}
-                style={styles.card}
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate("reportDetail", { reportId: r.report_id })}
               >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>{sagipTitle(r.species, r.condition)}</Text>
-                  <Text style={styles.cardMeta}>{(r.city ? r.city + " · " : "") + relTime(r.reported_at)}</Text>
-                </View>
-                <View style={[styles.chip, { backgroundColor: tone.bg }]}>
-                  <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
-                </View>
+                <Card style={styles.card}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.cardTitle}>{sagipTitle(r.species, r.condition)}</Text>
+                    <Text style={styles.cardMeta}>{(r.city ? r.city + " · " : "") + relTime(r.reported_at)}</Text>
+                  </View>
+                  <View style={[styles.chip, { backgroundColor: tone.bg }]}>
+                    <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
+                  </View>
+                </Card>
               </TouchableOpacity>
             );
           })}
@@ -145,10 +151,6 @@ function Legend({ color, label }: { color: string; label: string }) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
@@ -161,7 +163,7 @@ const styles = StyleSheet.create({
   legend: { flexDirection: "row", alignItems: "center", gap: 7 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { color: colors.muted, ...typography.meta, fontWeight: "600" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },

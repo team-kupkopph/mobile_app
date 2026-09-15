@@ -11,8 +11,9 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { relTime, sagipTitle, strayChip } from "../sagip";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { colors, spacing, typography } from "../theme";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Card, ScreenHeader } from "../components/ui";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -42,6 +43,7 @@ export function MyRescuesScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="My rescues" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {loadState(res, cases.length).kind !== "ready" ? (
@@ -59,21 +61,22 @@ export function MyRescuesScreen({ navigation }: Props) {
             return (
               <TouchableOpacity
                 key={c.case_id}
-                style={styles.card}
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate("rescueUpdate", {
                   caseId: c.case_id, reportId: c.report.report_id
                 })}
               >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>{sagipTitle(c.report.species, c.report.condition)}</Text>
-                  <Text style={styles.cardMeta}>
-                    {(c.report.city ? c.report.city + " · " : "") + "claimed " + relTime(c.claimed_at)}
-                  </Text>
-                </View>
-                <View style={[styles.chip, { backgroundColor: tone.bg }]}>
-                  <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
-                </View>
+                <Card style={styles.card}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.cardTitle}>{sagipTitle(c.report.species, c.report.condition)}</Text>
+                    <Text style={styles.cardMeta}>
+                      {(c.report.city ? c.report.city + " · " : "") + "claimed " + relTime(c.claimed_at)}
+                    </Text>
+                  </View>
+                  <View style={[styles.chip, { backgroundColor: tone.bg }]}>
+                    <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
+                  </View>
+                </Card>
               </TouchableOpacity>
             );
           })
@@ -83,14 +86,10 @@ export function MyRescuesScreen({ navigation }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },

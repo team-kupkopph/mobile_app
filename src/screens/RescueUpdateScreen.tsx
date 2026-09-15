@@ -14,8 +14,9 @@ import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { advanceableStatuses, sagipTitle, strayChip } from "../sagip";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, Field, ScreenHeader } from "../components/ui";
+import { colors, radii, spacing, typography } from "../theme";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Button, Card, Field, ScreenHeader } from "../components/ui";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -102,6 +103,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Update case" onBack={() => navigation.goBack()} />
 
       {!report ? (
@@ -109,30 +111,32 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <Text style={styles.h1}>{sagipTitle(report.species, report.condition)}</Text>
-          {report.city ? <Text style={styles.sub}>{report.city}</Text> : null}
-          {chip && tone ? (
-            <View style={[styles.currentChip, { backgroundColor: tone.bg }]}>
-              <Text style={[styles.currentChipText, { color: tone.fg }]}>Currently: {chip.label}</Text>
-            </View>
-          ) : null}
+          <Card>
+            <Text style={styles.h1}>{sagipTitle(report.species, report.condition)}</Text>
+            {report.city ? <Text style={styles.sub}>{report.city}</Text> : null}
+            {chip && tone ? (
+              <View style={[styles.currentChip, { backgroundColor: tone.bg }]}>
+                <Text style={[styles.currentChipText, { color: tone.fg }]}>Currently: {chip.label}</Text>
+              </View>
+            ) : null}
 
-          {/* US-SEC1 — GET /reports/{id} already includes precise_location for the
-              active claimer (that's you, on this screen), so no second fetch is needed. */}
-          {report.precise_location ? (
-            <View style={styles.mapWrap}>
-              <MapView
-                style={styles.map}
-                pointerEvents="none"
-                initialRegion={{
-                  latitude: report.precise_location.lat, longitude: report.precise_location.lng,
-                  latitudeDelta: 0.01, longitudeDelta: 0.01
-                }}
-              >
-                <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
-              </MapView>
-            </View>
-          ) : null}
+            {/* US-SEC1 — GET /reports/{id} already includes precise_location for the
+                active claimer (that's you, on this screen), so no second fetch is needed. */}
+            {report.precise_location ? (
+              <View style={styles.mapWrap}>
+                <MapView
+                  style={styles.map}
+                  pointerEvents="none"
+                  initialRegion={{
+                    latitude: report.precise_location.lat, longitude: report.precise_location.lng,
+                    latitudeDelta: 0.01, longitudeDelta: 0.01
+                  }}
+                >
+                  <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
+                </MapView>
+              </View>
+            ) : null}
+          </Card>
 
           {/* US-H1/US-H2 — once the case's report is safe, the claiming rescuer can hand it
               off, either publicly (adoption listing) or directly to someone they already
@@ -164,14 +168,15 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                   return (
                     <TouchableOpacity
                       key={status}
-                      style={[styles.radioRow, active && styles.radioRowActive]}
                       onPress={() => setTarget(status)}
                       activeOpacity={0.85}
                     >
-                      <View style={[styles.radio, active && styles.radioActive]}>
-                        {active ? <View style={styles.radioDot} /> : null}
-                      </View>
-                      <Text style={styles.radioLabel}>{STATUS_LABEL[status]}</Text>
+                      <Card style={[styles.radioRow, active && styles.radioRowActive]}>
+                        <View style={[styles.radio, active && styles.radioActive]}>
+                          {active ? <View style={styles.radioDot} /> : null}
+                        </View>
+                        <Text style={styles.radioLabel}>{STATUS_LABEL[status]}</Text>
+                      </Card>
                     </TouchableOpacity>
                   );
                 })}
@@ -218,10 +223,6 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
   resolvedNote: { marginTop: 24, color: colors.muted, ...typography.body },
   sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   radioList: { gap: 10 },
-  radioRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderRadius: radii.tile, borderWidth: 2, borderColor: "transparent", ...card },
+  radioRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderWidth: 2, borderColor: "transparent" },
   radioRowActive: { borderColor: colors.teal },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   radioActive: { borderColor: colors.teal },

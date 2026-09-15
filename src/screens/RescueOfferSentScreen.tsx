@@ -8,7 +8,8 @@ import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL } from "../sagip";
 import { TAP_SLOP } from "../touch";
 import { colors, spacing, squircle, typography } from "../theme";
-import { Button } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Button, Card } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOfferSent">;
@@ -19,22 +20,25 @@ export function RescueOfferSentScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <View style={styles.content}>
-        <View style={styles.heroIcon}><CheckIcon color={colors.white} size={30} /></View>
-        <Text style={styles.heroTitle}>Offer sent</Text>
-        <Text style={styles.heroBody}>
-          You offered {label.toLowerCase()}. If someone claims this case, they'll get your
-          contact — no other action needed from you until then.
-        </Text>
+        <Card tone="hero" style={styles.doneCard}>
+          <View style={styles.heroIcon}><CheckIcon color={colors.white} size={30} /></View>
+          <Text style={styles.heroTitle}>Offer sent</Text>
+          <Text style={styles.heroBody}>
+            You offered {label.toLowerCase()}. If someone claims this case, they'll get your
+            contact — no other action needed from you until then.
+          </Text>
 
-        <Button
-          label="Back to the report"
-          onPress={() => navigation.replace("reportDetail", { reportId })}
-          style={styles.primary}
-        />
-        <TouchableOpacity hitSlop={TAP_SLOP} onPress={() => navigation.navigate("myOffers")} activeOpacity={0.7}>
-          <Text style={styles.secondary}>See my offers</Text>
-        </TouchableOpacity>
+          <Button
+            label="Back to the report"
+            onPress={() => navigation.replace("reportDetail", { reportId })}
+            style={styles.primary}
+          />
+          <TouchableOpacity hitSlop={TAP_SLOP} onPress={() => navigation.navigate("myOffers")} activeOpacity={0.7}>
+            <Text style={styles.secondary}>See my offers</Text>
+          </TouchableOpacity>
+        </Card>
       </View>
     </View>
   );
@@ -43,6 +47,7 @@ export function RescueOfferSentScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.lg },
+  doneCard: { width: "100%", alignItems: "center" },
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },

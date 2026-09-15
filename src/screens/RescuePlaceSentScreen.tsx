@@ -7,7 +7,8 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { colors, spacing, squircle, typography } from "../theme";
-import { Button } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Button, Card } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescuePlaceSent">;
@@ -15,20 +16,21 @@ type Props = NativeStackScreenProps<RootStackParamList, "rescuePlaceSent">;
 export function RescuePlaceSentScreen({ navigation }: Props) {
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.hero}>
+        <Card tone="hero" style={styles.hero}>
           <View style={styles.heroIcon}><CheckIcon color={colors.white} size={30} /></View>
           <Text style={styles.heroTitle}>Placement sent</Text>
           <Text style={styles.heroBody}>
             The recipient's been notified. They'll take it from here once they accept.
           </Text>
-        </View>
 
-        <Button
-          label="Back to my rescues"
-          onPress={() => navigation.navigate("myRescues")}
-          style={styles.primary}
-        />
+          <Button
+            label="Back to my rescues"
+            onPress={() => navigation.navigate("myRescues")}
+            style={styles.primary}
+          />
+        </Card>
       </ScrollView>
     </View>
   );
@@ -37,7 +39,7 @@ export function RescuePlaceSentScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 90, paddingBottom: 60 },
-  hero: { alignItems: "center" },
+  hero: { width: "100%", alignItems: "center" },
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
   heroBody: { marginTop: 8, color: colors.muted, ...typography.subtitle, textAlign: "center" },

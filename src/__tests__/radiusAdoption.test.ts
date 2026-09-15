@@ -253,7 +253,11 @@ describe("screens take corner radii from the theme", () => {
     // ShelterVolunteerCalendarScreen's card (radii.tile), ShelterVolunteerActivityScreen's
     // infoCard and actionCard (radii.field ×2), and ShelterVolunteerCancelScreen's
     // summaryCard (radii.field) — nine sites off this scan. 349 -> 340.
-    expect(sites.length).toBeGreaterThan(335);
+    // 2026-09-15 — A6 (Sagip rescuer, the last A-story) bound five more literal container
+    // radii to <Card>: MyRescuesScreen's card, MyOffersScreen's card and RescueMapScreen's
+    // card (all radii.field), RescueOfferScreen's optionCard (radii.field), and
+    // RescueUpdateScreen's radioRow (radii.tile) — five sites off this scan.
+    expect(sites.length).toBeGreaterThan(327);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.

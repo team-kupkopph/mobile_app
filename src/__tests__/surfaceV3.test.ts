@@ -22,6 +22,13 @@
 //
 // Task A5 (verified member) converts MemberUpgradeScreen, MemberVerifyScreen and
 // MemberSubmittedScreen onto <ScreenBackdrop> — the baseline grows from 26 to 29 here.
+//
+// Task A6 (Sagip rescuer) converts the 12 Sagip rescuer screens — MyRescuesScreen,
+// MyOffersScreen, RescueMapScreen, RescueListScreen, RescueListedScreen, RescueOfferScreen,
+// RescueOfferSentScreen, RescuePlaceScreen, RescuePlaceConfirmScreen, RescuePlaceSentScreen,
+// RescueUpdateScreen, PlaceAcceptedScreen — onto <ScreenBackdrop>. This is the last A-story:
+// the baseline grows from 29 to 41 here, and both `backdropAdoption`/`cardAdoption` holdout
+// lists go to `[]` (flat rule at zero, the `themeAdoption` precedent).
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -31,7 +38,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the twenty-nine V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member)", () => {
+  it("found the forty-one V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member + 12 Sagip rescuer)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "DonatePledgeScreen",
@@ -47,8 +54,20 @@ describe("surface, re-derived", () => {
       "MemberVerifyScreen",
       "MyDonationsScreen",
       "MyInquiriesScreen",
+      "MyOffersScreen",
+      "MyRescuesScreen",
+      "PlaceAcceptedScreen",
       "PlaceRequestScreen",
       "ProfileScreen",
+      "RescueListScreen",
+      "RescueListedScreen",
+      "RescueMapScreen",
+      "RescueOfferScreen",
+      "RescueOfferSentScreen",
+      "RescuePlaceConfirmScreen",
+      "RescuePlaceScreen",
+      "RescuePlaceSentScreen",
+      "RescueUpdateScreen",
       "ShelterDashboardScreen",
       "ShelterNeedsScreen",
       "ShelterProfileScreen",
