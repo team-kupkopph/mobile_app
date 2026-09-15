@@ -15,6 +15,9 @@
  * Task A2 (shelter listings + needs) converts ListingFormScreen, ListingDetailScreen,
  * PlaceRequestScreen and ShelterNeedsScreen onto <ScreenBackdrop>, so those four leave
  * the list here — 32 -> 28.
+ *
+ * Task A3 (shelter donations) converts DonationQrScreen, DonateScreen, DonatePledgeScreen
+ * and MyDonationsScreen onto <ScreenBackdrop>, so those four leave the list here — 28 -> 24.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";

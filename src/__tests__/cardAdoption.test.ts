@@ -24,6 +24,10 @@
  * ShelterNeedsScreen onto <Card> — 22 -> 19. ListingFormScreen (the fourth screen in that
  * task) never spread `...elevation.*` in the first place (see the note above) and so was
  * never in this list.
+ *
+ * Task A3 (shelter donations) converts DonateScreen, DonatePledgeScreen and MyDonationsScreen
+ * onto <Card> — 19 -> 16. DonationQrScreen (the fourth screen in that task) never spread
+ * `...elevation.*` in the first place (see the note above) and so was never in this list.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
