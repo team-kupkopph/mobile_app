@@ -9,8 +9,9 @@ import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { colors, spacing, typography } from "../theme";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Button, Card, ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
@@ -46,6 +47,7 @@ export function RescueOfferScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Offer help" onBack={() => navigation.goBack()} />
 
       <View style={styles.content}>
@@ -61,17 +63,18 @@ export function RescueOfferScreen({ navigation, route }: Props) {
             return (
               <TouchableOpacity
                 key={type}
-                style={[styles.optionCard, active && styles.optionCardActive]}
                 onPress={() => setSelected(type)}
                 activeOpacity={0.85}
               >
-                <View style={[styles.radio, active && styles.radioActive]}>
-                  {active ? <View style={styles.radioDot} /> : null}
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.optionTitle}>{OFFER_TYPE_LABEL[type]}</Text>
-                  <Text style={styles.optionHint}>{OFFER_TYPE_HINT[type]}</Text>
-                </View>
+                <Card style={[styles.optionCard, active && styles.optionCardActive]}>
+                  <View style={[styles.radio, active && styles.radioActive]}>
+                    {active ? <View style={styles.radioDot} /> : null}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.optionTitle}>{OFFER_TYPE_LABEL[type]}</Text>
+                    <Text style={styles.optionHint}>{OFFER_TYPE_HINT[type]}</Text>
+                  </View>
+                </Card>
               </TouchableOpacity>
             );
           })}
@@ -93,17 +96,13 @@ export function RescueOfferScreen({ navigation, route }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 12 },
   h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 10, color: colors.muted, ...typography.body },
   cardList: { marginTop: 24, gap: 12 },
-  optionCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 18, borderRadius: radii.field, borderWidth: 2, borderColor: "transparent", ...card },
+  optionCard: { flexDirection: "row", alignItems: "center", gap: 14, padding: 18, borderWidth: 2, borderColor: "transparent" },
   optionCardActive: { borderColor: colors.teal },
   radio: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   radioActive: { borderColor: colors.teal },
