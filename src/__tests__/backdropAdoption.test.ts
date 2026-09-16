@@ -48,7 +48,7 @@ const BACKDROP_HOLDOUTS: string[] = [];
 describe("V3 screens sit on the backdrop", () => {
   it("found screens to classify", () => {
     expect(readdirSync(SCREENS).filter((f) => f.endsWith(".tsx")).length).toBeGreaterThan(80);
-    expect(V3_SCOPE.length).toBe(35);
+    expect(V3_SCOPE.length).toBe(36);
   });
 
   it("every in-scope screen not in the holdout list renders ScreenBackdrop", () => {

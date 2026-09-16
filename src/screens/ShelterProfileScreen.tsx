@@ -117,6 +117,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
           onTabPress={(t) => {
             if (t === "home") navigation.navigate("shelterDashboard");
             if (t === "donate") navigation.navigate("shelterDonate");
+            if (t === "animals") navigation.navigate("shelterAnimals");
           }}
         />
       </View>
@@ -226,6 +227,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
         onTabPress={(t) => {
           if (t === "home") navigation.navigate("shelterDashboard");
           if (t === "donate") navigation.navigate("shelterDonate");
+          if (t === "animals") navigation.navigate("shelterAnimals");
         }}
       />
     </View>
