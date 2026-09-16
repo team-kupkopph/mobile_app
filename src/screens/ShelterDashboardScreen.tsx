@@ -20,7 +20,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
 import { colors, radii, spacing, typography } from "../theme";
-import { Button, Card } from "../components/ui";
+import { Card } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -78,9 +78,10 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   function onBannerPress() {
     // US-D4 audit (2026-08-24) · was a dead tap for "pending" — the banner's own CTA
     // reads "Status ›" but nothing navigated, same shape as the dead Google-signup and
-    // "+ List an animal" buttons earlier audits found. ShelterProfileScreen's "Under
-    // review" accent already reached verifyDocuments for the same gated state; this
-    // banner (the first thing a pending shelter sees) is the more obvious entry point.
+    // the old draft-a-listing button earlier audits found (that one has since moved to
+    // ShelterAnimalsScreen — Task B2). ShelterProfileScreen's "Under review" accent
+    // already reached verifyDocuments for the same gated state; this banner (the first
+    // thing a pending shelter sees) is the more obvious entry point.
     if (state === "incomplete") navigation.navigate("shelterVerify", { tier });
     else if (state === "pending") navigation.navigate("verifyDocuments");
   }
@@ -109,6 +110,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           onTabPress={(t) => {
             if (t === "profile") navigation.navigate("shelterProfile");
             if (t === "donate") navigation.navigate("shelterDonate");
+            if (t === "animals") navigation.navigate("shelterAnimals");
           }}
         />
       </View>
@@ -173,15 +175,6 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           <Stat n={counts.donations} label="Donations" />
         </View>
 
-        <Button
-          label="+  List an animal"
-          onPress={() => navigation.navigate("listingForm", undefined)}
-          style={styles.primaryButton}
-        />
-        <Text style={styles.primaryHint}>
-          {verified ? "Your listings are public." : "Saved as a draft until you're verified."}
-        </Text>
-
         {!verified ? (
           <Card accent={colors.teal} style={styles.footCard}>
             <View style={styles.footCopy}>
@@ -202,6 +195,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         onTabPress={(t) => {
           if (t === "profile") navigation.navigate("shelterProfile");
           if (t === "donate") navigation.navigate("shelterDonate");
+          if (t === "animals") navigation.navigate("shelterAnimals");
         }}
       />
     </View>
@@ -284,8 +278,6 @@ const styles = StyleSheet.create({
   },
   statNum: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
-  primaryButton: { marginTop: 22 },
-  primaryHint: { marginTop: 12, color: colors.muted, ...typography.body, textAlign: "center" },
   footCard: {
     marginTop: 26,
     minHeight: 100,

@@ -67,6 +67,9 @@ export type RootStackParamList = {
   shelterDashboard: undefined;
   shelterProfile: undefined;
   shelterDonate: undefined;
+  // Task B2 · the shelter's Animals tab root — segmented Live/Pending/Adopted over the
+  // shelter's own listings.
+  shelterAnimals: undefined;
   // Verification decision — the applicant's side (Track V)
   verifyDocuments: undefined;
   verifyResubmit: {

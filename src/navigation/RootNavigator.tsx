@@ -37,6 +37,7 @@ import { ProfileScreen } from "../screens/ProfileScreen";
 import { ResetOtpScreen } from "../screens/ResetOtpScreen";
 import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
 import { ShelterContactScreen } from "../screens/ShelterContactScreen";
+import { ShelterAnimalsScreen } from "../screens/ShelterAnimalsScreen";
 import { ShelterDashboardScreen } from "../screens/ShelterDashboardScreen";
 import { ShelterDonateScreen } from "../screens/ShelterDonateScreen";
 import { ShelterPhoneVerifyScreen } from "../screens/ShelterPhoneVerifyScreen";
@@ -141,6 +142,7 @@ export function RootNavigator() {
       <Stack.Screen name="shelterDashboard" component={ShelterDashboardScreen} />
       <Stack.Screen name="shelterProfile" component={ShelterProfileScreen} />
       <Stack.Screen name="shelterDonate" component={ShelterDonateScreen} />
+      <Stack.Screen name="shelterAnimals" component={ShelterAnimalsScreen} />
       <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
       <Stack.Screen name="verifyResubmit" component={VerifyResubmitScreen} />
       <Stack.Screen name="reportStray" component={ReportStrayScreen} />
