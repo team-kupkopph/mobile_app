@@ -66,6 +66,7 @@ export type RootStackParamList = {
   shelterVerifyNgo: { baseDocs: ShelterDoc[]; socialUrl: string };
   shelterDashboard: undefined;
   shelterProfile: undefined;
+  shelterDonate: undefined;
   // Verification decision — the applicant's side (Track V)
   verifyDocuments: undefined;
   verifyResubmit: {

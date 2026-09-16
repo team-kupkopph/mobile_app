@@ -104,7 +104,13 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             is a dead end to look at: the iOS edge-swipe still pops the screen, which is why
             this survived review and every automated check, but a person sees no exit. Found
             on a real device during US-PF3 by someone who could not get past it. */}
-        <ShelterTabs active="home" onTabPress={(t) => t === "profile" && navigation.navigate("shelterProfile")} />
+        <ShelterTabs
+          active="home"
+          onTabPress={(t) => {
+            if (t === "profile") navigation.navigate("shelterProfile");
+            if (t === "donate") navigation.navigate("shelterDonate");
+          }}
+        />
       </View>
     );
   }
@@ -191,7 +197,13 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         ) : null}
       </ScrollView>
 
-      <ShelterTabs active="home" onTabPress={(t) => t === "profile" && navigation.navigate("shelterProfile")} />
+      <ShelterTabs
+        active="home"
+        onTabPress={(t) => {
+          if (t === "profile") navigation.navigate("shelterProfile");
+          if (t === "donate") navigation.navigate("shelterDonate");
+        }}
+      />
     </View>
   );
 }
