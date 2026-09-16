@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL, offerStatusChip, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, spacing, typography } from "../theme";
+import { colors, spacing, squircle, typography } from "../theme";
 import { CheckIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, ScreenHeader } from "../components/ui";
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   sectionTitle: { marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
   doneCard: { marginTop: 40, alignItems: "center" },
-  doneIcon: { width: 76, height: 76, borderRadius: 38, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
+  doneIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   doneTitle: { marginTop: 18, color: colors.ink, ...typography.subtitle, fontWeight: "800", textAlign: "center" },
   doneButton: { marginTop: 24, width: "100%" },
   cardTitle: { color: colors.ink, ...typography.section },
