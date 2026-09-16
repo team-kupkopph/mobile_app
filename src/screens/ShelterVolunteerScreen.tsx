@@ -13,8 +13,9 @@ import { RootStackParamList } from "../navigation/types";
 import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, spacing, typography } from "../theme";
+import { Card, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -63,6 +64,7 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader
         title="Kawang-Gawa"
         onBack={() => navigation.goBack()}
@@ -101,21 +103,22 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
             return (
               <TouchableOpacity
                 key={s.shift_id}
-                style={styles.card}
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate("shelterVolunteerActivity", { shiftId: s.shift_id })}
               >
-                <View style={styles.cardIcon}>
-                  <VolunteerIcon color={colors.teal} size={22} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
-                  <Text style={styles.cardMeta}>{shiftWhenLabel(s.starts_at, s.ends_at)}</Text>
-                  <Text style={styles.cardSignedUp}>{signedUp} / {s.capacity} signed up</Text>
-                </View>
-                <View style={[styles.statusChip, STATUS_STYLE[chip.tone]]}>
-                  <Text style={[styles.statusChipText, STATUS_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
-                </View>
+                <Card style={styles.card}>
+                  <View style={styles.cardIcon}>
+                    <VolunteerIcon color={colors.teal} size={22} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
+                    <Text style={styles.cardMeta}>{shiftWhenLabel(s.starts_at, s.ends_at)}</Text>
+                    <Text style={styles.cardSignedUp}>{signedUp} / {s.capacity} signed up</Text>
+                  </View>
+                  <View style={[styles.statusChip, STATUS_STYLE[chip.tone]]}>
+                    <Text style={[styles.statusChipText, STATUS_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
+                  </View>
+                </Card>
               </TouchableOpacity>
             );
           })
@@ -137,10 +140,6 @@ const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
   danger: { color: colors.warningStrong }
 };
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: {
@@ -154,7 +153,7 @@ const styles = StyleSheet.create({
   sectionTitle: { color: colors.ink, ...typography.hero },
   sectionSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   calendarLink: { color: colors.teal, ...typography.strong, fontWeight: "800", marginTop: 4 },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
   cardIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },

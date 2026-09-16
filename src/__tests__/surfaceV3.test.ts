@@ -16,6 +16,9 @@
 //
 // Task A3 (shelter donations) converts DonationQrScreen, DonateScreen, DonatePledgeScreen
 // and MyDonationsScreen onto <ScreenBackdrop> — the baseline grows from 13 to 17 here.
+//
+// Task A4 (shelter volunteer) converts all nine ShelterVolunteer* screens onto
+// <ScreenBackdrop> — the baseline grows from 17 to 26 here.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -25,7 +28,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the seventeen V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations)", () => {
+  it("found the twenty-six V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "DonatePledgeScreen",
@@ -43,6 +46,15 @@ describe("surface, re-derived", () => {
       "ShelterDashboardScreen",
       "ShelterNeedsScreen",
       "ShelterProfileScreen",
+      "ShelterVolunteerActivityScreen",
+      "ShelterVolunteerAttendanceScreen",
+      "ShelterVolunteerCalendarScreen",
+      "ShelterVolunteerCancelScreen",
+      "ShelterVolunteerCreateScreen",
+      "ShelterVolunteerDetailScreen",
+      "ShelterVolunteerEditScreen",
+      "ShelterVolunteerRequestsScreen",
+      "ShelterVolunteerScreen",
       "SigninScreen"
     ]);
   });

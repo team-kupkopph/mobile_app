@@ -13,14 +13,11 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ShiftType, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, radii, spacing, typography } from "../theme";
 import { Button, Field, ScreenHeader } from "../components/ui";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
-
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
 
 type Initial = { type: ShiftType; starts_at: string; ends_at: string; capacity: number };
 
@@ -123,6 +120,7 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Edit activity" onBack={() => navigation.goBack()} />
 
       {/* Gated on `!initial`, not on the request: once the form is up, a failed REFETCH must
@@ -197,7 +195,7 @@ const styles = StyleSheet.create({
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
     minWidth: "47%", height: 48, borderRadius: radii.chip, alignItems: "center", justifyContent: "center",
-    paddingHorizontal: 12, ...card
+    paddingHorizontal: 12, backgroundColor: colors.white
   },
   chipActive: { backgroundColor: colors.soft },
   chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },

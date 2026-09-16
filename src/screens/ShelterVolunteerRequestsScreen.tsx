@@ -19,8 +19,9 @@ import { RootStackParamList } from "../navigation/types";
 import { ChipTone, ListingCard, PendingRequest, ShelterShift, reliabilityChip } from "../shelterVolunteer";
 import { Reliability, shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Avatar, Button, ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, radii, spacing, squircle, typography } from "../theme";
+import { Avatar, Button, Card, ScreenHeader } from "../components/ui";
 
 // The endpoint also returns `requested_at` per-row (backend ShiftRequestsView) even though
 // Task 4's PendingRequest type doesn't declare it — extend locally rather than widen the
@@ -198,6 +199,7 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title={shift ? shiftTypeLabel(shift.type) : "Requests"} onBack={() => navigation.goBack()} align="center">
         {!!shift && (
           <Text style={styles.subtitle}>
@@ -231,7 +233,7 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
               // silently skip the animal picker with no way to attach a listing afterward.
               const approveBusy = busy || !shiftLoaded;
               return (
-                <View key={row.signup_id} style={styles.card}>
+                <Card key={row.signup_id} style={styles.card}>
                   <View style={styles.cardTop}>
                     <Avatar initials={initials(row.volunteer.display_name)} size={44} />
                     <View style={{ flex: 1 }}>
@@ -265,7 +267,7 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
                         approving before the type is known could skip a walking shift's picker. */}
                     <Button size="small" label="Approve" onPress={() => onPressApprove(row.signup_id)} loading={approveBusy} style={styles.half} />
                   </View>
-                </View>
+                </Card>
               );
             })
           )}
@@ -295,19 +297,20 @@ export function ShelterVolunteerRequestsScreen({ navigation, route }: Props) {
                 listings.map((l) => (
                   <TouchableOpacity
                     key={l.listing_id}
-                    style={styles.animalCard}
                     activeOpacity={0.85}
                     onPress={() => onPickListing(l.listing_id)}
                   >
-                    {l.photo_url ? (
-                      <Image source={{ uri: l.photo_url }} style={styles.animalPhoto} resizeMode="cover" />
-                    ) : (
-                      <View style={[styles.animalPhoto, styles.animalPhotoEmpty]} />
-                    )}
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.animalName}>{l.pet.name}</Text>
-                      <Text style={styles.animalSpecies}>{capitalize(l.pet.species)}</Text>
-                    </View>
+                    <Card style={styles.animalCard}>
+                      {l.photo_url ? (
+                        <Image source={{ uri: l.photo_url }} style={styles.animalPhoto} resizeMode="cover" />
+                      ) : (
+                        <View style={[styles.animalPhoto, styles.animalPhotoEmpty]} />
+                      )}
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.animalName}>{l.pet.name}</Text>
+                        <Text style={styles.animalSpecies}>{capitalize(l.pet.species)}</Text>
+                      </View>
+                    </Card>
                   </TouchableOpacity>
                 ))
               )}
@@ -359,10 +362,6 @@ const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
   done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.warningStrong }
 };
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   subtitle: { marginTop: 3, color: colors.muted, ...typography.meta, textAlign: "center" },
@@ -372,7 +371,7 @@ const styles = StyleSheet.create({
   sectionLabel: { marginBottom: 12, color: colors.ink, ...typography.strong, fontWeight: "800" },
   bannerBox: { marginHorizontal: 20, marginTop: 4, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
-  card: { borderRadius: radii.field, padding: 16, marginBottom: 14, ...card },
+  card: { padding: 16, marginBottom: 14 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   requestedAt: { marginTop: 2, color: colors.muted, ...typography.meta },
@@ -393,7 +392,7 @@ const styles = StyleSheet.create({
   pickerClose: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   pickerSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   pickerList: { marginTop: 14 },
-  animalCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, borderRadius: radii.card, marginBottom: 10, ...card },
+  animalCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12, marginBottom: 10 },
   animalPhoto: { width: 52, height: 52, borderRadius: squircle(52) },
   animalPhotoEmpty: { backgroundColor: colors.greyPill },
   animalName: { color: colors.ink, ...typography.strong, fontWeight: "800" },
