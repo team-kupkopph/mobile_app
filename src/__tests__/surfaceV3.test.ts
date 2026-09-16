@@ -29,6 +29,12 @@
 // RescueUpdateScreen, PlaceAcceptedScreen — onto <ScreenBackdrop>. This is the last A-story:
 // the baseline grows from 29 to 41 here, and both `backdropAdoption`/`cardAdoption` holdout
 // lists go to `[]` (flat rule at zero, the `themeAdoption` precedent).
+//
+// Task B3 (Requests shell root) converts ShelterRequestsScreen, the last shell root — the
+// baseline grows from 43 (41 + Task B1's Donate root + Task B2's Animals root) to 44 here,
+// and `deadTabs` goes from `["requests"]` to `[]`: both ShelterDashboardScreen and
+// ShelterProfileScreen's `onTabPress` gain `t === "requests"`, and ShelterRequestsScreen
+// itself wires home/animals/donate/profile.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -38,7 +44,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the forty-three V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member + 12 Sagip rescuer + 1 Task B1 Donate root + 1 Task B2 Animals root)", () => {
+  it("found the forty-four V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member + 12 Sagip rescuer + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "DonatePledgeScreen",
@@ -73,6 +79,7 @@ describe("surface, re-derived", () => {
       "ShelterDonateScreen",
       "ShelterNeedsScreen",
       "ShelterProfileScreen",
+      "ShelterRequestsScreen",
       "ShelterVolunteerActivityScreen",
       "ShelterVolunteerAttendanceScreen",
       "ShelterVolunteerCalendarScreen",
@@ -91,7 +98,10 @@ describe("surface, re-derived", () => {
     // onTabPress both gain `t === "donate"`), so it leaves this list.
     // Task B2 wires the Animals tab the same way (both roots' onTabPress gain
     // `t === "animals"`, and ShelterAnimalsScreen itself wires home/donate/profile), so
-    // "animals" leaves this list too — only "requests" remains dead.
-    expect(s.deadTabs.sort()).toEqual(["requests"]);
+    // "animals" leaves this list too.
+    // Task B3 wires the Requests tab the same way (both roots' onTabPress gain
+    // `t === "requests"`, and ShelterRequestsScreen itself wires home/animals/donate/
+    // profile) — the last of ShelterTabs' five tabs, so this list is empty now.
+    expect(s.deadTabs.sort()).toEqual([]);
   });
 });

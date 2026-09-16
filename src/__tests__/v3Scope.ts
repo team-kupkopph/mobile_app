@@ -17,14 +17,17 @@
 // screen — so `V3_SCOPE ∪ V3_EXCLUDED` accounts for the entire file list and nothing is
 // silently forgotten (asserted in v3Scope.test.ts).
 
-/** Shell roots (4) — Task B1 added ShelterDonateScreen, the Donate tab's new root, born
- * converted (spec §5); Task B2 adds ShelterAnimalsScreen, the Animals tab's new root, the
- * same way — neither is a re-derived count like the rest of this file, both are ADDITIONS. */
+/** Shell roots (5) — Task B1 added ShelterDonateScreen, the Donate tab's new root, born
+ * converted (spec §5); Task B2 added ShelterAnimalsScreen, the Animals tab's new root, the
+ * same way; Task B3 adds ShelterRequestsScreen, the Requests tab's new root — the last of
+ * ShelterTabs' five tabs to stop being dead — none of the three is a re-derived count like
+ * the rest of this file, all three are ADDITIONS. */
 const SHELL_ROOTS = [
   "ShelterDashboardScreen",
   "ShelterProfileScreen",
   "ShelterDonateScreen",
-  "ShelterAnimalsScreen"
+  "ShelterAnimalsScreen",
+  "ShelterRequestsScreen"
 ] as const;
 
 /** Shelter listings (3) */

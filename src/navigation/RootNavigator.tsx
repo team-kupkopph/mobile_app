@@ -42,6 +42,7 @@ import { ShelterDashboardScreen } from "../screens/ShelterDashboardScreen";
 import { ShelterDonateScreen } from "../screens/ShelterDonateScreen";
 import { ShelterPhoneVerifyScreen } from "../screens/ShelterPhoneVerifyScreen";
 import { ShelterProfileScreen } from "../screens/ShelterProfileScreen";
+import { ShelterRequestsScreen } from "../screens/ShelterRequestsScreen";
 import { ShelterSetupScreen } from "../screens/ShelterSetupScreen";
 import { ShelterTierScreen } from "../screens/ShelterTierScreen";
 import { ShelterVolunteerActivityScreen } from "../screens/ShelterVolunteerActivityScreen";
@@ -141,8 +142,9 @@ export function RootNavigator() {
       <Stack.Screen name="shelterVerifyNgo" component={ShelterVerifyNgoScreen} />
       <Stack.Screen name="shelterDashboard" component={ShelterDashboardScreen} />
       <Stack.Screen name="shelterProfile" component={ShelterProfileScreen} />
-      <Stack.Screen name="shelterDonate" component={ShelterDonateScreen} />
       <Stack.Screen name="shelterAnimals" component={ShelterAnimalsScreen} />
+      <Stack.Screen name="shelterDonate" component={ShelterDonateScreen} />
+      <Stack.Screen name="shelterRequests" component={ShelterRequestsScreen} />
       <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
       <Stack.Screen name="verifyResubmit" component={VerifyResubmitScreen} />
       <Stack.Screen name="reportStray" component={ReportStrayScreen} />

@@ -118,6 +118,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
             if (t === "home") navigation.navigate("shelterDashboard");
             if (t === "donate") navigation.navigate("shelterDonate");
             if (t === "animals") navigation.navigate("shelterAnimals");
+            if (t === "requests") navigation.navigate("shelterRequests");
           }}
         />
       </View>
@@ -228,6 +229,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
           if (t === "home") navigation.navigate("shelterDashboard");
           if (t === "donate") navigation.navigate("shelterDonate");
           if (t === "animals") navigation.navigate("shelterAnimals");
+          if (t === "requests") navigation.navigate("shelterRequests");
         }}
       />
     </View>

@@ -66,10 +66,13 @@ export type RootStackParamList = {
   shelterVerifyNgo: { baseDocs: ShelterDoc[]; socialUrl: string };
   shelterDashboard: undefined;
   shelterProfile: undefined;
-  shelterDonate: undefined;
   // Task B2 · the shelter's Animals tab root — segmented Live/Pending/Adopted over the
   // shelter's own listings.
   shelterAnimals: undefined;
+  shelterDonate: undefined;
+  // Task B3 · the shelter's Requests tab root — segmented Adoption/Volunteer/Placement
+  // over B-be2's merged inbox (GET /shelter/requests).
+  shelterRequests: undefined;
   // Verification decision — the applicant's side (Track V)
   verifyDocuments: undefined;
   verifyResubmit: {
