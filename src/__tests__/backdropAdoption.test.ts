@@ -21,6 +21,9 @@
  *
  * Task A4 (shelter volunteer) converts the nine ShelterVolunteer* screens onto
  * <ScreenBackdrop>, so those nine leave the list here — 24 -> 15.
+ *
+ * Task A5 (verified member) converts MemberUpgradeScreen, MemberVerifyScreen and
+ * MemberSubmittedScreen onto <ScreenBackdrop>, so those three leave the list here — 15 -> 12.
  */
 import { readFileSync, readdirSync } from "fs";
 import { join } from "path";
@@ -51,7 +54,10 @@ const BACKDROP_HOLDOUTS: string[] = V3_SCOPE.filter(
     n !== "ShelterVolunteerAttendanceScreen" &&
     n !== "ShelterVolunteerCalendarScreen" &&
     n !== "ShelterVolunteerActivityScreen" &&
-    n !== "ShelterVolunteerCancelScreen"
+    n !== "ShelterVolunteerCancelScreen" &&
+    n !== "MemberUpgradeScreen" &&
+    n !== "MemberVerifyScreen" &&
+    n !== "MemberSubmittedScreen"
 );
 
 describe("V3 screens sit on the backdrop", () => {
