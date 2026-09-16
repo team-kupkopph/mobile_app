@@ -7,10 +7,10 @@ import { V3_SCOPE, V3_EXCLUDED } from "./v3Scope";
 const SCREENS = join(__dirname, "..", "screens");
 
 describe("v3Scope", () => {
-  it("has 36 in-scope screens — 34 from spec §4.2's own table (see v3Scope.ts header) plus "
-    + "ShelterDonateScreen (Task B1) and ShelterAnimalsScreen (Task B2), each added whole "
-    + "by its own shell-root task (spec §5)", () => {
-    expect(V3_SCOPE.length).toBe(36);
+  it("has 37 in-scope screens — 34 from spec §4.2's own table (see v3Scope.ts header) plus "
+    + "ShelterDonateScreen (Task B1), ShelterAnimalsScreen (Task B2) and ShelterRequestsScreen "
+    + "(Task B3), each added whole by its own shell-root task (spec §5)", () => {
+    expect(V3_SCOPE.length).toBe(37);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {

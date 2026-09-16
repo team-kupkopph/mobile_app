@@ -137,3 +137,23 @@ export type ShelterDashboard = {
   counts: { draft_listings: number; adopted: number; donations: number };
   gates: { can_publish: boolean; donations_enabled: boolean };
 };
+
+// Task B3 — GET /shelter/requests (B-be2), the shelter's merged inbox across its three
+// inbound-request surfaces. `status` carries each source's OWN vocabulary, not a shared
+// enum: adoption/placement use AdoptionInquiry's (active/adopted/declined/withdrawn),
+// volunteer uses VolunteerSignup's (requested/approved/declined/cancelled/completed/
+// no_show) — see shelter/views.py::ShelterRequestsView._adoption_items /
+// _volunteer_items / _placement_items on the backend. `target` is already the exact
+// `navigation.navigate` shape the backend intends (route name + id); `requestRoute` in
+// shelterRequests.ts re-derives it from `kind` instead of trusting the wire string
+// directly, same defensive stance as notifications.ts's own client-side routing.
+export type ShelterRequestKind = "adoption" | "volunteer" | "placement";
+export type ShelterRequest = {
+  kind: ShelterRequestKind;
+  id: string;
+  title: string;
+  subtitle: string;
+  status: string;
+  created_at: string;
+  target: { route: string; id: string };
+};
