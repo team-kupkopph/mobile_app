@@ -7,8 +7,9 @@ import { V3_SCOPE, V3_EXCLUDED } from "./v3Scope";
 const SCREENS = join(__dirname, "..", "screens");
 
 describe("v3Scope", () => {
-  it("has 34 in-scope screens — spec §4.2's own table sums to 34, not the plan's 35; see v3Scope.ts header", () => {
-    expect(V3_SCOPE.length).toBe(34);
+  it("has 35 in-scope screens — 34 from spec §4.2's own table (see v3Scope.ts header) plus "
+    + "ShelterDonateScreen, added whole by Task B1 (spec §5)", () => {
+    expect(V3_SCOPE.length).toBe(35);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {

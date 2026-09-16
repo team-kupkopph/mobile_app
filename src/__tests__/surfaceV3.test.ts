@@ -38,7 +38,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the forty-one V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member + 12 Sagip rescuer)", () => {
+  it("found the forty-two V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member + 12 Sagip rescuer + 1 Task B1 Donate root)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "DonatePledgeScreen",
@@ -69,6 +69,7 @@ describe("surface, re-derived", () => {
       "RescuePlaceSentScreen",
       "RescueUpdateScreen",
       "ShelterDashboardScreen",
+      "ShelterDonateScreen",
       "ShelterNeedsScreen",
       "ShelterProfileScreen",
       "ShelterVolunteerActivityScreen",
@@ -85,6 +86,8 @@ describe("surface, re-derived", () => {
   });
 
   it("found the dead shelter tabs", () => {
-    expect(s.deadTabs.sort()).toEqual(["animals", "donate", "requests"]);
+    // Task B1 wires the Donate tab (ShelterDashboardScreen + ShelterProfileScreen's
+    // onTabPress both gain `t === "donate"`), so it leaves this list.
+    expect(s.deadTabs.sort()).toEqual(["animals", "requests"]);
   });
 });

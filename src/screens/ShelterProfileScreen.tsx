@@ -114,7 +114,10 @@ export function ShelterProfileScreen({ navigation }: Props) {
             on a real device during US-PF3 by someone who could not get past it. */}
         <ShelterTabs
           active="profile"
-          onTabPress={(t) => t === "home" && navigation.navigate("shelterDashboard")}
+          onTabPress={(t) => {
+            if (t === "home") navigation.navigate("shelterDashboard");
+            if (t === "donate") navigation.navigate("shelterDonate");
+          }}
         />
       </View>
     );
@@ -220,7 +223,10 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
       <ShelterTabs
         active="profile"
-        onTabPress={(t) => t === "home" && navigation.navigate("shelterDashboard")}
+        onTabPress={(t) => {
+          if (t === "home") navigation.navigate("shelterDashboard");
+          if (t === "donate") navigation.navigate("shelterDonate");
+        }}
       />
     </View>
   );
