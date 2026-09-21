@@ -100,6 +100,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   web: { favicon: "./assets/favicon.png" },
 
   plugins: [
+    // Xcode 27 needs IPHONEOS_DEPLOYMENT_TARGET ≥ 15.0; three transitive pods still ship
+    // pre-15 targets that override our `platform :ios, '15.1'`. This plugin appends a
+    // post_install hook to the generated Podfile that bumps every pod target to 15.1.
+    // Kept above the other plugins so it runs first and the bump is present on any prebuild.
+    "./plugins/withIosDeploymentTarget",
     "expo-asset",
     "expo-secure-store",
     "expo-web-browser",        // the auth sheet Google sign-in opens (US-A2 / S0-06)
