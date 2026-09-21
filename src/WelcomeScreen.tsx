@@ -1,8 +1,9 @@
 import { useFocusEffect } from "@react-navigation/native";
+import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { setStatusBarStyle } from "expo-status-bar";
-import { useCallback } from "react";
-import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useRef } from "react";
+import { Image, ImageSourcePropType, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { SocialProvider } from "./auth/socialAuth";
@@ -114,7 +115,21 @@ type WelcomeScreenProps = {
   onLogin?: () => void;
   onBrowseGuest?: () => void;
   onTerms?: () => void;
+  /**
+   * US-DEV1 · reached only via the logo's triple-tap gesture below, which itself no-ops
+   * outside a development build — see IS_DEV_PROFILE. Optional because every other caller
+   * (and every existing test that renders this screen) has no reason to supply it.
+   */
+  onDevMenu?: () => void;
 };
+
+/** Dev-only shortcuts must not exist in a store build. Same check as src/api/client.ts and
+ * app.config.ts's own `isDev` — Constants.expoConfig.extra.profile, not NODE_ENV, because
+ * that is the value the build itself validated. */
+const IS_DEV_PROFILE = Constants.expoConfig?.extra?.profile === "development";
+/** Taps must land within this window of each other or the count resets — a slow triple tap
+ * is three separate single taps, not the gesture. */
+const TRIPLE_TAP_WINDOW_MS = 600;
 
 export function WelcomeScreen({
   copy: copyInput,
@@ -123,6 +138,7 @@ export function WelcomeScreen({
   onLogin,
   onBrowseGuest,
   onTerms,
+  onDevMenu,
 }: WelcomeScreenProps) {
   const copy = mergeCopy(copyInput);
   const insets = useSafeAreaInsets();
@@ -146,6 +162,37 @@ export function WelcomeScreen({
     }, []),
   );
 
+  /**
+   * US-DEV1 · triple-tap the logo to reach the dev seed-tokens menu.
+   *
+   * ⚠️ THE GUARD LIVES INSIDE THE HANDLER, NOT AROUND THE `Pressable`. Wiring `onPress`
+   * conditionally on `IS_DEV_PROFILE` would work too, but a stray re-render that recreates
+   * the Pressable with a fresh identity is a subtler bug than a function that simply returns
+   * immediately. Outside a development build this handler runs and does nothing — "the extra
+   * props on the logo are a no-op" is true by construction, not by omission.
+   */
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogoPress = useCallback(() => {
+    if (!IS_DEV_PROFILE) return;
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current);
+      tapTimerRef.current = null;
+    }
+    tapCountRef.current += 1;
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      onDevMenu?.();
+      return;
+    }
+    // Idle reset: a fourth tap 2 seconds after the first two should start counting from zero,
+    // not complete a "triple tap" that took several seconds.
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+      tapTimerRef.current = null;
+    }, TRIPLE_TAP_WINDOW_MS);
+  }, [onDevMenu]);
 
   return (
     <View style={styles.root} testID="screen.welcome">
@@ -170,9 +217,17 @@ export function WelcomeScreen({
         />
 
         <View style={[styles.heroInner, { paddingTop: insets.top + 28 }]}>
-          <View style={styles.logoCard}>
+          <Pressable
+            onPress={handleLogoPress}
+            style={styles.logoCard}
+            // Decorative-brand-mark semantics unchanged for everyone but a dev build's tester
+            // deliberately hunting for this: no accessibilityRole/label is added, so a screen
+            // reader still treats this exactly as it did as a plain View.
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
             <Image source={logo} resizeMode="contain" style={styles.logoImage} />
-          </View>
+          </Pressable>
 
           {/* accessibilityRole="header" gives a screen reader a landmark to jump to — US-W1
               is about navigability, and a hero with no header is a wall of flat text. */}

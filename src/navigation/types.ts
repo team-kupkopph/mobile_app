@@ -179,4 +179,9 @@ export type RootStackParamList = {
   shelterVolunteerCalendar: undefined;
   shelterVolunteerEdit: { shiftId: string };
   shelterVolunteerCancel: { shiftId: string };
+  // US-DEV1 · dev-only seed-tokens shortcut. The type exists unconditionally so a
+  // production build still type-checks against `navigation.navigate("dev")` in
+  // WelcomeScreen.tsx; RootNavigator.tsx is what actually gates whether the route is
+  // ever registered (Constants.expoConfig.extra.profile === "development").
+  dev: undefined;
 };
