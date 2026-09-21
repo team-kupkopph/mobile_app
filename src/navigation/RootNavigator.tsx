@@ -1,4 +1,5 @@
 import { NativeStackScreenProps, createNativeStackNavigator } from "@react-navigation/native-stack";
+import Constants from "expo-constants";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
@@ -98,9 +99,16 @@ import { WaiverScreen } from "../screens/WaiverScreen";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
 import { typography } from "../theme";
+import { DevMenuScreen } from "../screens/dev/DevMenuScreen";
 // screen imports are added as tasks land; start with the ones that exist.
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+/** Dev-only routes are registered ONLY under this check — the same one src/api/client.ts and
+ * app.config.ts use — so the "dev" route literally does not exist in a production build,
+ * not merely "is hard to reach". See WelcomeScreen.tsx's triple-tap gesture, which is the
+ * only way anything ever navigates here. */
+const IS_DEV_PROFILE = Constants.expoConfig?.extra?.profile === "development";
 
 export function RootNavigator() {
   const { tokens, isReady } = useAuth();
@@ -217,6 +225,9 @@ export function RootNavigator() {
       <Stack.Screen name="shelterVolunteerCalendar" component={ShelterVolunteerCalendarScreen} />
       <Stack.Screen name="shelterVolunteerEdit" component={ShelterVolunteerEditScreen} />
       <Stack.Screen name="shelterVolunteerCancel" component={ShelterVolunteerCancelScreen} />
+      {/* US-DEV1 — dev-only seed-tokens shortcut, registered ONLY in a development build.
+          Reached exclusively by triple-tapping Welcome's logo (see WelcomeScreen.tsx). */}
+      {IS_DEV_PROFILE ? <Stack.Screen name="dev" component={DevMenuScreen} /> : null}
     </Stack.Navigator>
   );
 }
@@ -233,6 +244,7 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
       onLogin={() => navigation.navigate("signin")}
       onBrowseGuest={() => navigation.navigate("homeGuest")}
       onSocial={onSocial}
+      onDevMenu={() => navigation.navigate("dev")}
     />
   );
 }
