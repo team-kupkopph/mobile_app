@@ -6,8 +6,10 @@ import {
   Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View
 } from "react-native";
 
+import { useAuth } from "../auth/AuthContext";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import { SignupWall } from "../components/SignupWall";
 import { Avatar, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
@@ -36,6 +38,9 @@ function initials(name: string) {
 
 export function StoryDetailScreen({ navigation, route }: Props) {
   const api = useApi();
+  const { tokens } = useAuth();
+  const isGuest = tokens === null;
+  const [wallOpen, setWallOpen] = useState(false);
   const { storyId } = route.params;
   const [story, setStory] = useState<Story | null>(null);
   // US-R1 · keep the RESULT. The previous line discarded it (`r.ok && setStory(...)`), which
@@ -56,6 +61,11 @@ export function StoryDetailScreen({ navigation, route }: Props) {
 
   async function toggleReact() {
     if (!story) return;
+    // G16 (from library/dev/test-plan-guest.md Run 3): a guest tap used to fire the
+    // POST unauthenticated, get a silent 401 from the AllowAny-only sieve, and revert
+    // the heart with no explanation to the user. Now: open the account wall so they
+    // know why the tap didn't do what it looked like it did.
+    if (isGuest) { setWallOpen(true); return; }
     const wasOn = story.my_reaction;
     // optimistic: flip + adjust count now, reconcile from the server's real count.
     setStory({ ...story, my_reaction: !wasOn, reaction_count: story.reaction_count + (wasOn ? -1 : 1) });
@@ -70,6 +80,11 @@ export function StoryDetailScreen({ navigation, route }: Props) {
   }
 
   function confirmFlag() {
+    // G16 (same reasoning as toggleReact): a guest tapping Flag would confirm the
+    // Alert, POST to /moderation/flags, 401, and then see "Thanks" from the client
+    // (which reads res.ok only, not the status code) — a truly silent failure with
+    // false-positive UX. Route them to the wall instead.
+    if (isGuest) { setWallOpen(true); return; }
     Alert.alert("Flag this story?",
       "It'll be sent to Kupkop for review. Use this for off-topic, misleading, or unsafe posts.",
       [{ text: "Cancel", style: "cancel" },
@@ -141,6 +156,13 @@ export function StoryDetailScreen({ navigation, route }: Props) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <SignupWall
+        visible={wallOpen}
+        action="account"
+        onCreateAccount={() => { setWallOpen(false); navigation.navigate("accountType"); }}
+        onLogin={() => { setWallOpen(false); navigation.navigate("signin"); }}
+        onDismiss={() => setWallOpen(false)}
+      />
     </View>
   );
 }
