@@ -1,0 +1,145 @@
+# C-N8 · tier-1 verify: DPA consent left unticked blocks "Continue to NGO papers".
+#
+# Requires a SHELTER account: MAESTRO_SHELTER_EMAIL / MAESTRO_SHELTER_PASSWORD.
+#
+# ⚠️ TWO ENVIRONMENT ASSUMPTIONS THIS FLOW CANNOT VERIFY FOR ITSELF, WRITTEN DOWN RATHER THAN
+# SILENTLY ASSUMED (dev/test-plan-auth.md's own Run 4/5 notes call the first one out too):
+#
+#   1. The account's `ShelterProfile.tier` must be `registered_ngo`. `ShelterVerifyScreen`'s
+#      single primary button reads `isNgo` off `route.params.tier` and only shows/behaves as
+#      "Continue to NGO papers" (testID `btn.shelterVerify.continueNgo`) when it is — with
+#      `community_rescue` the SAME button is "Submit for review" (`btn.shelterVerify.submit`)
+#      and, on a clean unverified account, submitting it directly. `backend/dev/e2e_fixtures.py`
+#      as checked in sets `e2e.shelter@kupkop.invalid` to `ShelterTier.COMMUNITY_RESCUE` — so
+#      this flow needs that overridden to `registered_ngo` (`manage.py shell`, or a fixture
+#      change) before it will reach `btn.shelterVerify.continueNgo` at all. If the account is
+#      still tier-1, swap the two tapOn/assertVisible ids below for the `*.submit` variants and
+#      this becomes the tier-1 half of C-N8 (still a real row: consent must gate "Submit for
+#      review" exactly the same way) rather than the `-ngo` half the plan text calls out.
+#   2. The dashboard only exposes a route to this screen while `GET /shelter/dashboard` reports
+#      state "incomplete" (ShelterDashboardScreen's `onBannerPress`, testID
+#      `btn.shelterDashboard.continueVerify`) — i.e. the account has never submitted a
+#      verification request. A prior curl/seed walk against this same shared account (Run 8's
+#      dev-seed close of C-2/C-3) may have left it "pending" instead, in which case this button
+#      is absent and the flow fails at the first `tapOn` below. Reset with the fixture script or
+#      confirm state via `GET /shelter/dashboard` before running.
+#
+# ⚠️ THE DOCUMENT-UPLOAD STEPS BELOW ARE UNVERIFIED — WRITTEN BY INSPECTION, NOT BY RUNNING IT.
+# Every one of the 9 flows this suite already had avoids the native iOS Photos picker entirely
+# (10-report-a-stray's photo is explicitly OPTIONAL and the passing flow never taps it) — this
+# is the first attempt at it here. `addMedia` is Maestro's own documented mechanism for seeding
+# the simulator's gallery; the tap sequence that follows (`PXGGridLayout-Info` for iOS 18's
+# picker grid, falling back to the `Photo, .*` accessibility-label regex for older ones) is
+# Maestro's own published recipe (docs.maestro.dev/examples/recipes/choose-images-from-the-
+# gallery), not something tuned against this app's actual simulator. Confirm on a device pass
+# before trusting this the way the other 9 flows are trusted.
+appId: ph.kupkop.app
+---
+- runFlow:
+    file: 00-signin.yaml
+    env:
+      MAESTRO_EMAIL: ${MAESTRO_SHELTER_EMAIL}
+      MAESTRO_PASSWORD: ${MAESTRO_SHELTER_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterDashboard"
+    timeout: 30000
+
+# Photo-library access, granted with a SECOND launchApp rather than touching 00-signin.yaml's
+# own launchApp block (shared by every other flow in this suite). No `clearState` / `clearKeychain`
+# here, so the session should survive the relaunch — tokens live in the keychain (00-signin.yaml's
+# own comment) and app-local storage is untouched. Unverified; if the relaunch drops the session,
+# grant `photos: allow` on 00-signin.yaml's launchApp step instead and remove this one.
+- launchApp:
+    permissions:
+      photos: allow
+- addMedia:
+    - "../fixtures/e2e-doc.jpg"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterDashboard"
+    timeout: 30000
+
+- tapOn:
+    id: "btn.shelterDashboard.continueVerify"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterVerify"
+    timeout: 20000
+
+# Government ID, proof of billing, three rescue photos — all three are required before
+# `onPrimary` ever reaches the consent check (ShelterVerifyScreen.tsx's validation order is
+# govId -> billing -> photos -> social link -> consent), so C-N8 cannot be reached without them.
+- tapOn:
+    id: "btn.shelterVerify.uploadGovId"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadBilling"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadPhoto"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadPhoto"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadPhoto"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+# Social link is also required (socialLink.ts) and checked before consent.
+- tapOn:
+    id: "field.shelterVerify.socialLink"
+- inputText: "facebook.com/e2e.shelter"
+
+# ⚠️ THE POINT OF THIS FLOW: consent is deliberately left UNTICKED. Do NOT tap
+# chk.shelterVerify.consentDpa.
+- tapOn:
+    id: "btn.shelterVerify.continueNgo"
+
+# The generic form-error box (err.shelterVerify.form) is what actually shows "Tick the consent
+# box to continue." — ShelterVerifyScreen has no per-field highlight for this checkbox the way
+# KawangGawaDetailScreen's waiver/contact checkboxes do (chk.kawanggawaDetail.waiver + its own
+# err.kawanggawaDetail.waiver); this screen surfaces every validation through one shared Text.
+- assertVisible:
+    id: "err.shelterVerify.form"
+- assertNotVisible:
+    id: "screen.shelterVerifyNgo"

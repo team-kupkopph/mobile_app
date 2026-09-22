@@ -51,7 +51,13 @@ const SOURCE = sourceFiles(SRC).map((f) => readFileSync(f, "utf8")).join("\n");
  */
 const LITERALS = new Set([
   ...[...SOURCE.matchAll(/testID="([^"]+)"/g)].map((m) => m[1]),
-  ...[...SOURCE.matchAll(/testID:\s*"([^"]+)"/g)].map((m) => m[1])
+  ...[...SOURCE.matchAll(/testID:\s*"([^"]+)"/g)].map((m) => m[1]),
+  // FOURTH SHAPE, added when ShelterVerifyNgoScreen.tsx needed a testID on a field's live
+  // inline-error Text as well as on the field itself (US-X2 / C-N10) — `Field`'s `testID` prop
+  // is already spoken for (it forwards to the `TextInput`), so the error carries its own
+  // `errorTestID="..."` prop instead. Same lesson as the US-CH1 comment above: the guard
+  // caught the gap, so the shape gets taught here rather than the check getting loosened.
+  ...[...SOURCE.matchAll(/errorTestID="([^"]+)"/g)].map((m) => m[1])
 ]);
 const PREFIXES = [...SOURCE.matchAll(/testID=\{`([^`$]*)\$\{/g)].map((m) => m[1]);
 

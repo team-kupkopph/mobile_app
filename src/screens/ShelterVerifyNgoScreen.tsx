@@ -115,15 +115,16 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.screen} testID="screen.shelterVerifyNgo">
       <ScreenHeader title="NGO papers" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>NGO papers</Text>
         <Text style={styles.subheading}>Step 2 of 2 — the registration and vet details for a Verified Shelter.</Text>
 
-        <DocSlot label="SEC / DTI registration" hint="Your registration certificate · Required" done={!!sec} busy={busy === "sec"} onPress={() => uploadInto("sec", setSec)} />
+        <DocSlot testID="btn.shelterVerifyNgo.uploadSec" label="SEC / DTI registration" hint="Your registration certificate · Required" done={!!sec} busy={busy === "sec"} onPress={() => uploadInto("sec", setSec)} />
         <DocSlot
+          testID="btn.shelterVerifyNgo.uploadBai"
           label="BAI certificate"
           hint={baiPending ? "You'll send this later" : "Annual BAI licence · Required"}
           done={!!bai}
@@ -132,13 +133,15 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
           onPress={() => uploadInto("bai", setBai)}
         />
 
-        <TouchableOpacity activeOpacity={0.85} style={styles.pendingRow} onPress={() => setBaiPending((v) => !v)}>
+        <TouchableOpacity testID="chk.shelterVerifyNgo.baiPending" activeOpacity={0.85} style={styles.pendingRow} onPress={() => setBaiPending((v) => !v)}>
           <View style={[styles.consentBox, baiPending && styles.consentBoxChecked]}>{baiPending && <CheckIcon color="#FFFFFF" size={13} />}</View>
           <Text style={styles.pendingText}>Our BAI licence is still processing — I'll send it later.</Text>
         </TouchableOpacity>
 
-        <Field label="Vet name" value={vetName} onChangeText={setVetName} placeholder="Dr. Juan Cruz" />
+        <Field testID="field.shelterVerifyNgo.vetName" label="Vet name" value={vetName} onChangeText={setVetName} placeholder="Dr. Juan Cruz" />
         <Field
+          testID="field.shelterVerifyNgo.prcNumber"
+          errorTestID="err.shelterVerifyNgo.prcFormat"
           label="Vet PRC number"
           value={prc}
           onChangeText={setPrc}
@@ -147,9 +150,9 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
           error={prc.trim().length > 0 && !prcValid ? "PRC number must be 6–8 digits." : undefined}
         />
 
-        {!!error && <Text style={styles.formError}>{error}</Text>}
+        {!!error && <Text testID="err.shelterVerifyNgo.form" style={styles.formError}>{error}</Text>}
 
-        <Button label="Submit for review" onPress={onSubmit} loading={submitting} style={styles.submitButton} />
+        <Button testID="btn.shelterVerifyNgo.submit" label="Submit for review" onPress={onSubmit} loading={submitting} style={styles.submitButton} />
       </ScrollView>
     </View>
   );
@@ -161,7 +164,8 @@ function DocSlot({
   done,
   busy,
   onPress,
-  disabled
+  disabled,
+  testID
 }: {
   label: string;
   hint: string;
@@ -169,9 +173,10 @@ function DocSlot({
   busy: boolean;
   onPress: () => void;
   disabled?: boolean;
+  testID?: string;
 }) {
   return (
-    <TouchableOpacity activeOpacity={0.8} style={[styles.docCard, disabled && styles.docCardDisabled]} onPress={onPress} disabled={busy || disabled}>
+    <TouchableOpacity testID={testID} activeOpacity={0.8} style={[styles.docCard, disabled && styles.docCardDisabled]} onPress={onPress} disabled={busy || disabled}>
       <Avatar size={48}>
         <DocumentIcon color={authColors.teal} />
       </Avatar>

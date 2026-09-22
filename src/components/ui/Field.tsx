@@ -14,6 +14,14 @@ type FieldProps = {
    * does not. This is why `error` is a prop on the field and there is no FormErrorSummary.
    */
   error?: string;
+  /**
+   * testID for the error `<Text>` itself (US-X2). Separate from `testID`, which the caller
+   * puts on the `TextInput` — this one lets a Maestro flow assert the LIVE, per-keystroke
+   * validation message (e.g. a format rule that reacts before any submit), which the
+   * screen-level submit-time error box cannot: that one only updates when `onSubmit` runs and
+   * stays stale otherwise.
+   */
+  errorTestID?: string;
   /** Read-only renders flat and unshadowed — it is not a control, so it should not look raised. */
   readOnly?: boolean;
   /** Masks the value and, with `onToggleSecure`, renders the built-in eye. */
@@ -35,7 +43,7 @@ type FieldProps = {
 >;
 
 export function Field({
-  label, value, onChangeText, error, readOnly, secure, onToggleSecure, accessory, style, onBlur, ...input
+  label, value, onChangeText, error, errorTestID, readOnly, secure, onToggleSecure, accessory, style, onBlur, ...input
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
   const state = error ? "error" : focused ? "focused" : readOnly ? "readOnly" : "rest";
@@ -82,7 +90,7 @@ export function Field({
         </View>
       </View>
       {error ? (
-        <Text style={styles.errorText} accessibilityLiveRegion="polite">{error}</Text>
+        <Text testID={errorTestID} style={styles.errorText} accessibilityLiveRegion="polite">{error}</Text>
       ) : null}
     </View>
   );
