@@ -49,13 +49,6 @@ function getCopy(action: SignupWallAction, subject?: string): WallCopy {
           ? `Takes a minute — we'll bring you right back to ${subject}.`
           : "Takes a minute — we'll bring you right back."
       };
-    case "save":
-      return {
-        icon: <HouseHeartIcon />,
-        title: subject ? `Save ${subject}` : "Save this pet",
-        body: "Create a free account to save pets you love and get updates.",
-        note: "Takes a minute — we'll bring you right back."
-      };
     case "report":
       return {
         icon: <PinIcon />,
