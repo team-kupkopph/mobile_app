@@ -127,16 +127,17 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.screen} testID="screen.shelterVerify">
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>{isNgo ? "Base checks" : "Prove you're real"}</Text>
         <Text style={styles.subheading}>{isNgo ? "Step 1 of 2 — the base documents every shelter shares." : "A few documents and our team takes it from here."}</Text>
 
-        <DocSlot label="Government ID" hint="A clear photo of your ID · Required" done={!!govId} busy={busy === "gov"} onPress={() => uploadInto("gov", setGovId)} />
-        <DocSlot label="Proof of billing" hint="Shows your real address · Required" done={!!billing} busy={busy === "bill"} onPress={() => uploadInto("bill", setBilling)} />
+        <DocSlot testID="btn.shelterVerify.uploadGovId" label="Government ID" hint="A clear photo of your ID · Required" done={!!govId} busy={busy === "gov"} onPress={() => uploadInto("gov", setGovId)} />
+        <DocSlot testID="btn.shelterVerify.uploadBilling" label="Proof of billing" hint="Shows your real address · Required" done={!!billing} busy={busy === "bill"} onPress={() => uploadInto("bill", setBilling)} />
         <DocSlot
+          testID="btn.shelterVerify.uploadPhoto"
           label="Rescue-space photos"
           hint={`Where the animals are kept · ${photos.length}/${MIN_PHOTOS} added`}
           done={photos.length >= MIN_PHOTOS}
@@ -146,6 +147,7 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
         />
 
         <Field
+          testID="field.shelterVerify.socialLink"
           label="Social link"
           value={social}
           onChangeText={(t) => { setSocial(t); setSocialError(undefined); }}
@@ -157,14 +159,15 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
         />
         {!!socialLinkNote(social) && <Text style={styles.fieldNote}>{socialLinkNote(social)}</Text>}
 
-        <TouchableOpacity activeOpacity={0.85} style={styles.consentRow} onPress={() => setConsent((v) => !v)}>
+        <TouchableOpacity testID="chk.shelterVerify.consentDpa" activeOpacity={0.85} style={styles.consentRow} onPress={() => setConsent((v) => !v)}>
           <View style={[styles.consentBox, consent && styles.consentBoxChecked]}>{consent && <CheckIcon color="#FFFFFF" size={13} />}</View>
           <Text style={styles.consentText}>I consent to Kupkop PH collecting these documents solely to verify our organisation.</Text>
         </TouchableOpacity>
 
-        {!!error && <Text style={styles.formError}>{error}</Text>}
+        {!!error && <Text testID="err.shelterVerify.form" style={styles.formError}>{error}</Text>}
 
         <Button
+          testID={isNgo ? "btn.shelterVerify.continueNgo" : "btn.shelterVerify.submit"}
           label={isNgo ? "Continue to NGO papers" : "Submit for review"}
           onPress={onPrimary}
           loading={submitting}
@@ -185,7 +188,8 @@ function DocSlot({
   done,
   busy,
   onPress,
-  actionLabel = "Upload"
+  actionLabel = "Upload",
+  testID
 }: {
   label: string;
   hint: string;
@@ -193,9 +197,10 @@ function DocSlot({
   busy: boolean;
   onPress: () => void;
   actionLabel?: string;
+  testID?: string;
 }) {
   return (
-    <TouchableOpacity activeOpacity={0.8} style={styles.docCard} onPress={onPress} disabled={busy}>
+    <TouchableOpacity testID={testID} activeOpacity={0.8} style={styles.docCard} onPress={onPress} disabled={busy}>
       <Avatar size={48}>
         <DocumentIcon color={authColors.teal} />
       </Avatar>

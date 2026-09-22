@@ -184,7 +184,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
                 {state === "pending" ? "They go live the moment you're approved." : "Upload your documents to get approved."}
               </Text>
             </View>
-            <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.8} onPress={onBannerPress}>
+            <TouchableOpacity testID="btn.shelterDashboard.continueVerify" hitSlop={TAP_SLOP} activeOpacity={0.8} onPress={onBannerPress}>
               <Text style={styles.footCta}>{state === "pending" ? "Start ›" : "Continue ›"}</Text>
             </TouchableOpacity>
           </Card>

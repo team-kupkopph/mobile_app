@@ -1,0 +1,154 @@
+# C-N10 · tier-2 NGO papers: PRC number format (6-8 digits, format-only, not a live lookup).
+#
+# Requires a SHELTER account whose ShelterProfile.tier is registered_ngo — see 55's header
+# comment for why (the plan's `-ngo` half assumes it; `backend/dev/e2e_fixtures.py` as checked
+# in does not set it) — and the same "account must still be in the pre-submission 'incomplete'
+# dashboard state" caveat.
+#
+# ⚠️ The tier-1 document-upload steps below (gov ID, billing, 3 photos) carry the same
+# UNVERIFIED native-Photos-picker caveat as 55 — see that file's header for the full
+# explanation and the addMedia/PXGGridLayout-Info recipe this borrows from Maestro's own docs.
+#
+# ⚠️ DESIGN NOTE — why this flow never uploads SEC/BAI or fills the vet name. PRC format is
+# checked TWO places in ShelterVerifyNgoScreen.tsx: a live, per-keystroke inline error on the
+# Field itself (`error={prc.trim().length > 0 && !prcValid ? "..." : undefined}`, reactive to
+# `prc`/`prcValid` alone — now carrying its own testID, `err.shelterVerifyNgo.prcFormat`, added
+# in this same change so Maestro has something to assert against it directly), and a SECOND
+# check inside `onSubmit`, which only runs after `docsReady` (SEC uploaded, and BAI uploaded or
+# marked pending) and a non-empty vet name — i.e. reaching the submit-time check needs the SEC
+# document picker too, on top of everything 55 already needs for tier-1. The inline field error
+# needs none of that: it updates the instant the PRC text changes, with nothing uploaded and no
+# submit ever pressed. Asserting THAT selector tests the exact rule C-N10 is about (PRC format,
+# 6-8 digits) with the smallest possible flow and zero risk of writing a real verification row
+# to the shared dev DB — which is also why the "valid PRC" final step below never taps submit.
+appId: ph.kupkop.app
+---
+- runFlow:
+    file: 00-signin.yaml
+    env:
+      MAESTRO_EMAIL: ${MAESTRO_SHELTER_EMAIL}
+      MAESTRO_PASSWORD: ${MAESTRO_SHELTER_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterDashboard"
+    timeout: 30000
+
+- launchApp:
+    permissions:
+      photos: allow
+- addMedia:
+    - "../fixtures/e2e-doc.jpg"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterDashboard"
+    timeout: 30000
+
+- tapOn:
+    id: "btn.shelterDashboard.continueVerify"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterVerify"
+    timeout: 20000
+
+- tapOn:
+    id: "btn.shelterVerify.uploadGovId"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadBilling"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadPhoto"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadPhoto"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "btn.shelterVerify.uploadPhoto"
+- tapOn:
+    id: 'PXGGridLayout-Info'
+    index: 0
+    optional: true
+- tapOn:
+    text: 'Photo, .*'
+    index: 0
+    optional: true
+
+- tapOn:
+    id: "field.shelterVerify.socialLink"
+- inputText: "facebook.com/e2e.shelter"
+
+- tapOn:
+    id: "chk.shelterVerify.consentDpa"
+- tapOn:
+    id: "btn.shelterVerify.continueNgo"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterVerifyNgo"
+    timeout: 20000
+
+# --- C-N10 itself: three invalid shapes from the plan, each checked live on the field. ---
+
+# 12345 — 5 digits, too short.
+- tapOn:
+    id: "field.shelterVerifyNgo.prcNumber"
+- inputText: "12345"
+- assertVisible:
+    id: "err.shelterVerifyNgo.prcFormat"
+
+- tapOn:
+    id: "field.shelterVerifyNgo.prcNumber"
+- eraseText
+# 123456789 — 9 digits, too long.
+- inputText: "123456789"
+- assertVisible:
+    id: "err.shelterVerifyNgo.prcFormat"
+
+- tapOn:
+    id: "field.shelterVerifyNgo.prcNumber"
+- eraseText
+# ABC123 — non-numeric.
+- inputText: "ABC123"
+- assertVisible:
+    id: "err.shelterVerifyNgo.prcFormat"
+
+# 123456 — a valid 6-digit PRC number. The live error must clear; deliberately NOT submitted
+# (see the header note — a real submit here would write a pending VerificationRequest to the
+# shared dev DB that would then need manual cleanup).
+- tapOn:
+    id: "field.shelterVerifyNgo.prcNumber"
+- eraseText
+- inputText: "123456"
+- assertNotVisible:
+    id: "err.shelterVerifyNgo.prcFormat"
