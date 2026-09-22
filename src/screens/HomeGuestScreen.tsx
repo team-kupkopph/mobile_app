@@ -118,10 +118,14 @@ export function HomeGuestScreen({ navigation }: Props) {
 
         {/* The status slot: where a member sees "Verified Member in review", a guest sees this,
             in the same card. */}
+        {/* G11 (library/dev/test-plan-guest.md Run 2): this used to navigate straight to
+            accountType, the one guest CTA that skipped the wall. Owner ratified: route through
+            the wall like every other gated action, for one consistent gate across the guest
+            surface. */}
         <TouchableOpacity
           activeOpacity={0.85}
           style={styles.guestCard}
-          onPress={() => navigation.navigate("accountType")}
+          onPress={() => openWall("account")}
           accessibilityRole="button"
           accessibilityLabel="Sign up"
         >
