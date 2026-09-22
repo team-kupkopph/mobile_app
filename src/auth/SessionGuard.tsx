@@ -23,6 +23,15 @@ const AUTH_SCREENS: Array<keyof RootStackParamList> = [
   "passwordChanged",
   "homeGuest",
   "support",
+  // G15 (from library/dev/test-plan-guest.md Run 3): guest-accessible read-only surfaces.
+  // A signed-in user whose session expires while on one of these should STAY on the
+  // current screen, not bounce to Welcome — the screen is legitimately viewable as a
+  // guest, so the tokens transition is silent to them and the API calls (which are
+  // AllowAny reads on the backend) keep succeeding. Without these entries the guard
+  // resets to Welcome and forces them to re-navigate through homeGuest.
+  "stories",
+  "storyDetail",
+  "rescueMap",
 ];
 
 type Props = {

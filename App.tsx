@@ -1,4 +1,5 @@
 import { NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
+import { LogBox } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -11,6 +12,16 @@ import { initErrorReporting } from "./src/observability";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { PushBridge } from "./src/push/PushBridge";
 import type { RootStackParamList } from "./src/navigation/types";
+
+// LogBox targeted ignore (from library/dev/test-plan-guest.md Run 7's "LogBox ergonomic"
+// finding). RN's own Animated internals warn "Sending onAnimatedValueUpdate with no
+// listeners registered" during ordinary tab-bar/screen transitions — nothing we can fix
+// at this level and nothing a developer needs to see. Keeping every other warning
+// unmuted so a genuine yellow-box still surfaces. Dev-only; releases have LogBox off
+// entirely per the RN default. Fixes the ergonomic issue where the yellow banner
+// overlapped the F19 dev chip on SignupWall and other bottom-of-screen affordances
+// during Maestro / MCP walks.
+if (__DEV__) LogBox.ignoreLogs([/onAnimatedValueUpdate/]);
 
 // US-E2 · started at module scope, before the first render, so a crash during startup is
 // still captured. No-op until a DSN is configured.
