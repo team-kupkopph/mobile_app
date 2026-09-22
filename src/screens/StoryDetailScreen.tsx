@@ -10,6 +10,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { SignupWall } from "../components/SignupWall";
+import { setIntent } from "../guestIntent";
 import { Avatar, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
@@ -158,8 +159,12 @@ export function StoryDetailScreen({ navigation, route }: Props) {
       </ScrollView>
       <SignupWall
         visible={wallOpen}
-        action="account"
-        onCreateAccount={() => { setWallOpen(false); navigation.navigate("accountType"); }}
+        // G16 follow-up: owner ratified a dedicated "react" intent over the generic
+        // "account" copy, so the wall now names the actual gated action ("React to
+        // stories") and the post-signup Home toast says "You can now react to stories."
+        // instead of the generic "You can now manage your profile."
+        action="react"
+        onCreateAccount={() => { setIntent("react"); setWallOpen(false); navigation.navigate("accountType"); }}
         onLogin={() => { setWallOpen(false); navigation.navigate("signin"); }}
         onDismiss={() => setWallOpen(false)}
       />

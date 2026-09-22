@@ -63,6 +63,13 @@ function getCopy(action: SignupWallAction, subject?: string): WallCopy {
         body: "Create a free account to sign up for Kawang-Gawa volunteer shifts.",
         note: "Takes a minute — we'll bring you right back."
       };
+    case "react":
+      return {
+        icon: <HeartIcon />,
+        title: "React to stories",
+        body: "Create a free account to react to stories from the community.",
+        note: "Takes a minute — we'll bring you right back."
+      };
     case "account":
     default:
       return {
@@ -150,6 +157,14 @@ function PinIcon() {
       <View style={styles.pinCircle} />
     </View>
   );
+}
+
+// G16 follow-up (owner ratified a dedicated "react" intent over the generic "account"
+// copy) — same glyph StoryDetailScreen's own React button uses (♥), sized to read clearly
+// inside the wall's 76×76 iconCircle rather than composed from primitives like the two
+// icons above.
+function HeartIcon() {
+  return <Text style={styles.heartIcon}>♥</Text>;
 }
 
 const styles = StyleSheet.create({
@@ -298,6 +313,11 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: "center",
     justifyContent: "center"
+  },
+  heartIcon: {
+    fontSize: 32,
+    color: authColors.teal,
+    lineHeight: 34
   },
   pinCircle: {
     width: 18,
