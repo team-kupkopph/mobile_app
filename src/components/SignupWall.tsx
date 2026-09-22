@@ -7,12 +7,21 @@
 // unrelated and already built (M7).
 import { ReactNode } from "react";
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import Constants from "expo-constants";
 
 import { GuestIntentAction } from "../guestIntent";
 import { CheckIcon, ProfileIcon, VolunteerIcon } from "./AppIcons";
 import { PrimaryButton, authColors } from "../screens/AuthFormKit";
 import { TAP_SLOP } from "../touch";
 import { radii, typography } from "../theme";
+import { RootStackParamList } from "../navigation/types";
+
+// Same gate as RootNavigator.tsx's IS_DEV_PROFILE / WelcomeScreen.tsx's triple-tap
+// trigger — Constants.expoConfig.extra.profile, not NODE_ENV — so a store build never
+// registers the "dev" route and this chip never renders (RootNavigator.tsx:111).
+const IS_DEV_PROFILE = Constants.expoConfig?.extra?.profile === "development";
 
 export type SignupWallAction = GuestIntentAction;
 
@@ -74,6 +83,11 @@ function getCopy(action: SignupWallAction, subject?: string): WallCopy {
 
 export function SignupWall({ visible, action, subject, onCreateAccount, onLogin, onDismiss }: SignupWallProps) {
   const copy = getCopy(action, subject);
+  // Dev-only affordance (F19) — reads the same route the DevMenu's own triple-tap
+  // entry point uses. Navigating away is what closes the wall; guestIntent.ts's
+  // module singleton is untouched here, so whatever intent was set when the wall
+  // opened survives to HomeScreen's takeIntent() once seeding lands back on Home.
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onDismiss}>
@@ -106,6 +120,17 @@ export function SignupWall({ visible, action, subject, onCreateAccount, onLogin,
           <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={onDismiss} style={styles.laterPressable}>
             <Text style={styles.laterLink}>Keep browsing</Text>
           </TouchableOpacity>
+
+          {IS_DEV_PROFILE ? (
+            <TouchableOpacity
+              hitSlop={TAP_SLOP}
+              activeOpacity={0.75}
+              onPress={() => navigation.navigate("dev")}
+              style={styles.devPressable}
+            >
+              <Text style={styles.devLink}>Dev · Seed as e2e.owner</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
     </Modal>
@@ -219,6 +244,15 @@ const styles = StyleSheet.create({
   },
   laterLink: {
     color: "#AAA69D",
+    ...typography.meta,
+    fontWeight: "700"
+  },
+  devPressable: {
+    marginTop: 10,
+    paddingVertical: 4
+  },
+  devLink: {
+    color: authColors.muted,
     ...typography.meta,
     fontWeight: "700"
   },
