@@ -433,8 +433,6 @@ function intentToast(action: GuestIntentAction): [string, string] {
   switch (action) {
     case "adopt":
       return ["You're in!", "You can now send adoption inquiries."];
-    case "save":
-      return ["You're in!", "You can now save pets you love."];
     case "report":
       return ["You're in!", "You can now report strays."];
     case "volunteer":

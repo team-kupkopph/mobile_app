@@ -225,6 +225,12 @@ export function WelcomeScreen({
             // reader still treats this exactly as it did as a plain View.
             accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
+            // F17 — Maestro-friendly triple-tap: a future e2e flow reaches DevMenu with
+            // `- tapOn: id: btn.welcome.logo` `  repeat: 3` which fires within Maestro's
+            // native tap-batch (well under 600ms), bypassing the MCP-tap-round-trip issue
+            // Run 6 documented. Present in every build; only `handleLogoPress`'s guard
+            // decides whether the taps do anything.
+            testID="btn.welcome.logo"
           >
             <Image source={logo} resizeMode="contain" style={styles.logoImage} />
           </Pressable>

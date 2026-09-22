@@ -3,7 +3,7 @@
 // threaded through every route's params, and without persisting to SecureStore (it's meant to be
 // resumed once, this session, then forgotten — a stale intent surviving an app relaunch would be
 // surprising). HomeScreen's focus effect calls takeIntent() once it lands after signup.
-export type GuestIntentAction = "adopt" | "report" | "volunteer" | "save" | "account";
+export type GuestIntentAction = "adopt" | "report" | "volunteer" | "account";
 
 let pendingIntent: GuestIntentAction | null = null;
 
