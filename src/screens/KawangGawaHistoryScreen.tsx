@@ -15,17 +15,9 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { CardTone, historyHours, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
+import { historyHours, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
-
-
-const TONE: Record<CardTone, { bg: string; fg: string }> = {
-  active: { bg: colors.successBg, fg: colors.success },
-  done: { bg: colors.soft, fg: colors.teal },
-  muted: { bg: colors.warningBg, fg: colors.warningStrong },
-  danger: { bg: colors.dangerBg, fg: colors.danger }
-};
+import { ScreenHeader, chipTones } from "../components/ui";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -48,8 +40,8 @@ function hoursLabel(total: number): string {
 }
 
 function StatusChip({ item }: { item: MySignupItem }) {
-  const { label, tone } = signupStatusCard(item.status);
-  const c = TONE[tone];
+  const { label, tone } = signupStatusCard(item);
+  const c = chipTones[tone];
   return (
     <View style={[styles.chip, { backgroundColor: c.bg }]}>
       <Text style={[styles.chipText, { color: c.fg }]}>{label}</Text>

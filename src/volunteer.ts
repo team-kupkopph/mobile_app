@@ -1,6 +1,8 @@
 // US-V8 volunteer display logic + types. Pure and unit-tested (like adoption.ts / sagip.ts).
 // Types mirror backend GET /me/signups and GET /shifts by hand (no shared package).
 
+import type { ChipTone } from "./components/ui";
+
 export type ShiftType = "walking" | "feeding" | "visitor" | "event" | "facility" | "transport";
 export type SignupStatus = "requested" | "approved" | "declined" | "cancelled" | "completed" | "no_show";
 
@@ -28,9 +30,11 @@ export type ShiftDetail = BrowseShift & {
   viewer?: { needs_reapproval: boolean };
   location?: ShiftLocation; shelter_contact?: ShelterContact | null;
 };
+export type AssignedAnimal = { listing_id: string; name: string; photo_url: string | null };
 export type MySignupItem = {
   signup_id: string; status: SignupStatus; cancelled_at: string | null; was_late: boolean;
   check_in_at: string | null; check_out_at: string | null; hours: number | null; shift: ShiftSummary;
+  cancel_cutoff_at: string; needs_marking: boolean; assigned_animal: AssignedAnimal | null;
 };
 export type Reliability = {
   shifts_completed: number; no_shows: number; consecutive_no_shows: number;
@@ -45,15 +49,20 @@ const TYPE_LABEL: Record<ShiftType, string> = {
 export const shiftTypeLabel = (t: ShiftType): string => TYPE_LABEL[t] ?? t;
 
 export type StrayTone = "amber" | "teal" | "green" | "grey";
-export type CardTone = "done" | "danger" | "muted" | "active";
-export function signupStatusCard(s: SignupStatus): { label: string; tone: CardTone } {
-  switch (s) {
-    case "completed": return { label: "Completed", tone: "done" };
+
+/** The status chip for a signup, in the shared `ChipTone` vocabulary (fixes K26: this screen
+ *  used to invent its own tones instead of reusing `src/components/ui`'s). A past `approved`
+ *  shift the shelter hasn't marked yet (`needs_marking`) reads as "Awaiting shelter" rather
+ *  than a stale "Confirmed" — the volunteer did their part; it's on the shelter now. */
+export function signupStatusCard(item: Pick<MySignupItem, "status" | "needs_marking">): { label: string; tone: ChipTone } {
+  if (item.status === "approved" && item.needs_marking) return { label: "Awaiting shelter", tone: "info" };
+  switch (item.status) {
+    case "requested": return { label: "Requested", tone: "warning" };
+    case "approved":  return { label: "Confirmed", tone: "success" };
+    case "completed": return { label: "Completed", tone: "success" };
+    case "declined":  return { label: "Declined", tone: "danger" };
     case "no_show":   return { label: "No-show", tone: "danger" };
-    case "cancelled": return { label: "Cancelled", tone: "muted" };
-    case "declined":  return { label: "Declined", tone: "muted" };
-    case "approved":  return { label: "Confirmed", tone: "active" };
-    default:          return { label: "Requested", tone: "muted" };
+    default:          return { label: "Cancelled", tone: "neutral" };
   }
 }
 export const historyHours = (i: { hours: number | null }): string => i.hours == null ? "—" : `${i.hours} h`;
@@ -214,4 +223,59 @@ export function detailSignupState(d: ShiftDetail): DetailSignupState {
     case "completed": case "no_show": return "closed_for_you";
     default: return "none";   // no signup, or a cancelled/declined one (D4: may request again)
   }
+}
+
+// ── Kawang-Gawa P3 · volunteer flow (cancel preview, check-in, calendar, today card) ────────
+const H = 3600e3;
+
+/** What the server will decide if the volunteer cancels right now — a preview only; the
+ *  server re-derives this itself at cancel time and is the source of truth. */
+export type CancelVariant = "request" | "free" | "late";
+export function cancelVariant(item: MySignupItem, nowMs: number = Date.now()): CancelVariant {
+  if (item.status === "requested") return "request";
+  return nowMs > new Date(item.cancel_cutoff_at).getTime() ? "late" : "free";
+}
+
+/** The check-in/out window for a shift: opens 30 min before start, stays open for check-out
+ *  until 2 h after the shift ends, and reads as missed once that grace period has passed
+ *  without a check-in. */
+export type CheckinState =
+  | { kind: "not_yet"; opensAt: string } | { kind: "can_check_in" } | { kind: "can_check_out" }
+  | { kind: "done" } | { kind: "missed" };
+export function checkinState(item: MySignupItem, nowMs: number = Date.now()): CheckinState {
+  const start = new Date(item.shift.starts_at).getTime();
+  const end = new Date(item.shift.ends_at).getTime();
+  if (item.check_out_at) return { kind: "done" };
+  if (item.check_in_at) return nowMs <= end + 2 * H ? { kind: "can_check_out" } : { kind: "done" };
+  if (nowMs > end) return { kind: "missed" };
+  const opens = start - 30 * 60e3;
+  return nowMs < opens ? { kind: "not_yet", opensAt: new Date(opens).toISOString() } : { kind: "can_check_in" };
+}
+
+const icsDate = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+const icsText = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+
+/** G5 · one VEVENT, UTC times, CRLF line endings (RFC 5545). */
+export function buildIcs(item: MySignupItem, nowMs: number = Date.now()): string {
+  const s = item.shift;
+  const lines = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Kupkop PH//Kawang-Gawa//EN", "BEGIN:VEVENT",
+    `UID:${item.signup_id}@kupkop.ph`, `DTSTAMP:${icsDate(new Date(nowMs).toISOString())}`,
+    `DTSTART:${icsDate(s.starts_at)}`, `DTEND:${icsDate(s.ends_at)}`,
+    `SUMMARY:${icsText(`${shiftHeadline(s)} · ${s.org_name}`)}`,
+    ...(s.location ? [`LOCATION:${icsText(locationLine(s.location))}`] : []),
+    "END:VEVENT", "END:VCALENDAR"
+  ];
+  return lines.join("\r\n") + "\r\n";
+}
+
+/** G15 · the approved shift to put on Home: from 3 h before start until checked out. */
+export function todayShift(signups: MySignups | null, nowMs: number = Date.now()): MySignupItem | null {
+  if (!signups) return null;
+  return signups.upcoming.find((i) => {
+    if (i.status !== "approved" || i.check_out_at) return false;
+    const start = new Date(i.shift.starts_at).getTime();
+    const end = new Date(i.shift.ends_at).getTime();
+    return nowMs >= start - 3 * H && nowMs <= end + 2 * H;
+  }) ?? null;
 }
