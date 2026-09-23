@@ -9,9 +9,12 @@ import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "r
 import { Avatar, Button, ScreenHeader, chipTones } from "../components/ui";
 
 import { useApi } from "../api/useApi";
+import { useAuth } from "../auth/AuthContext";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
+import { SignupWall } from "../components/SignupWall";
+import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import {
@@ -58,6 +61,12 @@ type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaDetail">;
 
 export function KawangGawaDetailScreen({ navigation, route }: Props) {
   const api = useApi();
+  const { tokens } = useAuth();
+  // G13 · a guest may view this screen read-only; Request is the gated action — it raises
+  // the SignupWall rather than the consent rows (which are hidden entirely, not disabled:
+  // there is no account yet for either consent to apply to).
+  const isGuest = tokens === null;
+  const [wall, setWall] = useState(false);
   const { shiftId } = route.params;
 
   const [shift, setShift] = useState<ShiftDetail | null>(null);
@@ -248,7 +257,19 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           {mineState === "closed_for_you" && (
             <StatusNote tone="neutral" text="You've already done this shift." />
           )}
-          {mineState === "none" && (
+          {/* G13 · a guest sees no consent rows at all — there is no account yet for either
+              consent to apply to — just the Request button, which raises the SignupWall. */}
+          {mineState === "none" && isGuest && (
+            <Button
+              testID="btn.kawanggawaDetail.request"
+              label="Request"
+              onPress={() => setWall(true)}
+              accessibilityLabel="Request this shift"
+              style={styles.submitButton}
+            />
+          )}
+
+          {mineState === "none" && !isGuest && (
             <>
               <Text style={styles.sectionLabel}>Before you request</Text>
 
@@ -336,6 +357,17 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
             </>
           )}
         </ScrollView>
+      )}
+
+      {isGuest && shift && (
+        <SignupWall
+          visible={wall}
+          action="volunteer"
+          subject={shiftHeadline(shift)}
+          onCreateAccount={() => { setIntent("volunteer"); setWall(false); navigation.navigate("accountType"); }}
+          onLogin={() => { setIntent("volunteer"); setWall(false); navigation.navigate("signin"); }}
+          onDismiss={() => setWall(false)}
+        />
       )}
     </View>
   );

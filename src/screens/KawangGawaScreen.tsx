@@ -34,7 +34,10 @@ import { StaleBanner } from "../components/StaleBanner";
 import { MyShifts } from "../components/volunteer/MyShifts";
 import { isOffline, loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
+import { GuestTabs } from "../components/GuestTabs";
 import { OwnerTabs } from "../components/OwnerTabs";
+import { SignupWall, SignupWallAction } from "../components/SignupWall";
+import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { useCachedFeed } from "../useCachedFeed";
@@ -60,7 +63,11 @@ type Props = NativeStackScreenProps<RootStackParamList, "kawanggawa">;
 
 export function KawangGawaScreen({ navigation, route }: Props) {
   const api = useApi();
-  const { city, isReady } = useAuth();
+  const { tokens, city, isReady } = useAuth();
+  // G13 · guests may browse the hub read-only: no /me/signups call, no impact strip, no
+  // My shifts segment (there is nothing of theirs to show) — Browse only, and the tab bar
+  // is the guest one rather than OwnerTabs.
+  const isGuest = tokens === null;
   const { rows: shifts, res, stale, load: loadFeed } =
     useCachedFeed<BrowseShift>(api, (d) => d?.results ?? []);
 
@@ -78,6 +85,10 @@ export function KawangGawaScreen({ navigation, route }: Props) {
   // they folded into this tab — lets LoadStateView tell offline/error/gone apart on the My
   // shifts segment, the same way those screens' load states did.
   const [mineRes, setMineRes] = useState<{ ok: boolean; status: number } | null>(null);
+
+  // G13 · Adopt/You are still gated for a guest browsing the hub — same wall the guest Home
+  // uses for those two tabs.
+  const [wall, setWall] = useState<SignupWallAction | null>(null);
 
   const [tabIndex, setTabIndex] = useState(route.params?.tab === "mine" ? 1 : 0);
   // The hub is a single screen for the life of the volunteer's session — a notification tap
@@ -114,9 +125,9 @@ export function KawangGawaScreen({ navigation, route }: Props) {
   useFocusEffect(useCallback(() => {
     if (!isReady) return;
     load();
-    loadMine();
+    if (!isGuest) loadMine();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable per render
-  }, [load, loadMine, isReady]));
+  }, [load, loadMine, isReady, isGuest]));
 
   const totalsLabel = volunteerTotalsLabel(volunteerTotals(mine));
   const next = nextBookedShift(mine);
@@ -131,13 +142,17 @@ export function KawangGawaScreen({ navigation, route }: Props) {
           own line now, and the two destinations folded into one segmented control below. */}
       <View style={styles.header}>
         <Text style={styles.title}>Kawang-Gawa</Text>
-        <SegmentedControl
-          segments={["Browse", "My shifts"]}
-          index={tabIndex}
-          onChange={setTabIndex}
-          style={styles.segmented}
-          testID="seg.kawanggawa"
-        />
+        {/* G13 · a guest has no My shifts to switch to — Browse is the only segment, so the
+            control that would let them switch away from it is not mounted at all. */}
+        {!isGuest && (
+          <SegmentedControl
+            segments={["Browse", "My shifts"]}
+            index={tabIndex}
+            onChange={setTabIndex}
+            style={styles.segmented}
+            testID="seg.kawanggawa"
+          />
+        )}
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -169,7 +184,7 @@ export function KawangGawaScreen({ navigation, route }: Props) {
           </View>
         )}
 
-        {tabIndex === 1 ? (
+        {!isGuest && tabIndex === 1 ? (
           mine ? (
             <MyShifts
               data={mine}
@@ -307,7 +322,21 @@ export function KawangGawaScreen({ navigation, route }: Props) {
         )}
       </ScrollView>
 
-      <OwnerTabs active="volunteer" />
+      {isGuest ? (
+        <GuestTabs active="volunteer" onGated={setWall} />
+      ) : (
+        <OwnerTabs active="volunteer" />
+      )}
+
+      {isGuest && (
+        <SignupWall
+          visible={!!wall}
+          action={wall ?? "account"}
+          onCreateAccount={() => { if (wall) setIntent(wall); setWall(null); navigation.navigate("accountType"); }}
+          onLogin={() => { setWall(null); navigation.navigate("signin"); }}
+          onDismiss={() => setWall(null)}
+        />
+      )}
     </View>
   );
 }

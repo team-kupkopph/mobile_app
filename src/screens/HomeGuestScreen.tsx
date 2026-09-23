@@ -22,10 +22,11 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { Listing } from "../api/types";
-import { AdoptIcon, HomeIcon, ProfileIcon, VolunteerIcon } from "../components/AppIcons";
+import { GuestTabs } from "../components/GuestTabs";
+import { ProfileIcon } from "../components/AppIcons";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
-import { SectionHeader, TabBar, type TabBarItem } from "../components/ui";
+import { SectionHeader } from "../components/ui";
 import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, StoryRow, StoryRowData, StrayRow, sectionSpacing } from "../components/home/HomeSections";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
@@ -196,7 +197,7 @@ export function HomeGuestScreen({ navigation }: Props) {
         ))}
       </ScrollView>
 
-      <GuestTabs onGated={openWall} />
+      <GuestTabs active="home" onGated={openWall} />
 
       <SignupWall
         visible={!!wall}
@@ -209,30 +210,6 @@ export function HomeGuestScreen({ navigation }: Props) {
     </View>
   );
 }
-
-// A guest-only tab bar (not OwnerTabs): OwnerTabs navigates straight to the real Adopt/Volunteer/
-// profile routes, which is exactly what a guest must not do — every non-Home tab here opens the
-// SignupWall instead. Only the DESTINATIONS differ; the look comes from the shared TabBar.
-//
-// ⚠️ US-CH1 converted this bar. It was an opaque white 84 pt panel whose active state was a tinted
-// chip behind the ICON ALONE, leaving the label outside the selection — the V2 shape. It now uses
-// the same 68 pt glass bar as the other two shells, with the pill behind icon and label together.
-// It also carried its own private colour table (GUEST_TAB_COLORS); the colours now come from the
-// theme, which is the point of the exercise — this is the bar a signed-out visitor actually lands
-// on, and it is the one that kept its 1.60:1 inactive icon the last time only the owner bar
-// was fixed.
-function GuestTabs({ onGated }: { onGated: (action: SignupWallAction) => void }) {
-  const items: TabBarItem[] = [
-    // Home is the tab the guest is already on, so TabBar swallows the press.
-    { key: "home", label: "Home", testID: "tab.guest.home", icon: (c, s) => <HomeIcon color={c} size={s} />, onPress: () => {} },
-    { key: "adopt", label: "Adopt", testID: "tab.guest.adopt", icon: (c, s) => <AdoptIcon color={c} size={s} />, onPress: () => onGated("adopt") },
-    { key: "volunteer", label: "Volunteer", testID: "tab.guest.volunteer", icon: (c, s) => <VolunteerIcon color={c} size={s} />, onPress: () => onGated("volunteer") },
-    { key: "profile", label: "You", testID: "tab.guest.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: () => onGated("account") }
-  ];
-
-  return <TabBar items={items} active="home" />;
-}
-
 
 const styles = StyleSheet.create({
   screen: {
