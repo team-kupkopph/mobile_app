@@ -32,6 +32,11 @@ const AUTH_SCREENS: Array<keyof RootStackParamList> = [
   "stories",
   "storyDetail",
   "rescueMap",
+  // G13: guests may browse the Kawang-Gawa hub, a shift's detail and the waiver read-only —
+  // Request is the gated action (it opens the SignupWall), not the screens themselves.
+  "kawanggawa",
+  "kawanggawaDetail",
+  "waiver",
 ];
 
 type Props = {

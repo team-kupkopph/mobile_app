@@ -24,6 +24,7 @@ import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { pickSpotlight } from "../sagip";
+import { MySignupItem, shiftHeadline, shiftTimeRange, todayShift } from "../volunteer";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, elevation, radii, spacing, typography } from "../theme";
@@ -66,6 +67,11 @@ export function HomeScreen({ navigation, route }: Props) {
   // Home must never say "you're all clear" on the strength of a request that did not arrive.
   const [myCases, setMyCases] = useState<RescueCaseSummary[]>([]);
   const [myReports, setMyReports] = useState<MyReport[]>([]);
+  // G15 · today's approved Kawang-Gawa shift, personal accounts only. Same "say nothing on
+  // failure" rule as the spotlight above: a failed /me/signups renders no card at all, never
+  // an empty/error state — a volunteer's actual shift must never silently disappear from the
+  // one place check-in starts, but a network hiccup also must never invent a false "no shift".
+  const [todaySignup, setTodaySignup] = useState<MySignupItem | null>(null);
   // US-R2 · FOUR fetches, and neither list is "the" primary — they are peer panels, so this
   // screen takes the per-panel branch of the rule rather than the whole-screen one. Blanking
   // Home because the adoption strip timed out would hide the rescue strip that did load, and
@@ -94,6 +100,16 @@ export function HomeScreen({ navigation, route }: Props) {
           return;
         }
         setMe(r.data);
+        // G15 · shelter accounts already returned above (via the reset); admin accounts have
+        // no shifts to volunteer for. Only a personal account's own signups are relevant here,
+        // and the brief is explicit that this must not fire for shelter/business accounts.
+        if (r.data.account_type === "personal") {
+          api.get("/me/signups").then((sr) => {
+            setTodaySignup(sr.ok ? todayShift(sr.data) : null);
+          });
+        } else {
+          setTodaySignup(null);
+        }
       });
       // Refetched on every focus, including right after leaving NotificationsScreen (which
       // marks everything read on open) — so the dot clears the moment you come back.
@@ -249,6 +265,35 @@ export function HomeScreen({ navigation, route }: Props) {
             </TouchableOpacity>
           }
         />
+
+        {todaySignup && (
+          // G15 · today's approved shift, top of Home — `todayShift` already narrows to the
+          // one-signup, 3h-before-to-2h-after window, so anything non-null here is meant to
+          // be acted on right now. Disappears on its own once checked out: that's `todayShift`
+          // returning null on the next focus, not a dismiss the volunteer has to do by hand.
+          <PressScale
+            testID="card.home.todayShift"
+            style={styles.todayCardLayout}
+            accessibilityRole="button"
+            accessibilityLabel={`Today: ${shiftHeadline(todaySignup.shift)} at ${todaySignup.shift.org_name}`}
+            onPress={() => navigation.navigate("kawanggawaCheckin", { signupId: todaySignup.signup_id })}
+          >
+            <Card accent={colors.teal} style={styles.todayCardInner}>
+              <View style={styles.todayCardRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.todayCardTitle}>
+                    Today · {shiftHeadline(todaySignup.shift)} at {todaySignup.shift.org_name}
+                  </Text>
+                  <Text style={styles.todayCardMeta}>
+                    {shiftTimeRange(todaySignup.shift.starts_at, todaySignup.shift.ends_at)} ·{" "}
+                    {todaySignup.shift.location?.meeting_point || todaySignup.shift.city}
+                  </Text>
+                </View>
+                <Text style={styles.todayCardChevron}>›</Text>
+              </View>
+            </Card>
+          </PressScale>
+        )}
 
         {pendingMember && (
           // US-D4 audit (2026-08-24) · was a dead tap — "Documents ›" implied a
@@ -477,6 +522,14 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "#FFFFFF"
   },
+  /** Layout only — the fill, radius, accent bar and shadow are Card's. Matches the spotlight
+   *  card's own split between PressScale (layout) and Card (surface). */
+  todayCardLayout: { marginTop: 18 },
+  todayCardInner: { paddingVertical: 16, paddingHorizontal: 18 },
+  todayCardRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  todayCardTitle: { color: colors.ink, ...typography.section },
+  todayCardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
+  todayCardChevron: { color: colors.teal, fontSize: 19, fontWeight: "700" },
   reviewCard: {
     minHeight: 84,
     marginTop: 22,

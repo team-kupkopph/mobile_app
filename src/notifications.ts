@@ -8,8 +8,8 @@ export type NotificationTarget =
   | { screen: "verifyDocuments" }
   | { screen: "reportDetail"; reportId: string }
   | { screen: "myInquiries" }
-  | { screen: "kawanggawaSchedule" }
-  | { screen: "kawanggawaHistory" }
+  | { screen: "kawanggawa"; tab: "mine" }
+  | { screen: "shelterVolunteerActivity"; shiftId: string }
   | { screen: "shelterVolunteerRequests"; shiftId: string }
   // Sprint 6 · community. match_suggested rides the report_id path (reportDetail) until L3's
   // dedicated matches screen lands; the wishlist/badge types land on their own screens.
@@ -37,15 +37,21 @@ const VERIFICATION_TYPES = new Set([
 // over-approximation: harmless for (a) (they land on their own — unrelated — inquiry list,
 // same as tapping the bell icon itself would), and correct for (b).
 const MY_INQUIRIES_TYPES = new Set(["stage_advanced", "inquiry_received"]);
-// US-V8 · the volunteer side of notify(): shift_confirmed/shift_reminder are "look at your
-// upcoming shifts", signup_declined/shift_cancelled_by_shelter are "see what happened" —
-// both already-past events, so history rather than schedule.
-const SCHEDULE_TYPES = new Set(["shift_confirmed", "shift_reminder"]);
-const HISTORY_TYPES = new Set(["signup_declined", "shift_cancelled_by_shelter"]);
+// US-V8 · the volunteer side of notify(): schedule and history folded onto one hub screen
+// (Task 5, K30/G9) — every volunteer notification now opens the hub on its "My shifts" tab,
+// whether it's "look at your upcoming shifts" (shift_confirmed/shift_reminder) or "see what
+// happened" (signup_declined/shift_cancelled_by_shelter). MY_SHIFTS_TYPES replaces the old
+// SCHEDULE_TYPES/HISTORY_TYPES split — the two destinations became one screen with two
+// sections, so the routing no longer needs to guess which section a type belongs under.
+const MY_SHIFTS_TYPES = new Set([
+  "shift_confirmed", "shift_reminder", "signup_declined", "shift_cancelled_by_shelter"
+]);
 // US-V9 · signup_requested is the SHELTER's own notification (a volunteer requested one of
 // their shifts) — routes to the shelter-side requests screen for that shift, same
 // whitelist-by-type posture as reportDetail above: the only `data` read is the id plugged
 // into a fixed screen, never a URL parsed out of `data`.
+// signup_cancelled_by_volunteer is the shelter's own notification too (a volunteer cancelled
+// a shift they were on) — routes to that shift's activity hub, same shape.
 
 export function notificationTarget(n: { type: string; data: Record<string, any> | null }): NotificationTarget | null {
   if (VERIFICATION_TYPES.has(n.type)) {
@@ -57,14 +63,14 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   if (MY_INQUIRIES_TYPES.has(n.type)) {
     return { screen: "myInquiries" };
   }
-  if (SCHEDULE_TYPES.has(n.type)) {
-    return { screen: "kawanggawaSchedule" };
-  }
-  if (HISTORY_TYPES.has(n.type)) {
-    return { screen: "kawanggawaHistory" };
+  if (MY_SHIFTS_TYPES.has(n.type)) {
+    return { screen: "kawanggawa", tab: "mine" };
   }
   if (n.type === "signup_requested" && n.data?.shift_id) {
     return { screen: "shelterVolunteerRequests", shiftId: n.data.shift_id };
+  }
+  if (n.type === "signup_cancelled_by_volunteer" && n.data?.shift_id) {
+    return { screen: "shelterVolunteerActivity", shiftId: n.data.shift_id };
   }
   // Sprint 6 · community notifications route to their own screens (US-B2/W2/W3).
   if (n.type === "badge_earned") {

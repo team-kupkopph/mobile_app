@@ -1,18 +1,12 @@
 import {
   BrowseShift, MySignupItem, MySignups, groupShiftsByDay, historyHours, lateCancelCopy,
   nextBookedShift, shiftDayLabel, shiftDurationLabel, shiftSlotsChip, shiftTypeLabel,
-  shiftTimeRange, signupStatusCard, volunteerTotals, volunteerTotalsLabel
+  shiftTimeRange, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
 
 test("shiftTypeLabel maps the six enum values", () => {
   expect(shiftTypeLabel("walking")).toBe("Dog walking");
   expect(shiftTypeLabel("feeding")).toBe("Feeding");
-});
-
-test("signupStatusCard maps status to label + tone", () => {
-  expect(signupStatusCard("completed")).toEqual({ label: "Completed", tone: "done" });
-  expect(signupStatusCard("no_show")).toEqual({ label: "No-show", tone: "danger" });
-  expect(signupStatusCard("cancelled")).toEqual({ label: "Cancelled", tone: "muted" });
 });
 
 test("historyHours formats the derived hours or a dash", () => {
@@ -49,6 +43,7 @@ function item(over: Partial<MySignupItem> = {}): MySignupItem {
   return {
     signup_id: "g1", status: "completed", cancelled_at: null, was_late: false,
     check_in_at: null, check_out_at: null, hours: 2,
+    needs_marking: false, assigned_animal: null, cancel_cutoff_at: at("2026-09-11T21:00:00"),
     shift: { shift_id: "s9", type: "feeding", org_name: "E2E shelter",
              starts_at: at("2026-09-12T09:00:00"), ends_at: at("2026-09-12T11:00:00"),
              status: "open", capacity: 4,
@@ -189,4 +184,62 @@ test("detailSignupState reads the viewer's own signup", () => {
   expect(detailSignupState({ my_signup: { signup_id: "1", status: "completed" } } as any)).toBe("closed_for_you");
   expect(detailSignupState({ my_signup: { signup_id: "1", status: "cancelled" } } as any)).toBe("none");
   expect(detailSignupState({ my_signup: { signup_id: "1", status: "declined" } } as any)).toBe("none");
+});
+
+// ── Kawang-Gawa P3 · volunteer flow (cancel preview, check-in, calendar, today card) ────────
+import { buildIcs, cancelVariant, checkinState, signupStatusCard, todayShift } from "../volunteer";
+
+const T0 = Date.UTC(2030, 9, 4, 1, 0);           // 09:00 Manila
+const item2 = (over: Partial<any> = {}): any => ({
+  signup_id: "s1", status: "approved", cancelled_at: null, was_late: false,
+  check_in_at: null, check_out_at: null, hours: null, needs_marking: false, assigned_animal: null,
+  cancel_cutoff_at: new Date(T0 - 12 * 3600e3).toISOString(),
+  shift: { shift_id: "sh1", type: "walking", title: "Morning dog walk", org_name: "KG Test Shelter",
+           description: "", city: "Marikina", province: "", status: "open", capacity: 3, slots_left: 1,
+           starts_at: new Date(T0).toISOString(), ends_at: new Date(T0 + 2 * 3600e3).toISOString(),
+           location: { meeting_point: "Front gate", address_line1: "12 Shelter Rd", barangay: "", city: "Marikina", province: "" } },
+  ...over
+});
+
+test("cancelVariant previews what the server will decide", () => {
+  expect(cancelVariant(item2({ status: "requested" }), T0 - 2 * 3600e3)).toBe("request");
+  expect(cancelVariant(item2(), T0 - 13 * 3600e3)).toBe("free");
+  expect(cancelVariant(item2(), T0 - 11 * 3600e3)).toBe("late");
+});
+
+test("checkinState follows the window: 30 min before start to end, then out until +2h", () => {
+  expect(checkinState(item2(), T0 - 3600e3)).toEqual({ kind: "not_yet", opensAt: new Date(T0 - 30 * 60e3).toISOString() });
+  expect(checkinState(item2(), T0 - 10 * 60e3)).toEqual({ kind: "can_check_in" });
+  expect(checkinState(item2({ check_in_at: "x" }), T0 + 60 * 60e3)).toEqual({ kind: "can_check_out" });
+  expect(checkinState(item2({ check_in_at: "x", check_out_at: "y" }), T0)).toEqual({ kind: "done" });
+  expect(checkinState(item2(), T0 + 3 * 3600e3)).toEqual({ kind: "missed" });
+});
+
+test("status chips use the shared vocabulary, and a past unmarked shift waits on the shelter", () => {
+  expect(signupStatusCard({ status: "requested", needs_marking: false })).toEqual({ label: "Requested", tone: "warning" });
+  expect(signupStatusCard({ status: "approved", needs_marking: false })).toEqual({ label: "Confirmed", tone: "success" });
+  expect(signupStatusCard({ status: "approved", needs_marking: true })).toEqual({ label: "Awaiting shelter", tone: "info" });
+  expect(signupStatusCard({ status: "completed", needs_marking: false })).toEqual({ label: "Completed", tone: "success" });
+  expect(signupStatusCard({ status: "declined", needs_marking: false })).toEqual({ label: "Declined", tone: "danger" });
+  expect(signupStatusCard({ status: "no_show", needs_marking: false })).toEqual({ label: "No-show", tone: "danger" });
+  expect(signupStatusCard({ status: "cancelled", needs_marking: false })).toEqual({ label: "Cancelled", tone: "neutral" });
+});
+
+test("buildIcs is a valid single VEVENT in UTC with the meeting point", () => {
+  const ics = buildIcs(item2(), Date.UTC(2030, 0, 1));
+  expect(ics).toContain("BEGIN:VCALENDAR\r\n");
+  expect(ics).toContain("DTSTART:20301004T010000Z");
+  expect(ics).toContain("DTEND:20301004T030000Z");
+  expect(ics).toContain("SUMMARY:Morning dog walk · KG Test Shelter");
+  expect(ics).toContain("LOCATION:Front gate · 12 Shelter Rd\\, Marikina");
+  expect(ics).toContain("UID:s1@kupkop.ph");
+  expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
+});
+
+test("todayShift is the approved shift from 3h before start until checked out", () => {
+  const mine: any = { requested: [], upcoming: [item2()], history: [], reliability: {} };
+  expect(todayShift(mine, T0 - 4 * 3600e3)).toBeNull();
+  expect(todayShift(mine, T0 - 2 * 3600e3)?.signup_id).toBe("s1");
+  mine.upcoming[0].check_out_at = "done";
+  expect(todayShift(mine, T0)).toBeNull();
 });

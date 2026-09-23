@@ -3,9 +3,9 @@
 // Kept deliberately generic — no volunteer/cancel-specific copy or logic lives here — so any
 // destructive-action confirm (starting with V9's shelter-cancel confirm) can reuse it as-is.
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import { radii, typography } from "../theme";
+import { colors as themeColors, radii, typography } from "../theme";
 
-export type ConfirmModalTone = "neutral" | "danger";
+export type ConfirmModalTone = "neutral" | "warning" | "danger";
 
 export type ConfirmModalProps = {
   visible: boolean;
@@ -30,7 +30,10 @@ const colors = {
 export function ConfirmModal({
   visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel, secondaryLabel, onSecondary
 }: ConfirmModalProps) {
-  const confirmColor = tone === "danger" ? colors.danger : colors.teal;
+  // P5 moves the whole component onto theme tokens; `warning` borrows `warningStrong` from
+  // `../theme` in the meantime rather than inventing a local amber to match it.
+  const confirmColor =
+    tone === "danger" ? colors.danger : tone === "warning" ? themeColors.warningStrong : colors.teal;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
