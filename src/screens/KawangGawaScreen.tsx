@@ -17,16 +17,18 @@ import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { useAuth } from "../auth/AuthContext";
 import { LoadStateView } from "../components/LoadStateView";
 import { StaleBanner } from "../components/StaleBanner";
 import { isOffline, loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { RootStackParamList } from "../navigation/types";
+import { TAP_SLOP } from "../touch";
 import { useCachedFeed } from "../useCachedFeed";
 import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
-  shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
+  shiftHeadline, shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 
@@ -58,10 +60,14 @@ type Props = NativeStackScreenProps<
 
 export function KawangGawaScreen({ navigation }: Props) {
   const api = useApi();
+  const { city, isReady } = useAuth();
   const { rows: shifts, res, stale, load: loadFeed } =
     useCachedFeed<BrowseShift>(api, (d) => d?.results ?? []);
 
   const [type, setType] = useState<"" | ShiftType>("");
+  // P2 · city scope. Off (browsing every city) until the volunteer taps "Change" — defaults
+  // to their own city whenever one is on file, same as the home feed.
+  const [allCities, setAllCities] = useState(false);
   // ⚠️ Set ONLY on a successful response, and the strip renders only when it is non-null. A
   // failed /me/signups therefore draws nothing rather than a confident "0 shifts" — the same
   // rule the rescue panels follow, and for the same reason: an empty answer and an answer that
@@ -70,18 +76,27 @@ export function KawangGawaScreen({ navigation }: Props) {
   const [mine, setMine] = useState<MySignups | null>(null);
 
   const load = useCallback(() => {
-    const qs = type ? `?type=${type}` : "";
-    loadFeed(`/shifts${qs}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter change
-  }, [type]);
+    const params = new URLSearchParams();
+    if (type) params.set("type", type);
+    if (city && !allCities) params.set("city", city);
+    const qs = params.toString();
+    loadFeed(`/shifts${qs ? `?${qs}` : ""}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter/city change
+  }, [type, city, allCities]);
 
+  // ⚠️ Gated on `isReady` for the same cold-start reason HomeScreen's `loadCityPanels`
+  // documents: AuthContext reads the cached city out of SecureStore ASYNCHRONOUSLY, so on a
+  // cold start `city` is still null on the first render. Firing before `isReady` would query
+  // every city once, then re-query on the city landing — a visible flash from "all cities" to
+  // scoped. Waiting for `isReady` means it fires exactly once, with the real answer.
   useFocusEffect(useCallback(() => {
+    if (!isReady) return;
     load();
     api.get("/me/signups").then((r) => {
       if (r.ok) setMine(r.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable per render
-  }, [load]));
+  }, [load, isReady]));
 
   const totalsLabel = volunteerTotalsLabel(volunteerTotals(mine));
   const next = nextBookedShift(mine);
@@ -145,6 +160,36 @@ export function KawangGawaScreen({ navigation }: Props) {
           </View>
         )}
 
+        {/* P2 · city scope row. Mirrors the home feed's city chip: a saved city scopes the
+            feed by default, and "Change" is a plain toggle rather than a trip to the picker —
+            the picker is one tap further, for the "no city yet" case only. */}
+        <View style={styles.scopeRow}>
+          {city ? (
+            <>
+              <Text style={styles.scopeText}>{allCities ? "All cities" : `Near ${city}`}</Text>
+              <TouchableOpacity
+                hitSlop={TAP_SLOP}
+                accessibilityRole="button"
+                accessibilityState={{ selected: allCities }}
+                onPress={() => setAllCities((v) => !v)}
+              >
+                <Text style={styles.scopeAction}>Change</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={styles.scopeText}>All cities</Text>
+              <TouchableOpacity
+                hitSlop={TAP_SLOP}
+                accessibilityRole="button"
+                onPress={() => navigation.navigate("locationPicker")}
+              >
+                <Text style={styles.scopeAction}>Set your city ›</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+
         {/* One scrolling row. Seven chips wrapped onto three rows before, taking ~140 pt of
             the screen above a list that is often shorter than the filter that sorts it. */}
         <ScrollView
@@ -167,11 +212,28 @@ export function KawangGawaScreen({ navigation }: Props) {
         </ScrollView>
 
         {state.kind !== "ready" ? (
-          <LoadStateView
-            state={state}
-            emptyTitle="No open shifts right now — check back soon."
-            onRetry={load}
-          />
+          <>
+            <LoadStateView
+              state={state}
+              emptyTitle={
+                city && !allCities ? `No open shifts in ${city} right now.` : "No open shifts right now — check back soon."
+              }
+              onRetry={load}
+            />
+            {/* `LoadStateView`'s own retry button never renders for `empty` (there is nothing
+                to retry) — this is a second action, not that one: it widens the scope rather
+                than re-asking the same query. */}
+            {state.kind === "empty" && city && !allCities && (
+              <TouchableOpacity
+                style={styles.emptyAction}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                onPress={() => setAllCities(true)}
+              >
+                <Text style={styles.emptyActionText}>See all cities</Text>
+              </TouchableOpacity>
+            )}
+          </>
         ) : (
           <>
           {stale ? <StaleBanner offline={isOffline(res)} /> : null}
@@ -201,12 +263,14 @@ export function KawangGawaScreen({ navigation }: Props) {
                         wrapped onto two lines on a 402 pt screen. */}
                     <View style={styles.cardCopy}>
                       <View style={styles.cardTop}>
-                        <Text style={styles.cardTitle} numberOfLines={1}>{shiftTypeLabel(s.type)}</Text>
+                        <Text style={styles.cardTitle} numberOfLines={1}>{shiftHeadline(s)}</Text>
                         <View style={[styles.chip, { backgroundColor: tone.bg }]}>
                           <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
                         </View>
                       </View>
-                      <Text style={styles.cardOrg}>{s.org_name}</Text>
+                      <Text style={styles.cardOrg}>
+                        {shiftTypeLabel(s.type)} · {s.org_name}{s.city ? ` · ${s.city}` : ""}
+                      </Text>
                       <Text style={styles.cardMeta}>
                         {shiftTimeRange(s.starts_at, s.ends_at)} · {shiftDurationLabel(s.starts_at, s.ends_at)}
                       </Text>
@@ -250,6 +314,13 @@ const styles = StyleSheet.create({
   impactNextLabel: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   impactNextWhen: { marginTop: 3, color: colors.muted, ...typography.meta },
   impactChevron: { marginLeft: 10, color: colors.teal, fontSize: 19, fontWeight: "700" },
+  scopeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+              marginBottom: 14 },
+  scopeText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
+  scopeAction: { color: colors.teal, ...typography.meta, fontWeight: "800" },
+  emptyAction: { alignSelf: "center", marginTop: 4, height: 44, justifyContent: "center",
+                 paddingHorizontal: 18 },
+  emptyActionText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   filterRow: { gap: 8, paddingRight: 26, marginBottom: 18 },
   filterChip: { paddingHorizontal: 16, height: 44, borderRadius: 22, alignItems: "center",
                 justifyContent: "center", backgroundColor: colors.white },
