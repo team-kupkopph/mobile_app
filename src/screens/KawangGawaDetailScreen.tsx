@@ -365,7 +365,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           action="volunteer"
           subject={shiftHeadline(shift)}
           onCreateAccount={() => { setIntent("volunteer"); setWall(false); navigation.navigate("accountType"); }}
-          onLogin={() => { setIntent("volunteer"); setWall(false); navigation.navigate("signin"); }}
+          onLogin={() => { setWall(false); navigation.navigate("signin"); }}
           onDismiss={() => setWall(false)}
         />
       )}
