@@ -26,3 +26,25 @@ test("round trip is the identity", () => {
   const iso = toOffsetIso("2026-10-04T09:00", 480)!;
   expect(toLocalInputValue(iso, 480)).toBe("2026-10-04T09:00");
 });
+
+import { shiftWindow, upcomingDays, windowParts } from "../shiftTime";
+
+test("upcomingDays lists local calendar days starting today", () => {
+  const now = Date.UTC(2026, 9, 3, 17, 0); // 2026-10-04 01:00 in Manila
+  expect(upcomingDays(3, now, 480)).toEqual(["2026-10-04", "2026-10-05", "2026-10-06"]);
+});
+
+test("shiftWindow builds an offset-aware start and end", () => {
+  expect(shiftWindow("2026-10-04", "09:00", 120, 480))
+    .toEqual({ starts_at: "2026-10-04T09:00:00+08:00", ends_at: "2026-10-04T11:00:00+08:00" });
+});
+
+test("a window crossing midnight ends on the next day", () => {
+  expect(shiftWindow("2026-10-04", "23:00", 90, 480))
+    .toEqual({ starts_at: "2026-10-04T23:00:00+08:00", ends_at: "2026-10-05T00:30:00+08:00" });
+});
+
+test("windowParts is shiftWindow's inverse", () => {
+  expect(windowParts("2026-10-04T01:00:00+00:00", "2026-10-04T03:00:00+00:00", 480))
+    .toEqual({ day: "2026-10-04", start: "09:00", durationMins: 120 });
+});

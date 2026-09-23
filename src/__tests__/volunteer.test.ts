@@ -33,7 +33,8 @@ function shift(over: Partial<BrowseShift> = {}): BrowseShift {
   return {
     shift_id: "s1", type: "walking", org_name: "E2E shelter",
     starts_at: at("2026-09-09T14:00:00"), ends_at: at("2026-09-09T16:00:00"),
-    capacity: 4, status: "open", slots_left: 2, ...over
+    capacity: 4, status: "open", slots_left: 2,
+    title: "", description: "", city: "", province: "", ...over
   };
 }
 function signups(over: Partial<MySignups> = {}): MySignups {
@@ -50,7 +51,8 @@ function item(over: Partial<MySignupItem> = {}): MySignupItem {
     check_in_at: null, check_out_at: null, hours: 2,
     shift: { shift_id: "s9", type: "feeding", org_name: "E2E shelter",
              starts_at: at("2026-09-12T09:00:00"), ends_at: at("2026-09-12T11:00:00"),
-             status: "open", capacity: 4 },
+             status: "open", capacity: 4,
+             title: "", description: "", city: "", province: "", slots_left: 4 },
     ...over
   };
 }
@@ -162,4 +164,29 @@ test("a full shift does not jump into an earlier day", () => {
   ], NOW);
   expect(groups.map((g) => g.label)).toEqual(["Today", "Tomorrow"]);
   expect(groups[0].shifts[0].shift_id).toBe("todayFull");
+});
+
+import { detailSignupState, locationLine, shiftHeadline } from "../volunteer";
+
+test("a shift is named by its title, falling back to its type", () => {
+  expect(shiftHeadline({ title: "Morning dog walk", type: "walking" })).toBe("Morning dog walk");
+  expect(shiftHeadline({ title: "", type: "walking" })).toBe("Dog walking");
+});
+
+test("locationLine joins what exists, meeting point first", () => {
+  expect(locationLine({ meeting_point: "Front gate", address_line1: "12 Shelter Rd",
+    barangay: "Concepcion Uno", city: "Marikina", province: "Metro Manila" }))
+    .toBe("Front gate · 12 Shelter Rd, Concepcion Uno, Marikina, Metro Manila");
+  expect(locationLine({ meeting_point: "", address_line1: "", barangay: "", city: "Marikina", province: "" }))
+    .toBe("Marikina");
+});
+
+test("detailSignupState reads the viewer's own signup", () => {
+  const base = { my_signup: null } as any;
+  expect(detailSignupState(base)).toBe("none");
+  expect(detailSignupState({ my_signup: { signup_id: "1", status: "requested" } } as any)).toBe("requested");
+  expect(detailSignupState({ my_signup: { signup_id: "1", status: "approved" } } as any)).toBe("approved");
+  expect(detailSignupState({ my_signup: { signup_id: "1", status: "completed" } } as any)).toBe("closed_for_you");
+  expect(detailSignupState({ my_signup: { signup_id: "1", status: "cancelled" } } as any)).toBe("none");
+  expect(detailSignupState({ my_signup: { signup_id: "1", status: "declined" } } as any)).toBe("none");
 });
