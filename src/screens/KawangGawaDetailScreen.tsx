@@ -252,6 +252,16 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
             <>
               <Text style={styles.sectionLabel}>Before you request</Text>
 
+              {/* K10 · a neutral honesty line, not a warning — the shelter already sees this on
+                  their side (three no-shows trips `needs_reapproval`, US-V6). Saying it here
+                  means a volunteer isn't blindsided by a decline they had no way to anticipate. */}
+              {!!shift.viewer?.needs_reapproval && (
+                <StatusNote
+                  tone="neutral"
+                  text="Shelters can see you've missed your last 3 shifts. They may still say yes."
+                />
+              )}
+
               <TouchableOpacity
                 testID="chk.kawanggawaDetail.waiver"
                 activeOpacity={0.85}
@@ -266,13 +276,8 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.consentText}>
-                    I agree to the{" "}
-                    <Text style={styles.consentLink} onPress={() => navigation.navigate("waiver")}>
-                      volunteer waiver & guidelines
-                    </Text>
-                    .
+                    I agree to the volunteer waiver & guidelines.
                   </Text>
-                  <Text style={styles.consentHelper}>Tap the link to read what's there so far.</Text>
                   {/* Inside the tinted block on purpose. Sitting between the two rows, this read
                       as if it belonged to the row BELOW whenever only one consent was missing. */}
                   {waiverHighlight && (
@@ -281,6 +286,22 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                     </Text>
                   )}
                 </View>
+              </TouchableOpacity>
+
+              {/* K20 · its own control, OUTSIDE the checkbox row's TouchableOpacity. The row
+                  used to wrap this link too, so one tap on "volunteer waiver & guidelines"
+                  both opened the page AND ticked the consent box the volunteer hadn't read
+                  yet. 44 pt tall on its own — not hitSlop on a text-only touchable — since
+                  `touchTargets` treats a bare `<Text>` child as needing a declared target. */}
+              <TouchableOpacity
+                testID="lnk.kawanggawaDetail.waiver"
+                activeOpacity={0.7}
+                style={styles.waiverLinkRow}
+                accessibilityRole="button"
+                accessibilityLabel="Read the volunteer waiver and guidelines"
+                onPress={() => navigation.navigate("waiver")}
+              >
+                <Text style={styles.waiverLinkText}>Read the volunteer waiver & guidelines ›</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -355,8 +376,10 @@ const styles = StyleSheet.create({
   consentBoxChecked: { backgroundColor: colors.teal },
   consentBoxAlert: { borderColor: colors.danger },
   consentText: { color: colors.tealDark, ...typography.meta, fontWeight: "700", lineHeight: 19 },
-  consentLink: { textDecorationLine: "underline" },
   consentHelper: { marginTop: 6, color: colors.muted, ...typography.caption, fontWeight: "600" },
+  // K20 · its own 44 pt target, directly under the checkbox row it used to live inside.
+  waiverLinkRow: { minHeight: 44, marginTop: -6, marginBottom: 14, justifyContent: "center" },
+  waiverLinkText: { color: colors.teal, ...typography.meta, fontWeight: "700", textDecorationLine: "underline" },
   formError: { marginTop: 4, marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { marginTop: 8 },
   consentError: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "700" }
