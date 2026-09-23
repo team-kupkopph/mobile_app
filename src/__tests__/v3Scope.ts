@@ -105,15 +105,15 @@ const OWNER_V3 = [
   "SigninScreen"
 ] as const;
 
-/** 7 KawangGawa owner-side volunteer screens */
+/** 5 KawangGawa owner-side volunteer screens. Was 7 — Task 5 (K30/G9) folded the standalone
+ * KawangGawaScheduleScreen and KawangGawaHistoryScreen into the hub itself (one screen,
+ * segmented Browse | My shifts), and both files were deleted. */
 const KAWANG_GAWA = [
   "KawangGawaScreen",
   "KawangGawaCancelScreen",
   "KawangGawaCheckinScreen",
   "KawangGawaDetailScreen",
-  "KawangGawaHistoryScreen",
-  "KawangGawaRequestedScreen",
-  "KawangGawaScheduleScreen"
+  "KawangGawaRequestedScreen"
 ] as const;
 
 /** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 36 names */

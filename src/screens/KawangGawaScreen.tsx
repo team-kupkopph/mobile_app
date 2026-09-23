@@ -1,6 +1,7 @@
-// US-V8 · the Kawang-Gawa hub — the Volunteer tab. Browse open shifts across shelters.
+// US-V8 · the Kawang-Gawa hub — the Volunteer tab. Browse open shifts across shelters, or
+// switch to "My shifts" for everything the volunteer already signed up for.
 // Reference: screens/user/screen-kawanggawa.png. GET /shifts (optionally ?type=), plus
-// GET /me/signups for the impact strip.
+// GET /me/signups for the impact strip and the My shifts tab.
 //
 // Redesigned 2026-09-09. What was here: a 26pt title that collided with two 14pt header links
 // at phone width, seven filter chips wrapping onto three rows above a list that often held one
@@ -8,18 +9,29 @@
 // 5 of 5 slots left". Nothing said how long a shift takes, whether it was nearly gone, or what
 // the volunteer had already done — there was nothing on the screen to bring anyone back.
 //
+// Task 5 (K30, G9), 2026-09-23. The two header pills ("My schedule", "History") each opened a
+// standalone screen re-fetching the same /me/signups this screen already had. Folded onto one
+// screen instead: a SegmentedControl under the title, Browse (the body below, unchanged) and
+// My shifts (KawangGawaScheduleScreen's upcoming/requested + KawangGawaHistoryScreen's stats +
+// history, all rendered by <MyShifts> over the SAME `mine` state the impact strip already
+// fetches — switching segments no longer refetches Browse, and My shifts needs no fetch of its
+// own either). `route.params.tab` seeds the initial segment (a notification tap or the
+// Requested screen's CTA opens straight onto "mine") and keeps it in sync if the hub is
+// popped back to with a new `tab` param rather than freshly mounted.
+//
 // ⚠️ WHAT THE DATA WILL NOT SUPPORT. `_shift_repr` carries no location, description or photo
 // (volunteer/views.py), so "shelters near you", distance and imagery are not available here
 // without backend work. Everything below is derived from the two endpoints that already exist.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { LoadStateView } from "../components/LoadStateView";
 import { StaleBanner } from "../components/StaleBanner";
+import { MyShifts } from "../components/volunteer/MyShifts";
 import { isOffline, loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { OwnerTabs } from "../components/OwnerTabs";
@@ -31,6 +43,7 @@ import {
   shiftHeadline, shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { SegmentedControl } from "../components/ui";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -43,22 +56,9 @@ const TONE = {
   green: { bg: "#EAF3DE", fg: "#27500A" }, grey: { bg: "#ECEAE3", fg: "#5F5E5A" }
 } as const;
 
-// Registered under "kawanggawa" (the real hub) and, temporarily, under the remaining
-// not-yet-built US-V8 route names too — RootNavigator points them all at this component so the
-// app compiles before Tasks 5–8 swap in their real screens ("kawanggawaDetail" and "waiver" got
-// their real components in Task 4). The union keeps that placeholder wiring typechecking without
-// an `any` cast; this screen never reads `route.params`.
-type Props = NativeStackScreenProps<
-  RootStackParamList,
-  | "kawanggawa"
-  | "kawanggawaRequested"
-  | "kawanggawaSchedule"
-  | "kawanggawaCheckin"
-  | "kawanggawaHistory"
-  | "kawanggawaCancel"
->;
+type Props = NativeStackScreenProps<RootStackParamList, "kawanggawa">;
 
-export function KawangGawaScreen({ navigation }: Props) {
+export function KawangGawaScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city, isReady } = useAuth();
   const { rows: shifts, res, stale, load: loadFeed } =
@@ -74,6 +74,19 @@ export function KawangGawaScreen({ navigation }: Props) {
   // never arrived are not the same statement. A genuine first-timer comes back non-null with
   // zeroes and gets the invitation line instead.
   const [mine, setMine] = useState<MySignups | null>(null);
+  // US-R4 · same result-not-booleans shape KawangGawaScheduleScreen/HistoryScreen used before
+  // they folded into this tab — lets LoadStateView tell offline/error/gone apart on the My
+  // shifts segment, the same way those screens' load states did.
+  const [mineRes, setMineRes] = useState<{ ok: boolean; status: number } | null>(null);
+
+  const [tabIndex, setTabIndex] = useState(route.params?.tab === "mine" ? 1 : 0);
+  // The hub is a single screen for the life of the volunteer's session — a notification tap
+  // or the Requested screen's "View my shifts" CTA navigate back to an ALREADY-MOUNTED hub
+  // with a fresh `tab` param, which does not re-run useState's initializer. This keeps the
+  // segment in sync with that param on every change, not just first mount.
+  useEffect(() => {
+    if (route.params?.tab) setTabIndex(route.params.tab === "mine" ? 1 : 0);
+  }, [route.params?.tab]);
 
   const load = useCallback(() => {
     const params = new URLSearchParams();
@@ -84,6 +97,15 @@ export function KawangGawaScreen({ navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter/city change
   }, [type, city, allCities]);
 
+  const loadMine = useCallback(() => {
+    setMineRes(null);
+    api.get("/me/signups").then((r) => {
+      setMineRes({ ok: r.ok, status: r.status });
+      if (r.ok) setMine(r.data);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus
+  }, []);
+
   // ⚠️ Gated on `isReady` for the same cold-start reason HomeScreen's `loadCityPanels`
   // documents: AuthContext reads the cached city out of SecureStore ASYNCHRONOUSLY, so on a
   // cold start `city` is still null on the first render. Firing before `isReady` would query
@@ -92,11 +114,9 @@ export function KawangGawaScreen({ navigation }: Props) {
   useFocusEffect(useCallback(() => {
     if (!isReady) return;
     load();
-    api.get("/me/signups").then((r) => {
-      if (r.ok) setMine(r.data);
-    });
+    loadMine();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable per render
-  }, [load, isReady]));
+  }, [load, loadMine, isReady]));
 
   const totalsLabel = volunteerTotalsLabel(volunteerTotals(mine));
   const next = nextBookedShift(mine);
@@ -108,27 +128,16 @@ export function KawangGawaScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.kawanggawa">
       {/* The title had `justifyContent: space-between` against two links and no room to
           shrink, so "Kawang-Gawa" ran straight into "My schedule ›" at 402 pt. It gets its
-          own line now, and the two destinations became real buttons rather than 14 pt text. */}
+          own line now, and the two destinations folded into one segmented control below. */}
       <View style={styles.header}>
         <Text style={styles.title}>Kawang-Gawa</Text>
-        <View style={styles.headerLinks}>
-          <TouchableOpacity
-            style={styles.headerPill}
-            activeOpacity={0.75}
-            accessibilityRole="button"
-            onPress={() => navigation.navigate("kawanggawaSchedule")}
-          >
-            <Text style={styles.headerPillText}>My schedule</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.headerPill}
-            activeOpacity={0.75}
-            accessibilityRole="button"
-            onPress={() => navigation.navigate("kawanggawaHistory")}
-          >
-            <Text style={styles.headerPillText}>History</Text>
-          </TouchableOpacity>
-        </View>
+        <SegmentedControl
+          segments={["Browse", "My shifts"]}
+          index={tabIndex}
+          onChange={setTabIndex}
+          style={styles.segmented}
+          testID="seg.kawanggawa"
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -143,7 +152,7 @@ export function KawangGawaScreen({ navigation }: Props) {
                   activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityLabel={`Next shift: ${shiftTypeLabel(next.shift.type)} at ${next.shift.org_name}`}
-                  onPress={() => navigation.navigate("kawanggawaSchedule")}
+                  onPress={() => setTabIndex(1)}
                 >
                   <View style={styles.impactNextCopy}>
                     <Text style={styles.impactNextLabel}>
@@ -160,6 +169,18 @@ export function KawangGawaScreen({ navigation }: Props) {
           </View>
         )}
 
+        {tabIndex === 1 ? (
+          mine ? (
+            <MyShifts
+              data={mine}
+              onOpen={(item) => navigation.navigate("kawanggawaCheckin", { signupId: item.signup_id })}
+              onCancel={(item) => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })}
+            />
+          ) : (
+            <LoadStateView state={loadState(mineRes)} subject="shifts" onRetry={loadMine} />
+          )
+        ) : (
+          <>
         {/* P2 · city scope row. Mirrors the home feed's city chip: a saved city scopes the
             feed by default, and "Change" is a plain toggle rather than a trip to the picker —
             the picker is one tap further, for the "no city yet" case only. */}
@@ -282,6 +303,8 @@ export function KawangGawaScreen({ navigation }: Props) {
           ))}
           </>
         )}
+          </>
+        )}
       </ScrollView>
 
       <OwnerTabs active="volunteer" />
@@ -297,14 +320,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4 },
   title: { color: colors.ink, ...typography.hero },
-  headerLinks: { marginTop: 12, flexDirection: "row", gap: 10 },
-  headerPill: {
-    // §13.4 · a real 44 pt box rather than hitSlop; touch.ts is explicit that invisible slop
-    // between close siblings overlaps and the first one wins every contested tap.
-    height: 44, paddingHorizontal: 18, borderRadius: 22, alignItems: "center",
-    justifyContent: "center", ...card
-  },
-  headerPillText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
+  segmented: { marginTop: 16 },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 130 },
   impact: { borderRadius: radii.tile, paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18, ...card },
   impactTotals: { color: colors.ink, ...typography.section },

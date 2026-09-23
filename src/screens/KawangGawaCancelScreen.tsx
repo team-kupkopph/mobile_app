@@ -73,8 +73,8 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
           <Text style={styles.subheading}>{lateCancelCopy(!!wasLate)}</Text>
 
           <Button
-            label="Back to schedule"
-            onPress={() => navigation.navigate("kawanggawaSchedule")}
+            label="Back to my shifts"
+            onPress={() => navigation.navigate("kawanggawa", { tab: "mine" })}
             style={styles.primaryButton}
           />
         </View>
@@ -88,7 +88,7 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
           <Text style={styles.heading}>Couldn't cancel</Text>
           <Text style={styles.subheading}>{errorMessage}</Text>
 
-          <Button label="Back to schedule" onPress={() => navigation.goBack()} style={styles.primaryButton} />
+          <Button label="Back" onPress={() => navigation.goBack()} style={styles.primaryButton} />
         </View>
       )}
 

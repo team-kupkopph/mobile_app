@@ -74,12 +74,12 @@ export function NotificationsScreen({ navigation }: Props) {
       navigation.navigate("reportDetail", { reportId: target.reportId });
     } else if (target.screen === "myInquiries") {
       navigation.navigate("myInquiries");
-    } else if (target.screen === "kawanggawaSchedule") {
-      navigation.navigate("kawanggawaSchedule");
-    } else if (target.screen === "kawanggawaHistory") {
-      navigation.navigate("kawanggawaHistory");
+    } else if (target.screen === "kawanggawa") {
+      navigation.navigate("kawanggawa", { tab: target.tab });
     } else if (target.screen === "shelterVolunteerRequests") {
       navigation.navigate("shelterVolunteerRequests", { shiftId: target.shiftId });
+    } else if (target.screen === "shelterVolunteerActivity") {
+      navigation.navigate("shelterVolunteerActivity", { shiftId: target.shiftId });
     } else {
       navigation.navigate("verifyDocuments");
     }

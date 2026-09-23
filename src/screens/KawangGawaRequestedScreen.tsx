@@ -1,22 +1,38 @@
 // US-V8 · terminal confirmation after a volunteer requests a shift.
 // Reference: screens/user/screen-kawanggawa-requested.png. No route params (kawanggawaRequested:
 // undefined) — KawangGawaDetailScreen navigates here right after POST /shifts/{id}/signups
-// succeeds, so this screen doesn't know which shift it was; it just points onward to the
-// schedule (where the new "requested" row shows up) or back to the hub to browse more.
+// succeeds, so this screen doesn't know which shift it was; it just points onward to the hub's
+// My shifts tab (where the new "requested" row shows up) or back to Browse for more.
+//
+// Task 5 (K19, K30) · ScreenHeader replaces the bare content-only layout, and its back arrow —
+// same as the hardware/gesture back, per the `beforeRemove` listener below — goes to the hub
+// on My shifts rather than back to the shift detail: landing back on the screen that just
+// asked "Request this shift?" after already requesting it is not a back step, it's a chance to
+// double-submit.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, spacing, typography } from "../theme";
-import { Button } from "../components/ui";
+import { Button, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaRequested">;
 
 export function KawangGawaRequestedScreen({ navigation }: Props) {
+  useEffect(() => navigation.addListener("beforeRemove", (e) => {
+    if (e.data.action.type === "GO_BACK") {
+      e.preventDefault();
+      navigation.navigate("kawanggawa", { tab: "mine" });
+    }
+  }), [navigation]);
+
   return (
     <View style={styles.screen} testID="screen.kawanggawaRequested">
+      <ScreenHeader title="Request sent" onBack={() => navigation.navigate("kawanggawa", { tab: "browse" })} />
+
       <View style={styles.content}>
         <View style={styles.iconCircle}>
           <ClockIcon color={colors.teal} size={44} />
@@ -32,15 +48,15 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
         </Text>
 
         <Button
-          label="View my schedule"
-          onPress={() => navigation.navigate("kawanggawaSchedule")}
+          label="View my shifts"
+          onPress={() => navigation.navigate("kawanggawa", { tab: "mine" })}
           style={styles.primaryButton}
         />
 
         <TouchableOpacity hitSlop={TAP_SLOP}
           activeOpacity={0.7}
           style={styles.secondaryButton}
-          onPress={() => navigation.navigate("kawanggawa")}
+          onPress={() => navigation.navigate("kawanggawa", { tab: "browse" })}
         >
           <Text style={styles.secondaryText}>Browse more opportunities</Text>
         </TouchableOpacity>

@@ -91,9 +91,7 @@ import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
 import { KawangGawaScreen } from "../screens/KawangGawaScreen";
 import { KawangGawaDetailScreen } from "../screens/KawangGawaDetailScreen";
 import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen";
-import { KawangGawaScheduleScreen } from "../screens/KawangGawaScheduleScreen";
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
-import { KawangGawaHistoryScreen } from "../screens/KawangGawaHistoryScreen";
 import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
 import { RootStackParamList } from "./types";
@@ -202,15 +200,14 @@ export function RootNavigator() {
       <Stack.Screen name="reportMatches" component={ReportMatchesScreen} />
       <Stack.Screen name="matchDetail" component={MatchDetailScreen} />
       <Stack.Screen name="reportContent" component={ReportContentScreen} />
-      {/* US-V8 — the real hub + shift detail/waiver (Task 4), schedule (Task 5),
-          check-in/out (Task 6), history (Task 7), and the cancel flow (Task 8). */}
+      {/* US-V8 — the real hub + shift detail/waiver (Task 4), check-in/out (Task 6), and the
+          cancel flow (Task 8). Task 5 (K30/G9) folded the standalone schedule and history
+          screens into the hub itself — one screen, segmented Browse | My shifts. */}
       <Stack.Screen name="kawanggawa" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaDetail" component={KawangGawaDetailScreen} />
       <Stack.Screen name="waiver" component={WaiverScreen} />
       <Stack.Screen name="kawanggawaRequested" component={KawangGawaRequestedScreen} />
-      <Stack.Screen name="kawanggawaSchedule" component={KawangGawaScheduleScreen} />
       <Stack.Screen name="kawanggawaCheckin" component={KawangGawaCheckinScreen} />
-      <Stack.Screen name="kawanggawaHistory" component={KawangGawaHistoryScreen} />
       <Stack.Screen name="kawanggawaCancel" component={KawangGawaCancelScreen} />
       {/* US-V9 — the shelter side of Kawang-Gawa: the manage list (Task 5, real), the
           activity hub + calendar (Task 6, real), create/edit (Task 7, real), requests

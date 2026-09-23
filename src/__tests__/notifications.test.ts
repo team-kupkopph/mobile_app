@@ -37,15 +37,15 @@ describe("notificationTarget", () => {
       .toEqual({ screen: "myInquiries" });
   });
 
-  it("routes volunteer notification types to schedule/history", () => {
-    expect(notificationTarget({ type: "shift_confirmed", data: { shift_id: "s", signup_id: "x" } }))
-      .toEqual({ screen: "kawanggawaSchedule" });
-    expect(notificationTarget({ type: "shift_reminder", data: { shift_id: "s", signup_id: "x", window: "24h" } }))
-      .toEqual({ screen: "kawanggawaSchedule" });
-    expect(notificationTarget({ type: "signup_declined", data: { shift_id: "s", signup_id: "x" } }))
-      .toEqual({ screen: "kawanggawaHistory" });
-    expect(notificationTarget({ type: "shift_cancelled_by_shelter", data: { shift_id: "s" } }))
-      .toEqual({ screen: "kawanggawaHistory" });
+  test("volunteer notifications open the hub on My shifts", () => {
+    for (const type of ["shift_confirmed", "shift_reminder", "signup_declined", "shift_cancelled_by_shelter"]) {
+      expect(notificationTarget({ type, data: { shift_id: "sh1" } })).toEqual({ screen: "kawanggawa", tab: "mine" });
+    }
+  });
+
+  test("a volunteer's cancel takes the shelter to that activity", () => {
+    expect(notificationTarget({ type: "signup_cancelled_by_volunteer", data: { shift_id: "sh1", signup_id: "s1", was_late: true } }))
+      .toEqual({ screen: "shelterVolunteerActivity", shiftId: "sh1" });
   });
 
   it("routes signup_requested (the shelter's own notification) to its requests screen for that shift", () => {

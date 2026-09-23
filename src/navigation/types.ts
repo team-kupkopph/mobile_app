@@ -157,15 +157,14 @@ export type RootStackParamList = {
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };
   // US-V8 — Kawang-Gawa volunteer flow (Track V, Sprint 5). `kawanggawa` is the real hub
-  // (Task 3); the other seven are placeholders pointed at KawangGawaScreen until Tasks 4–8
-  // register their own components.
-  kawanggawa: undefined;
+  // (Task 3). Task 5 (K30/G9) folded the standalone schedule and history screens into one
+  // segmented Browse | My shifts hub — `tab` picks the initial segment (defaults to
+  // "browse"); omitted params are the same as `{ tab: "browse" }`.
+  kawanggawa: { tab?: "browse" | "mine" } | undefined;
   kawanggawaDetail: { shiftId: string };
   waiver: undefined; // the D-S5-1 placeholder
   kawanggawaRequested: undefined;
-  kawanggawaSchedule: undefined;
   kawanggawaCheckin: { signupId: string };
-  kawanggawaHistory: undefined;
   kawanggawaCancel: { signupId: string };
   // US-V9 — the shelter side of Kawang-Gawa (Track V, Sprint 5). `shelterVolunteer` is the real
   // manage list (Task 5); the other eight are placeholders pointed at ShelterVolunteerScreen until
