@@ -1,26 +1,22 @@
 // US-V9 · edit a posted activity. Reference: ShelterVolunteerActivityScreen for style,
-// ShelterVolunteerCreateScreen for the form fields (same shape, minus the "no title/animal"
-// note — this edits the same {type, starts_at, ends_at, capacity}).
+// ShelterVolunteerCreateScreen for the form (same shared ShiftFormFields).
 // GET /shelter/shifts/{shiftId} prefills; PATCH /shelter/shifts/{shiftId} sends only the
-// fields that changed from what was loaded.
+// fields that changed from what was loaded — diffed via `shiftFormBody`, key by key, rather
+// than tracking a separate list of "touched" fields.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
-import { toLocalInputValue, toOffsetIso } from "../shiftTime";
+import { windowParts } from "../shiftTime";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { ShiftType, shiftTypeLabel } from "../volunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, radii, spacing, typography } from "../theme";
-import { Button, Field, ScreenHeader } from "../components/ui";
-
-const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
-
-type Initial = { type: ShiftType; starts_at: string; ends_at: string; capacity: number };
+import { colors, spacing, typography } from "../theme";
+import { Button, ScreenHeader } from "../components/ui";
+import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody } from "../components/ShiftFormFields";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerEdit">;
 
@@ -28,15 +24,12 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
   const api = useApi();
   const { shiftId } = route.params;
 
-  const [type, setType] = useState<ShiftType>("walking");
-  const [startsAt, setStartsAt] = useState("");
-  const [endsAt, setEndsAt] = useState("");
-  const [capacity, setCapacity] = useState("1");
-  const [initial, setInitial] = useState<Initial | null>(null);
+  const [form, setForm] = useState<ShiftFormValue | null>(null);
+  const [initialForm, setInitialForm] = useState<ShiftFormValue | null>(null);
 
   /**
    * US-R5 · this screen was ALREADY immune to the overwrite bug that ListingForm had, and
-   * not by accident: `submit()` returns early on `!initial` and sends a DIFF against it, so
+   * not by accident: `submit()` diffs against `initialForm` and sends only changed keys, so
    * a failed prefill can produce no patch at all. That is PrefillWarning's rules 3 and 4
    * satisfied structurally rather than by a banner, and it is the better way to do it.
    *
@@ -49,7 +42,8 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
    */
   const prefilled = useRef(false);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [errors, setErrors] = useState<ShiftFormErrors>({});
+  const [banner, setBanner] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
 
   const load = useCallback(() => {
@@ -58,17 +52,23 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
       setRes({ ok: r.ok, status: r.status });
       if (!r.ok) return;
       const d = r.data;
-      // `initial` is the diff baseline and must always track the server, or a re-save would
-      // resend fields the shelter never touched.
-      setInitial({ type: d.type, starts_at: toLocalInputValue(d.starts_at),
-                   ends_at: toLocalInputValue(d.ends_at), capacity: d.capacity });
-      // The EDITABLE fields, however, fill in exactly once — see the note above.
+      // `useShelterAddress: false` so the stored address is shown and editable — d.location
+      // is always present on the response, whether it came from the shelter's own custom
+      // fields or the server's shelter-primary-address default.
+      const loaded: ShiftFormValue = {
+        type: d.type, title: d.title, description: d.description ?? "", meetingPoint: d.location?.meeting_point ?? "",
+        ...windowParts(d.starts_at, d.ends_at), capacity: String(d.capacity),
+        useShelterAddress: false,
+        addressLine1: d.location?.address_line1 ?? "", barangay: d.location?.barangay ?? "",
+        city: d.location?.city ?? "", province: d.location?.province ?? ""
+      };
+      // `initialForm` is the diff baseline and must always track the server, or a re-save
+      // would resend fields the shelter never touched.
+      setInitialForm(loaded);
+      // The EDITABLE form, however, fills in exactly once — see the note above.
       if (prefilled.current) return;
       prefilled.current = true;
-      setType(d.type);
-      setStartsAt(toLocalInputValue(d.starts_at));
-      setEndsAt(toLocalInputValue(d.ends_at));
-      setCapacity(String(d.capacity));
+      setForm(loaded);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus, keyed by shiftId
   }, [shiftId]);
@@ -76,26 +76,19 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   async function submit() {
-    if (submitting || !initial) return;
-    setError(undefined);
+    if (submitting || !form || !initialForm) return;
+    setBanner(undefined);
 
-    const starts = toOffsetIso(startsAt);
-    const ends = toOffsetIso(endsAt);
-    if (!starts || !ends) {
-      setError("Enter start and end as 2026-10-04T09:00.");
-      return;
-    }
-    const cap = parseInt(capacity, 10);
-    if (!Number.isFinite(cap) || cap < 1) {
-      setError("Capacity must be at least 1.");
-      return;
-    }
+    const found = validateShiftForm(form);
+    setErrors(found);
+    if (Object.keys(found).length) return;
 
+    const body = shiftFormBody(form)!;
+    const baseline = shiftFormBody(initialForm)!;
     const patch: Record<string, unknown> = {};
-    if (type !== initial.type) patch.type = type;
-    if (startsAt.trim() !== initial.starts_at) patch.starts_at = starts;
-    if (endsAt.trim() !== initial.ends_at) patch.ends_at = ends;
-    if (cap !== initial.capacity) patch.capacity = cap;
+    for (const key of Object.keys(body)) {
+      if (JSON.stringify(body[key]) !== JSON.stringify(baseline[key])) patch[key] = body[key];
+    }
 
     if (Object.keys(patch).length === 0) {
       navigation.goBack();
@@ -110,16 +103,16 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
       navigation.goBack();
       return;
     }
-    const code = res.data?.error?.code;
-    if (res.status === 409 && code === "shift_closed") {
-      setError("This activity is closed and can't be edited.");
-      return;
-    }
-    if (res.status === 422 && code === "bad_window") {
-      setError("End time must be after start time.");
-      return;
-    }
-    setError(res.data?.error?.message ?? "Couldn't save changes. Try again.");
+    const err = res.data?.error;
+    if (res.status === 409 && err?.code === "shift_closed")
+      return setBanner("This activity is closed and can't be edited.");
+    if (res.status === 422 && err?.code === "bad_window") return setErrors({ when: "End must be after start." });
+    if (res.status === 422 && err?.code === "location_required")
+      return setErrors({ location: "Add your shelter's address in Organization details, or enter one here." });
+    if (res.status === 400 && err?.field === "title") return setErrors({ title: err.message });
+    if (res.status === 400 && err?.field === "capacity") return setErrors({ capacity: err.message });
+    if (res.status === 403) return setBanner("Your organization must be verified before posting activities.");
+    setBanner(err?.message ?? "Couldn't save changes. Try again.");
   }
 
   return (
@@ -127,43 +120,17 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Edit activity" onBack={() => navigation.goBack()} />
 
-      {/* Gated on `!initial`, not on the request: once the form is up, a failed REFETCH must
+      {/* Gated on `!form`, not on the request: once the form is up, a failed REFETCH must
           not replace it — that would throw away typed work, which is the whole reason forms
           get PrefillWarning instead of a full-screen state. Here nothing has been typed yet. */}
-      {!initial ? (
+      {!form ? (
         <LoadStateView state={loadState(res)} subject="activity" onRetry={load}
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-          <Text style={styles.label}>Activity type</Text>
-          <TypeChips value={type} onChange={setType} />
+          {banner ? <Text style={styles.banner}>{banner}</Text> : null}
 
-          <Field
-            label="Starts"
-            value={startsAt}
-            onChangeText={setStartsAt}
-            placeholder="2026-10-04T09:00"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          <Field
-            label="Ends"
-            value={endsAt}
-            onChangeText={setEndsAt}
-            placeholder="2026-10-04T09:00"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          <Field
-            label="Capacity"
-            value={capacity}
-            onChangeText={setCapacity}
-            placeholder="1"
-            keyboardType="number-pad"
-            error={error ? error : undefined}
-          />
+          <ShiftFormFields value={form} onChange={setForm} errors={errors} />
 
           <Button label="Save changes" onPress={submit} loading={submitting} style={styles.submit} />
         </ScrollView>
@@ -172,37 +139,11 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
   );
 }
 
-function TypeChips({ value, onChange }: { value: ShiftType; onChange: (t: ShiftType) => void }) {
-  return (
-    <View style={styles.chipGrid}>
-      {SHIFT_TYPES.map((t) => {
-        const active = t === value;
-        return (
-          <TouchableOpacity
-            key={t}
-            style={[styles.chip, active && styles.chipActive]}
-            onPress={() => onChange(t)}
-            activeOpacity={0.85}
-          >
-            <Text style={[styles.chipText, active && styles.chipTextActive]}>{shiftTypeLabel(t)}</Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  chip: {
-    minWidth: "47%", height: 48, borderRadius: radii.chip, alignItems: "center", justifyContent: "center",
-    paddingHorizontal: 12, backgroundColor: colors.white
+  banner: {
+    marginTop: 16, color: colors.danger, ...typography.meta, fontWeight: "600"
   },
-  chipActive: { backgroundColor: colors.soft },
-  chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
-  chipTextActive: { color: colors.teal },
   submit: { marginTop: 26 }
 });
