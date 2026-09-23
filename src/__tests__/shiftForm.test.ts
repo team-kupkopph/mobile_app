@@ -1,4 +1,4 @@
-import { shiftFormBody, validateShiftForm, type ShiftFormValue } from "../components/ShiftFormFields";
+import { shiftFormBody, validateShiftForm, revealLocationOnError, type ShiftFormValue } from "../components/ShiftFormFields";
 
 const base: ShiftFormValue = {
   type: "walking", title: "Morning dog walk", description: "", meetingPoint: "Front gate",
@@ -25,4 +25,16 @@ test("each problem lands on its own field", () => {
 test("a custom location is sent in full", () => {
   const body = shiftFormBody({ ...base, useShelterAddress: false, addressLine1: "Rizal Park", city: "Pasig" })!;
   expect(body).toMatchObject({ address_line1: "Rizal Park", city: "Pasig" });
+});
+
+// Fix round 1 · Finding 2: a `location_required` 422 says "...or enter one here" — that only
+// makes sense once the address fields are visible. Both screens' submit() run the form
+// through revealLocationOnError before setting the error, so the toggle flips off and the
+// fields reappear under the message instead of the copy pointing at hidden controls.
+test("a location_required error reveals the address fields", () => {
+  const withToggleOn: ShiftFormValue = { ...base, useShelterAddress: true };
+  const revealed = revealLocationOnError(withToggleOn);
+  expect(revealed.useShelterAddress).toBe(false);
+  // the rest of the form is untouched
+  expect(revealed).toMatchObject({ title: base.title, capacity: base.capacity });
 });

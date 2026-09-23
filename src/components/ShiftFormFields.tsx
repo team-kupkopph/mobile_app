@@ -32,6 +32,16 @@ export function validateShiftForm(v: ShiftFormValue): ShiftFormErrors {
   return e;
 }
 
+/**
+ * Fix round 1 (P2 T5, Finding 2) · a `location_required` 422 says "...or enter one here", but
+ * if the toggle is still on, the address fields are hidden and the message points at nothing.
+ * Both screens' `submit()` run the form through this before setting the error, so the fields
+ * are visible under the message rather than just fixing the copy.
+ */
+export function revealLocationOnError(v: ShiftFormValue): ShiftFormValue {
+  return { ...v, useShelterAddress: false };
+}
+
 export function shiftFormBody(v: ShiftFormValue): Record<string, unknown> | null {
   const w = shiftWindow(v.day, v.start, v.durationMins);
   if (!w) return null;
@@ -46,8 +56,18 @@ export function shiftFormBody(v: ShiftFormValue): Record<string, unknown> | null
   return body;
 }
 
-export function ShiftFormFields({ value, onChange, errors }: {
+export function ShiftFormFields({ value, onChange, errors, lockShelterAddress }: {
   value: ShiftFormValue; onChange: (v: ShiftFormValue) => void; errors: ShiftFormErrors;
+  /**
+   * Fix round 1 (P2 T5, Finding 1) · Edit's PATCH only sends keys that changed from the
+   * loaded baseline (see ShelterVolunteerEditScreen). Flipping this toggle back on there
+   * would omit the address keys from the diff entirely, so the PATCH sends nothing and the
+   * shelter's custom address silently persists while the toggle shows "on" — the UI would be
+   * lying. Rather than clear the address (which would drop the city too) or fetch the
+   * shelter's primary address just to re-populate it, Edit greys the toggle out: honest,
+   * and no extra API round trip.
+   */
+  lockShelterAddress?: boolean;
 }) {
   const set = <K extends keyof ShiftFormValue>(key: K) => (val: ShiftFormValue[K]) => onChange({ ...value, [key]: val });
 
@@ -99,15 +119,19 @@ export function ShiftFormFields({ value, onChange, errors }: {
       />
 
       <TouchableOpacity
-        style={styles.toggleRow}
-        activeOpacity={0.85}
+        style={[styles.toggleRow, lockShelterAddress && styles.toggleRowLocked]}
+        activeOpacity={lockShelterAddress ? 1 : 0.85}
         accessibilityRole="switch"
-        accessibilityState={{ checked: value.useShelterAddress }}
+        accessibilityState={{ checked: value.useShelterAddress, disabled: !!lockShelterAddress }}
+        disabled={lockShelterAddress}
         onPress={() => set("useShelterAddress")(!value.useShelterAddress)}
       >
         <View style={[styles.checkbox, value.useShelterAddress && styles.checkboxOn]} />
         <Text style={styles.toggleLabel}>Use our shelter address</Text>
       </TouchableOpacity>
+      {lockShelterAddress ? (
+        <Text style={styles.helperText}>Address is set — edit the fields below to change it.</Text>
+      ) : null}
       {errors.location ? <Text style={styles.errorText}>{errors.location}</Text> : null}
 
       {!value.useShelterAddress ? (
@@ -173,6 +197,8 @@ const styles = StyleSheet.create({
   chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   chipTextActive: { color: colors.teal },
   toggleRow: { flexDirection: "row", alignItems: "center", minHeight: 44, marginTop: spacing.md },
+  toggleRowLocked: { opacity: 0.5 },
+  helperText: { ...typography.meta, color: colors.muted, marginTop: 4 },
   // A circle, not a square: radius is exactly half the box (pill rule) so it doesn't read as
   // off-scale geometry — a rounded-square checkbox would need its own token this app has no
   // other use for.

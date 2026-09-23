@@ -16,7 +16,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
-import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody } from "../components/ShiftFormFields";
+import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody, revealLocationOnError } from "../components/ShiftFormFields";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerEdit">;
 
@@ -107,8 +107,11 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
     if (res.status === 409 && err?.code === "shift_closed")
       return setBanner("This activity is closed and can't be edited.");
     if (res.status === 422 && err?.code === "bad_window") return setErrors({ when: "End must be after start." });
-    if (res.status === 422 && err?.code === "location_required")
-      return setErrors({ location: "Add your shelter's address in Organization details, or enter one here." });
+    if (res.status === 422 && err?.code === "location_required") {
+      setForm(revealLocationOnError(form));
+      setErrors({ location: "Add your shelter's address in Organization details, or enter one here." });
+      return;
+    }
     if (res.status === 400 && err?.field === "title") return setErrors({ title: err.message });
     if (res.status === 400 && err?.field === "capacity") return setErrors({ capacity: err.message });
     if (res.status === 403) return setBanner("Your organization must be verified before posting activities.");
@@ -130,7 +133,7 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {banner ? <Text style={styles.banner}>{banner}</Text> : null}
 
-          <ShiftFormFields value={form} onChange={setForm} errors={errors} />
+          <ShiftFormFields value={form} onChange={setForm} errors={errors} lockShelterAddress />
 
           <Button label="Save changes" onPress={submit} loading={submitting} style={styles.submit} />
         </ScrollView>

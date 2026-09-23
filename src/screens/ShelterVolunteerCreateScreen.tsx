@@ -15,7 +15,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
-import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody } from "../components/ShiftFormFields";
+import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody, revealLocationOnError } from "../components/ShiftFormFields";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerCreate">;
 
@@ -52,8 +52,11 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
     }
     const err = res.data?.error;
     if (res.status === 422 && err?.code === "bad_window") return setErrors({ when: "End must be after start." });
-    if (res.status === 422 && err?.code === "location_required")
-      return setErrors({ location: "Add your shelter's address in Organization details, or enter one here." });
+    if (res.status === 422 && err?.code === "location_required") {
+      setForm(revealLocationOnError(form));
+      setErrors({ location: "Add your shelter's address in Organization details, or enter one here." });
+      return;
+    }
     if (res.status === 400 && err?.field === "title") return setErrors({ title: err.message });
     if (res.status === 400 && err?.field === "capacity") return setErrors({ capacity: err.message });
     if (res.status === 403) return setBanner("Your organization must be verified before posting activities.");
