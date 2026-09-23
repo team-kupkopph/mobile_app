@@ -1,23 +1,53 @@
-// US-V8 · cancel a shift. Reference: screens/user/screen-kawanggawa-cancel(-late).png.
-// `was_late` is decided server-side by POST /signups/{id}/cancel — never a device clock — so the
-// pattern here is: show a neutral ConfirmModal first ("Cancel this shift?"), and only after the
-// server responds do we know whether it was a free or a late (recorded) cancellation. The result
-// phase renders lateCancelCopy(was_late) straight from that response.
+// US-V8 · cancel a shift (K13: the modal says free/late/withdraw BEFORE the volunteer commits,
+// instead of a single "cancelling closer to the start time will be recorded" sentence that never
+// said which one this cancellation actually was).
+//
+// `cancelVariant` (src/volunteer.ts) is a PREVIEW only — it is what the client believes right
+// now, from `cancel_cutoff_at`. `was_late` is decided server-side by POST /signups/{id}/cancel,
+// never a device clock, so the result phase renders `lateCancelCopy(res.data.was_late)` straight
+// from the server response even if it disagrees with the preview the modal showed.
+//
+// The screen only gets a `signupId` in its route params (same as Check-in), so it fetches
+// `/me/signups` on mount and does the same upcoming/requested/history lookup Check-in does —
+// that's the only place `cancel_cutoff_at` and `status` (needed for `cancelVariant`) live.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { AlertIcon, CheckIcon } from "../components/AppIcons";
-import { ConfirmModal } from "../components/ConfirmModal";
+import { ConfirmModal, ConfirmModalTone } from "../components/ConfirmModal";
+import { LoadStateView } from "../components/LoadStateView";
+import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { lateCancelCopy } from "../volunteer";
-import { colors, elevation, spacing, typography } from "../theme";
+import { CancelVariant, MySignupItem, MySignups, cancelVariant, lateCancelCopy } from "../volunteer";
+import { colors, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
-
-
 type Phase = "confirm" | "submitting" | "result";
+
+type Outcome = { variant: CancelVariant; wasLate: boolean };
+
+const VARIANT_COPY: Record<CancelVariant, { title: string; body: string; confirmLabel: string; tone: ConfirmModalTone }> = {
+  request: {
+    title: "Withdraw your request?",
+    body: "The shelter hasn't confirmed you yet, so nothing is recorded.",
+    confirmLabel: "Withdraw request",
+    tone: "neutral",
+  },
+  free: {
+    title: "Cancel this shift?",
+    body: "You're cancelling more than 12 hours ahead — this is free, and the shelter will be told.",
+    confirmLabel: "Cancel shift",
+    tone: "neutral",
+  },
+  late: {
+    title: "Cancel this late?",
+    body: "It's less than 12 hours before the shift. You can still cancel, and it will be noted on your record. It won't count as a no-show.",
+    confirmLabel: "Cancel anyway",
+    tone: "warning",
+  },
+};
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaCancel">;
 
@@ -25,29 +55,51 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
   const api = useApi();
   const { signupId } = route.params;
 
+  const [data, setData] = useState<MySignups | null>(null);
+  // US-R4 pattern (see Check-in): the RESULT of the fetch, so `loadState` can tell offline/
+  // error/gone apart instead of collapsing everything into "something went wrong".
+  const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+
   const [phase, setPhase] = useState<Phase>("confirm");
-  const [wasLate, setWasLate] = useState<boolean | null>(null);
+  const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
 
+  const load = useCallback(() => {
+    setRes(null);
+    return api.get("/me/signups").then((r) => {
+      setRes({ ok: r.ok, status: r.status });
+      if (r.ok) setData(r.data);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch once on mount
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const item: MySignupItem | undefined = data
+    ? [...data.upcoming, ...data.requested, ...data.history].find((i) => i.signup_id === signupId)
+    : undefined;
+  const variant: CancelVariant | undefined = item ? cancelVariant(item) : undefined;
+
   async function onConfirm() {
+    if (!variant) return;
     setPhase("submitting");
     setErrorMessage(undefined);
-    const res = await api.post(`/signups/${signupId}/cancel`);
-    if (!res.ok) {
-      const code = res.data?.error?.code;
-      if (res.status === 409 && code === "not_cancellable") {
+    const r = await api.post(`/signups/${signupId}/cancel`);
+    if (!r.ok) {
+      const code = r.data?.error?.code;
+      if (r.status === 409 && code === "not_cancellable") {
         setErrorMessage("This shift can no longer be cancelled.");
       } else {
-        setErrorMessage(res.data?.error?.message ?? "Couldn't cancel this shift. Try again.");
+        setErrorMessage(r.data?.error?.message ?? "Couldn't cancel this shift. Try again.");
       }
       setPhase("confirm");
       return;
     }
-    setWasLate(!!res.data.was_late);
+    setOutcome({ variant, wasLate: !!r.data.was_late });
     setPhase("result");
   }
 
-  const resultTone = wasLate
+  const resultTone = outcome && outcome.variant !== "request" && outcome.wasLate
     ? { bg: colors.warningBg, fg: colors.warningStrong }
     : { bg: colors.successBg, fg: colors.success };
 
@@ -55,22 +107,41 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <ScreenHeader title="Cancel shift" onBack={() => navigation.goBack()} />
 
+      {phase === "confirm" && !item && (
+        <View style={styles.centerFill}>
+          <LoadStateView
+            state={loadState(res, 0)}
+            emptyTitle="Not found"
+            emptyBody="This signup couldn't be found."
+            subject="signup"
+            onRetry={load}
+            onBack={() => navigation.goBack()}
+          />
+        </View>
+      )}
+
       {phase === "submitting" && (
         <View style={styles.centerFill}>
           <ActivityIndicator color={colors.teal} />
         </View>
       )}
 
-      {phase === "result" && (
+      {phase === "result" && !!outcome && (
         <View style={styles.content}>
           <View style={[styles.iconCircle, { backgroundColor: resultTone.bg }]}>
-            {wasLate
+            {outcome.variant !== "request" && outcome.wasLate
               ? <AlertIcon color={resultTone.fg} size={40} />
               : <CheckIcon color={resultTone.fg} size={32} />}
           </View>
 
-          <Text style={styles.heading}>Shift cancelled</Text>
-          <Text style={styles.subheading}>{lateCancelCopy(!!wasLate)}</Text>
+          <Text style={styles.heading}>
+            {outcome.variant === "request" ? "Request withdrawn" : "Shift cancelled"}
+          </Text>
+          <Text style={styles.subheading}>
+            {outcome.variant === "request"
+              ? "Your request has been withdrawn. Nothing was recorded."
+              : lateCancelCopy(outcome.wasLate)}
+          </Text>
 
           <Button
             label="Back to my shifts"
@@ -80,7 +151,7 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
         </View>
       )}
 
-      {phase === "confirm" && !!errorMessage && (
+      {phase === "confirm" && !!item && !!errorMessage && (
         <View style={styles.content}>
           <View style={[styles.iconCircle, { backgroundColor: colors.dangerBg }]}>
             <AlertIcon color={colors.danger} size={40} />
@@ -92,15 +163,17 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
         </View>
       )}
 
-      <ConfirmModal
-        visible={phase === "confirm" && !errorMessage}
-        title="Cancel this shift?"
-        body="Cancelling more than 12 hours before your shift is free. Cancelling closer to the start time will be recorded on your account."
-        confirmLabel="Cancel shift"
-        tone="neutral"
-        onConfirm={onConfirm}
-        onCancel={() => navigation.goBack()}
-      />
+      {!!variant && (
+        <ConfirmModal
+          visible={phase === "confirm" && !!item && !errorMessage}
+          title={VARIANT_COPY[variant].title}
+          body={VARIANT_COPY[variant].body}
+          confirmLabel={VARIANT_COPY[variant].confirmLabel}
+          tone={VARIANT_COPY[variant].tone}
+          onConfirm={onConfirm}
+          onCancel={() => navigation.goBack()}
+        />
+      )}
     </View>
   );
 }
