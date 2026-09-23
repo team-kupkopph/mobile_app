@@ -15,9 +15,6 @@ appId: ph.kupkop.app
     id: "card.kawanggawa.0"
 - assertVisible:
     id: "screen.kawanggawaDetail"
-# Both consents are required before a shift can be requested — the waiver is a legal gate
-# (D-S5-1), not a formality.
-#
 # ⚠️ THIS USED TO WAIT FOR `btn.kawanggawaDetail.request` TO BECOME `enabled: true`, which
 # stopped proving anything on 2026-09-09: the button is deliberately always enabled now (the
 # design system forbids disabling a submit control for an incomplete form — a greyed button
@@ -25,19 +22,17 @@ appId: ph.kupkop.app
 # instantly, on a screen where the gate could have been removed entirely, and said nothing.
 # So the gate is now proved the way a person actually meets it: press Request with nothing
 # agreed to, and be told which consent is missing.
+# The waiver is required (D-S5-1). Contact sharing is OPTIONAL (D1, review G3): a consent the
+# volunteer cannot decline is not freely given under RA 10173, so pressing Request with
+# nothing ticked must name the waiver and ONLY the waiver.
 - tapOn:
     id: "btn.kawanggawaDetail.request"
 - assertVisible:
     id: "err.kawanggawaDetail.waiver"
-- assertVisible:
-    id: "err.kawanggawaDetail.contact"
-# THE ASSERTION THE BLOCK EXISTS FOR: pressing Request without the waiver must not sign anyone up.
 - assertNotVisible:
     id: "screen.kawanggawaRequested"
 - tapOn:
     id: "chk.kawanggawaDetail.waiver"
-- tapOn:
-    id: "chk.kawanggawaDetail.contact"
 - tapOn:
     id: "btn.kawanggawaDetail.request"
 - extendedWaitUntil:

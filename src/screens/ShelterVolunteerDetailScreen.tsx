@@ -16,10 +16,6 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
 import { Card, ScreenHeader } from "../components/ui";
 
-function formatAddress(addr: { line1: string; barangay: string; city: string; province: string }): string {
-  return [addr.line1, addr.barangay, addr.city, addr.province].filter(Boolean).join(", ");
-}
-
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerDetail">;
 
 export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
@@ -83,12 +79,6 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
                 <Text style={styles.contactLabel}>Email</Text>
                 <Text style={styles.contactValue}>{detail.contact.email}</Text>
               </View>
-              {!!detail.contact.address && (
-                <View style={styles.contactRow}>
-                  <Text style={styles.contactLabel}>Address</Text>
-                  <Text style={styles.contactValue}>{formatAddress(detail.contact.address)}</Text>
-                </View>
-              )}
             </Card>
           ) : (
             <Card style={styles.card}>

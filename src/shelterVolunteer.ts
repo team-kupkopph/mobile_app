@@ -6,7 +6,8 @@ export type PendingRequest = { signup_id: string; volunteer: { display_name: str
 export type ListingCard = { listing_id: string; pet: { name: string; species: string }; photo_url: string | null };
 export type VolunteerDetail = {
   display_name: string; reliability: Reliability;
-  contact?: { phone: string | null; email: string; address: { line1: string; barangay: string; city: string; province: string } | null };
+  // D2 · phone and email only; the backend never sends an address.
+  contact?: { phone: string | null; email: string };
 };
 
 export type ChipTone = "done" | "muted" | "danger";
