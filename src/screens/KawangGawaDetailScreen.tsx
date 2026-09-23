@@ -49,7 +49,6 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   const [waiverChecked, setWaiverChecked] = useState(false);
   const [contactChecked, setContactChecked] = useState(false);
   const [waiverHighlight, setWaiverHighlight] = useState(false);
-  const [contactHighlight, setContactHighlight] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
@@ -76,14 +75,10 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   async function submit() {
     if (submitting) return;
 
-    // Missing consents are reported ON the rows they belong to, not pooled into a summary
-    // above the button — the same design rule, and the reason `error` is left for failures
-    // that are not about a field (already requested, shift closed, network).
-    const missingWaiver = !waiverChecked;
-    const missingContact = !contactChecked;
-    setWaiverHighlight(missingWaiver);
-    setContactHighlight(missingContact);
-    if (missingWaiver || missingContact) {
+    // The waiver is the only required consent (D-S5-1). Contact sharing is optional (D1):
+    // it is an RA 10173 exception the volunteer opts INTO, so it can never block a request.
+    if (!waiverChecked) {
+      setWaiverHighlight(true);
       setError(undefined);
       return;
     }
@@ -199,24 +194,19 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           <TouchableOpacity
             testID="chk.kawanggawaDetail.contact"
             activeOpacity={0.85}
-            style={[styles.consentRow, contactHighlight && styles.consentRowAlert]}
-            onPress={() => {
-              setContactChecked((v) => !v);
-              if (contactHighlight) setContactHighlight(false);
-            }}
+            style={styles.consentRow}
+            onPress={() => setContactChecked((v) => !v)}
           >
-            <View style={[styles.consentBox, contactChecked && styles.consentBoxChecked, contactHighlight && styles.consentBoxAlert]}>
+            <View style={[styles.consentBox, contactChecked && styles.consentBoxChecked]}>
               {contactChecked && <CheckIcon color="#FFFFFF" size={13} />}
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.consentText}>
-                I agree to share my contact details (phone, email) with the shelter to coordinate this shift.
+                Share my phone number and email with {shift.org_name} for this shift.
               </Text>
-              {contactHighlight && (
-                <Text testID="err.kawanggawaDetail.contact" style={styles.consentError}>
-                  The shelter needs this to coordinate the shift with you.
-                </Text>
-              )}
+              <Text style={styles.consentHelper}>
+                Optional. The shelter can still approve you without it.
+              </Text>
             </View>
           </TouchableOpacity>
 

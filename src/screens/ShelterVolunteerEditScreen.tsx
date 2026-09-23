@@ -9,6 +9,7 @@ import { useCallback, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { toLocalInputValue, toOffsetIso } from "../shiftTime";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
@@ -59,13 +60,14 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
       const d = r.data;
       // `initial` is the diff baseline and must always track the server, or a re-save would
       // resend fields the shelter never touched.
-      setInitial({ type: d.type, starts_at: d.starts_at, ends_at: d.ends_at, capacity: d.capacity });
+      setInitial({ type: d.type, starts_at: toLocalInputValue(d.starts_at),
+                   ends_at: toLocalInputValue(d.ends_at), capacity: d.capacity });
       // The EDITABLE fields, however, fill in exactly once — see the note above.
       if (prefilled.current) return;
       prefilled.current = true;
       setType(d.type);
-      setStartsAt(d.starts_at);
-      setEndsAt(d.ends_at);
+      setStartsAt(toLocalInputValue(d.starts_at));
+      setEndsAt(toLocalInputValue(d.ends_at));
       setCapacity(String(d.capacity));
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus, keyed by shiftId
@@ -77,8 +79,10 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
     if (submitting || !initial) return;
     setError(undefined);
 
-    if (!startsAt.trim() || !endsAt.trim()) {
-      setError("Enter a start and end time.");
+    const starts = toOffsetIso(startsAt);
+    const ends = toOffsetIso(endsAt);
+    if (!starts || !ends) {
+      setError("Enter start and end as 2026-10-04T09:00.");
       return;
     }
     const cap = parseInt(capacity, 10);
@@ -89,8 +93,8 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
 
     const patch: Record<string, unknown> = {};
     if (type !== initial.type) patch.type = type;
-    if (startsAt.trim() !== initial.starts_at) patch.starts_at = startsAt.trim();
-    if (endsAt.trim() !== initial.ends_at) patch.ends_at = endsAt.trim();
+    if (startsAt.trim() !== initial.starts_at) patch.starts_at = starts;
+    if (endsAt.trim() !== initial.ends_at) patch.ends_at = ends;
     if (cap !== initial.capacity) patch.capacity = cap;
 
     if (Object.keys(patch).length === 0) {
@@ -138,7 +142,7 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
             label="Starts"
             value={startsAt}
             onChangeText={setStartsAt}
-            placeholder="2026-08-30T09:00"
+            placeholder="2026-10-04T09:00"
             autoCapitalize="none"
             autoCorrect={false}
           />
@@ -147,7 +151,7 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
             label="Ends"
             value={endsAt}
             onChangeText={setEndsAt}
-            placeholder="2026-08-30T11:00"
+            placeholder="2026-10-04T09:00"
             autoCapitalize="none"
             autoCorrect={false}
           />
