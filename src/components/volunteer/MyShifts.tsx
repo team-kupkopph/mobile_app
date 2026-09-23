@@ -3,8 +3,10 @@
 // KawangGawaHistoryScreen's stats + history) into one component the hub renders at index 1,
 // over the same `/me/signups` payload the hub already fetches for its impact strip. Pure
 // presentation: the hub owns the fetch, the load state, and where `onOpen`/`onCancel` go.
+import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import { addToCalendar } from "../../calendarShare";
 import { VolunteerIcon } from "../AppIcons";
 import {
   historyHours, locationLine, MySignupItem, MySignups, shiftHeadline, shiftTypeLabel,
@@ -52,6 +54,31 @@ function CancelLink({ label = "Cancel", onPress }: { label?: string; onPress: ()
   return (
     <TouchableOpacity activeOpacity={0.6} onPress={onPress} hitSlop={TAP_SLOP} style={styles.cancelLink}>
       <Text style={styles.cancelLinkText}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+// G5 · same "Add to calendar" share action as the check-in screen, nested the same way
+// CancelLink is — inside the card's own TouchableOpacity, so tapping it never also opens
+// check-in. Busy state is local: this list can hold several cards mid-share at once.
+function CalendarLink({ item }: { item: MySignupItem }) {
+  const [busy, setBusy] = useState(false);
+
+  async function onPress() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await addToCalendar(item);
+    } catch {
+      // No error slot on a list card — the OS share sheet not opening is visible on its own.
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <TouchableOpacity activeOpacity={0.6} onPress={onPress} hitSlop={TAP_SLOP} style={styles.calendarLink} disabled={busy}>
+      <Text style={styles.calendarLinkText}>Add to calendar</Text>
     </TouchableOpacity>
   );
 }
@@ -148,7 +175,9 @@ export function MyShifts({
               <View style={styles.cardRow}>
                 <ShiftCardBody item={item} />
               </View>
-              <CancelLink label="Cancel request" onPress={() => onCancel(item)} />
+              <View style={styles.cancelOnlyRow}>
+                <CancelLink label="Cancel request" onPress={() => onCancel(item)} />
+              </View>
             </Card>
           ))}
         </>
@@ -177,7 +206,10 @@ export function MyShifts({
                 <View style={styles.cardRow}>
                   <ShiftCardBody item={item} />
                 </View>
-                <CancelLink onPress={() => onCancel(item)} />
+                <View style={styles.cardLinkRow}>
+                  <CalendarLink item={item} />
+                  <CancelLink onPress={() => onCancel(item)} />
+                </View>
               </Card>
             </TouchableOpacity>
           ))}
@@ -206,8 +238,12 @@ const styles = StyleSheet.create({
   card: { marginBottom: 12 },
   cardColumn: { marginBottom: 12 },
   cardRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  cancelLink: { alignSelf: "flex-end", marginTop: 10, paddingVertical: 4, paddingHorizontal: 4 },
+  cardLinkRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 10 },
+  cancelOnlyRow: { alignItems: "flex-end", marginTop: 10 },
+  cancelLink: { paddingVertical: 4, paddingHorizontal: 4 },
   cancelLinkText: { color: colors.danger, ...typography.meta, fontWeight: "800" },
+  calendarLink: { paddingVertical: 4, paddingHorizontal: 4 },
+  calendarLinkText: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },

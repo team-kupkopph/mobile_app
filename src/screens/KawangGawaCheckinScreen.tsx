@@ -2,18 +2,27 @@
 // Reference: screens/user/screen-kawanggawa-checkin.png. GET /me/signups is the single source
 // of truth for check_in_at/check_out_at — POST /signups/{id}/check-in|check-out just flips a
 // timestamp server-side, so after either action we re-fetch instead of guessing the new state.
+//
+// P3 Task 7 (K7, K21, G5, G6) rebuilds this around `checkinState` (../volunteer): the body is
+// driven entirely by the not_yet/can_check_in/can_check_out/done/missed window rather than the
+// two hand-rolled booleans this screen used before. It also surfaces the assigned animal
+// (G6, once the shelter names one) and an "Add to calendar" share action (G5) that writes an
+// .ics to the cache dir and hands it to the OS share sheet — same File/Paths API ExportDataScreen
+// already uses, kept consistent rather than reintroducing the older FileSystem.* free functions.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
+import * as Sharing from "expo-sharing";
 import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { addToCalendar } from "../calendarShare";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
+import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { MySignupItem, MySignups, shiftTypeLabel } from "../volunteer";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { checkinState, locationLine, MySignupItem, MySignups, shiftHeadline } from "../volunteer";
+import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 
@@ -34,21 +43,6 @@ function timeLabel(iso: string): string {
   return new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
-function AttendanceRow({ label, at, isLast }: { label: string; at: string | null; isLast?: boolean }) {
-  return (
-    <View style={[styles.attRow, isLast && styles.attRowLast]}>
-      <View style={styles.attDotCol}>
-        <View style={[styles.attDot, at && styles.attDotDone]}>
-          {at && <CheckIcon color={colors.white} size={13} />}
-        </View>
-        {!isLast && <View style={styles.attLine} />}
-      </View>
-      <Text style={[styles.attLabel, at && styles.attLabelDone]}>{label}</Text>
-      <Text style={[styles.attValue, at && styles.attValueDone]}>{at ? timeLabel(at) : "Pending"}</Text>
-    </View>
-  );
-}
-
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaCheckin">;
 
 export function KawangGawaCheckinScreen({ navigation, route }: Props) {
@@ -65,6 +59,7 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [calendarError, setCalendarError] = useState<string | undefined>(undefined);
 
   const load = useCallback(() => {
     setRes(null);
@@ -89,11 +84,20 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
     const res = await api.post(`/signups/${signupId}/check-${action}`);
     if (!res.ok) {
       const code = res.data?.error?.code;
-      if (res.status === 409 && code === "not_approved") {
-        setError("You can only check in to a confirmed shift.");
-      } else {
-        setError(res.data?.error?.message ?? "Couldn't update your attendance. Try again.");
+      if (res.status === 409 && (code === "already_checked_in" || code === "already_checked_out")) {
+        // The server disagrees with what this screen thinks the state is — trust GET
+        // /me/signups over the 409, and say nothing: the reload alone brings the screen
+        // in line with reality, and there's nothing here the volunteer did wrong.
+        await load();
+        setSubmitting(false);
+        return;
       }
+      setError(
+        res.status === 409 && code === "too_early" ? "Check-in opens 30 minutes before the shift."
+        : res.status === 409 && code === "too_late" ? "This shift has ended."
+        : res.status === 409 && code === "not_checked_in" ? "Check in first."
+        : res.data?.error?.message ?? "Couldn't update your attendance. Try again."
+      );
       setSubmitting(false);
       return;
     }
@@ -101,20 +105,25 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
     setSubmitting(false);
   }
 
-  const banner = !item
-    ? undefined
-    : item.check_out_at
-      ? { bg: colors.soft, fg: colors.teal, text: "Shift complete. Thanks for volunteering!" }
-      : item.check_in_at
-        ? { bg: colors.successBg, fg: colors.success, text: "Happening now — check out when you're done." }
-        : { bg: colors.warningBg, fg: colors.warningStrong, text: "Check in when you arrive." };
+  async function onAddToCalendar() {
+    if (!item) return;
+    setCalendarError(undefined);
+    try {
+      if (!(await Sharing.isAvailableAsync())) {
+        setCalendarError("Sharing isn't available on this device.");
+        return;
+      }
+      await addToCalendar(item);
+    } catch {
+      setCalendarError("Couldn't add this to your calendar.");
+    }
+  }
 
-  const actionLabel = item?.check_in_at ? "Check out" : "Check in";
-  const onAction = () => act(item?.check_in_at ? "out" : "in");
+  const state = item ? checkinState(item) : null;
 
   return (
     <View style={styles.screen}>
-      <ScreenHeader title="Today's shift" onBack={() => navigation.goBack()} />
+      <ScreenHeader title="Your shift" onBack={() => navigation.goBack()} />
 
       {!item ? (
         <View style={styles.centerFill}>
@@ -136,32 +145,83 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
               <VolunteerIcon color={colors.teal} size={22} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{shiftTypeLabel(item.shift.type)}</Text>
+              <Text style={styles.cardTitle}>{shiftHeadline(item.shift)}</Text>
               <Text style={styles.cardOrg}>{item.shift.org_name}</Text>
               <Text style={styles.cardMeta}>{shiftWhenLabel(item.shift.starts_at, item.shift.ends_at)}</Text>
+              {/* G2 · the meeting point, once the shelter has approved and it's on the
+                  embedded shift. */}
+              {item.shift.location && (
+                <Text style={styles.cardLocation}>{locationLine(item.shift.location)}</Text>
+              )}
             </View>
           </View>
 
-          {!!banner && (
-            <View style={[styles.banner, { backgroundColor: banner.bg }]}>
-              <View style={[styles.bannerDot, { backgroundColor: banner.fg }]} />
-              <Text style={[styles.bannerText, { color: banner.fg }]}>{banner.text}</Text>
+          {/* G6 · once the shelter assigns an animal, who the volunteer is walking today. */}
+          {item.assigned_animal && (
+            <View style={styles.animalRow}>
+              {item.assigned_animal.photo_url ? (
+                <Image source={{ uri: item.assigned_animal.photo_url }} style={styles.animalPhoto} />
+              ) : (
+                <View style={[styles.animalPhoto, styles.animalPhotoPlaceholder]}>
+                  <VolunteerIcon color={colors.teal} size={18} />
+                </View>
+              )}
+              <Text style={styles.animalText}>You'll walk {item.assigned_animal.name}</Text>
             </View>
           )}
 
-          <Text style={styles.sectionLabel}>Attendance</Text>
-          <View style={styles.attCard}>
-            <AttendanceRow label="Checked in" at={item.check_in_at} />
-            <AttendanceRow label="Check out" at={item.check_out_at} isLast />
-          </View>
+          {/* K7, K21 · the body is driven entirely by the check-in window, not by which
+              timestamps happen to be set — `checkinState` is the one place that logic lives. */}
+          {state?.kind === "not_yet" && (
+            <View style={[styles.banner, { backgroundColor: colors.warningBg }]}>
+              <View style={[styles.bannerDot, { backgroundColor: colors.warningStrong }]} />
+              <Text style={[styles.bannerText, { color: colors.warningStrong }]}>
+                Check-in opens at {timeLabel(state.opensAt)}.
+              </Text>
+            </View>
+          )}
+          {state?.kind === "done" && (
+            <View style={[styles.banner, { backgroundColor: colors.soft }]}>
+              <View style={[styles.bannerDot, { backgroundColor: colors.teal }]} />
+              <Text style={[styles.bannerText, { color: colors.teal }]}>
+                Shift complete. Thanks for volunteering!
+              </Text>
+            </View>
+          )}
+          {state?.kind === "missed" && (
+            <View style={[styles.banner, { backgroundColor: colors.dangerBg }]}>
+              <View style={[styles.bannerDot, { backgroundColor: colors.danger }]} />
+              <Text style={[styles.bannerText, { color: colors.danger }]}>
+                This shift has ended. If you were there, tell the shelter — they mark attendance.
+              </Text>
+            </View>
+          )}
+          {state?.kind === "can_check_out" && (
+            <View style={[styles.banner, { backgroundColor: colors.successBg }]}>
+              <View style={[styles.bannerDot, { backgroundColor: colors.success }]} />
+              <Text style={[styles.bannerText, { color: colors.success }]}>
+                Happening now — check out when you're done.
+              </Text>
+            </View>
+          )}
 
           {!!error && <Text style={styles.formError}>{error}</Text>}
 
-          {/* Once checked out there is nothing left to do; the banner says so, and a greyed
-              "Check out" under it said nothing. */}
-          {!!item && !item.check_out_at && (
-            <Button label={actionLabel} onPress={onAction} loading={submitting} style={styles.actionButton} />
+          {state?.kind === "can_check_in" && (
+            <Button label="Check in" onPress={() => act("in")} loading={submitting} style={styles.actionButton} />
           )}
+          {state?.kind === "can_check_out" && (
+            <Button label="Check out" onPress={() => act("out")} loading={submitting} style={styles.actionButton} />
+          )}
+
+          <Button
+            label="Add to calendar"
+            onPress={onAddToCalendar}
+            variant="secondary"
+            size="small"
+            style={styles.calendarButton}
+          />
+          {!!calendarError && <Text style={styles.formError}>{calendarError}</Text>}
 
           <Text style={styles.helper}>The shelter marks your attendance from this.</Text>
         </ScrollView>
@@ -180,23 +240,17 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
+  cardLocation: { marginTop: 4, color: colors.muted, ...typography.caption, fontWeight: "600" },
+  animalRow: { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12, padding: 14,
+               borderRadius: radii.field, ...card },
+  animalPhoto: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft },
+  animalPhotoPlaceholder: { alignItems: "center", justifyContent: "center" },
+  animalText: { flex: 1, color: colors.ink, ...typography.strong, fontWeight: "700" },
   banner: { marginTop: 16, borderRadius: radii.notice, paddingHorizontal: 18, paddingVertical: 14, flexDirection: "row", alignItems: "center", gap: 10 },
   bannerDot: { width: 9, height: 9, borderRadius: 5 },
   bannerText: { flex: 1, ...typography.meta, fontWeight: "800" },
-  sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  attCard: { borderRadius: radii.tile, paddingHorizontal: 18, ...card },
-  attRow: { flexDirection: "row", alignItems: "center", paddingVertical: 16 },
-  attRowLast: {},
-  attDotCol: { width: 28, alignItems: "center", alignSelf: "stretch" },
-  attDot: { width: 26, height: 26, borderRadius: 13, borderWidth: 1.5, borderColor: colors.border,
-            backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },
-  attDotDone: { backgroundColor: colors.teal, borderColor: colors.teal },
-  attLine: { flex: 1, width: 2, backgroundColor: colors.border, marginVertical: 2 },
-  attLabel: { flex: 1, marginLeft: 14, color: colors.muted, ...typography.strong, fontWeight: "700" },
-  attLabelDone: { color: colors.ink },
-  attValue: { color: colors.muted, ...typography.meta, fontWeight: "700" },
-  attValueDone: { color: colors.ink },
   formError: { marginTop: 20, color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   actionButton: { marginTop: 28 },
-  helper: { marginTop: 12, color: colors.muted, ...typography.meta, fontWeight: "600", textAlign: "center" }
+  calendarButton: { marginTop: 16, alignSelf: "center" },
+  helper: { marginTop: 20, color: colors.muted, ...typography.meta, fontWeight: "600", textAlign: "center" }
 });
