@@ -13,6 +13,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { toOffsetIso } from "../shiftTime";
 import { RootStackParamList } from "../navigation/types";
 import { ShiftType, shiftTypeLabel } from "../volunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -37,8 +38,10 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
     if (submitting) return;
     setError(undefined);
 
-    if (!startsAt.trim() || !endsAt.trim()) {
-      setError("Enter a start and end time.");
+    const starts = toOffsetIso(startsAt);
+    const ends = toOffsetIso(endsAt);
+    if (!starts || !ends) {
+      setError("Enter start and end as 2026-10-04T09:00.");
       return;
     }
     const cap = parseInt(capacity, 10);
@@ -48,9 +51,7 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
     }
 
     setSubmitting(true);
-    const res = await api.post("/shelter/shifts", {
-      type, starts_at: startsAt.trim(), ends_at: endsAt.trim(), capacity: cap
-    });
+    const res = await api.post("/shelter/shifts", { type, starts_at: starts, ends_at: ends, capacity: cap });
     setSubmitting(false);
 
     if (res.ok) {
@@ -78,7 +79,7 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
           label="Starts"
           value={startsAt}
           onChangeText={setStartsAt}
-          placeholder="2026-08-30T09:00"
+          placeholder="2026-10-04T09:00"
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -87,7 +88,7 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
           label="Ends"
           value={endsAt}
           onChangeText={setEndsAt}
-          placeholder="2026-08-30T11:00"
+          placeholder="2026-10-04T09:00"
           autoCapitalize="none"
           autoCorrect={false}
         />
