@@ -8,14 +8,25 @@ export type SignupStatus = "requested" | "approved" | "declined" | "cancelled" |
 // `slots_left`. Distinct from `BrowseShift` below (the GET /shifts and GET /shifts/{id} shape,
 // `_shift_repr`), which has both `org_name` and `slots_left`. Keep this name — `MySignupItem.shift`
 // references it.
+export type ShiftLocation = { meeting_point: string; address_line1: string; barangay: string; city: string; province: string };
+export type ShelterContact = { name: string; phone: string; email: string };
+
 export type ShiftSummary = {
   shift_id: string; type: ShiftType; org_name: string;
   starts_at: string; ends_at: string; status: "open" | "full" | "closed"; capacity: number;
+  title: string; description: string; city: string; province: string; slots_left: number;
+  location?: ShiftLocation; shelter_contact?: ShelterContact | null;
 };
 // The GET /shifts (browse) and GET /shifts/{id} (detail) shape (backend `_shift_repr`).
 export type BrowseShift = {
   shift_id: string; type: ShiftType; org_name: string; starts_at: string; ends_at: string;
   capacity: number; status: "open" | "full" | "closed"; slots_left: number;
+  title: string; description: string; city: string; province: string;
+};
+export type ShiftDetail = BrowseShift & {
+  my_signup?: { signup_id: string; status: SignupStatus } | null;
+  viewer?: { needs_reapproval: boolean };
+  location?: ShiftLocation; shelter_contact?: ShelterContact | null;
 };
 export type MySignupItem = {
   signup_id: string; status: SignupStatus; cancelled_at: string | null; was_late: boolean;
@@ -178,4 +189,29 @@ export function groupShiftsByDay(shifts: BrowseShift[], nowMs: number = Date.now
     else groups.push({ label, shifts: [shift] });
   }
   return groups;
+}
+
+// ── Kawang-Gawa shift detail (P2 · what/where/who, 2026-09-23) ─────────────────────────────
+
+/** The shift's name, falling back to its type when the shelter didn't title it. */
+export const shiftHeadline = (s: { title: string; type: ShiftType }): string =>
+  s.title?.trim() ? s.title.trim() : shiftTypeLabel(s.type);
+
+/** "Front gate · 12 Shelter Rd, Concepcion Uno, Marikina, Metro Manila" — meeting point first,
+ *  then whatever address parts exist, skipping the ones that don't. */
+export function locationLine(l: ShiftLocation): string {
+  const street = [l.address_line1, l.barangay, l.city, l.province].filter((x) => x?.trim()).join(", ");
+  return [l.meeting_point?.trim(), street].filter(Boolean).join(" · ");
+}
+
+export type DetailSignupState = "none" | "requested" | "approved" | "closed_for_you";
+
+/** What the viewer's own relationship to this shift is, for the detail screen's action row. */
+export function detailSignupState(d: ShiftDetail): DetailSignupState {
+  switch (d.my_signup?.status) {
+    case "requested": return "requested";
+    case "approved": return "approved";
+    case "completed": case "no_show": return "closed_for_you";
+    default: return "none";   // no signup, or a cancelled/declined one (D4: may request again)
+  }
 }

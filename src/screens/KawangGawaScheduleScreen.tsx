@@ -13,7 +13,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { CardTone, MySignupItem, MySignups, shiftTypeLabel, signupStatusCard } from "../volunteer";
+import { CardTone, MySignupItem, MySignups, locationLine, shiftHeadline, signupStatusCard } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
@@ -52,9 +52,14 @@ function ShiftCardBody({ item }: { item: MySignupItem }) {
         <VolunteerIcon color={colors.teal} size={22} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={styles.cardTitle}>{shiftTypeLabel(item.shift.type)}</Text>
+        <Text style={styles.cardTitle}>{shiftHeadline(item.shift)}</Text>
         <Text style={styles.cardOrg}>{item.shift.org_name}</Text>
         <Text style={styles.cardMeta}>{shiftWhenLabel(item.shift.starts_at, item.shift.ends_at)}</Text>
+        {/* G2 · once the shelter approves, `location` shows up on the embedded shift — the
+            meeting point earns its own line rather than crowding the time line. */}
+        {item.shift.location && (
+          <Text style={styles.cardLocation}>{locationLine(item.shift.location)}</Text>
+        )}
       </View>
       <StatusChip item={item} />
     </>
@@ -200,6 +205,7 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
+  cardLocation: { marginTop: 4, color: colors.muted, ...typography.caption, fontWeight: "600" },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" }
 });

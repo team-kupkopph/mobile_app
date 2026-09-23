@@ -1,69 +1,66 @@
-// US-V9 · post a new volunteer activity. Reference: ShelterVolunteerActivityScreen for style,
-// ListingFormScreen for the form/chip patterns. POST /shelter/shifts.
+// US-V9 · post a new volunteer activity. Reference: ShelterVolunteerActivityScreen for style.
+// POST /shelter/shifts.
 //
-// Deliberately NO title field and NO animal control — ShiftCreateSerializer only accepts
-// {type, starts_at, ends_at, capacity}; the animal is assigned when a request is approved
-// (Task 8), not at posting time.
-//
-// No datetime picker exists anywhere in this app yet (grepped — nothing pulls in
-// @react-native-community/datetimepicker), so per the task brief this uses plain controlled
-// text inputs for the ISO datetimes rather than adding a new dependency for one slice.
+// K29 / G1 · the form itself lives in ShiftFormFields (shared with the Edit screen): pickers
+// for day/start/duration instead of ISO text, a required title, and an optional custom
+// address that defaults to the shelter's own. Per-field errors land under the offending
+// control; anything that isn't about one field (a 403, a network failure) goes to `banner`.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
-import { toOffsetIso } from "../shiftTime";
+import { upcomingDays } from "../shiftTime";
 import { RootStackParamList } from "../navigation/types";
-import { ShiftType, shiftTypeLabel } from "../volunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, radii, spacing, typography } from "../theme";
-import { Button, Field, ScreenHeader } from "../components/ui";
-
-const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
+import { colors, spacing, typography } from "../theme";
+import { Button, ScreenHeader } from "../components/ui";
+import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody, revealLocationOnError } from "../components/ShiftFormFields";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerCreate">;
+
+const initialForm: ShiftFormValue = {
+  type: "walking", title: "", description: "", meetingPoint: "",
+  day: upcomingDays(1)[0], start: "09:00", durationMins: 120, capacity: "1",
+  useShelterAddress: true, addressLine1: "", barangay: "", city: "", province: ""
+};
 
 export function ShelterVolunteerCreateScreen({ navigation }: Props) {
   const api = useApi();
 
-  const [type, setType] = useState<ShiftType>("walking");
-  const [startsAt, setStartsAt] = useState("");
-  const [endsAt, setEndsAt] = useState("");
-  const [capacity, setCapacity] = useState("1");
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [form, setForm] = useState<ShiftFormValue>(initialForm);
+  const [errors, setErrors] = useState<ShiftFormErrors>({});
+  const [banner, setBanner] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
 
   async function submit() {
     if (submitting) return;
-    setError(undefined);
+    setBanner(undefined);
 
-    const starts = toOffsetIso(startsAt);
-    const ends = toOffsetIso(endsAt);
-    if (!starts || !ends) {
-      setError("Enter start and end as 2026-10-04T09:00.");
-      return;
-    }
-    const cap = parseInt(capacity, 10);
-    if (!Number.isFinite(cap) || cap < 1) {
-      setError("Capacity must be at least 1.");
-      return;
-    }
+    const found = validateShiftForm(form);
+    setErrors(found);
+    if (Object.keys(found).length) return;
 
+    const body = shiftFormBody(form)!;
     setSubmitting(true);
-    const res = await api.post("/shelter/shifts", { type, starts_at: starts, ends_at: ends, capacity: cap });
+    const res = await api.post("/shelter/shifts", body);
     setSubmitting(false);
 
     if (res.ok) {
       navigation.goBack();
       return;
     }
-    const code = res.data?.error?.code;
-    if (res.status === 422 && code === "bad_window") {
-      setError("End time must be after start time.");
+    const err = res.data?.error;
+    if (res.status === 422 && err?.code === "bad_window") return setErrors({ when: "End must be after start." });
+    if (res.status === 422 && err?.code === "location_required") {
+      setForm(revealLocationOnError(form));
+      setErrors({ location: "Add your shelter's address in Organization details, or enter one here." });
       return;
     }
-    setError(res.data?.error?.message ?? "Couldn't post this activity. Try again.");
+    if (res.status === 400 && err?.field === "title") return setErrors({ title: err.message });
+    if (res.status === 400 && err?.field === "capacity") return setErrors({ capacity: err.message });
+    if (res.status === 403) return setBanner("Your organization must be verified before posting activities.");
+    setBanner(err?.message ?? "Couldn't post this activity. Try again.");
   }
 
   return (
@@ -72,35 +69,9 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
       <ScreenHeader title="Post an activity" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <Text style={styles.label}>Activity type</Text>
-        <TypeChips value={type} onChange={setType} />
+        {banner ? <Text style={styles.banner}>{banner}</Text> : null}
 
-        <Field
-          label="Starts"
-          value={startsAt}
-          onChangeText={setStartsAt}
-          placeholder="2026-10-04T09:00"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <Field
-          label="Ends"
-          value={endsAt}
-          onChangeText={setEndsAt}
-          placeholder="2026-10-04T09:00"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <Field
-          label="Capacity"
-          value={capacity}
-          onChangeText={setCapacity}
-          placeholder="1"
-          keyboardType="number-pad"
-          error={error ? error : undefined}
-        />
+        <ShiftFormFields value={form} onChange={setForm} errors={errors} />
 
         <Button label="Post activity" onPress={submit} loading={submitting} style={styles.submit} />
       </ScrollView>
@@ -108,37 +79,11 @@ export function ShelterVolunteerCreateScreen({ navigation }: Props) {
   );
 }
 
-function TypeChips({ value, onChange }: { value: ShiftType; onChange: (t: ShiftType) => void }) {
-  return (
-    <View style={styles.chipGrid}>
-      {SHIFT_TYPES.map((t) => {
-        const active = t === value;
-        return (
-          <TouchableOpacity
-            key={t}
-            style={[styles.chip, active && styles.chipActive]}
-            onPress={() => onChange(t)}
-            activeOpacity={0.85}
-          >
-            <Text style={[styles.chipText, active && styles.chipTextActive]}>{shiftTypeLabel(t)}</Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
-  chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  chip: {
-    minWidth: "47%", height: 48, borderRadius: radii.chip, alignItems: "center", justifyContent: "center",
-    paddingHorizontal: 12, backgroundColor: colors.white
+  banner: {
+    marginTop: 16, color: colors.danger, ...typography.meta, fontWeight: "600"
   },
-  chipActive: { backgroundColor: colors.soft },
-  chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
-  chipTextActive: { color: colors.teal },
   submit: { marginTop: 26 }
 });
