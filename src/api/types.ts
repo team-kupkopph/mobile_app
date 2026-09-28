@@ -128,6 +128,15 @@ export type MeNotification = {
 // Track H — the recipient's owned pets (US-H3). GET /me/pets, newest first, owner-scoped.
 export type MyPet = { pet_id: string; name: string; species: string; photo_url: string | null };
 
+// K27/G12 (backend) · the volunteer-facing summary on the shelter dashboard — pending
+// signups awaiting a decision, past shifts still needing attendance marked, and what's
+// coming up next. `next_shift` is null when nothing open/full is scheduled ahead.
+export type ShelterDashboardVolunteer = {
+  pending_requests: number;
+  attendance_due: number;
+  next_shift: { shift_id: string; title: string; starts_at: string } | null;
+};
+
 export type ShelterDashboard = {
   verification: {
     submitted: boolean;
@@ -136,6 +145,7 @@ export type ShelterDashboard = {
   };
   counts: { draft_listings: number; adopted: number; donations: number };
   gates: { can_publish: boolean; donations_enabled: boolean };
+  volunteer: ShelterDashboardVolunteer;
 };
 
 // Task B3 — GET /shelter/requests (B-be2), the shelter's merged inbox across its three

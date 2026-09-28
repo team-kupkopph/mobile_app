@@ -1,4 +1,4 @@
-import { shiftFormBody, validateShiftForm, revealLocationOnError, type ShiftFormValue } from "../components/ShiftFormFields";
+import { shiftFormBody, validateShiftForm, revealLocationOnError, capacityFieldError, type ShiftFormValue } from "../components/ShiftFormFields";
 
 const base: ShiftFormValue = {
   type: "walking", title: "Morning dog walk", description: "", meetingPoint: "Front gate",
@@ -20,6 +20,25 @@ test("each problem lands on its own field", () => {
   expect(validateShiftForm({ ...base, day: "" })).toEqual({ when: "Pick a day and a start time." });
   expect(validateShiftForm({ ...base, useShelterAddress: false, city: "" }))
     .toEqual({ location: "Enter the city where this happens." });
+});
+
+// Task 10 (K15) · mirrors the backend's IntegerField(max_value=500) so the field error shows
+// before the round trip, not just after a 400 capacity/max response.
+test("capacity over 500 is rejected client-side", () => {
+  expect(validateShiftForm({ ...base, capacity: "501" })).toEqual({ capacity: "Up to 500 volunteers." });
+  expect(validateShiftForm({ ...base, capacity: "500" })).toEqual({});
+});
+
+// Fix round 1 (Finding 1) · a 400 on `capacity` covers two distinct floors, and both screens'
+// submit() used to hardcode the max-case copy for either one — so a too-LOW capacity that
+// somehow reached the server read as "too high". Only the actual max case gets the fixed
+// copy; anything else forwards the server's own message untouched.
+test("capacityFieldError only overrides the max case", () => {
+  expect(capacityFieldError("501", "Ensure this value is less than or equal to 500."))
+    .toBe("Up to 500 volunteers.");
+  expect(capacityFieldError("0", "Ensure this value is greater than or equal to 1."))
+    .toBe("Ensure this value is greater than or equal to 1.");
+  expect(capacityFieldError("500", "should not matter")).toBe("should not matter");
 });
 
 test("a custom location is sent in full", () => {

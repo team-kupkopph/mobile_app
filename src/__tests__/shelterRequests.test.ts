@@ -35,10 +35,10 @@ describe("requestRoute", () => {
   // The signup's own id (`item.id`) and the shift's id (`item.target.id`) are DIFFERENT
   // values on the wire — routing must read `target.id`, since `shelterVolunteerRequests`
   // takes a shiftId, not a signupId. See shelter/views.py::_volunteer_items on the backend.
-  it("routes a volunteer item to that shift's requests queue, keyed on target.id (the shift), not item.id (the signup)", () => {
+  it("routes a volunteer item to that shift's timeline, on Pending, keyed on target.id (the shift), not item.id (the signup)", () => {
     expect(requestRoute(item({
       kind: "volunteer", id: "su-1", target: { route: "shelterVolunteerRequests", id: "shift-1" }
-    }))).toEqual({ name: "shelterVolunteerRequests", params: { shiftId: "shift-1" } });
+    }))).toEqual({ name: "shelterVolunteerActivity", params: { shiftId: "shift-1", section: "pending" } });
   });
 
   it("routes a placement item to the inquiry ladder", () => {

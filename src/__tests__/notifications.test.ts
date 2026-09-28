@@ -43,19 +43,29 @@ describe("notificationTarget", () => {
     }
   });
 
-  test("a volunteer's cancel takes the shelter to that activity", () => {
+  test("a volunteer's cancel takes the shelter to the Confirmed section — the slot just freed up there", () => {
     expect(notificationTarget({ type: "signup_cancelled_by_volunteer", data: { shift_id: "sh1", signup_id: "s1", was_late: true } }))
-      .toEqual({ screen: "shelterVolunteerActivity", shiftId: "sh1" });
+      .toEqual({ screen: "shelterVolunteerActivity", shiftId: "sh1", section: "confirmed" });
   });
 
-  it("routes signup_requested (the shelter's own notification) to its requests screen for that shift", () => {
+  it("routes signup_requested (the shelter's own notification) to the timeline's Pending section for that shift", () => {
     expect(notificationTarget({ type: "signup_requested", data: { shift_id: "s", signup_id: "x" } }))
-      .toEqual({ screen: "shelterVolunteerRequests", shiftId: "s" });
+      .toEqual({ screen: "shelterVolunteerActivity", shiftId: "s", section: "pending" });
   });
 
   it("is a no-op for signup_requested with no shift_id in its payload", () => {
     expect(notificationTarget({ type: "signup_requested", data: { signup_id: "x" } })).toBeNull();
     expect(notificationTarget({ type: "signup_requested", data: null })).toBeNull();
+  });
+
+  it("routes attendance_due to the timeline's Attendance section for that shift", () => {
+    expect(notificationTarget({ type: "attendance_due", data: { shift_id: "sh2" } }))
+      .toEqual({ screen: "shelterVolunteerActivity", shiftId: "sh2", section: "attendance" });
+  });
+
+  it("is a no-op for attendance_due with no shift_id in its payload", () => {
+    expect(notificationTarget({ type: "attendance_due", data: {} })).toBeNull();
+    expect(notificationTarget({ type: "attendance_due", data: null })).toBeNull();
   });
 
   it("routes the Sprint 6 community notifications to their own screens", () => {

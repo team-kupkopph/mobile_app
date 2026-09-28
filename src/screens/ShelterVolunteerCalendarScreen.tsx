@@ -71,7 +71,10 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       setRes(null);
-      api.get("/shelter/shifts").then((r) => {
+      // Task 10 (K8) · the schedule only ever shows what's ahead — same `?when=upcoming`
+      // the manage list and the You-tab count now use, so "how many activities" agrees
+      // everywhere it's asked.
+      api.get("/shelter/shifts?when=upcoming").then((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setShifts(r.data?.results ?? []);
       });

@@ -4,8 +4,8 @@
 // GET /shelter/requests?kind=<adoption|volunteer|placement>&status=open — one endpoint
 // across three unrelated backend models. A row opens `requestRoute(item)`: adoption and
 // placement both land on the same inquiry ladder (the shelter reads it either as the
-// poster or as the placement recipient), volunteer opens that shift's pending-requests
-// queue (the existing ShelterVolunteerRequestsScreen, US-V9).
+// poster or as the placement recipient), volunteer opens that shift's activity timeline
+// on the Pending section (Task 9 folded the old standalone requests queue into it).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -98,8 +98,8 @@ export function ShelterRequestsScreen({ navigation }: Props) {
             // so each call stays fully typed against RootStackParamList instead of an `any`.
             const route = requestRoute(item);
             function onPress() {
-              if (route.name === "shelterVolunteerRequests") {
-                navigation.navigate("shelterVolunteerRequests", { shiftId: route.params.shiftId });
+              if (route.name === "shelterVolunteerActivity") {
+                navigation.navigate("shelterVolunteerActivity", { shiftId: route.params.shiftId, section: "pending" });
               } else {
                 navigation.navigate("inquiry", { inquiryId: route.params.inquiryId });
               }

@@ -48,3 +48,15 @@ test("windowParts is shiftWindow's inverse", () => {
   expect(windowParts("2026-10-04T01:00:00+00:00", "2026-10-04T03:00:00+00:00", 480))
     .toEqual({ day: "2026-10-04", start: "09:00", durationMins: 120 });
 });
+
+import { nextWeekDay } from "../shiftTime";
+
+test("nextWeekDay is the same weekday, seven days out", () => {
+  const now = Date.UTC(2026, 9, 3, 17, 0); // 2026-10-04 01:00 in Manila
+  expect(nextWeekDay("2026-10-04", now, 480)).toBe("2026-10-11");
+});
+
+test("nextWeekDay clamps to today when +7 days is still in the past", () => {
+  const now = Date.UTC(2026, 9, 20, 17, 0); // 2026-10-21 01:00 in Manila
+  expect(nextWeekDay("2026-10-04", now, 480)).toBe("2026-10-21");
+});

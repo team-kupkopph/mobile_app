@@ -59,7 +59,10 @@ const CARD_HOLDOUTS: string[] = [];
 describe("V3 screens adopt Card instead of a raw elevation spread", () => {
   it("found screens to classify", () => {
     expect(readdirSync(SCREENS).filter((f) => f.endsWith(".tsx")).length).toBeGreaterThan(80);
-    expect(V3_SCOPE.length).toBe(37);
+    // 37 -> 35: Task 9 (P4) deleted ShelterVolunteerRequestsScreen and
+    // ShelterVolunteerAttendanceScreen (folded into ShelterVolunteerActivityScreen's own
+    // timeline) — two fewer screen files, not two fewer in-scope features.
+    expect(V3_SCOPE.length).toBe(35);
   });
 
   it("every in-scope screen not in the holdout list no longer spreads ...elevation.*", () => {

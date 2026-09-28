@@ -16,7 +16,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
-import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody, revealLocationOnError } from "../components/ShiftFormFields";
+import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody, revealLocationOnError, capacityFieldError } from "../components/ShiftFormFields";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerEdit">;
 
@@ -106,6 +106,16 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
     const err = res.data?.error;
     if (res.status === 409 && err?.code === "shift_closed")
       return setBanner("This activity is closed and can't be edited.");
+    // Task 10 (K15) · this activity's end time has already passed — PATCH refuses any change
+    // once that's true, so the banner names the reason rather than a generic "couldn't save".
+    if (res.status === 409 && err?.code === "shift_ended")
+      return setBanner("This activity has already happened.");
+    // Task 10 (K15) · lowering capacity below the count already approved — the field error
+    // names the number the backend's own 409 carried, not a generic "invalid capacity".
+    if (res.status === 409 && err?.code === "capacity_below_approved") {
+      const approved = err?.details?.approved;
+      return setErrors({ capacity: `${approved} volunteers are already confirmed — capacity can't go below that.` });
+    }
     if (res.status === 422 && err?.code === "bad_window") return setErrors({ when: "End must be after start." });
     if (res.status === 422 && err?.code === "location_required") {
       setForm(revealLocationOnError(form));
@@ -113,7 +123,13 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
       return;
     }
     if (res.status === 400 && err?.field === "title") return setErrors({ title: err.message });
-    if (res.status === 400 && err?.field === "capacity") return setErrors({ capacity: err.message });
+    // Task 10 (K15) · the backend's own capacity ceiling (max_value=500) — validateShiftForm
+    // already catches this before the round trip, so this is a backstop, not the primary path.
+    // Fix round 1 (Finding 1) · `capacityFieldError` only swaps in the fixed copy for the max
+    // case; a min-value 400 (which shouldn't reach here, but might on a race) still forwards
+    // the server's own message instead of misreporting it as "too high".
+    if (res.status === 400 && err?.field === "capacity")
+      return setErrors({ capacity: capacityFieldError(form.capacity, err.message) });
     if (res.status === 403) return setBanner("Your organization must be verified before posting activities.");
     setBanner(err?.message ?? "Couldn't save changes. Try again.");
   }

@@ -52,17 +52,18 @@ export const DEFAULT_STATUS_TONE = { label: "Unknown", tone: "neutral" as ChipTo
  * client-side routing. Adoption and placement are both an `AdoptionInquiry`; both land on
  * the SAME ladder (`inquiry`), the shelter is just on a different side of it (poster vs.
  * placement recipient) — the ladder itself already renders correctly either way (see
- * InquiryScreen). Volunteer opens that shift's pending-requests queue.
+ * InquiryScreen). Volunteer opens that shift's activity timeline on the Pending section —
+ * Task 9 folded the old standalone requests queue into it.
  *
  * ⚠️ Reads the id from `item.target.id`, NOT `item.id`. For adoption/placement the two are
  * the same value (the inquiry's own pk either way), but for volunteer they are NOT: `id` is
- * the signup's pk while `target.id` is the shift's — `shelterVolunteerRequests` takes a
+ * the signup's pk while `target.id` is the shift's — `shelterVolunteerActivity` takes a
  * `shiftId`, so the signup id would 404 (see shelter/views.py::_volunteer_items on the
  * backend, which sets `target.id` to `su.shift_id`, not `su.pk`).
  */
 export function requestRoute(item: ShelterRequest): { name: string; params: Record<string, string> } {
   if (item.kind === "volunteer") {
-    return { name: "shelterVolunteerRequests", params: { shiftId: item.target.id } };
+    return { name: "shelterVolunteerActivity", params: { shiftId: item.target.id, section: "pending" } };
   }
   return { name: "inquiry", params: { inquiryId: item.target.id } };
 }

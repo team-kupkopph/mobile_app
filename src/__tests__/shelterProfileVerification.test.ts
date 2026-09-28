@@ -14,7 +14,8 @@ function dash(submitted: boolean, status: ShelterDashboard["verification"]["stat
   return {
     verification: { submitted, status, docs: [] },
     counts: { draft_listings: 0, adopted: 0, donations: 0 },
-    gates: { can_publish: false, donations_enabled: false }
+    gates: { can_publish: false, donations_enabled: false },
+    volunteer: { pending_requests: 0, attendance_due: 0, next_shift: null }
   };
 }
 

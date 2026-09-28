@@ -1,4 +1,4 @@
-import { Me, ShelterDashboard } from "./api/types";
+import { Me, ShelterDashboard, ShelterDashboardVolunteer } from "./api/types";
 
 // US-B5: two derived dashboard states, never one screen. A shelter_org
 // verification_request existing (`submitted`) means "Under review"; no row means the
@@ -25,4 +25,28 @@ export function shelterVerificationCard(dash: ShelterDashboard | null, me: Me | 
   const submitted = dash ? dash.verification.submitted : status !== null;
   if (!submitted) return "incomplete";
   return status === "rejected" ? "rejected" : "pending";
+}
+
+// Task 10 (G12) · "Sat 9:00 AM" — short enough to sit inline in the Volunteers card's copy.
+// Not shared with the longer `weekday: "long"` labels the shift screens use elsewhere; this
+// one is deliberately terse because it is one clause inside a sentence, not a heading.
+function shortWhen(iso: string): string {
+  const d = new Date(iso);
+  const day = d.toLocaleDateString(undefined, { weekday: "short" });
+  const time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return `${day} ${time}`;
+}
+
+// Task 10 (K8/G12) · the dashboard's "Volunteers" card copy, pulled out of the screen so the
+// 0/1/n and next_shift-null branches are testable without rendering anything. `line2` is
+// null (not an empty string) when nothing needs marking, so the screen can skip the warning
+// row entirely rather than render a blank one.
+export function volunteerSummary(d: ShelterDashboardVolunteer): { line1: string; line2: string | null } {
+  const waiting = `${d.pending_requests} waiting`;
+  const next = d.next_shift ? ` · next: ${d.next_shift.title} ${shortWhen(d.next_shift.starts_at)}` : "";
+  const line1 = `${waiting}${next}`;
+  const line2 = d.attendance_due > 0
+    ? `Mark attendance for ${d.attendance_due} volunteer${d.attendance_due === 1 ? "" : "s"}`
+    : null;
+  return { line1, line2 };
 }

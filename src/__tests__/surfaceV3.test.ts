@@ -35,6 +35,12 @@
 // and `deadTabs` goes from `["requests"]` to `[]`: both ShelterDashboardScreen and
 // ShelterProfileScreen's `onTabPress` gain `t === "requests"`, and ShelterRequestsScreen
 // itself wires home/animals/donate/profile.
+//
+// Task 9 (P4) deletes two of those forty-four screen FILES — ShelterVolunteerRequestsScreen
+// and ShelterVolunteerAttendanceScreen — folding their cards into
+// ShelterVolunteerActivityScreen's own Pending/Confirmed/Attendance timeline. The baseline
+// drops from 44 to 42: two fewer files on the backdrop, not two fewer in-scope features (the
+// timeline itself was already counted, and still is).
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -44,7 +50,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the forty-four V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 9 volunteer + 3 verified member + 12 Sagip rescuer + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root)", () => {
+  it("found the forty-two V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 12 Sagip rescuer + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "DonatePledgeScreen",
@@ -81,13 +87,11 @@ describe("surface, re-derived", () => {
       "ShelterProfileScreen",
       "ShelterRequestsScreen",
       "ShelterVolunteerActivityScreen",
-      "ShelterVolunteerAttendanceScreen",
       "ShelterVolunteerCalendarScreen",
       "ShelterVolunteerCancelScreen",
       "ShelterVolunteerCreateScreen",
       "ShelterVolunteerDetailScreen",
       "ShelterVolunteerEditScreen",
-      "ShelterVolunteerRequestsScreen",
       "ShelterVolunteerScreen",
       "SigninScreen"
     ]);

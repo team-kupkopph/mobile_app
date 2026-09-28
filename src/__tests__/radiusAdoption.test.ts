@@ -265,7 +265,12 @@ describe("screens take corner radii from the theme", () => {
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.
-    expect(sites.filter(isPill).length).toBeGreaterThan(100);
+    // Task 9 (P4) deleted ShelterVolunteerRequestsScreen and ShelterVolunteerAttendanceScreen
+    // — each carried its own hand-rolled pill-shaped chip/status style — and folded their
+    // cards into ShelterVolunteerActivityScreen's timeline using the shared <Chip> primitive
+    // instead, which owns its own radius off this scan. Real pill sites left the codebase;
+    // 99, DOWN FROM 101+. Floor moves 100 -> 95.
+    expect(sites.filter(isPill).length).toBeGreaterThan(95);
   });
 
   it("leaves no container literal that already equals a step", () => {

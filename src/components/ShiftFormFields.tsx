@@ -28,6 +28,9 @@ export function validateShiftForm(v: ShiftFormValue): ShiftFormErrors {
   if (!v.day || !v.start) e.when = "Pick a day and a start time.";
   const cap = Number.parseInt(v.capacity, 10);
   if (!Number.isInteger(cap) || cap < 1 || String(cap) !== v.capacity.trim()) e.capacity = "At least 1 volunteer.";
+  // Task 10 (K15) · mirrors the backend's IntegerField(max_value=500) client-side so the
+  // field error shows before the round trip, not just after a 400.
+  else if (cap > 500) e.capacity = "Up to 500 volunteers.";
   if (!v.useShelterAddress && !v.city.trim()) e.location = "Enter the city where this happens.";
   return e;
 }
@@ -40,6 +43,20 @@ export function validateShiftForm(v: ShiftFormValue): ShiftFormErrors {
  */
 export function revealLocationOnError(v: ShiftFormValue): ShiftFormValue {
   return { ...v, useShelterAddress: false };
+}
+
+/**
+ * Fix round 1 (P4 T10, Finding 1) · the backend's `400 field=capacity` covers TWO distinct
+ * floors — too low (`min_value=1`) and too high (`max_value=500`) — and both screens'
+ * `submit()` used to hardcode "Up to 500 volunteers." for either one. That's wrong for the
+ * min case: `validateShiftForm` already refuses an empty/zero/negative capacity before the
+ * round trip, but a value that somehow still reaches the server under the floor (e.g. a race
+ * with another edit) would read as "too high" instead of "too low". Only the max case gets
+ * the fixed copy; every other capacity 400 forwards whatever the server actually said.
+ */
+export function capacityFieldError(capacityValue: string, serverMessage: string): string {
+  const cap = Number.parseInt(capacityValue, 10);
+  return Number.isFinite(cap) && cap > 500 ? "Up to 500 volunteers." : serverMessage;
 }
 
 export function shiftFormBody(v: ShiftFormValue): Record<string, unknown> | null {
