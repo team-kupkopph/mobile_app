@@ -52,6 +52,9 @@ export function ShelterProfileScreen({ navigation }: Props) {
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   // US-C1 · a REAL count, not the hardcoded "3 active". Active = shifts still open or full.
   const [activeShifts, setActiveShifts] = useState<number | null>(null);
+  // Task 10 (K8) · the count above is only page 1 (20 rows) of ?when=upcoming — true whenever
+  // the response's own `next` says there's more, whatever the exact count would have been.
+  const [moreActive, setMoreActive] = useState(false);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
@@ -67,10 +70,13 @@ export function ShelterProfileScreen({ navigation }: Props) {
         if (r.ok) setMe(r.data);
       });
       api.get("/shelter/dashboard").then((r) => { if (r.ok) setDash(r.data); });
-      api.get("/shelter/shifts").then((r) => {
+      // Task 10 (K8) · `?when=upcoming` — the same query the manage list and calendar use,
+      // so "active" means the same set of shifts everywhere it's counted.
+      api.get("/shelter/shifts?when=upcoming").then((r) => {
         if (r.ok) {
           const rows: Array<{ status: string }> = r.data.results ?? [];
           setActiveShifts(rows.filter((s) => s.status === "open" || s.status === "full").length);
+          setMoreActive(!!r.data.next);
         }
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
@@ -79,6 +85,9 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
   const volunteerValue = activeShifts === null
     ? undefined
+    // Task 10 (K8) · beyond page 1 there could be any number of additional open/full rows,
+    // so a precise count would be a lie past 20 — "20+ active" says what's actually known.
+    : moreActive ? "20+ active"
     : activeShifts === 0 ? "None" : `${activeShifts} active`;
 
   const tier: ShelterTier = me?.shelter?.tier ?? "community_rescue";

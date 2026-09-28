@@ -28,6 +28,9 @@ export function validateShiftForm(v: ShiftFormValue): ShiftFormErrors {
   if (!v.day || !v.start) e.when = "Pick a day and a start time.";
   const cap = Number.parseInt(v.capacity, 10);
   if (!Number.isInteger(cap) || cap < 1 || String(cap) !== v.capacity.trim()) e.capacity = "At least 1 volunteer.";
+  // Task 10 (K15) · mirrors the backend's IntegerField(max_value=500) client-side so the
+  // field error shows before the round trip, not just after a 400.
+  else if (cap > 500) e.capacity = "Up to 500 volunteers.";
   if (!v.useShelterAddress && !v.city.trim()) e.location = "Enter the city where this happens.";
   return e;
 }

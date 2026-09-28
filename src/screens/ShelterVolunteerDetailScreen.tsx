@@ -55,14 +55,28 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Card style={styles.card}>
             <Text style={styles.name}>{detail.display_name}</Text>
-            {!!chip && (
-              <View style={[styles.chip, CHIP_STYLE[chip.tone]]}>
-                <Text style={[styles.chipText, CHIP_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
-              </View>
-            )}
+            <View style={styles.chipRow}>
+              {/* Task 10 (K9/G14) · independent of `reliabilityChip` — an approved `rescuer`
+                  capability, not derived from this shift's own numbers. A brand-new volunteer
+                  can already be a Verified Member. */}
+              {detail.is_verified_member && (
+                <View style={[styles.chip, CHIP_STYLE.info]}>
+                  <Text style={[styles.chipText, CHIP_TEXT_STYLE.info]}>Verified Member</Text>
+                </View>
+              )}
+              {!!chip && (
+                <View style={[styles.chip, CHIP_STYLE[chip.tone]]}>
+                  <Text style={[styles.chipText, CHIP_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
+                </View>
+              )}
+            </View>
+            {/* Task 10 (K9) · the RUN, not only the lifetime total — a volunteer with 40
+                completed shifts and 1 recent no-show reads very differently from one on a
+                3-in-a-row streak, and the lifetime numbers alone can't tell them apart. */}
             <Text style={styles.reliabilityLine}>
               {detail.reliability.shifts_completed} shift{detail.reliability.shifts_completed === 1 ? "" : "s"} ·{" "}
-              {detail.reliability.no_shows} no-show{detail.reliability.no_shows === 1 ? "" : "s"}
+              {detail.reliability.no_shows} no-show{detail.reliability.no_shows === 1 ? "" : "s"} ·{" "}
+              {detail.reliability.consecutive_no_shows} in a row
             </Text>
           </Card>
 
@@ -104,6 +118,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   card: { padding: 18, marginBottom: 18 },
   name: { color: colors.ink, ...typography.section },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { alignSelf: "flex-start", marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   reliabilityLine: { marginTop: 12, color: colors.muted, ...typography.meta, fontWeight: "700" },

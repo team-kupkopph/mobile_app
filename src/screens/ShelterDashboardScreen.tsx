@@ -17,7 +17,8 @@ import { AlertIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterBannerState, shelterBannerState } from "../shelterDashboard";
+import { ShelterBannerState, shelterBannerState, volunteerSummary } from "../shelterDashboard";
+import { VolunteerIcon } from "../components/AppIcons";
 import { TAP_SLOP } from "../touch";
 import { colors, radii, spacing, typography } from "../theme";
 import { Card } from "../components/ui";
@@ -176,6 +177,31 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           <Stat n={counts.donations} label="Donations" />
         </View>
 
+        {/* Task 10 (K8/G12) · the Volunteers card — only once `dash` has actually loaded, so a
+            failed /shelter/dashboard (this screen's PRIMARY fetch, per US-R2) never shows a
+            confident "0 waiting" the way the stat row's `?? ` fallbacks would if applied here. */}
+        {dash && (
+          <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("shelterVolunteer")}>
+            <Card style={styles.volunteerCard}>
+              <View style={styles.volunteerHeaderRow}>
+                <View style={styles.volunteerIcon}>
+                  <VolunteerIcon color={colors.teal} size={20} />
+                </View>
+                <Text style={styles.volunteerTitle}>Volunteers</Text>
+              </View>
+              {(() => {
+                const summary = volunteerSummary(dash.volunteer);
+                return (
+                  <>
+                    <Text style={styles.volunteerLine}>{summary.line1}</Text>
+                    {summary.line2 ? <Text style={styles.volunteerWarning}>{summary.line2}</Text> : null}
+                  </>
+                );
+              })()}
+            </Card>
+          </TouchableOpacity>
+        )}
+
         {!verified ? (
           <Card accent={colors.teal} style={styles.footCard}>
             <View style={styles.footCopy}>
@@ -280,6 +306,12 @@ const styles = StyleSheet.create({
   },
   statNum: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
+  volunteerCard: { marginTop: 16, padding: 18 },
+  volunteerHeaderRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  volunteerIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
+  volunteerTitle: { color: colors.ink, ...typography.section },
+  volunteerLine: { marginTop: 10, color: colors.muted, ...typography.meta, fontWeight: "700" },
+  volunteerWarning: { marginTop: 6, color: colors.warningStrong, ...typography.meta, fontWeight: "800" },
   footCard: {
     marginTop: 26,
     minHeight: 100,

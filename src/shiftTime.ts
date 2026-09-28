@@ -63,3 +63,16 @@ export function windowParts(startsIso: string, endsIso: string, offsetMinutes: n
   const durationMins = Math.round((new Date(endsIso).getTime() - new Date(startsIso).getTime()) / 60000);
   return { day: ymd(s), start: `${pad(s.h)}:${pad(s.mi)}`, durationMins };
 }
+
+// ── Task 10 (K14) · Duplicate ───────────────────────────────────────────────────────────────
+
+/** The same weekday, one week after `day` — for prefilling Duplicate's copy, which reuses a
+ *  past or present shift's day/time but never re-posts it for a day that's already gone. If
+ *  seven days out still lands before today (duplicating a shift from long ago), today wins. */
+export function nextWeekDay(day: string, nowMs: number = Date.now(), offsetMinutes: number = deviceOffset()): string {
+  const [y, m, d] = day.split("-").map(Number);
+  const shifted = localParts(Date.UTC(y, m - 1, d) + 7 * 86400000, 0);
+  const candidate = ymd(shifted);
+  const today = upcomingDays(1, nowMs, offsetMinutes)[0];
+  return candidate < today ? today : candidate;
+}

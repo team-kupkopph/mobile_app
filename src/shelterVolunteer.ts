@@ -3,6 +3,10 @@ import { type ChipTone } from "./components/ui";
 import { BrowseShift, Reliability } from "./volunteer";
 
 export type ShelterShift = BrowseShift;
+// Task 10 (K8) · GET /shelter/shifts?when=... rows carry one extra field the plain
+// GET /shelter/shifts/{id} detail does not (backend `ShelterShiftsView.get` only): how many
+// approved signups on this shift are past `ends_at` with attendance still unmarked.
+export type ShelterShiftRow = ShelterShift & { attendance_due: number };
 export type PendingRequest = {
   signup_id: string; volunteer: { display_name: string }; reliability: Reliability;
   requested_at: string; previously_declined: boolean; is_verified_member: boolean;
@@ -10,6 +14,9 @@ export type PendingRequest = {
 export type ListingCard = { listing_id: string; pet: { name: string; species: string }; photo_url: string | null };
 export type VolunteerDetail = {
   display_name: string; reliability: Reliability;
+  // K9/G14 (backend) · an approved `rescuer` capability, independent of this shift's own
+  // reliability numbers — a brand-new volunteer can already be a Verified Member.
+  is_verified_member: boolean;
   // D2 · phone and email only; the backend never sends an address.
   contact?: { phone: string | null; email: string };
 };

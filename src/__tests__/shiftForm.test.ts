@@ -22,6 +22,13 @@ test("each problem lands on its own field", () => {
     .toEqual({ location: "Enter the city where this happens." });
 });
 
+// Task 10 (K15) · mirrors the backend's IntegerField(max_value=500) so the field error shows
+// before the round trip, not just after a 400 capacity/max response.
+test("capacity over 500 is rejected client-side", () => {
+  expect(validateShiftForm({ ...base, capacity: "501" })).toEqual({ capacity: "Up to 500 volunteers." });
+  expect(validateShiftForm({ ...base, capacity: "500" })).toEqual({});
+});
+
 test("a custom location is sent in full", () => {
   const body = shiftFormBody({ ...base, useShelterAddress: false, addressLine1: "Rizal Park", city: "Pasig" })!;
   expect(body).toMatchObject({ address_line1: "Rizal Park", city: "Pasig" });
