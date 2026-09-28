@@ -153,20 +153,10 @@ export function KawangGawaScreen({ navigation, route }: Props) {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {!isGuest && tabIndex === 1 ? (
-          mine ? (
-            <MyShifts
-              data={mine}
-              onOpen={(item) => navigation.navigate("kawanggawaCheckin", { signupId: item.signup_id })}
-              onCancel={(item) => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })}
-            />
-          ) : (
-            <LoadStateView state={loadState(mineRes)} subject="shifts" onRetry={loadMine} />
-          )
-        ) : (
-          <>
-        {/* The impact strip stays in the Browse body only — My shifts has its own stats
-            card (MyShifts' Completed/Hours/No-shows row) and doesn't need this too. */}
+        {/* Shipped placement (origin/main): the impact strip sits ABOVE the Browse | My shifts
+            segmented control's own body, so it shows on both tabs — not a Browse-only strip.
+            Guest mode still hides it: `mine` is never set without a successful /me/signups,
+            which guests never fetch (P3 T9). */}
         {mine && (
           <Card tone="hero" style={styles.impact}>
             <Text style={styles.impactTotals}>{totalsLabel ?? "Your first shift is waiting."}</Text>
@@ -195,6 +185,18 @@ export function KawangGawaScreen({ navigation, route }: Props) {
           </Card>
         )}
 
+        {!isGuest && tabIndex === 1 ? (
+          mine ? (
+            <MyShifts
+              data={mine}
+              onOpen={(item) => navigation.navigate("kawanggawaCheckin", { signupId: item.signup_id })}
+              onCancel={(item) => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })}
+            />
+          ) : (
+            <LoadStateView state={loadState(mineRes)} subject="shifts" onRetry={loadMine} />
+          )
+        ) : (
+          <>
         {/* P2 · city scope row. Mirrors the home feed's city chip: a saved city scopes the
             feed by default, and "Change" is a plain toggle rather than a trip to the picker —
             the picker is one tap further, for the "no city yet" case only. */}
