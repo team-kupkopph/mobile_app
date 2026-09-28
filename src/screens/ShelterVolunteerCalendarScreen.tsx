@@ -16,7 +16,7 @@ import { ShelterShift } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
-import { Card, ScreenHeader } from "../components/ui";
+import { Card, Chip, ChipTone, ScreenHeader } from "../components/ui";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -50,11 +50,10 @@ function groupByDate(shifts: ShelterShift[]): { key: string; heading: string; sh
     .sort((a, b) => new Date(a.shifts[0].starts_at).getTime() - new Date(b.shifts[0].starts_at).getTime());
 }
 
-type StatusTone = "active" | "muted" | "danger";
-const STATUS_CHIP: Record<ShelterShift["status"], { label: string; tone: StatusTone }> = {
-  open: { label: "Open", tone: "active" },
-  full: { label: "Full", tone: "muted" },
-  closed: { label: "Closed", tone: "danger" }
+const STATUS_CHIP: Record<ShelterShift["status"], { label: string; tone: ChipTone }> = {
+  open: { label: "Open", tone: "success" },
+  full: { label: "Full", tone: "neutral" },
+  closed: { label: "Closed", tone: "neutral" }
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerCalendar">;
@@ -121,9 +120,7 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
                           {timeRangeLabel(s.starts_at, s.ends_at)} · {signedUp} / {s.capacity} signed up
                         </Text>
                       </View>
-                      <View style={[styles.statusChip, STATUS_STYLE[chip.tone]]}>
-                        <Text style={[styles.statusChipText, STATUS_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
-                      </View>
+                      <Chip label={chip.label} tone={chip.tone} dot={false} />
                     </TouchableOpacity>
                   );
                 })}
@@ -137,17 +134,6 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
 }
 
 
-const STATUS_STYLE: Record<StatusTone, { backgroundColor: string }> = {
-  active: { backgroundColor: colors.soft },
-  muted: { backgroundColor: colors.greyPill },
-  danger: { backgroundColor: colors.warningBg }
-};
-const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
-  active: { color: colors.tealDark },
-  muted: { color: colors.muted },
-  danger: { color: colors.warningStrong }
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
@@ -159,7 +145,5 @@ const styles = StyleSheet.create({
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, marginBottom: 10 },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
-  statusChip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  statusChipText: { ...typography.meta, fontWeight: "800" }
+  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta }
 });

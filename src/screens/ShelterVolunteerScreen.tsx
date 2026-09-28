@@ -20,7 +20,7 @@ import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
-import { Card, Chip, ScreenHeader, SegmentedControl } from "../components/ui";
+import { Card, Chip, ChipTone, ScreenHeader, SegmentedControl } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -31,11 +31,10 @@ function shiftWhenLabel(startsAt: string, endsAt: string): string {
   return `${date} · ${startTime}–${endTime}`;
 }
 
-type StatusTone = "active" | "muted" | "danger";
-const STATUS_CHIP: Record<ShelterShiftRow["status"], { label: string; tone: StatusTone }> = {
-  open: { label: "Open", tone: "active" },
-  full: { label: "Full", tone: "muted" },
-  closed: { label: "Closed", tone: "danger" }
+const STATUS_CHIP: Record<ShelterShiftRow["status"], { label: string; tone: ChipTone }> = {
+  open: { label: "Open", tone: "success" },
+  full: { label: "Full", tone: "neutral" },
+  closed: { label: "Closed", tone: "neutral" }
 };
 
 const SEGMENTS: Array<"upcoming" | "past"> = ["upcoming", "past"];
@@ -163,9 +162,7 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
                         </TouchableOpacity>
                       )}
                     </View>
-                    <View style={[styles.statusChip, STATUS_STYLE[chip.tone]]}>
-                      <Text style={[styles.statusChipText, STATUS_TEXT_STYLE[chip.tone]]}>{chip.label}</Text>
-                    </View>
+                    <Chip label={chip.label} tone={chip.tone} dot={false} />
                   </Card>
                 </TouchableOpacity>
               );
@@ -194,17 +191,6 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
 }
 
 
-const STATUS_STYLE: Record<StatusTone, { backgroundColor: string }> = {
-  active: { backgroundColor: colors.soft },
-  muted: { backgroundColor: colors.greyPill },
-  danger: { backgroundColor: colors.warningBg }
-};
-const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
-  active: { color: colors.tealDark },
-  muted: { color: colors.muted },
-  danger: { color: colors.warningStrong }
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   header: {
@@ -229,8 +215,6 @@ const styles = StyleSheet.create({
   // slipped through it. `minHeight` grows the tappable area around the chip without touching
   // the chip's own rendered size (still centered inside).
   attendanceChipWrap: { marginTop: 8, alignSelf: "flex-start", minHeight: 44, justifyContent: "center" },
-  statusChip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
-  statusChipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   loadMore: { marginTop: 6, marginBottom: 10, height: 44, alignItems: "center", justifyContent: "center" },
   loadMoreText: { color: colors.teal, ...typography.strong, fontWeight: "800" }
