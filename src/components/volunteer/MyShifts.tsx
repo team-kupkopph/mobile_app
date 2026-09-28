@@ -13,7 +13,7 @@ import {
   signupStatusCard
 } from "../../volunteer";
 import { TAP_SLOP } from "../../touch";
-import { colors, typography } from "../../theme";
+import { colors, squircle, typography } from "../../theme";
 import { Card, Chip } from "../ui";
 
 function shiftDateLabel(iso: string): string {
@@ -244,7 +244,9 @@ const styles = StyleSheet.create({
   cancelLinkText: { color: colors.danger, ...typography.meta, fontWeight: "800" },
   calendarLink: { paddingVertical: 4, paddingHorizontal: 4 },
   calendarLinkText: { color: colors.teal, ...typography.meta, fontWeight: "800" },
-  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
+  // Squircle (0.32 × size), not a circle — VolunteerHub.dc.html calls out "MyShifts draws a
+  // circle today" as the one thing this row's tile still had to fix.
+  cardIcon: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },

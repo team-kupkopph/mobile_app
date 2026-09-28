@@ -36,6 +36,7 @@ import { isOffline, loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { GuestTabs } from "../components/GuestTabs";
 import { OwnerTabs } from "../components/OwnerTabs";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
@@ -45,19 +46,14 @@ import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
   shiftHeadline, shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { SegmentedControl } from "../components/ui";
+import { colors, spacing, typography } from "../theme";
+import { Card, Chip, SegmentedControl } from "../components/ui";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
   { key: "", label: "All" },
   ...SHIFT_TYPES.map((t) => ({ key: t, label: shiftTypeLabel(t) }))
 ];
-
-const TONE = {
-  amber: { bg: "#FAEEDA", fg: "#633806" }, teal: { bg: "#E2EEF0", fg: "#14504F" },
-  green: { bg: "#EAF3DE", fg: "#27500A" }, grey: { bg: "#ECEAE3", fg: "#5F5E5A" }
-} as const;
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawa">;
 
@@ -137,6 +133,7 @@ export function KawangGawaScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.kawanggawa">
+      <ScreenBackdrop />
       {/* The title had `justifyContent: space-between` against two links and no room to
           shrink, so "Kawang-Gawa" ran straight into "My schedule ›" at 402 pt. It gets its
           own line now, and the two destinations folded into one segmented control below. */}
@@ -156,8 +153,22 @@ export function KawangGawaScreen({ navigation, route }: Props) {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {!isGuest && tabIndex === 1 ? (
+          mine ? (
+            <MyShifts
+              data={mine}
+              onOpen={(item) => navigation.navigate("kawanggawaCheckin", { signupId: item.signup_id })}
+              onCancel={(item) => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })}
+            />
+          ) : (
+            <LoadStateView state={loadState(mineRes)} subject="shifts" onRetry={loadMine} />
+          )
+        ) : (
+          <>
+        {/* The impact strip stays in the Browse body only — My shifts has its own stats
+            card (MyShifts' Completed/Hours/No-shows row) and doesn't need this too. */}
         {mine && (
-          <View style={styles.impact}>
+          <Card tone="hero" style={styles.impact}>
             <Text style={styles.impactTotals}>{totalsLabel ?? "Your first shift is waiting."}</Text>
             {next ? (
               <>
@@ -181,21 +192,9 @@ export function KawangGawaScreen({ navigation, route }: Props) {
                 </TouchableOpacity>
               </>
             ) : null}
-          </View>
+          </Card>
         )}
 
-        {!isGuest && tabIndex === 1 ? (
-          mine ? (
-            <MyShifts
-              data={mine}
-              onOpen={(item) => navigation.navigate("kawanggawaCheckin", { signupId: item.signup_id })}
-              onCancel={(item) => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })}
-            />
-          ) : (
-            <LoadStateView state={loadState(mineRes)} subject="shifts" onRetry={loadMine} />
-          )
-        ) : (
-          <>
         {/* P2 · city scope row. Mirrors the home feed's city chip: a saved city scopes the
             feed by default, and "Change" is a plain toggle rather than a trip to the picker —
             the picker is one tap further, for the "no city yet" case only. */}
@@ -279,38 +278,36 @@ export function KawangGawaScreen({ navigation, route }: Props) {
               {group.shifts.map((s) => {
                 cardIndex += 1;
                 const chip = shiftSlotsChip(s.slots_left, s.capacity);
-                const tone = TONE[chip.tone];
                 const full = s.slots_left <= 0;
                 return (
                   <TouchableOpacity
                     testID={`card.kawanggawa.${cardIndex}`}
                     key={s.shift_id}
-                    style={styles.card}
                     activeOpacity={0.85}
                     accessibilityRole="button"
                     accessibilityLabel={`${shiftTypeLabel(s.type)} at ${s.org_name}, ${shiftTimeRange(s.starts_at, s.ends_at)}, ${chip.label}`}
                     onPress={() => navigation.navigate("kawanggawaDetail", { shiftId: s.shift_id })}
                   >
-                    <View style={[styles.cardIcon, full && styles.cardIconFull]}>
-                      <VolunteerIcon color={full ? colors.muted : colors.teal} size={22} />
-                    </View>
-                    {/* The chip sits in the TITLE row, not a third column. As a column it
-                        left the time line about 156 pt and "11:29 PM–1:29 AM · 2 hours"
-                        wrapped onto two lines on a 402 pt screen. */}
-                    <View style={styles.cardCopy}>
-                      <View style={styles.cardTop}>
-                        <Text style={styles.cardTitle} numberOfLines={1}>{shiftHeadline(s)}</Text>
-                        <View style={[styles.chip, { backgroundColor: tone.bg }]}>
-                          <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
-                        </View>
+                    <Card style={styles.card}>
+                      <View style={[styles.cardIcon, full && styles.cardIconFull]}>
+                        <VolunteerIcon color={full ? colors.muted : colors.teal} size={22} />
                       </View>
-                      <Text style={styles.cardOrg}>
-                        {shiftTypeLabel(s.type)} · {s.org_name}{s.city ? ` · ${s.city}` : ""}
-                      </Text>
-                      <Text style={styles.cardMeta}>
-                        {shiftTimeRange(s.starts_at, s.ends_at)} · {shiftDurationLabel(s.starts_at, s.ends_at)}
-                      </Text>
-                    </View>
+                      {/* The chip sits in the TITLE row, not a third column. As a column it
+                          left the time line about 156 pt and "11:29 PM–1:29 AM · 2 hours"
+                          wrapped onto two lines on a 402 pt screen. */}
+                      <View style={styles.cardCopy}>
+                        <View style={styles.cardTop}>
+                          <Text style={styles.cardTitle} numberOfLines={1}>{shiftHeadline(s)}</Text>
+                          <Chip label={chip.label} tone={chip.tone} />
+                        </View>
+                        <Text style={styles.cardOrg}>
+                          {shiftTypeLabel(s.type)} · {s.org_name}{s.city ? ` · ${s.city}` : ""}
+                        </Text>
+                        <Text style={styles.cardMeta}>
+                          {shiftTimeRange(s.starts_at, s.ends_at)} · {shiftDurationLabel(s.starts_at, s.ends_at)}
+                        </Text>
+                      </View>
+                    </Card>
                   </TouchableOpacity>
                 );
               })}
@@ -341,17 +338,13 @@ export function KawangGawaScreen({ navigation, route }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page },
+  screen: { flex: 1, backgroundColor: "transparent" },
   header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4 },
   title: { color: colors.ink, ...typography.hero },
   segmented: { marginTop: 16 },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 130 },
-  impact: { borderRadius: radii.tile, paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18, ...card },
+  impact: { paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18 },
   impactTotals: { color: colors.ink, ...typography.section },
   impactDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },
   impactNext: { marginTop: 12, flexDirection: "row", alignItems: "center" },
@@ -374,7 +367,7 @@ const styles = StyleSheet.create({
   filterTextActive: { color: colors.white },
   groupHead: { marginTop: 4, marginBottom: 10, color: colors.muted, ...typography.meta,
                fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase" },
-  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
   cardIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardIconFull: { backgroundColor: "#ECEAE3" },
@@ -382,7 +375,5 @@ const styles = StyleSheet.create({
   cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
-  cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
-  chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
-  chipText: { ...typography.meta, fontWeight: "800" }
+  cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" }
 });
