@@ -145,7 +145,20 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen} testID="screen.kawanggawaDetail">
       <ScreenBackdrop />
-      <ScreenHeader title="Volunteer" onBack={() => navigation.goBack()} />
+      <ScreenHeader
+        title="Volunteer"
+        onBack={() => navigation.goBack()}
+        right={shift ? (
+          <TouchableOpacity
+            testID="lnk.kawanggawaDetail.report"
+            hitSlop={TAP_SLOP}
+            onPress={() => navigation.navigate("reportContent",
+              { targetType: "shift", targetId: shift.shift_id })}
+          >
+            <Text style={styles.flagLinkText}>Report this</Text>
+          </TouchableOpacity>
+        ) : null}
+      />
 
       {!shift ? (
         <LoadStateView state={loadState(res)} subject="shift" onRetry={load}
@@ -364,6 +377,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "transparent" },
+  flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 22, paddingBottom: 60 },
   heroCard: { marginTop: 4 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },

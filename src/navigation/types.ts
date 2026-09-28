@@ -156,7 +156,7 @@ export type RootStackParamList = {
   matchDetail: { reportId: string; match: MatchShape };
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
-  reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message"; targetId: string };
+  reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message" | "shift"; targetId: string };
   // US-V8 — Kawang-Gawa volunteer flow (Track V, Sprint 5). `kawanggawa` is the real hub
   // (Task 3). Task 5 (K30/G9) folded the standalone schedule and history screens into one
   // segmented Browse | My shifts hub — `tab` picks the initial segment (defaults to
