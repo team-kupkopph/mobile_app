@@ -35,6 +35,8 @@ describe("blockerCopy", () => {
       .toMatch(/cancel/i);
     expect(blockerCopy({ kind: "adoption_inquiry", label: "Adoption inquiry", id: "3" }).action)
       .toMatch(/finish|decline/i);
+    expect(blockerCopy({ kind: "hosted_shift", label: "Morning dog walk", id: "6" }).action)
+      .toMatch(/cancel/i);
   });
 
   it("still renders a kind it has never seen", () => {

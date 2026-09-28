@@ -42,6 +42,8 @@ export function blockerCopy(blocker: Blocker): { title: string; action: string }
       return { title: blocker.label, action: "Cancel the shift so the shelter can refill it" };
     case "adoption_inquiry":
       return { title: blocker.label, action: "Finish or decline this inquiry" };
+    case "hosted_shift":
+      return { title: blocker.label, action: "Cancel this activity first — the volunteers will be told." };
     default:
       return { title: blocker.label || "Open commitment", action: "Close this first" };
   }
