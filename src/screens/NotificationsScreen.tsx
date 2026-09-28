@@ -76,10 +76,8 @@ export function NotificationsScreen({ navigation }: Props) {
       navigation.navigate("myInquiries");
     } else if (target.screen === "kawanggawa") {
       navigation.navigate("kawanggawa", { tab: target.tab });
-    } else if (target.screen === "shelterVolunteerRequests") {
-      navigation.navigate("shelterVolunteerRequests", { shiftId: target.shiftId });
     } else if (target.screen === "shelterVolunteerActivity") {
-      navigation.navigate("shelterVolunteerActivity", { shiftId: target.shiftId });
+      navigation.navigate("shelterVolunteerActivity", { shiftId: target.shiftId, section: target.section });
     } else {
       navigation.navigate("verifyDocuments");
     }

@@ -1,4 +1,4 @@
-import { activitySection, attendanceSuggestion, blastRadiusCopy, reliabilityChip } from "../shelterVolunteer";
+import { activitySection, attendanceSuggestion, blastRadiusCopy, reapprovalCopy, reliabilityChip } from "../shelterVolunteer";
 
 const rel = (o: Partial<any>) => ({ shifts_completed: 0, no_shows: 0, consecutive_no_shows: 0,
   needs_reapproval: false, is_reliable: false, ...o });
@@ -25,6 +25,17 @@ test("the timeline opens on the question the shelter has now", () => {
   expect(activitySection(shift, 2, T - 86400e3)).toBe("pending");
   expect(activitySection(shift, 0, T - 86400e3)).toBe("confirmed");
   expect(activitySection(shift, 1, T + 3 * 3600e3)).toBe("attendance");
+});
+
+test("reapprovalCopy (K11) names the consequence, not the reliability breakdown", () => {
+  expect(reapprovalCopy("Juana Dela Cruz", { consecutive_no_shows: 3 })).toEqual({
+    title: "Approve Juana anyway?",
+    body: "Juana has missed their last 3 shifts. If they don't show, this slot goes unfilled."
+  });
+  expect(reapprovalCopy("Mark", { consecutive_no_shows: 4 })).toEqual({
+    title: "Approve Mark anyway?",
+    body: "Mark has missed their last 4 shifts. If they don't show, this slot goes unfilled."
+  });
 });
 
 test("blastRadiusCopy names the count", () => {

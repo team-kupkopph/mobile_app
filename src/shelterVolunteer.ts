@@ -45,3 +45,16 @@ export function blastRadiusCopy(n: number): string {
   if (n <= 0) return "No volunteers will be notified.";
   return `${n} volunteer${n === 1 ? "" : "s"} will be notified.`;
 }
+
+// K11 · the re-approval confirm's copy, pulled out of the screen so it's independently
+// testable. Names the consequence rather than reciting the reliability block's three numbers
+// (that was the OLD copy, on ShelterVolunteerRequestsScreen's ConfirmModal — Task 9 replaces
+// it with this, per spec). `n` is `consecutive_no_shows`, the count the 409's own
+// `reapproval_required` error detail carries.
+export function reapprovalCopy(name: string, rel: Pick<Reliability, "consecutive_no_shows">): { title: string; body: string } {
+  const first = name.trim().split(/\s+/)[0] || name;
+  return {
+    title: `Approve ${first} anyway?`,
+    body: `${first} has missed their last ${rel.consecutive_no_shows} shifts. If they don't show, this slot goes unfilled.`
+  };
+}

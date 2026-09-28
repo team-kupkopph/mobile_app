@@ -1,22 +1,31 @@
-// US-V9 · the shelter's activity hub for a single posted shift — summary + the manage actions.
-// Reference: screens/user/screen-shelter-volunteer-activity.png. GET /shelter/shifts/{shiftId}
-// is the owner-only detail endpoint from Task 1; it returns the same `_shift_repr` shape as the
-// volunteer-facing GET /shifts/{id} (ShelterShift = BrowseShift), so no new type is needed.
+// Task 9 · the activity timeline (G7, G8, G11, G20, K16) — one screen, Pending → Confirmed →
+// Attendance, replacing the old standalone ShelterVolunteerRequestsScreen and
+// ShelterVolunteerAttendanceScreen. GET /shelter/shifts/{shiftId} is the owner-only detail
+// endpoint from Task 1; it returns the same `_shift_repr` shape as the volunteer-facing
+// GET /shifts/{id} (ShelterShift = BrowseShift), so no new type is needed for the header.
+//
+// The shift fetch is treated as PRIMARY here (unlike the three sections below it, which each
+// degrade on their own, US-R2) — the header, the SegmentedControl's gating, and the footer's
+// K15 rule all need it, so a screen with no shift to show is a screen with nothing to show.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterShift } from "../shelterVolunteer";
-import { shiftTypeLabel } from "../volunteer";
+import { ActivitySection, ShelterShift, activitySection } from "../shelterVolunteer";
+import { shiftHeadline } from "../volunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, spacing, typography } from "../theme";
-import { Button, Card, ScreenHeader } from "../components/ui";
+import { PendingSection } from "../components/shelterVolunteer/PendingSection";
+import { ConfirmedSection } from "../components/shelterVolunteer/ConfirmedSection";
+import { AttendanceSection } from "../components/shelterVolunteer/AttendanceSection";
+import { colors, radii, spacing, typography } from "../theme";
+import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
+
+const SECTION_ORDER: ActivitySection[] = ["pending", "confirmed", "attendance"];
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -27,12 +36,9 @@ function shiftWhenLabel(startsAt: string, endsAt: string): string {
   return `${date} · ${startTime}–${endTime}`;
 }
 
-type StatusTone = "active" | "muted" | "danger";
-const STATUS_CHIP: Record<ShelterShift["status"], { label: string; tone: StatusTone }> = {
-  open: { label: "Open", tone: "active" },
-  full: { label: "Full", tone: "muted" },
-  closed: { label: "Closed", tone: "danger" }
-};
+function hasEnded(shift: ShelterShift, nowMs: number = Date.now()): boolean {
+  return nowMs >= new Date(shift.ends_at).getTime();
+}
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerActivity">;
 
@@ -41,11 +47,18 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
   const { shiftId } = route.params;
 
   const [shift, setShift] = useState<ShelterShift | null>(null);
-  // US-R4 · this screen had ALREADY worked out the 404-is-not-a-network-error split by
-  // hand, down to offering "Go back" instead of a retry. It is where LoadStateView's
-  // `onBack` came from. Converting it keeps that behaviour and deletes three booleans.
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
+  const [confirmedCount, setConfirmedCount] = useState<number | null>(null);
+
+  const requestedIndex = route.params.section ? SECTION_ORDER.indexOf(route.params.section) : -1;
+  const [index, setIndex] = useState(requestedIndex >= 0 ? requestedIndex : 0);
+  // Once a section is picked — explicitly via route params, or auto-picked below once the
+  // shift and the pending count both settle — never move it again on our own; only the
+  // person tapping a segment (onSegmentChange) should change it after that.
+  const autoPicked = useRef(requestedIndex >= 0);
+  const [gateBanner, setGateBanner] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setRes(null);
@@ -58,118 +71,119 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
+  useEffect(() => {
+    if (autoPicked.current || !shift || pendingCount === null) return;
+    setIndex(SECTION_ORDER.indexOf(activitySection(shift, pendingCount)));
+    autoPicked.current = true;
+  }, [shift, pendingCount]);
+
+  const ended = shift ? hasEnded(shift) : false;
+
+  function onSegmentChange(i: number) {
+    if (i === 2 && !ended) {
+      setGateBanner("Attendance opens when the shift ends.");
+      return;
+    }
+    setGateBanner(null);
+    autoPicked.current = true;
+    setIndex(i);
+  }
+
+  const pendingLabel = `Pending${pendingCount !== null ? ` · ${pendingCount}` : ""}`;
+  const confirmedLabel = `Confirmed${confirmedCount !== null ? ` · ${confirmedCount}` : ""}`;
+  const segments = [pendingLabel, confirmedLabel, "Attendance"];
+
+  const footerHidden = !shift || shift.status === "closed" || hasEnded(shift);
+
   return (
     <View style={styles.screen}>
       <ScreenBackdrop />
-      <ScreenHeader title="Activity" onBack={() => navigation.goBack()} align="center" />
+      <ScreenHeader title={shift ? shiftHeadline(shift) : "Activity"} onBack={() => navigation.goBack()} align="center">
+        {!!shift && (
+          <Text style={styles.subtitle}>{shiftWhenLabel(shift.starts_at, shift.ends_at)} · {shift.city}</Text>
+        )}
+      </ScreenHeader>
 
       {!shift ? (
-        <LoadStateView state={loadState(res)} subject="activity" onRetry={load}
-          onBack={() => navigation.goBack()} />
+        <LoadStateView state={loadState(res)} subject="activity" onRetry={load} onBack={() => navigation.goBack()} />
       ) : (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.heroRow}>
-            <View style={styles.heroIcon}>
-              <VolunteerIcon color={colors.teal} size={26} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.heroTitle}>{shiftTypeLabel(shift.type)}</Text>
-              <Text style={styles.heroWhen}>{shiftWhenLabel(shift.starts_at, shift.ends_at)}</Text>
-              <Text style={styles.heroOrg}>{shift.org_name}</Text>
-            </View>
+        <>
+          <View style={styles.segmentWrap}>
+            <SegmentedControl segments={segments} index={index} onChange={onSegmentChange} testID="seg.activity" />
           </View>
 
-          <Card style={styles.infoCard}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.infoTitle}>
-                {shift.capacity - shift.slots_left} of {shift.capacity} spots filled
-              </Text>
-              <Text style={styles.infoSub}>
-                {shift.slots_left <= 0 ? "No slots left" : `${shift.slots_left} slot${shift.slots_left === 1 ? "" : "s"} left`}
-              </Text>
+          {!!gateBanner && (
+            <View style={styles.bannerBox}>
+              <Text style={styles.bannerText}>{gateBanner}</Text>
             </View>
-            <View style={[styles.statusChip, STATUS_STYLE[STATUS_CHIP[shift.status].tone]]}>
-              <Text style={[styles.statusChipText, STATUS_TEXT_STYLE[STATUS_CHIP[shift.status].tone]]}>
-                {STATUS_CHIP[shift.status].label}
-              </Text>
+          )}
+
+          <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            {/* All three sections stay mounted (hidden via `display`, not unmounted) so each
+                keeps its own fetch/retry state across tab switches, and so Pending/Confirmed
+                can report their counts for the segment labels before the person ever visits
+                them. */}
+            <View style={index === 0 ? undefined : styles.hidden}>
+              <PendingSection
+                shiftId={shiftId}
+                shift={shift}
+                onOpenDetail={(signupId) => navigation.navigate("shelterVolunteerDetail", { signupId })}
+                onCountSettled={setPendingCount}
+              />
             </View>
-          </Card>
+            <View style={index === 1 ? undefined : styles.hidden}>
+              <ConfirmedSection
+                shiftId={shiftId}
+                shift={shift}
+                onOpenDetail={(signupId) => navigation.navigate("shelterVolunteerDetail", { signupId })}
+                onCountSettled={setConfirmedCount}
+              />
+            </View>
+            <View style={index === 2 ? undefined : styles.hidden}>
+              <AttendanceSection shiftId={shiftId} />
+            </View>
+          </ScrollView>
 
-          <Text style={styles.sectionLabel}>Manage</Text>
-          <Card style={styles.actionCard}>
-            <ActionRow
-              label="View requests"
-              onPress={() => navigation.navigate("shelterVolunteerRequests", { shiftId })}
-            />
-            <ActionRow
-              label="Mark attendance"
-              onPress={() => navigation.navigate("shelterVolunteerAttendance", { shiftId })}
-            />
-            <ActionRow
-              label="Edit activity"
-              last
-              onPress={() => navigation.navigate("shelterVolunteerEdit", { shiftId })}
-            />
-          </Card>
-
-          <Button
-            label="Cancel activity"
-            onPress={() => navigation.navigate("shelterVolunteerCancel", { shiftId })}
-            variant="destructive"
-            style={styles.cancelButton}
-          />
-        </ScrollView>
+          {!footerHidden && (
+            <View style={styles.footer}>
+              <View style={styles.footerRow}>
+                <Button
+                  label="Edit"
+                  variant="secondary"
+                  onPress={() => navigation.navigate("shelterVolunteerEdit", { shiftId })}
+                  style={styles.footerHalf}
+                />
+                <Button
+                  label="Duplicate"
+                  variant="secondary"
+                  onPress={() => navigation.navigate("shelterVolunteerCreate", { copyFrom: shiftId })}
+                  style={styles.footerHalf}
+                />
+              </View>
+              <Button
+                label="Cancel activity"
+                onPress={() => navigation.navigate("shelterVolunteerCancel", { shiftId })}
+                variant="destructive"
+                style={styles.cancelButton}
+              />
+            </View>
+          )}
+        </>
       )}
     </View>
   );
 }
 
-function ActionRow({ label, onPress, last }: { label: string; onPress: () => void; last?: boolean }) {
-  return (
-    <TouchableOpacity
-      style={[styles.actionRow, !last && styles.actionRowDivider]}
-      activeOpacity={0.7}
-      onPress={onPress}
-    >
-      <Text style={styles.actionRowText}>{label}</Text>
-      <Text style={styles.actionRowGlyph}>›</Text>
-    </TouchableOpacity>
-  );
-}
-
-
-const STATUS_STYLE: Record<StatusTone, { backgroundColor: string }> = {
-  active: { backgroundColor: colors.soft },
-  muted: { backgroundColor: colors.greyPill },
-  danger: { backgroundColor: colors.warningBg }
-};
-const STATUS_TEXT_STYLE: Record<StatusTone, { color: string }> = {
-  active: { color: colors.tealDark },
-  muted: { color: colors.muted },
-  danger: { color: colors.warningStrong }
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
-  heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
-  heroIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  heroTitle: { color: colors.ink, ...typography.title },
-  heroWhen: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
-  heroOrg: { marginTop: 2, color: colors.muted, ...typography.meta },
-  infoCard: {
-    marginTop: 24, paddingHorizontal: 20, paddingVertical: 18,
-    flexDirection: "row", alignItems: "center", gap: 12
-  },
-  infoTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  infoSub: { marginTop: 4, color: colors.muted, ...typography.meta },
-  statusChip: { paddingHorizontal: 14, height: 32, borderRadius: 16, justifyContent: "center" },
-  statusChipText: { ...typography.meta, fontWeight: "800" },
-  sectionLabel: { marginTop: 28, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },
-  actionCard: { padding: 0, overflow: "hidden" },
-  actionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 20, height: 60 },
-  actionRowDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
-  actionRowText: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  actionRowGlyph: { color: colors.muted, fontSize: 20, fontWeight: "700" },
-  cancelButton: { marginTop: 24 }
+  subtitle: { marginTop: 3, color: colors.muted, ...typography.meta, textAlign: "center" },
+  segmentWrap: { paddingHorizontal: spacing.lg, paddingTop: 16 },
+  bannerBox: { marginHorizontal: spacing.lg, marginTop: 10, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.warningBg },
+  bannerText: { color: colors.warningStrong, ...typography.meta, fontWeight: "700", textAlign: "center" },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 40 },
+  hidden: { display: "none" },
+  footer: { paddingHorizontal: spacing.lg, paddingTop: 10, paddingBottom: 24 },
+  footerRow: { flexDirection: "row", gap: 10 },
+  footerHalf: { flex: 1 },
+  cancelButton: { marginTop: 10 }
 });

@@ -47,13 +47,11 @@ import { ShelterRequestsScreen } from "../screens/ShelterRequestsScreen";
 import { ShelterSetupScreen } from "../screens/ShelterSetupScreen";
 import { ShelterTierScreen } from "../screens/ShelterTierScreen";
 import { ShelterVolunteerActivityScreen } from "../screens/ShelterVolunteerActivityScreen";
-import { ShelterVolunteerAttendanceScreen } from "../screens/ShelterVolunteerAttendanceScreen";
 import { ShelterVolunteerCalendarScreen } from "../screens/ShelterVolunteerCalendarScreen";
 import { ShelterVolunteerCancelScreen } from "../screens/ShelterVolunteerCancelScreen";
 import { ShelterVolunteerCreateScreen } from "../screens/ShelterVolunteerCreateScreen";
 import { ShelterVolunteerDetailScreen } from "../screens/ShelterVolunteerDetailScreen";
 import { ShelterVolunteerEditScreen } from "../screens/ShelterVolunteerEditScreen";
-import { ShelterVolunteerRequestsScreen } from "../screens/ShelterVolunteerRequestsScreen";
 import { ShelterVolunteerScreen } from "../screens/ShelterVolunteerScreen";
 import { ShelterVerifyNgoScreen } from "../screens/ShelterVerifyNgoScreen";
 import { ShelterVerifyScreen } from "../screens/ShelterVerifyScreen";
@@ -216,8 +214,6 @@ export function RootNavigator() {
       <Stack.Screen name="shelterVolunteer" component={ShelterVolunteerScreen} />
       <Stack.Screen name="shelterVolunteerCreate" component={ShelterVolunteerCreateScreen} />
       <Stack.Screen name="shelterVolunteerActivity" component={ShelterVolunteerActivityScreen} />
-      <Stack.Screen name="shelterVolunteerRequests" component={ShelterVolunteerRequestsScreen} />
-      <Stack.Screen name="shelterVolunteerAttendance" component={ShelterVolunteerAttendanceScreen} />
       <Stack.Screen name="shelterVolunteerDetail" component={ShelterVolunteerDetailScreen} />
       <Stack.Screen name="shelterVolunteerCalendar" component={ShelterVolunteerCalendarScreen} />
       <Stack.Screen name="shelterVolunteerEdit" component={ShelterVolunteerEditScreen} />

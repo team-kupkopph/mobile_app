@@ -1,5 +1,6 @@
 import { ShelterTier } from "../api/types";
 import { SocialIdentity } from "../auth/socialAuth";
+import { ActivitySection } from "../shelterVolunteer";
 
 // Base document collected in the tier-1 step, threaded to the NGO step so the final
 // POST /verifications (US-C1) can submit the base set + NGO papers in one request.
@@ -167,13 +168,14 @@ export type RootStackParamList = {
   kawanggawaCheckin: { signupId: string };
   kawanggawaCancel: { signupId: string };
   // US-V9 — the shelter side of Kawang-Gawa (Track V, Sprint 5). `shelterVolunteer` is the real
-  // manage list (Task 5); the other eight are placeholders pointed at ShelterVolunteerScreen until
-  // Tasks 6–10 register their own components.
+  // manage list (Task 5). Task 9 folded the standalone Requests and Attendance screens into
+  // `shelterVolunteerActivity`'s own Pending/Confirmed/Attendance timeline — `section` picks
+  // the initial tab (defaults to `activitySection(shift, pendingCount)` when omitted).
   shelterVolunteer: undefined;
-  shelterVolunteerCreate: undefined;
-  shelterVolunteerActivity: { shiftId: string };
-  shelterVolunteerRequests: { shiftId: string };
-  shelterVolunteerAttendance: { shiftId: string };
+  // `copyFrom` (Task 9's footer "Duplicate") pre-fills the form from that shift; omitted for
+  // a fresh post, same as before.
+  shelterVolunteerCreate: { copyFrom?: string } | undefined;
+  shelterVolunteerActivity: { shiftId: string; section?: ActivitySection };
   shelterVolunteerDetail: { signupId: string };
   shelterVolunteerCalendar: undefined;
   shelterVolunteerEdit: { shiftId: string };

@@ -16,6 +16,12 @@
 // Sprint 11), the 7 KawangGawa owner-side volunteer screens, and every remaining owner
 // screen — so `V3_SCOPE ∪ V3_EXCLUDED` accounts for the entire file list and nothing is
 // silently forgotten (asserted in v3Scope.test.ts).
+//
+// Task B1/B2/B3 later added three more (ShelterDonateScreen, ShelterAnimalsScreen,
+// ShelterRequestsScreen — see SHELL_ROOTS below), making 37. Task 9 (P4) then DELETED two
+// screen FILES (ShelterVolunteerRequestsScreen, ShelterVolunteerAttendanceScreen) without
+// removing an in-scope feature — their cards folded into ShelterVolunteerActivityScreen's own
+// timeline — so the true count drops to 35, not because two features left scope.
 
 /** Shell roots (5) — Task B1 added ShelterDonateScreen, the Donate tab's new root, born
  * converted (spec §5); Task B2 added ShelterAnimalsScreen, the Animals tab's new root, the
@@ -39,14 +45,15 @@ const SHELTER_DONATIONS = ["DonationQrScreen", "DonateScreen", "DonatePledgeScre
 /** Shelter needs (1) */
 const SHELTER_NEEDS = ["ShelterNeedsScreen"] as const;
 
-/** Shelter volunteer (9) */
+/** Shelter volunteer (7 — DOWN FROM 9. Task 9 (P4) deleted ShelterVolunteerRequestsScreen and
+ * ShelterVolunteerAttendanceScreen: their cards folded into ShelterVolunteerActivityScreen's
+ * own Pending/Confirmed/Attendance timeline, so there are two fewer screen files, not two
+ * fewer in-scope FEATURES — the timeline itself is still in V3_SCOPE, unchanged.) */
 const SHELTER_VOLUNTEER = [
   "ShelterVolunteerScreen",
   "ShelterVolunteerCreateScreen",
   "ShelterVolunteerEditScreen",
   "ShelterVolunteerDetailScreen",
-  "ShelterVolunteerRequestsScreen",
-  "ShelterVolunteerAttendanceScreen",
   "ShelterVolunteerCalendarScreen",
   "ShelterVolunteerActivityScreen",
   "ShelterVolunteerCancelScreen"
