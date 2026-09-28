@@ -6,23 +6,20 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
-import { ScreenHeader } from "../components/ui";
-
-
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { colors, spacing, typography } from "../theme";
+import { Card, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "waiver">;
 
 export function WaiverScreen({ navigation }: Props) {
   return (
     <View style={styles.screen} testID="screen.waiver">
+      <ScreenBackdrop />
       <ScreenHeader title="Liability waiver & guidelines" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.noticeCard}>
+        <Card style={styles.noticeCard}>
           {/* TODO(D-S5-1): replace this placeholder with legal's finalised waiver text before M3 beta. */}
           <Text style={styles.body}>
             The full liability waiver and volunteer guidelines are still being finalised.
@@ -34,15 +31,15 @@ export function WaiverScreen({ navigation }: Props) {
           <Text style={styles.body}>
             This page is not the waiver itself — no binding agreement exists yet.
           </Text>
-        </View>
+        </Card>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page },
+  screen: { flex: 1, backgroundColor: "transparent" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
-  noticeCard: { borderRadius: radii.tile, padding: 20, gap: 14, ...card },
+  noticeCard: { gap: 14 },
   body: { color: colors.muted, ...typography.body }
 });
