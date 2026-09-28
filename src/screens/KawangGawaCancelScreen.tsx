@@ -20,6 +20,7 @@ import { ConfirmModal, ConfirmModalTone } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { CancelVariant, MySignupItem, MySignups, cancelVariant, lateCancelCopy } from "../volunteer";
 import { colors, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
@@ -105,6 +106,7 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Cancel shift" onBack={() => navigation.goBack()} />
 
       {phase === "confirm" && !item && (
@@ -179,7 +181,7 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page },
+  screen: { flex: 1, backgroundColor: "transparent" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 60, alignItems: "center" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
