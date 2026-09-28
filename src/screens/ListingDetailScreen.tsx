@@ -15,7 +15,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { useAuth } from "../auth/AuthContext";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { SignupWall } from "../components/SignupWall";
+import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
@@ -38,7 +38,13 @@ export function ListingDetailScreen({ navigation, route }: Props) {
 
   const [inquiring, setInquiring] = useState(false);
   const [inquired, setInquired] = useState(false);
-  const [wallOpen, setWallOpen] = useState(false);
+  // Which gated tap raised the wall: Inquire → "adopt"; "Report this" → the generic
+  // "account" copy (the "report" copy is about reporting a stray, not flagging a listing).
+  // The action outlives `open` so the copy doesn't flip while the sheet slides out.
+  const [wall, setWall] = useState<{ open: boolean; action: SignupWallAction }>(
+    { open: false, action: "adopt" });
+  const openWall = (action: SignupWallAction) => setWall({ open: true, action });
+  const closeWall = () => setWall((w) => ({ ...w, open: false }));
 
   const load = useCallback(() => {
     setRes(null);
@@ -56,7 +62,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
     // it raises the signup wall rather than hitting the API (which would just 401). A
     // signed-in user goes straight to the real inquiry.
     if (isGuest) {
-      setWallOpen(true);
+      openWall("adopt");
       return;
     }
     inquire();
@@ -105,7 +111,9 @@ export function ListingDetailScreen({ navigation, route }: Props) {
         right={listing ? (
           <TouchableOpacity
             hitSlop={TAP_SLOP}
-            onPress={() => navigation.navigate("reportContent",
+            // A guest's report would 401 at /moderation/flags and dead-end on "Couldn't send
+            // the report" — raise the signup wall instead, same as Inquire.
+            onPress={() => isGuest ? openWall("account") : navigation.navigate("reportContent",
               { targetType: "listing", targetId: listing.listing_id })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
@@ -198,12 +206,12 @@ export function ListingDetailScreen({ navigation, route }: Props) {
       )}
 
       <SignupWall
-        visible={wallOpen}
-        action="adopt"
-        subject={listing?.pet.name}
-        onCreateAccount={() => { setIntent("adopt"); setWallOpen(false); navigation.navigate("accountType"); }}
-        onLogin={() => { setWallOpen(false); navigation.navigate("signin"); }}
-        onDismiss={() => setWallOpen(false)}
+        visible={wall.open}
+        action={wall.action}
+        subject={wall.action === "adopt" ? listing?.pet.name : undefined}
+        onCreateAccount={() => { setIntent(wall.action); closeWall(); navigation.navigate("accountType"); }}
+        onLogin={() => { closeWall(); navigation.navigate("signin"); }}
+        onDismiss={closeWall}
       />
     </View>
   );
