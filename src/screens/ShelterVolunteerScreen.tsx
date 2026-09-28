@@ -224,7 +224,11 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
   cardSignedUp: { marginTop: 4, color: colors.muted, ...typography.meta },
-  attendanceChipWrap: { marginTop: 8, alignSelf: "flex-start" },
+  // Fix round 1 (Finding 2) · the Chip itself is a fixed 30 pt tall, well under the 44 pt
+  // minimum — the touchTargets guard only scans bare-Text touchables, so a Chip-only wrapper
+  // slipped through it. `minHeight` grows the tappable area around the chip without touching
+  // the chip's own rendered size (still centered inside).
+  attendanceChipWrap: { marginTop: 8, alignSelf: "flex-start", minHeight: 44, justifyContent: "center" },
   statusChip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
   statusChipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },

@@ -45,6 +45,20 @@ export function revealLocationOnError(v: ShiftFormValue): ShiftFormValue {
   return { ...v, useShelterAddress: false };
 }
 
+/**
+ * Fix round 1 (P4 T10, Finding 1) · the backend's `400 field=capacity` covers TWO distinct
+ * floors — too low (`min_value=1`) and too high (`max_value=500`) — and both screens'
+ * `submit()` used to hardcode "Up to 500 volunteers." for either one. That's wrong for the
+ * min case: `validateShiftForm` already refuses an empty/zero/negative capacity before the
+ * round trip, but a value that somehow still reaches the server under the floor (e.g. a race
+ * with another edit) would read as "too high" instead of "too low". Only the max case gets
+ * the fixed copy; every other capacity 400 forwards whatever the server actually said.
+ */
+export function capacityFieldError(capacityValue: string, serverMessage: string): string {
+  const cap = Number.parseInt(capacityValue, 10);
+  return Number.isFinite(cap) && cap > 500 ? "Up to 500 volunteers." : serverMessage;
+}
+
 export function shiftFormBody(v: ShiftFormValue): Record<string, unknown> | null {
   const w = shiftWindow(v.day, v.start, v.durationMins);
   if (!w) return null;

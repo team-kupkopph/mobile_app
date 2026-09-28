@@ -22,7 +22,7 @@ import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
-import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody, revealLocationOnError } from "../components/ShiftFormFields";
+import { ShiftFormFields, ShiftFormValue, ShiftFormErrors, validateShiftForm, shiftFormBody, revealLocationOnError, capacityFieldError } from "../components/ShiftFormFields";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerCreate">;
 
@@ -99,7 +99,11 @@ export function ShelterVolunteerCreateScreen({ navigation, route }: Props) {
     if (res.status === 400 && err?.field === "title") return setErrors({ title: err.message });
     // Task 10 (K15) · the backend's own capacity ceiling (max_value=500) — validateShiftForm
     // already catches this before the round trip, so this is a backstop, not the primary path.
-    if (res.status === 400 && err?.field === "capacity") return setErrors({ capacity: "Up to 500 volunteers." });
+    // Fix round 1 (Finding 1) · `capacityFieldError` only swaps in the fixed copy for the max
+    // case; a min-value 400 (which shouldn't reach here, but might on a race) still forwards
+    // the server's own message instead of misreporting it as "too high".
+    if (res.status === 400 && err?.field === "capacity")
+      return setErrors({ capacity: capacityFieldError(form.capacity, err.message) });
     if (res.status === 403) return setBanner("Your organization must be verified before posting activities.");
     setBanner(err?.message ?? "Couldn't post this activity. Try again.");
   }
