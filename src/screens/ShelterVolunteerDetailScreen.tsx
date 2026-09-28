@@ -11,10 +11,10 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { ChipTone, VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
+import { VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
-import { Card, ScreenHeader } from "../components/ui";
+import { Card, ChipTone, chipTones, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerDetail">;
 
@@ -92,12 +92,12 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
 }
 
 
-const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = {
-  done: { backgroundColor: colors.soft }, muted: { backgroundColor: colors.greyPill }, danger: { backgroundColor: colors.warningBg }
-};
-const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
-  done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.warningStrong }
-};
+const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = Object.fromEntries(
+  Object.entries(chipTones).map(([tone, { bg }]) => [tone, { backgroundColor: bg }])
+) as Record<ChipTone, { backgroundColor: string }>;
+const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = Object.fromEntries(
+  Object.entries(chipTones).map(([tone, { fg }]) => [tone, { color: fg }])
+) as Record<ChipTone, { color: string }>;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },

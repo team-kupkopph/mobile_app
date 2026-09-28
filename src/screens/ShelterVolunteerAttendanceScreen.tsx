@@ -12,10 +12,9 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { ChipTone } from "../shelterVolunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, radii, spacing, typography } from "../theme";
-import { Avatar, Button, Card, ScreenHeader } from "../components/ui";
+import { Avatar, Button, Card, ChipTone, chipTones, ScreenHeader } from "../components/ui";
 
 type RosterStatus = "approved" | "completed" | "no_show";
 type RosterRow = {
@@ -27,7 +26,7 @@ type RosterRow = {
 };
 
 const OUTCOME_CHIP: Record<"completed" | "no_show", { label: string; tone: ChipTone }> = {
-  completed: { label: "Completed", tone: "done" },
+  completed: { label: "Completed", tone: "success" },
   no_show: { label: "No-show", tone: "danger" }
 };
 
@@ -142,12 +141,12 @@ function initials(name: string): string {
 }
 
 
-const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = {
-  done: { backgroundColor: colors.soft }, muted: { backgroundColor: colors.greyPill }, danger: { backgroundColor: colors.dangerBg }
-};
-const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = {
-  done: { color: colors.tealDark }, muted: { color: colors.muted }, danger: { color: colors.danger }
-};
+const CHIP_STYLE: Record<ChipTone, { backgroundColor: string }> = Object.fromEntries(
+  Object.entries(chipTones).map(([tone, { bg }]) => [tone, { backgroundColor: bg }])
+) as Record<ChipTone, { backgroundColor: string }>;
+const CHIP_TEXT_STYLE: Record<ChipTone, { color: string }> = Object.fromEntries(
+  Object.entries(chipTones).map(([tone, { fg }]) => [tone, { color: fg }])
+) as Record<ChipTone, { color: string }>;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },

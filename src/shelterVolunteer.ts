@@ -1,8 +1,12 @@
 // US-V9 shelter-side display logic + types. Pure, unit-tested (like volunteer.ts).
+import { type ChipTone } from "./components/ui";
 import { BrowseShift, Reliability } from "./volunteer";
 
 export type ShelterShift = BrowseShift;
-export type PendingRequest = { signup_id: string; volunteer: { display_name: string }; reliability: Reliability };
+export type PendingRequest = {
+  signup_id: string; volunteer: { display_name: string }; reliability: Reliability;
+  requested_at: string; previously_declined: boolean; is_verified_member: boolean;
+};
 export type ListingCard = { listing_id: string; pet: { name: string; species: string }; photo_url: string | null };
 export type VolunteerDetail = {
   display_name: string; reliability: Reliability;
@@ -10,12 +14,31 @@ export type VolunteerDetail = {
   contact?: { phone: string | null; email: string };
 };
 
-export type ChipTone = "done" | "muted" | "danger";
-export function reliabilityChip(rel: Reliability): { label: string; tone: ChipTone } {
-  if (rel.needs_reapproval)
-    return { label: `Needs re-approval · ${rel.consecutive_no_shows} no-shows in a row`, tone: "danger" };
-  if (rel.is_reliable) return { label: "Reliable", tone: "done" };
-  return { label: "New volunteer", tone: "muted" };
+export type RosterRow = {
+  signup_id: string; volunteer: { display_name: string };
+  status: "approved" | "completed" | "no_show";
+  check_in_at: string | null; check_out_at: string | null;
+  assigned_animal: { listing_id: string; name: string; photo_url: string | null } | null;
+  contact_shared: boolean; attendance_marked_at: string | null; can_undo: boolean;
+};
+
+// null = flagged — the amber "Needs re-approval" strip already says it, so the caller strips
+// the chip entirely rather than showing a redundant/contradictory tone.
+export function reliabilityChip(rel: Reliability): { label: string; tone: ChipTone } | null {
+  if (rel.needs_reapproval) return null;
+  if (rel.is_reliable) return { label: "Reliable", tone: "success" };
+  if (rel.no_shows > 0) return { label: `${rel.no_shows} no-show${rel.no_shows === 1 ? "" : "s"}`, tone: "neutral" };
+  if (rel.shifts_completed === 0) return { label: "New volunteer", tone: "info" };
+  return { label: `${rel.shifts_completed} shift${rel.shifts_completed === 1 ? "" : "s"}`, tone: "neutral" };
+}
+
+export const attendanceSuggestion = (row: RosterRow): "completed" | null =>
+  row.status === "approved" && row.check_in_at && row.check_out_at ? "completed" : null;
+
+export type ActivitySection = "pending" | "confirmed" | "attendance";
+export function activitySection(shift: ShelterShift, pendingCount: number, nowMs: number = Date.now()): ActivitySection {
+  if (nowMs >= new Date(shift.ends_at).getTime()) return "attendance";
+  return pendingCount > 0 ? "pending" : "confirmed";
 }
 
 export function blastRadiusCopy(n: number): string {
