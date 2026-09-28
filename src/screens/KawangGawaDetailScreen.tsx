@@ -14,7 +14,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { SignupWall } from "../components/SignupWall";
+import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
@@ -57,7 +57,13 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   // the SignupWall rather than the consent rows (which are hidden entirely, not disabled:
   // there is no account yet for either consent to apply to).
   const isGuest = tokens === null;
-  const [wall, setWall] = useState(false);
+  // Which gated tap raised the wall: Request → "volunteer"; "Report this" → the generic
+  // "account" copy (a guest's report would otherwise 401 at /moderation/flags and dead-end).
+  // The action outlives `open` so the copy doesn't flip while the sheet slides out.
+  const [wall, setWall] = useState<{ open: boolean; action: SignupWallAction }>(
+    { open: false, action: "volunteer" });
+  const openWall = (action: SignupWallAction) => setWall({ open: true, action });
+  const closeWall = () => setWall((w) => ({ ...w, open: false }));
   const { shiftId } = route.params;
 
   const [shift, setShift] = useState<ShiftDetail | null>(null);
@@ -152,7 +158,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           <TouchableOpacity
             testID="lnk.kawanggawaDetail.report"
             hitSlop={TAP_SLOP}
-            onPress={() => navigation.navigate("reportContent",
+            onPress={() => isGuest ? openWall("account") : navigation.navigate("reportContent",
               { targetType: "shift", targetId: shift.shift_id })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
@@ -265,7 +271,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
             <Button
               testID="btn.kawanggawaDetail.request"
               label="Request"
-              onPress={() => setWall(true)}
+              onPress={() => openWall("volunteer")}
               accessibilityLabel="Request this shift"
               style={styles.submitButton}
             />
@@ -363,12 +369,12 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
 
       {isGuest && shift && (
         <SignupWall
-          visible={wall}
-          action="volunteer"
-          subject={shiftHeadline(shift)}
-          onCreateAccount={() => { setIntent("volunteer"); setWall(false); navigation.navigate("accountType"); }}
-          onLogin={() => { setWall(false); navigation.navigate("signin"); }}
-          onDismiss={() => setWall(false)}
+          visible={wall.open}
+          action={wall.action}
+          subject={wall.action === "volunteer" ? shiftHeadline(shift) : undefined}
+          onCreateAccount={() => { setIntent(wall.action); closeWall(); navigation.navigate("accountType"); }}
+          onLogin={() => { closeWall(); navigation.navigate("signin"); }}
+          onDismiss={closeWall}
         />
       )}
     </View>
