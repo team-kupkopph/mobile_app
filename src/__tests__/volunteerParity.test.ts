@@ -1,0 +1,98 @@
+/**
+ * P5 Task 2 — the volunteer side matches its two new anchor artboards
+ * (VolunteerHub.dc.html, ShiftDetail.dc.html) added to design/mobile-v3 in the
+ * companion library PR #51 (docs/canvas-volunteer-anchors).
+ *
+ * Same convention as shelterShellParity.test.ts: walk up from this file looking for
+ * design/mobile-v3, and describe.skip + console.warn (not fail) when it isn't there —
+ * the guard is advisory until the artboards ship, never a false red for a checkout
+ * (e.g. CI) that simply doesn't have the sibling library repo laid out alongside it.
+ */
+import { existsSync, readFileSync } from "fs";
+import { dirname, join } from "path";
+
+const SRC = join(__dirname, "..");
+
+function findCanvasDir(): string | null {
+  let dir = __dirname;
+  for (let i = 0; i < 8; i++) {
+    const c = join(dir, "design", "mobile-v3", "VolunteerHub.dc.html");
+    if (existsSync(c)) return join(dir, "design", "mobile-v3");
+    const up = dirname(dir);
+    if (up === dir) break;
+    dir = up;
+  }
+  return null;
+}
+const canvasDir = findCanvasDir();
+const readCanvas = (file: string) => readFileSync(join(canvasDir as string, file), "utf8");
+const describeParity = canvasDir ? describe : describe.skip;
+if (!canvasDir) {
+  // eslint-disable-next-line no-console
+  console.warn("[volunteerParity] design/mobile-v3 not found — parity assertions skipped, not failed.");
+}
+
+// data-fact="key" content="value" — the same marker convention across every anchor artboard.
+const facts = (html: string) =>
+  Object.fromEntries(
+    [...html.matchAll(/data-fact="([^"]+)"\s+content="([^"]*)"/g)].map((m) => [m[1], m[2]])
+  );
+
+describeParity("the volunteer side matches its anchor artboards", () => {
+  const hub = facts(readCanvas("VolunteerHub.dc.html"));
+  const detail = facts(readCanvas("ShiftDetail.dc.html"));
+  const src = (f: string) => readFileSync(join(SRC, f), "utf8");
+
+  it("hub segments and filter labels", () => {
+    expect(hub.segments).toBe("Browse,My shifts");
+    const screen = src("screens/KawangGawaScreen.tsx");
+    expect(screen).toContain('segments={["Browse", "My shifts"]}');
+    const vol = src("volunteer.ts");
+    for (const label of hub.filters.split(",").slice(1)) expect(vol).toContain(`"${label}"`);
+  });
+
+  it("my-shifts sections, in order", () => {
+    // The artboard's `my-sections` marker names buckets (Requested/Upcoming/Past); the
+    // on-V3 rule is that copy doesn't change, and MyShifts.tsx already ships the section
+    // headings "Awaiting approval" / "Upcoming shifts" / "Shift history" (verified against
+    // src/components/volunteer/MyShifts.tsx before writing this map) — so map bucket name
+    // to shipped heading rather than asserting the marker's own words appear verbatim.
+    const HEADING_FOR: Record<string, string> = {
+      Requested: "Awaiting approval",
+      Upcoming: "Upcoming shifts",
+      Past: "Shift history",
+    };
+    const my = src("components/volunteer/MyShifts.tsx");
+    const order = hub["my-sections"]
+      .split(",")
+      .map((bucket: string) => my.indexOf(HEADING_FOR[bucket]));
+    expect(order.every((i: number) => i >= 0)).toBe(true);
+    expect([...order].sort((a, b) => a - b)).toEqual(order);
+  });
+
+  it("every status chip uses the artboard's tone", () => {
+    const vol = src("volunteer.ts");
+    for (const pair of hub["status-chips"].split(",")) {
+      const [label, tone] = pair.split(":");
+      expect(vol).toMatch(new RegExp(`label: "${label}", tone: "${tone}"`));
+    }
+  });
+
+  it("detail sections and consents", () => {
+    const screen = src("screens/KawangGawaDetailScreen.tsx");
+    for (const title of detail.sections.split(",")) expect(screen).toContain(title);
+    expect(detail.consents).toBe("waiver:required,contact:optional");
+    expect(screen).toContain("Optional.");
+  });
+
+  // it.failing for this commit only — red-proven above; Task 3 turns it back into `it`
+  // once the six screens move onto ScreenBackdrop and drop elevation.soft.
+  it.failing("the volunteer screens are on V3 surfaces", () => {
+    for (const f of ["KawangGawaScreen", "KawangGawaDetailScreen", "KawangGawaRequestedScreen",
+                     "KawangGawaCancelScreen", "KawangGawaCheckinScreen", "WaiverScreen"]) {
+      const s = src(`screens/${f}.tsx`);
+      expect(s).toContain("<ScreenBackdrop");
+      expect(s).not.toMatch(/elevation\.soft/);
+    }
+  });
+});
