@@ -22,6 +22,13 @@
 // screen FILES (ShelterVolunteerRequestsScreen, ShelterVolunteerAttendanceScreen) without
 // removing an in-scope feature — their cards folded into ShelterVolunteerActivityScreen's own
 // timeline — so the true count drops to 35, not because two features left scope.
+//
+// P5 Task 3 (K24/K26, commit a1b23d0) moves six of the seven KawangGawa owner-side volunteer
+// screens named above — KawangGawaScreen, KawangGawaCancelScreen, KawangGawaCheckinScreen,
+// KawangGawaDetailScreen, KawangGawaRequestedScreen, and WaiverScreen — OUT of V3_EXCLUDED
+// and INTO V3_SCOPE (see KAWANG_GAWA_V3 below), now that they are converted onto
+// <ScreenBackdrop> + <Card>. V3_SCOPE grows from 35 to 41; V3_EXCLUDED shrinks by the same
+// six.
 
 /** Shell roots (5) — Task B1 added ShelterDonateScreen, the Donate tab's new root, born
  * converted (spec §5); Task B2 added ShelterAnimalsScreen, the Animals tab's new root, the
@@ -127,7 +134,7 @@ const OWNER_V3 = [
   "SigninScreen"
 ] as const;
 
-/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 36 names */
+/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 35 names */
 const OTHER_OWNER_SCREENS = [
   "AccountTypeScreen",
   "AdjustPinScreen",
