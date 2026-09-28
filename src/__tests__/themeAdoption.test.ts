@@ -64,3 +64,14 @@ describe("screens take colour from the theme", () => {
     expect(OWN_TABLE.test('const colors = {\n  ink: "#12213A"\n};')).toBe(true);
   });
 });
+
+/**
+ * P5 · Task 4 — `ConfirmModal` is a shared component, not a screen, so the scan above never
+ * saw its own `const colors = {...}`. This is the same rule applied directly to it.
+ */
+describe("ConfirmModal takes colour from the theme", () => {
+  it("does not declare its own colour table", () => {
+    const src = readFileSync(join(__dirname, "..", "components", "ConfirmModal.tsx"), "utf8");
+    expect(OWN_TABLE.test(src)).toBe(false);
+  });
+});

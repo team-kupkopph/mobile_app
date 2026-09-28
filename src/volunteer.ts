@@ -159,14 +159,18 @@ export function shiftDurationLabel(startsAt: string, endsAt: string): string {
  *  ⚠️ Replaces "5 of 5 slots left", which reads as "5 of 5 taken" at a glance and gave a
  *  nearly-gone shift exactly the same weight as an empty one. Amber is this app's "someone
  *  must still act" colour (see sagip.ts) and the last slot is precisely that. */
-export function shiftSlotsChip(slotsLeft: number, capacity: number): { label: string; tone: StrayTone } {
-  if (slotsLeft <= 0) return { label: "Full", tone: "grey" };
-  if (slotsLeft === 1) return { label: "1 slot left", tone: "amber" };
+export function shiftSlotsChip(slotsLeft: number, capacity: number): { label: string; tone: ChipTone } {
+  if (slotsLeft <= 0) return { label: "Full", tone: "neutral" };
+  if (slotsLeft === 1) return { label: "1 slot left", tone: "warning" };
   // ⚠️ An untouched shift says how big it is ("5 slots"), not "5 of 5 left" — that phrasing
   // is the very ambiguity this replaced, and it reads as "5 of 5 taken" at a glance. Once
   // someone has joined, the number that matters is what is still going.
-  if (slotsLeft >= capacity) return { label: `${capacity} slots`, tone: "teal" };
-  return { label: `${slotsLeft} left`, tone: "teal" };
+  //
+  // P5 Task 3 (owner decision) · this chip STAYS teal — the shared `info` tone (fg tealDark
+  // #14504F on infoBg #E2EEF0) is exactly the teal this chip already shipped, so "success"
+  // (the plan's original suggestion) would have been a colour change disguised as a token swap.
+  if (slotsLeft >= capacity) return { label: `${capacity} slots`, tone: "info" };
+  return { label: `${slotsLeft} left`, tone: "info" };
 }
 
 export type ShiftGroup = { label: string; shifts: BrowseShift[] };

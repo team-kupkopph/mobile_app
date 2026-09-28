@@ -261,7 +261,10 @@ describe("screens take corner radii from the theme", () => {
     // card (all radii.field), RescueOfferScreen's optionCard (radii.field), and
     // RescueUpdateScreen's radioRow (radii.tile) — five sites off this scan. Floor moves
     // 330 -> 322.
-    expect(sites.length).toBeGreaterThan(322);
+    // P5 · Task 4 (2026-09-28): ConfirmModal's card lost its own `borderRadius: radii.card`
+    // when it became a <Card> (which owns radii.card internally, off this scan) — one site.
+    // Floor moves 322 -> 321.
+    expect(sites.length).toBeGreaterThan(321);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its
     // own height once, in one file. The floor moved down with them; it is still a floor.
@@ -270,7 +273,11 @@ describe("screens take corner radii from the theme", () => {
     // cards into ShelterVolunteerActivityScreen's timeline using the shared <Chip> primitive
     // instead, which owns its own radius off this scan. Real pill sites left the codebase;
     // 99, DOWN FROM 101+. Floor moves 100 -> 95.
-    expect(sites.filter(isPill).length).toBeGreaterThan(95);
+    // P5 · Task 4 (2026-09-28): ShelterVolunteerScreen's and ShelterVolunteerCalendarScreen's
+    // hand-rolled `statusChip` pills (r = h/2, 15 and 14) were replaced by the shared <Chip>
+    // primitive, which owns its own radius off this scan — two pill sites left. Floor moves
+    // 95 -> 93.
+    expect(sites.filter(isPill).length).toBeGreaterThan(93);
   });
 
   it("leaves no container literal that already equals a step", () => {

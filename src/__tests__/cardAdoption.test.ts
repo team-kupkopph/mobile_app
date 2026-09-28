@@ -62,7 +62,9 @@ describe("V3 screens adopt Card instead of a raw elevation spread", () => {
     // 37 -> 35: Task 9 (P4) deleted ShelterVolunteerRequestsScreen and
     // ShelterVolunteerAttendanceScreen (folded into ShelterVolunteerActivityScreen's own
     // timeline) — two fewer screen files, not two fewer in-scope features.
-    expect(V3_SCOPE.length).toBe(35);
+    // 35 -> 41: P5 Task 3 (K24/K26) moves the six KawangGawa*/WaiverScreen screens from
+    // V3_EXCLUDED into scope, now that they're converted.
+    expect(V3_SCOPE.length).toBe(41);
   });
 
   it("every in-scope screen not in the holdout list no longer spreads ...elevation.*", () => {

@@ -3,7 +3,8 @@
 // Kept deliberately generic — no volunteer/cancel-specific copy or logic lives here — so any
 // destructive-action confirm (starting with V9's shelter-cancel confirm) can reuse it as-is.
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import { colors as themeColors, radii, typography } from "../theme";
+import { colors, typography } from "../theme";
+import { Card } from "./ui";
 
 export type ConfirmModalTone = "neutral" | "warning" | "danger";
 
@@ -23,17 +24,12 @@ export type ConfirmModalProps = {
   onSecondary?: () => void;
 };
 
-const colors = {
-  ink: "#12213A", muted: "#5F5E5A", white: "#FFFFFF", teal: "#1C6B6B", danger: "#B23B3B"
-};
-
 export function ConfirmModal({
   visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel, secondaryLabel, onSecondary
 }: ConfirmModalProps) {
-  // P5 moves the whole component onto theme tokens; `warning` borrows `warningStrong` from
-  // `../theme` in the meantime rather than inventing a local amber to match it.
+  // P5 · Task 4 moves the whole component onto theme tokens.
   const confirmColor =
-    tone === "danger" ? colors.danger : tone === "warning" ? themeColors.warningStrong : colors.teal;
+    tone === "danger" ? colors.danger : tone === "warning" ? colors.warningStrong : colors.teal;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
@@ -42,7 +38,7 @@ export function ConfirmModal({
           <View style={StyleSheet.absoluteFill} />
         </TouchableWithoutFeedback>
 
-        <View style={styles.card}>
+        <Card style={styles.card}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.body}>{body}</Text>
 
@@ -63,7 +59,7 @@ export function ConfirmModal({
               <Text style={styles.cancelText}>Never mind</Text>
             </TouchableOpacity>
           )}
-        </View>
+        </Card>
       </View>
     </Modal>
   );
@@ -77,13 +73,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     backgroundColor: "rgba(18, 33, 58, 0.45)"
   },
+  // `Card` supplies background, radius and elevation; this keeps the modal's own padding,
+  // which is taller top/bottom than Card's default `spacing.md` on every side.
   card: {
     width: "100%",
-    borderRadius: radii.card,
     paddingHorizontal: 24,
     paddingTop: 26,
-    paddingBottom: 22,
-    backgroundColor: colors.white
+    paddingBottom: 22
   },
   title: {
     color: colors.ink,

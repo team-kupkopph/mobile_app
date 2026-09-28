@@ -263,8 +263,12 @@ describe("screens take depth from the theme", () => {
     // `const card = { ...elevation.soft }` objects: MyRescuesScreen, MyOffersScreen,
     // RescueMapScreen, RescueOfferScreen and RescueUpdateScreen — each screen's list-row or
     // option-row surface is <Card> now. 70 -> 62 (bound). The floor below moves down with it.
-    expect(bound.length).toBeGreaterThan(55);
-    expect(bound.length + handRolled.length).toBeGreaterThan(57);
+    // P5 Task 3 (K24/K26) removed four more: KawangGawaScreen, KawangGawaDetailScreen,
+    // KawangGawaCheckinScreen and WaiverScreen — each screen's list-row/hero/facts/notice
+    // surface is <Card> now (KawangGawaCancelScreen and KawangGawaRequestedScreen had none
+    // to remove). 62 -> ~56. Both floors below move down with them.
+    expect(bound.length).toBeGreaterThan(50);
+    expect(bound.length + handRolled.length).toBeGreaterThan(53);
   });
 
   it("leaves no hand-rolled shadow that reproduces a step exactly", () => {
