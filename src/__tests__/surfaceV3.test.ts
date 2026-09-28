@@ -43,9 +43,9 @@
 // timeline itself was already counted, and still is).
 //
 // P5 Task 3 (K24/K26) converts the six owner-side KawangGawa* screens plus WaiverScreen onto
-// <ScreenBackdrop> — these are outside V3_SCOPE/v3Scope.ts (that list is the shelter-side
-// rollout only), but this guard scans every screen file regardless of scope, so the baseline
-// grows from 42 to 48 here.
+// <ScreenBackdrop> — these are now inside V3_SCOPE/v3Scope.ts too (commit a1b23d0 moved them
+// out of V3_EXCLUDED), but this guard scans every screen file regardless of scope, so the
+// baseline grows from 42 to 48 here either way.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {

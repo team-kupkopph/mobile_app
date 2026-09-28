@@ -261,9 +261,12 @@ describe("screens take corner radii from the theme", () => {
     // card (all radii.field), RescueOfferScreen's optionCard (radii.field), and
     // RescueUpdateScreen's radioRow (radii.tile) — five sites off this scan. Floor moves
     // 330 -> 322.
-    // P5 · Task 4 (2026-09-28): ConfirmModal's card lost its own `borderRadius: radii.card`
-    // when it became a <Card> (which owns radii.card internally, off this scan) — one site.
-    // Floor moves 322 -> 321.
+    // P5 · Task 4 (2026-09-28): three sites left this scan — ConfirmModal's card lost its own
+    // `borderRadius: radii.card` when it became a <Card> (which owns radii.card internally,
+    // off this scan), and ShelterVolunteerScreen's and ShelterVolunteerCalendarScreen's
+    // hand-rolled `statusChip` pills (r = h/2, 15 and 14) were replaced by the shared <Chip>
+    // primitive (see the isPill note below, where those same two sites are counted again).
+    // 325 -> 322, measured. Floor moves 322 -> 321.
     expect(sites.length).toBeGreaterThan(321);
     expect(tokenRefs.length + squircleRefs.length).toBeGreaterThan(90);
     // 45 hand-rolled CTAs were pills (r = h/2) until they became <Button>, which halves its

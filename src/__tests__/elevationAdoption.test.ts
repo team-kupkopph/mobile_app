@@ -266,8 +266,8 @@ describe("screens take depth from the theme", () => {
     // P5 Task 3 (K24/K26) removed four more: KawangGawaScreen, KawangGawaDetailScreen,
     // KawangGawaCheckinScreen and WaiverScreen — each screen's list-row/hero/facts/notice
     // surface is <Card> now (KawangGawaCancelScreen and KawangGawaRequestedScreen had none
-    // to remove). 62 -> ~56. Both floors below move down with them.
-    expect(bound.length).toBeGreaterThan(50);
+    // to remove). 60 -> 56. Both floors below move down with them.
+    expect(bound.length).toBeGreaterThan(51);
     expect(bound.length + handRolled.length).toBeGreaterThan(53);
   });
 
