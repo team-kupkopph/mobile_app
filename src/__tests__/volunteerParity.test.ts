@@ -85,9 +85,9 @@ describeParity("the volunteer side matches its anchor artboards", () => {
     expect(screen).toContain("Optional.");
   });
 
-  // it.failing for this commit only — red-proven above; Task 3 turns it back into `it`
-  // once the six screens move onto ScreenBackdrop and drop elevation.soft.
-  it.failing("the volunteer screens are on V3 surfaces", () => {
+  // P5 Task 3 · the six screens are on ScreenBackdrop and off elevation.soft — flipped
+  // back from it.failing now that the conversion has landed.
+  it("the volunteer screens are on V3 surfaces", () => {
     for (const f of ["KawangGawaScreen", "KawangGawaDetailScreen", "KawangGawaRequestedScreen",
                      "KawangGawaCancelScreen", "KawangGawaCheckinScreen", "WaiverScreen"]) {
       const s = src(`screens/${f}.tsx`);
