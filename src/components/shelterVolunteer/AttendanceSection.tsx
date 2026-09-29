@@ -131,6 +131,7 @@ export function AttendanceSection({ shiftId }: Props) {
                     size="small"
                     variant={suggestion === "completed" ? "secondary" : "primary"}
                     label="No-show"
+                    accessibilityLabel={`No-show ${row.volunteer.display_name}`}
                     onPress={() => setNoShowSignupId(row.signup_id)}
                     loading={busy}
                     style={styles.half}
@@ -139,6 +140,7 @@ export function AttendanceSection({ shiftId }: Props) {
                     size="small"
                     variant={suggestion === "completed" ? "primary" : "secondary"}
                     label="Attended"
+                    accessibilityLabel={`Attended ${row.volunteer.display_name}`}
                     onPress={() => markAttendance(row.signup_id, "completed")}
                     loading={busy}
                     style={styles.half}
