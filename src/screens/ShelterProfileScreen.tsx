@@ -98,6 +98,11 @@ export function ShelterProfileScreen({ navigation }: Props) {
   const gated = !me?.is_verified_rescuer;
   // F13 · WHICH gated state — never from `gated` alone (see shelterVerificationCard).
   const card = shelterVerificationCard(dash, me);
+  // An approved org whose LATEST request is still with the reviewer has an upgrade in flight
+  // (US-X4 files it as a new shelter_org request). The server doesn't refuse a second one, so
+  // the accent must stop offering the form and track the first.
+  const upgradeInReview = !gated && (me?.shelter?.verification_status === "pending"
+    || me?.shelter?.verification_status === "needs_info");
   const badge = isTier1 ? "Verified Rescue" : "Verified Shelter";
   const sub = isTier1 ? "Community rescue" : "Registered NGO";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
@@ -213,13 +218,27 @@ export function ShelterProfileScreen({ navigation }: Props) {
               <Text style={styles.accentWarnChev}>›</Text>
             </TouchableOpacity>
           ) : isTier1 ? (
-            <View style={styles.accentTeal}>
+            // Was a View with a chevron and no onPress. The approved base is on file, so the
+            // upgrade skips step 1 and sends only the NGO papers (POST /verifications/upgrade).
+            <TouchableOpacity
+              activeOpacity={0.85}
+              style={styles.accentTeal}
+              onPress={() =>
+                upgradeInReview
+                  ? navigation.navigate("verifyDocuments")
+                  : navigation.navigate("shelterVerifyNgo", { upgrade: true })
+              }
+            >
               <View style={styles.accentCopy}>
-                <Text style={styles.accentTealTitle}>Upgrade to Verified Shelter</Text>
-                <Text style={styles.accentTealBody}>Unlock uncapped fees & escalation</Text>
+                <Text style={styles.accentTealTitle}>
+                  {upgradeInReview ? "Upgrade under review" : "Upgrade to Verified Shelter"}
+                </Text>
+                <Text style={styles.accentTealBody}>
+                  {upgradeInReview ? "Track your documents" : "Unlock uncapped fees & escalation"}
+                </Text>
               </View>
               <Text style={styles.accentTealChev}>›</Text>
-            </View>
+            </TouchableOpacity>
           ) : (
             // F-R3-4 · same dead-chevron shape as the rows the finding named; the approved
             // org's documents live on the same tracker the gated accent above opens.

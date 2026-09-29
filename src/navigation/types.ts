@@ -64,7 +64,9 @@ export type RootStackParamList = {
   shelterContact: { tier: ShelterTier };
   shelterPhoneVerify: { tier: ShelterTier; phone: string };
   shelterVerify: { tier: ShelterTier };
-  shelterVerifyNgo: { baseDocs: ShelterDoc[]; socialUrl: string };
+  // Step 2 of the initial tier-2 flow carries step 1's base set; `upgrade` is an APPROVED
+  // tier-1 moving up (US-X4) — its base is already on file, so only the NGO papers are sent.
+  shelterVerifyNgo: { baseDocs: ShelterDoc[]; socialUrl: string } | { upgrade: true };
   shelterDashboard: undefined;
   shelterProfile: undefined;
   // Task B2 · the shelter's Animals tab root — segmented Live/Pending/Adopted over the

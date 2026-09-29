@@ -104,7 +104,9 @@ describe("every screen that sends social_proof_url validates it with the helper"
 
   it("ShelterVerifyNgoScreen only forwards the link ShelterVerifyScreen already validated", () => {
     const src = senders.find((s) => s.f === "ShelterVerifyNgoScreen.tsx")!.src;
-    expect(src).toMatch(/socialUrl \} = route\.params/);
+    // Sent straight from step 1's params. Upgrade mode has no step 1 and sends no link at all.
+    expect(src).toMatch(/social_proof_url: route\.params\.socialUrl/);
+    expect(src.match(/social_proof_url:/g)).toHaveLength(1);
     // ShelterVerifyScreen hands over the normalised value.
     const shelter = senders.find((s) => s.f === "ShelterVerifyScreen.tsx")!.src;
     expect(shelter).toMatch(/socialUrl: normalizeSocialLink\(/);
