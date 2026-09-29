@@ -78,6 +78,23 @@ describe("K21 · the check-in screen does not claim a future shift is today's", 
   });
 });
 
+describe("F-R3-7 · an early check-in is not 'Happening now' and offers no Check out", () => {
+  const src = read("screens/KawangGawaCheckinScreen.tsx");
+
+  it("offers Check out only once the shift has started", () => {
+    expect(guardBefore(src, 'label="Check out"')).toMatch(/state\?\.kind === "can_check_out"/);
+    expect(guardBefore(src, "Happening now — check out when you're done.")).toMatch(/state\?\.kind === "can_check_out"/);
+  });
+
+  it("says when the shift starts while checked in early", () => {
+    expect(guardBefore(src, "Checked in — the shift starts at")).toMatch(/state\?\.kind === "checked_in"/);
+  });
+
+  it("maps the server's shift_not_started refusal", () => {
+    expect(src).toMatch(/code === "shift_not_started"/);
+  });
+});
+
 describe("K15 · a closed or ended activity offers no Edit or Cancel", () => {
   const src = read("screens/ShelterVolunteerActivityScreen.tsx");
 

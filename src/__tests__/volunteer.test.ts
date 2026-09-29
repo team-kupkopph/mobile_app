@@ -215,6 +215,13 @@ test("checkinState follows the window: 30 min before start to end, then out unti
   expect(checkinState(item2(), T0 + 3 * 3600e3)).toEqual({ kind: "missed" });
 });
 
+test("F-R3-7 · checked in before the start is its own state — check-out waits for starts_at", () => {
+  const early = item2({ check_in_at: "x" });
+  expect(checkinState(early, T0 - 20 * 60e3)).toEqual({ kind: "checked_in", startsAt: early.shift.starts_at });
+  expect(checkinState(early, T0 - 1)).toEqual({ kind: "checked_in", startsAt: early.shift.starts_at });
+  expect(checkinState(early, T0)).toEqual({ kind: "can_check_out" });   // the server's boundary is `now < starts_at`
+});
+
 test("status chips use the shared vocabulary, and a past unmarked shift waits on the shelter", () => {
   expect(signupStatusCard({ status: "requested", needs_marking: false })).toEqual({ label: "Requested", tone: "warning" });
   expect(signupStatusCard({ status: "approved", needs_marking: false })).toEqual({ label: "Confirmed", tone: "success" });

@@ -4,15 +4,16 @@
 // timestamp server-side, so after either action we re-fetch instead of guessing the new state.
 //
 // P3 Task 7 (K7, K21, G5, G6) rebuilds this around `checkinState` (../volunteer): the body is
-// driven entirely by the not_yet/can_check_in/can_check_out/done/missed window rather than the
-// two hand-rolled booleans this screen used before. It also surfaces the assigned animal
-// (G6, once the shelter names one) and an "Add to calendar" share action (G5) that writes an
-// .ics to the cache dir and hands it to the OS share sheet — same File/Paths API ExportDataScreen
-// already uses, kept consistent rather than reintroducing the older FileSystem.* free functions.
+// driven entirely by the not_yet/can_check_in/checked_in/can_check_out/done/missed window
+// rather than the two hand-rolled booleans this screen used before. It also surfaces the
+// assigned animal (G6, once the shelter names one) and an "Add to calendar" share action (G5)
+// that writes an .ics to the cache dir and hands it to the OS share sheet — same File/Paths
+// API ExportDataScreen already uses, kept consistent rather than reintroducing the older
+// FileSystem.* free functions.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Sharing from "expo-sharing";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
@@ -92,8 +93,13 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
         res.status === 409 && code === "too_early" ? "Check-in opens 30 minutes before the shift."
         : res.status === 409 && code === "too_late" ? "This shift has ended."
         : res.status === 409 && code === "not_checked_in" ? "Check in first."
+        // F-R3-7 · this screen's clock ran ahead of the server's; the reload below moves it
+        // back to `checked_in`, and the time says when to come back.
+        : res.status === 409 && code === "shift_not_started"
+          ? `Check-out opens when the shift starts${res.data?.error?.details?.starts_at ? ` at ${timeLabel(res.data.error.details.starts_at)}` : ""}.`
         : res.data?.error?.message ?? "Couldn't update your attendance. Try again."
       );
+      if (res.status === 409 && code === "shift_not_started") await load();
       setSubmitting(false);
       return;
     }
@@ -116,6 +122,21 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
   }
 
   const state = item ? checkinState(item) : null;
+
+  // The window moves with the clock, not with a fetch: re-render when the next boundary
+  // passes, so a volunteer waiting on this screen sees Check in (or, F-R3-7, Check out)
+  // appear without leaving it. Only near boundaries are scheduled — setTimeout overflows
+  // past ~24.8 days, and a far-off shift is re-derived on the next focus anyway.
+  const [, setTick] = useState(0);
+  const boundary = state?.kind === "not_yet" ? state.opensAt
+    : state?.kind === "checked_in" ? state.startsAt : null;
+  useEffect(() => {
+    if (!boundary) return;
+    const delay = new Date(boundary).getTime() - Date.now();
+    if (delay > 12 * 3600e3) return;
+    const t = setTimeout(() => setTick((n) => n + 1), Math.max(0, delay) + 500);
+    return () => clearTimeout(t);
+  }, [boundary]);
 
   return (
     <View style={styles.screen}>
@@ -174,6 +195,16 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
               <View style={[styles.bannerDot, { backgroundColor: colors.warningStrong }]} />
               <Text style={[styles.bannerText, { color: colors.warningStrong }]}>
                 Check-in opens at {timeLabel(state.opensAt)}.
+              </Text>
+            </View>
+          )}
+          {/* F-R3-7 · checked in during the 30-minute early window — the shift hasn't
+              started, so this is not "Happening now" and there is no Check out yet. */}
+          {state?.kind === "checked_in" && (
+            <View style={[styles.banner, { backgroundColor: colors.soft }]}>
+              <View style={[styles.bannerDot, { backgroundColor: colors.teal }]} />
+              <Text style={[styles.bannerText, { color: colors.teal }]}>
+                Checked in — the shift starts at {timeLabel(state.startsAt)}.
               </Text>
             </View>
           )}
