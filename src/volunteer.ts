@@ -69,6 +69,11 @@ export const historyHours = (i: { hours: number | null }): string => i.hours == 
 export const lateCancelCopy = (wasLate: boolean): string =>
   wasLate ? "You're cancelling less than 12 hours before the shift. This will be recorded."
           : "You're cancelling with more than 12 hours' notice — this is free.";
+/** F-R2-2 · the history row's note for a late cancel, or null. Reads the server's `was_late`
+ *  (never a device clock), and only on a cancelled row — the chip alone said "Cancelled" for a
+ *  free cancel and a recorded one alike, so the volunteer never saw what the shelter sees. */
+export const historyLateNote = (i: Pick<MySignupItem, "status" | "was_late">): string | null =>
+  i.status === "cancelled" && i.was_late ? "Late cancel · under 12 hours' notice" : null;
 
 // ── Kawang-Gawa hub display logic (US-V8 redesign, 2026-09-09) ──────────────────────────
 // The hub was a filter row over a flat list: type, org, time, "5 of 5 slots left". It said
