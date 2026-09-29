@@ -43,3 +43,34 @@ test("blastRadiusCopy names the count", () => {
   expect(blastRadiusCopy(1)).toMatch(/1 volunteer\b/);
   expect(blastRadiusCopy(0)).toMatch(/No volunteers/i);
 });
+
+// F-R2-9 · the picker's Close (and Android back) MUST NOT approve — a 2026-09 device walk
+// found Close was wired to the same `onPickListing(null)` as Skip, silently approving the
+// volunteer with no animal instead of dismissing the sheet. Skip stays deliberate. This is
+// a source-scan (the suite is helper-only, no RTL) that pins the wiring the bug touched.
+import { readFileSync } from "fs";
+import { join } from "path";
+
+test("F-R2-9 · picker Close dismisses, does not approve (Skip stays the approve-without-animal path)", () => {
+  const src = readFileSync(join(__dirname, "..", "components", "shelterVolunteer", "PendingSection.tsx"), "utf8");
+  const hook = readFileSync(join(__dirname, "..", "components", "shelterVolunteer", "useRequestActions.ts"), "utf8");
+
+  // The hook exposes a dedicated dismissPicker that only clears pickerSignupId — no approve.
+  expect(hook).toMatch(/function dismissPicker\(\)\s*{\s*setPickerSignupId\(null\);\s*}/);
+  expect(hook).toMatch(/return\s*{[^}]*dismissPicker/);
+
+  // The Modal's onRequestClose (Android back / backdrop dismiss on OS) uses dismissPicker.
+  expect(src).toMatch(/onRequestClose=\{actions\.dismissPicker\}/);
+  // The Close button uses dismissPicker (not onPickListing).
+  expect(src).toMatch(/onPress=\{actions\.dismissPicker\}[\s\S]{0,200}styles\.pickerClose/);
+
+  // Skip is unchanged — a deliberate "approve without assigning an animal" still routes
+  // through onPickListing(null), which fires doApprove(signupId, null).
+  expect(src).toMatch(/onPress=\{\(\) => actions\.onPickListing\(null\)\}[\s\S]{0,200}Skip — approve without assigning an animal/);
+
+  // The regression pattern the bug had: Close previously called onPickListing(null). No
+  // arrow-wrapped onPickListing(null) call may remain anywhere near the Close label.
+  const closeIdx = src.indexOf("styles.pickerClose");
+  const closeContext = src.slice(Math.max(0, closeIdx - 300), closeIdx + 60);
+  expect(closeContext).not.toMatch(/onPickListing\(null\)/);
+});
