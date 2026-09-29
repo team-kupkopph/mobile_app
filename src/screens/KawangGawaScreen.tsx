@@ -168,7 +168,15 @@ export function KawangGawaScreen({ navigation, route }: Props) {
                   activeOpacity={0.7}
                   accessibilityRole="button"
                   accessibilityLabel={`Next shift: ${shiftTypeLabel(next.shift.type)} at ${next.shift.org_name}`}
-                  onPress={() => setTabIndex(1)}
+                  accessibilityHint={tabIndex === 1 ? "Opens check-in for this shift" : "Shows My shifts"}
+                  // F-R3-5 · on Browse the strip switches to My shifts; on My shifts that was a
+                  // no-op behind a chevron, so there it opens the shift itself — the same
+                  // check-in screen the Upcoming card opens.
+                  onPress={() =>
+                    tabIndex === 1
+                      ? navigation.navigate("kawanggawaCheckin", { signupId: next.signup_id })
+                      : setTabIndex(1)
+                  }
                 >
                   <View style={styles.impactNextCopy}>
                     <Text style={styles.impactNextLabel}>
@@ -255,7 +263,9 @@ export function KawangGawaScreen({ navigation, route }: Props) {
               emptyTitle={
                 city && !allCities ? `No open shifts in ${city} right now.` : "No open shifts right now — check back soon."
               }
-              onRetry={load}
+              // F-R3-2 · retry both fetches: after a recovered outage `mine` is still null, and
+              // retrying the feed alone left the impact/Next strip missing until a refocus.
+              onRetry={() => { load(); if (!isGuest) loadMine(); }}
             />
             {/* `LoadStateView`'s own retry button never renders for `empty` (there is nothing
                 to retry) — this is a second action, not that one: it widens the scope rather

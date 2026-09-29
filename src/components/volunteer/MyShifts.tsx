@@ -9,7 +9,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { addToCalendar } from "../../calendarShare";
 import { VolunteerIcon } from "../AppIcons";
 import {
-  historyHours, locationLine, MySignupItem, MySignups, shiftHeadline, shiftTypeLabel,
+  historyHours, historyLateNote, locationLine, MySignupItem, MySignups, shiftHeadline, shiftTypeLabel,
   signupStatusCard
 } from "../../volunteer";
 import { TAP_SLOP } from "../../touch";
@@ -111,6 +111,7 @@ function ShiftCardBody({ item }: { item: MySignupItem }) {
 
 function HistoryRow({ item }: { item: MySignupItem }) {
   const hours = item.status === "completed" ? historyHours(item) : null;
+  const lateNote = historyLateNote(item);
   return (
     <Card style={styles.card}>
       <View style={styles.cardRow}>
@@ -123,6 +124,7 @@ function HistoryRow({ item }: { item: MySignupItem }) {
             {item.shift.org_name} · {shiftDateLabel(item.shift.starts_at)}
             {hours ? ` · ${hours}` : ""}
           </Text>
+          {lateNote && <Text style={styles.lateNote}>{lateNote}</Text>}
         </View>
         <StatusChip item={item} />
       </View>
@@ -140,14 +142,10 @@ export function MyShifts({
   const { requested, upcoming, history, reliability } = data;
   const isEmpty = requested.length === 0 && upcoming.length === 0 && history.length === 0;
 
-  if (isEmpty) {
-    return (
-      <View style={styles.emptyWrap}>
-        <Text style={styles.empty}>No shifts yet. Browse and request one — it'll show up here.</Text>
-      </View>
-    );
-  }
-
+  // F-R2-3 · the stats card renders for a brand-new account too — zeroes and all — so My shifts
+  // has the same shape on day one as on day ninety, with the empty copy beneath it rather than
+  // in place of it. (The hub's impact strip is the one place zeroes are hidden: see
+  // volunteerTotalsLabel.)
   return (
     <View>
       <Card style={styles.statsCard}>
@@ -222,12 +220,18 @@ export function MyShifts({
           {history.map((item) => <HistoryRow key={item.signup_id} item={item} />)}
         </>
       )}
+
+      {isEmpty && (
+        <View style={styles.emptyWrap}>
+          <Text style={styles.empty}>No shifts yet. Browse and request one — it'll show up here.</Text>
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  emptyWrap: { paddingTop: 24, paddingHorizontal: 8 },
+  emptyWrap: { paddingTop: 6, paddingHorizontal: 8 },
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   statsCard: { flexDirection: "row", alignItems: "center", paddingVertical: 20, marginBottom: 18 },
   statCol: { flex: 1, alignItems: "center" },
@@ -251,5 +255,6 @@ const styles = StyleSheet.create({
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
-  cardLocation: { marginTop: 4, color: colors.muted, ...typography.caption, fontWeight: "600" }
+  cardLocation: { marginTop: 4, color: colors.muted, ...typography.caption, fontWeight: "600" },
+  lateNote: { marginTop: 4, color: colors.danger, ...typography.caption, fontWeight: "700" }
 });
