@@ -20,7 +20,8 @@ import { loadState } from "../net";
 import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
-import { BellIcon, CheckIcon, ClockIcon } from "../components/AppIcons";
+import { CheckIcon, ClockIcon } from "../components/AppIcons";
+import { NotificationBell } from "../components/NotificationBell";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { pickSpotlight } from "../sagip";
@@ -252,17 +253,7 @@ export function HomeScreen({ navigation, route }: Props) {
           city={city ?? "Set your city"}
           onChangeCity={() => navigation.navigate("locationPicker")}
           right={
-            <TouchableOpacity
-              style={styles.bellButton}
-              activeOpacity={0.75}
-              onPress={() => navigation.navigate("notifications")}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel="Notifications"
-            >
-              <BellIcon color="#12213A" />
-              {hasUnread ? <View style={styles.bellDot} /> : null}
-            </TouchableOpacity>
+            <NotificationBell hasUnread={hasUnread} onPress={() => navigation.navigate("notifications")} />
           }
         />
 
@@ -500,27 +491,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: 20,
     paddingBottom: 156
-  },
-  bellButton: {
-    width: 40,
-    height: 40,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF"
-  },
-  bellDot: {
-    position: "absolute",
-    top: 6,
-    right: 7,
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: "#B23B3B",
-    borderWidth: 1.5,
-    borderColor: "#FFFFFF"
   },
   /** Layout only — the fill, radius, accent bar and shadow are Card's. Matches the spotlight
    *  card's own split between PressScale (layout) and Card (surface). */

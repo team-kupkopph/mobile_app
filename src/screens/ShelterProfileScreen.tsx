@@ -169,7 +169,10 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
         <Text style={styles.groupTitle}>Organization</Text>
         <Card style={styles.group}>
-          <Row label="Organization details" />
+          {/* F-R3-4 · "Organization details" was a row here with a chevron and no onPress.
+              There is no screen to edit an existing org (ShelterSetup is POST-only and 409s
+              once the profile exists), so the row is gone rather than left as a dead tap.
+              Bring it back WITH its screen. */}
           {/* US-Q1 · was a dead row (no onPress at all, same shape as the "+ List an
               animal" dead button US-A2 found) — upload works pre-approval (decision 2's
               draft-first pattern), donations just stay off until the org is approved. */}
@@ -218,14 +221,24 @@ export function ShelterProfileScreen({ navigation }: Props) {
               <Text style={styles.accentTealChev}>›</Text>
             </View>
           ) : (
-            <Row label="Verification" value={badge} last />
+            // F-R3-4 · same dead-chevron shape as the rows the finding named; the approved
+            // org's documents live on the same tracker the gated accent above opens.
+            <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("verifyDocuments")}>
+              <Row label="Verification" value={badge} last />
+            </TouchableOpacity>
           )}
         </Card>
 
         <Text style={styles.groupTitle}>Account</Text>
         <Card style={styles.group}>
-          <Row label="Account settings" />
-          <Row label="Help & support" />
+          {/* F-R3-4 · was a chevron with no onPress — and with it, the shelter's only route to
+              the §12.6 / RA 10173 data rights (export, delete) and privacy controls.
+              "Help & support" sat under it the same way; with no support screen to open (the
+              `support` route is a signed-out placeholder), it was removed, matching the owner
+              side, which has no help row either. __tests__/shelterProfileRows guards both. */}
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("settings", { shelter: true })}>
+            <Row label="Account settings" />
+          </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} style={styles.row} onPress={signOut}>
             <Text style={styles.rowDanger}>Log out</Text>
           </TouchableOpacity>

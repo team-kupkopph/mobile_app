@@ -140,7 +140,10 @@ export type RootStackParamList = {
   needForm: { need?: ShelterNeedShape } | undefined;
   needPledges: { need: ShelterNeedShape };
   // US-N5 · settings + the two RA 10173 data rights (§12.6/§12.7).
-  settings: undefined;
+  // F-R3-4 · `shelter` hides the owner-only ACCOUNT rows (Edit profile → the OWNER
+  // ProfileScreen, Phone number → the owner verifyPhone, which would desync the org's
+  // SMS-verified official_phone). Optional, so the owner's navigate("settings") is unchanged.
+  settings: { shelter?: boolean } | undefined;
   settingsPrivacy: undefined;
   deleteAccount: undefined;
   exportData: undefined;

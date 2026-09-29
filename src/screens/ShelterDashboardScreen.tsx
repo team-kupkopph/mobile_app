@@ -14,6 +14,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { AlertIcon, CheckIcon, ClockIcon, VolunteerIcon } from "../components/AppIcons";
+import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
@@ -48,6 +49,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [me, setMe] = useState<Me | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [hasUnread, setHasUnread] = useState(false);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
@@ -64,6 +66,11 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         if (r.ok) setDash(r.data);
       });
       api.get("/me").then((r) => { if (r.ok) setMe(r.data); });
+      // F-R3-4 · the bell's dot, same query and same focus refetch as HomeScreen's — so it
+      // clears on return from NotificationsScreen (which marks everything read on open).
+      api.get("/me/notifications").then((r) => {
+        if (r.ok) setHasUnread((r.data?.notifications ?? []).some((n: { read: boolean }) => !n.read));
+      });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, []);
   useFocusEffect(load);
@@ -137,6 +144,10 @@ export function ShelterDashboardScreen({ navigation }: Props) {
               <Text style={styles.pillText}>Unverified</Text>
             </View>
           )}
+          {/* F-R3-4 · the shelter's ONLY way into its notification feed. Before this, every
+              signup_requested / attendance_due / signup_cancelled_by_volunteer was push-only:
+              dismiss the push (or deny the permission) and it was gone. Same bell as HomeScreen's. */}
+          <NotificationBell hasUnread={hasUnread} onPress={() => navigation.navigate("notifications")} />
         </View>
         {/* Per-tier label (the -rescue variants): a community rescue is not a "Shelter". */}
         <Text style={styles.subLabel}>
@@ -242,7 +253,8 @@ function Stat({ n, label }: { n: number; label: string }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 120 },
-  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+
   orgName: { flex: 1, color: colors.ink, ...typography.hero },
   unverifiedPill: {
     flexDirection: "row",
