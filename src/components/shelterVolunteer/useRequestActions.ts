@@ -76,6 +76,13 @@ export function useRequestActions(
     if (signupId) doApprove(signupId, listingId);
   }
 
+  // F-R2-9 · dismissing the picker (X, Android back, backdrop) is NOT the same as Skip.
+  // Skip is a deliberate "approve without an animal" and still routes through onPickListing;
+  // dismissPicker just closes the sheet and leaves the volunteer in `requested`.
+  function dismissPicker() {
+    setPickerSignupId(null);
+  }
+
   async function doApprove(signupId: string, assignedListingId: string | null, acknowledged = false) {
     setBusySignupId(signupId);
     setBanner(null);
@@ -134,7 +141,7 @@ export function useRequestActions(
 
   return {
     busySignupId, banner, pickerSignupId, listings, listingsLoaded, listingsError,
-    reapprove, onPressApprove, doApprove, doDecline, onPickListing, dismissReapprove,
-    shiftId
+    reapprove, onPressApprove, doApprove, doDecline, onPickListing, dismissPicker,
+    dismissReapprove, shiftId
   };
 }

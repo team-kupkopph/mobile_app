@@ -149,12 +149,12 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }:
       )}
 
       {/* D-S5-3 — the walking-shift animal picker. Non-walking shifts never open this. */}
-      <Modal visible={actions.pickerSignupId !== null} transparent animationType="slide" onRequestClose={() => actions.onPickListing(null)}>
+      <Modal visible={actions.pickerSignupId !== null} transparent animationType="slide" onRequestClose={actions.dismissPicker}>
         <View style={styles.pickerOverlay}>
           <View style={styles.pickerSheet}>
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>Assign an animal</Text>
-              <TouchableOpacity onPress={() => actions.onPickListing(null)} hitSlop={TAP_SLOP}>
+              <TouchableOpacity onPress={actions.dismissPicker} hitSlop={TAP_SLOP}>
                 <Text style={styles.pickerClose}>Close</Text>
               </TouchableOpacity>
             </View>

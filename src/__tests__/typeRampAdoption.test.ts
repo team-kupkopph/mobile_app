@@ -447,9 +447,11 @@ for (const file of sources(SRC)) {
  *     among them unified at the canvas's 19 / 700.
  */
 const OFF_RAMP = 0;
-/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. (32: the guest Home's
- *  "See nearby strays ›" row went with the V1 guest Home; Home's rows are shared now.) */
-const GLYPHS = 32;
+/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. (33: SignupWall.tsx's
+ *  `heartIcon` — the wall's teal ♥, added by G11 to route the guest-card CTA — is a glyph
+ *  drawn as text and lands here. 32 covered the pre-G11 state; 33 covers the state main
+ *  has actually been in since #115 merged, which the ratchet had missed until now.) */
+const GLYPHS = 33;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
