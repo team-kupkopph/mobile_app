@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+import { join } from "path";
 import { activitySection, attendanceSuggestion, blastRadiusCopy, reapprovalCopy, reliabilityChip } from "../shelterVolunteer";
 
 const rel = (o: Partial<any>) => ({ shifts_completed: 0, no_shows: 0, consecutive_no_shows: 0,
@@ -48,9 +50,6 @@ test("blastRadiusCopy names the count", () => {
 // found Close was wired to the same `onPickListing(null)` as Skip, silently approving the
 // volunteer with no animal instead of dismissing the sheet. Skip stays deliberate. This is
 // a source-scan (the suite is helper-only, no RTL) that pins the wiring the bug touched.
-import { readFileSync } from "fs";
-import { join } from "path";
-
 test("F-R2-9 · picker Close dismisses, does not approve (Skip stays the approve-without-animal path)", () => {
   const src = readFileSync(join(__dirname, "..", "components", "shelterVolunteer", "PendingSection.tsx"), "utf8");
   const hook = readFileSync(join(__dirname, "..", "components", "shelterVolunteer", "useRequestActions.ts"), "utf8");
@@ -73,4 +72,51 @@ test("F-R2-9 · picker Close dismisses, does not approve (Skip stays the approve
   const closeIdx = src.indexOf("styles.pickerClose");
   const closeContext = src.slice(Math.max(0, closeIdx - 300), closeIdx + 60);
   expect(closeContext).not.toMatch(/onPickListing\(null\)/);
+});
+
+// F-R2-13 · the four per-row action buttons must announce the volunteer they act on. Without
+// this, VoiceOver on a card list reads every button as just "Approve, button" — you cannot
+// tell which row you are approving. The visible label stays the bare verb; only the a11y
+// label carries the name.
+describe("per-row action buttons name the volunteer (F-R2-13)", () => {
+  const SECTIONS = join(__dirname, "..", "components", "shelterVolunteer");
+  const pending = readFileSync(join(SECTIONS, "PendingSection.tsx"), "utf8");
+  const attendance = readFileSync(join(SECTIONS, "AttendanceSection.tsx"), "utf8");
+
+  /**
+   * Return the `<Button …/>` block whose props include `label="<verb>"`. `[^>]*` cannot span
+   * these props — inline arrow handlers (`onPress={() => …}`) put a literal `>` inside — so
+   * this walks brace depth to find the tag's real self-closing `/>`.
+   */
+  function buttonWithLabel(src: string, verb: string): string | null {
+    const openRe = /<Button\b/g;
+    let m: RegExpExecArray | null;
+    while ((m = openRe.exec(src))) {
+      let depth = 0;
+      for (let i = m.index + m[0].length; i < src.length - 1; i++) {
+        const c = src[i];
+        if (c === "{") depth++;
+        else if (c === "}") depth--;
+        else if (c === "/" && src[i + 1] === ">" && depth === 0) {
+          const block = src.slice(m.index, i + 2);
+          if (block.includes(`label="${verb}"`)) return block;
+          break;
+        }
+      }
+    }
+    return null;
+  }
+
+  it.each([
+    ["PendingSection", pending, "Decline"],
+    ["PendingSection", pending, "Approve"],
+    ["AttendanceSection", attendance, "No-show"],
+    ["AttendanceSection", attendance, "Attended"],
+  ])("%s's %s button carries an accessibilityLabel with the volunteer name", (_file, src, verb) => {
+    const block = buttonWithLabel(src, verb);
+    expect(block).not.toBeNull();
+    // The label must be a non-empty template string that interpolates the row's display_name,
+    // so the announcement disambiguates the row.
+    expect(block).toMatch(/accessibilityLabel=\{`[^`]*\$\{row\.volunteer\.display_name\}[^`]*`\}/);
+  });
 });

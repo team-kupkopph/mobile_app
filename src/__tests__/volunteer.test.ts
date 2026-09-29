@@ -124,10 +124,10 @@ test("shiftDurationLabel says what the shift actually asks for", () => {
 
 test("shiftSlotsChip never repeats the 'N of N' shape that reads as 'N of N taken'", () => {
   // An untouched shift describes its size; a partly-filled one describes what is left.
-  expect(shiftSlotsChip(5, 5)).toEqual({ label: "5 slots", tone: "teal" });
-  expect(shiftSlotsChip(3, 4)).toEqual({ label: "3 left", tone: "teal" });
-  expect(shiftSlotsChip(1, 4)).toEqual({ label: "1 slot left", tone: "amber" });
-  expect(shiftSlotsChip(0, 4)).toEqual({ label: "Full", tone: "grey" });
+  expect(shiftSlotsChip(5, 5)).toEqual({ label: "5 slots", tone: "info" });
+  expect(shiftSlotsChip(3, 4)).toEqual({ label: "3 left", tone: "info" });
+  expect(shiftSlotsChip(1, 4)).toEqual({ label: "1 slot left", tone: "warning" });
+  expect(shiftSlotsChip(0, 4)).toEqual({ label: "Full", tone: "neutral" });
   for (const [left, cap] of [[5, 5], [3, 4], [1, 4], [0, 4]] as const) {
     expect(shiftSlotsChip(left, cap).label).not.toMatch(/\d+ of \d+/);
   }

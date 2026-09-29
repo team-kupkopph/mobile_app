@@ -21,14 +21,10 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
+import { ScreenBackdrop } from "../components/ScreenBackground";
 import { checkinState, locationLine, MySignupItem, MySignups, shiftHeadline } from "../volunteer";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
-
-
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
+import { colors, radii, spacing, squircle, typography } from "../theme";
+import { Card, Button, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -123,6 +119,7 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title="Your shift" onBack={() => navigation.goBack()} />
 
       {!item ? (
@@ -140,7 +137,7 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.shiftCard}>
+          <Card style={styles.shiftCard}>
             <View style={styles.cardIcon}>
               <VolunteerIcon color={colors.teal} size={22} />
             </View>
@@ -154,11 +151,11 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
                 <Text style={styles.cardLocation}>{locationLine(item.shift.location)}</Text>
               )}
             </View>
-          </View>
+          </Card>
 
           {/* G6 · once the shelter assigns an animal, who the volunteer is walking today. */}
           {item.assigned_animal && (
-            <View style={styles.animalRow}>
+            <Card style={styles.animalRow}>
               {item.assigned_animal.photo_url ? (
                 <Image source={{ uri: item.assigned_animal.photo_url }} style={styles.animalPhoto} />
               ) : (
@@ -167,7 +164,7 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
                 </View>
               )}
               <Text style={styles.animalText}>You'll walk {item.assigned_animal.name}</Text>
-            </View>
+            </Card>
           )}
 
           {/* K7, K21 · the body is driven entirely by the check-in window, not by which
@@ -231,18 +228,18 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page },
+  screen: { flex: 1, backgroundColor: "transparent" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   content: { paddingHorizontal: spacing.lg, paddingTop: 22, paddingBottom: 60 },
-  shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, ...card },
-  cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft,
+  shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18 },
+  // Squircle (0.32 × size), matching the hub's browse row tile.
+  cardIcon: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
   cardLocation: { marginTop: 4, color: colors.muted, ...typography.caption, fontWeight: "600" },
-  animalRow: { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12, padding: 14,
-               borderRadius: radii.field, ...card },
+  animalRow: { marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
   animalPhoto: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft },
   animalPhotoPlaceholder: { alignItems: "center", justifyContent: "center" },
   animalText: { flex: 1, color: colors.ink, ...typography.strong, fontWeight: "700" },

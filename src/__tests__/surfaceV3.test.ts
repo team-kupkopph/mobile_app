@@ -41,6 +41,11 @@
 // ShelterVolunteerActivityScreen's own Pending/Confirmed/Attendance timeline. The baseline
 // drops from 44 to 42: two fewer files on the backdrop, not two fewer in-scope features (the
 // timeline itself was already counted, and still is).
+//
+// P5 Task 3 (K24/K26) converts the six owner-side KawangGawa* screens plus WaiverScreen onto
+// <ScreenBackdrop> — these are now inside V3_SCOPE/v3Scope.ts too (commit a1b23d0 moved them
+// out of V3_EXCLUDED), but this guard scans every screen file regardless of scope, so the
+// baseline grows from 42 to 48 here either way.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -50,7 +55,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the forty-two V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 12 Sagip rescuer + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root)", () => {
+  it("found the forty-eight V3 screens on the backdrop (7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 12 Sagip rescuer + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root + 6 P5 Task 3 KawangGawa/Waiver)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "DonatePledgeScreen",
@@ -59,6 +64,11 @@ describe("surface, re-derived", () => {
       "HomeGuestScreen",
       "HomeScreen",
       "InquiryScreen",
+      "KawangGawaCancelScreen",
+      "KawangGawaCheckinScreen",
+      "KawangGawaDetailScreen",
+      "KawangGawaRequestedScreen",
+      "KawangGawaScreen",
       "ListingDetailScreen",
       "ListingFormScreen",
       "MemberSubmittedScreen",
@@ -93,7 +103,8 @@ describe("surface, re-derived", () => {
       "ShelterVolunteerDetailScreen",
       "ShelterVolunteerEditScreen",
       "ShelterVolunteerScreen",
-      "SigninScreen"
+      "SigninScreen",
+      "WaiverScreen"
     ]);
   });
 

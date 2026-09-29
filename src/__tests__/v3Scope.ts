@@ -22,6 +22,13 @@
 // screen FILES (ShelterVolunteerRequestsScreen, ShelterVolunteerAttendanceScreen) without
 // removing an in-scope feature — their cards folded into ShelterVolunteerActivityScreen's own
 // timeline — so the true count drops to 35, not because two features left scope.
+//
+// P5 Task 3 (K24/K26, commit a1b23d0) moves six of the seven KawangGawa owner-side volunteer
+// screens named above — KawangGawaScreen, KawangGawaCancelScreen, KawangGawaCheckinScreen,
+// KawangGawaDetailScreen, KawangGawaRequestedScreen, and WaiverScreen — OUT of V3_EXCLUDED
+// and INTO V3_SCOPE (see KAWANG_GAWA_V3 below), now that they are converted onto
+// <ScreenBackdrop> + <Card>. V3_SCOPE grows from 35 to 41; V3_EXCLUDED shrinks by the same
+// six.
 
 /** Shell roots (5) — Task B1 added ShelterDonateScreen, the Donate tab's new root, born
  * converted (spec §5); Task B2 added ShelterAnimalsScreen, the Animals tab's new root, the
@@ -81,6 +88,20 @@ const SAGIP_RESCUER = [
   "PlaceAcceptedScreen"
 ] as const;
 
+/** P5 Task 3 (K24/K26) · the six owner-side KawangGawa* screens plus WaiverScreen (the
+ * waiver linked from the detail screen's consent row), all moved onto <ScreenBackdrop> +
+ * <Card> in this task. Was excluded (see v3Scope.test.ts history / KAWANG_GAWA, removed
+ * here) — now in scope, so backdropAdoption/cardAdoption enforce them like every other
+ * V3_SCOPE screen. */
+const KAWANG_GAWA_V3 = [
+  "KawangGawaScreen",
+  "KawangGawaCancelScreen",
+  "KawangGawaCheckinScreen",
+  "KawangGawaDetailScreen",
+  "KawangGawaRequestedScreen",
+  "WaiverScreen"
+] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -88,7 +109,8 @@ export const V3_SCOPE: readonly string[] = [
   ...SHELTER_NEEDS,
   ...SHELTER_VOLUNTEER,
   ...VERIFIED_MEMBER,
-  ...SAGIP_RESCUER
+  ...SAGIP_RESCUER,
+  ...KAWANG_GAWA_V3
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */
@@ -112,18 +134,7 @@ const OWNER_V3 = [
   "SigninScreen"
 ] as const;
 
-/** 5 KawangGawa owner-side volunteer screens. Was 7 — Task 5 (K30/G9) folded the standalone
- * KawangGawaScheduleScreen and KawangGawaHistoryScreen into the hub itself (one screen,
- * segmented Browse | My shifts), and both files were deleted. */
-const KAWANG_GAWA = [
-  "KawangGawaScreen",
-  "KawangGawaCancelScreen",
-  "KawangGawaCheckinScreen",
-  "KawangGawaDetailScreen",
-  "KawangGawaRequestedScreen"
-] as const;
-
-/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 36 names */
+/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 35 names */
 const OTHER_OWNER_SCREENS = [
   "AccountTypeScreen",
   "AdjustPinScreen",
@@ -159,13 +170,11 @@ const OTHER_OWNER_SCREENS = [
   "StoryDetailScreen",
   "VerifyDocumentsScreen",
   "VerifyPhoneScreen",
-  "VerifyResubmitScreen",
-  "WaiverScreen"
+  "VerifyResubmitScreen"
 ] as const;
 
 export const V3_EXCLUDED: readonly string[] = [
   ...SHELTER_ONBOARDING,
   ...OWNER_V3,
-  ...KAWANG_GAWA,
   ...OTHER_OWNER_SCREENS
 ];

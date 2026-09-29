@@ -6,14 +6,15 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Avatar, Button, ScreenHeader, chipTones } from "../components/ui";
+import { Avatar, Button, Card, Chip, ScreenHeader, chipTones } from "../components/ui";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
-import { SignupWall } from "../components/SignupWall";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
@@ -21,17 +22,7 @@ import {
   ShiftDetail, detailSignupState, locationLine, shiftDurationLabel, shiftHeadline,
   shiftSlotsChip, shiftTimeRange
 } from "../volunteer";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-
-
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
-const TONE = {
-  amber: { bg: "#FAEEDA", fg: "#633806" }, teal: { bg: "#E2EEF0", fg: "#14504F" },
-  green: { bg: "#EAF3DE", fg: "#27500A" }, grey: { bg: "#ECEAE3", fg: "#5F5E5A" }
-} as const;
+import { colors, radii, spacing, typography } from "../theme";
 
 /** The full date. The hub's section heads say "Today"/"Friday" because the list groups by
  *  day; a detail screen is the one place that should state which Friday. */
@@ -66,7 +57,13 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
   // the SignupWall rather than the consent rows (which are hidden entirely, not disabled:
   // there is no account yet for either consent to apply to).
   const isGuest = tokens === null;
-  const [wall, setWall] = useState(false);
+  // Which gated tap raised the wall: Request → "volunteer"; "Report this" → the generic
+  // "account" copy (a guest's report would otherwise 401 at /moderation/flags and dead-end).
+  // The action outlives `open` so the copy doesn't flip while the sheet slides out.
+  const [wall, setWall] = useState<{ open: boolean; action: SignupWallAction }>(
+    { open: false, action: "volunteer" });
+  const openWall = (action: SignupWallAction) => setWall({ open: true, action });
+  const closeWall = () => setWall((w) => ({ ...w, open: false }));
   const { shiftId } = route.params;
 
   const [shift, setShift] = useState<ShiftDetail | null>(null);
@@ -153,26 +150,41 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.kawanggawaDetail">
-      <ScreenHeader title="Volunteer" onBack={() => navigation.goBack()} />
+      <ScreenBackdrop />
+      <ScreenHeader
+        title="Volunteer"
+        onBack={() => navigation.goBack()}
+        right={shift ? (
+          <TouchableOpacity
+            testID="lnk.kawanggawaDetail.report"
+            hitSlop={TAP_SLOP}
+            onPress={() => isGuest ? openWall("account") : navigation.navigate("reportContent",
+              { targetType: "shift", targetId: shift.shift_id })}
+          >
+            <Text style={styles.flagLinkText}>Report this</Text>
+          </TouchableOpacity>
+        ) : null}
+      />
 
       {!shift ? (
         <LoadStateView state={loadState(res)} subject="shift" onRetry={load}
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.heroRow}>
-            <Avatar size={52}>
-              <VolunteerIcon color={colors.teal} size={26} />
-            </Avatar>
-            <Text style={styles.heroTitle}>{shiftHeadline(shift)}</Text>
-          </View>
-
-          <Text style={styles.orgName}>{shift.org_name}</Text>
+          <Card tone="hero" style={styles.heroCard}>
+            <View style={styles.heroRow}>
+              <Avatar size={52}>
+                <VolunteerIcon color={colors.teal} size={26} />
+              </Avatar>
+              <Text style={styles.heroTitle}>{shiftHeadline(shift)}</Text>
+            </View>
+            <Text style={styles.orgName}>{shift.org_name}</Text>
+          </Card>
 
           {/* Matched to the hub card 2026-09-09. This said "5 of 5 slots left" while the card
               the user had just tapped said "5 slots" — one shift, two vocabularies, one tap
               apart. Same three tiers as the card now: day, time · duration, toned chip. */}
-          <View style={styles.infoCard}>
+          <Card style={styles.infoCard}>
             <Text style={styles.infoDate}>{shiftDateLabel(shift.starts_at)}</Text>
             <Text style={styles.infoWhen}>
               {shiftTimeRange(shift.starts_at, shift.ends_at)} · {shiftDurationLabel(shift.starts_at, shift.ends_at)}
@@ -180,13 +192,9 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
             <View style={styles.infoDivider} />
             {(() => {
               const chip = shiftSlotsChip(shift.slots_left, shift.capacity);
-              return (
-                <View style={[styles.infoChip, { backgroundColor: TONE[chip.tone].bg }]}>
-                  <Text style={[styles.infoChipText, { color: TONE[chip.tone].fg }]}>{chip.label}</Text>
-                </View>
-              );
+              return <Chip label={chip.label} tone={chip.tone} style={styles.infoChip} />;
             })()}
-          </View>
+          </Card>
 
           {shift.status !== "open" && (
             <Text style={styles.notOpenNote}>This shift is no longer open for requests.</Text>
@@ -263,7 +271,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
             <Button
               testID="btn.kawanggawaDetail.request"
               label="Request"
-              onPress={() => setWall(true)}
+              onPress={() => openWall("volunteer")}
               accessibilityLabel="Request this shift"
               style={styles.submitButton}
             />
@@ -291,6 +299,9 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                   setWaiverChecked((v) => !v);
                   if (waiverHighlight) setWaiverHighlight(false);
                 }}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: waiverChecked }}
+                accessibilityLabel="I agree to the volunteer waiver & guidelines."
               >
                 <View style={[styles.consentBox, waiverChecked && styles.consentBoxChecked, waiverHighlight && styles.consentBoxAlert]}>
                   {waiverChecked && <CheckIcon color="#FFFFFF" size={13} />}
@@ -302,7 +313,12 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                   {/* Inside the tinted block on purpose. Sitting between the two rows, this read
                       as if it belonged to the row BELOW whenever only one consent was missing. */}
                   {waiverHighlight && (
-                    <Text testID="err.kawanggawaDetail.waiver" style={styles.consentError}>
+                    <Text
+                      testID="err.kawanggawaDetail.waiver"
+                      style={styles.consentError}
+                      accessibilityRole="alert"
+                      accessibilityLiveRegion="polite"
+                    >
                       Agree to the waiver to request this shift.
                     </Text>
                   )}
@@ -330,6 +346,9 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                 activeOpacity={0.85}
                 style={styles.consentRow}
                 onPress={() => setContactChecked((v) => !v)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: contactChecked }}
+                accessibilityLabel={`Share my phone number and email with ${shift.org_name} for this shift.`}
               >
                 <View style={[styles.consentBox, contactChecked && styles.consentBoxChecked]}>
                   {contactChecked && <CheckIcon color="#FFFFFF" size={13} />}
@@ -361,12 +380,12 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
 
       {isGuest && shift && (
         <SignupWall
-          visible={wall}
-          action="volunteer"
-          subject={shiftHeadline(shift)}
-          onCreateAccount={() => { setIntent("volunteer"); setWall(false); navigation.navigate("accountType"); }}
-          onLogin={() => { setWall(false); navigation.navigate("signin"); }}
-          onDismiss={() => setWall(false)}
+          visible={wall.open}
+          action={wall.action}
+          subject={wall.action === "volunteer" ? shiftHeadline(shift) : undefined}
+          onCreateAccount={() => { setIntent(wall.action); closeWall(); navigation.navigate("accountType"); }}
+          onLogin={() => { closeWall(); navigation.navigate("signin"); }}
+          onDismiss={closeWall}
         />
       )}
     </View>
@@ -374,19 +393,19 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.page },
+  screen: { flex: 1, backgroundColor: "transparent" },
+  flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 22, paddingBottom: 60 },
+  heroCard: { marginTop: 4 },
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   // Squircle, matching the hub card's tile — V2 replaced round tiles with rounded squares.
   heroTitle: { flex: 1, color: colors.ink, ...typography.hero },
   orgName: { marginTop: 14, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  infoCard: { marginTop: 16, borderRadius: radii.tile, paddingHorizontal: 18, paddingVertical: 16, ...card },
+  infoCard: { marginTop: 14, paddingHorizontal: 18, paddingVertical: 16 },
   infoDate: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoWhen: { marginTop: 4, color: colors.teal, ...typography.strong, fontWeight: "700" },
   infoDivider: { marginTop: 14, height: 1, backgroundColor: colors.border },
-  infoChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 12, height: 28,
-              borderRadius: 14, justifyContent: "center" },
-  infoChipText: { ...typography.meta, fontWeight: "800" },
+  infoChip: { marginTop: 14 },
   notOpenNote: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "700" },
   sectionLabel: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   sectionBody: { color: colors.ink, ...typography.meta, fontWeight: "600", lineHeight: 20 },

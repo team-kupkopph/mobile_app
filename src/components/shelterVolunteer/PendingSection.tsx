@@ -140,8 +140,8 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }:
               )}
 
               <View style={styles.actionsRow}>
-                <Button size="small" variant="secondary" label="Decline" onPress={() => actions.doDecline(row.signup_id)} style={styles.half} />
-                <Button size="small" label="Approve" onPress={() => actions.onPressApprove(row.signup_id)} loading={approveBusy} style={styles.half} />
+                <Button size="small" variant="secondary" label="Decline" accessibilityLabel={`Decline ${row.volunteer.display_name}`} onPress={() => actions.doDecline(row.signup_id)} style={styles.half} />
+                <Button size="small" label="Approve" accessibilityLabel={`Approve ${row.volunteer.display_name}`} onPress={() => actions.onPressApprove(row.signup_id)} loading={approveBusy} style={styles.half} />
               </View>
             </Card>
           );

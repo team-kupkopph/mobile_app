@@ -280,6 +280,44 @@ describe("nested actions inside an accessible container", () => {
   });
 });
 
+// ── a checkbox-shaped row declares role, state, and label ───────────────────────────
+//
+// F-R2-12 · the two consent rows on KawangGawaDetail were TouchableOpacity + a hand-drawn
+// tick box, no `accessibilityRole="checkbox"`, no `accessibilityState={{checked}}`, no
+// `accessibilityLabel`. VoiceOver announced them as unlabeled buttons whose ticked/unticked
+// state was invisible.
+//
+// ⚠️ TARGETED, NOT BROAD. A source-wide scan for "TouchableOpacity that draws a checkbox
+// visual" also flags three older consent rows on MemberVerify, ShelterVerify and
+// ShelterVerifyNgo — real prior instances of the same defect, but not what F-R2-12 is
+// scoped to fix, and turning this guard on globally would fail the build for pre-existing
+// screens the person editing consent copy on Kawang-Gawa never touched. When those screens
+// are converted, extend the SITES list below rather than dropping the assertion.
+describe("consent rows are announced as checkboxes (F-R2-12)", () => {
+  const SITES: Array<{ file: string; testIDs: string[] }> = [
+    { file: "KawangGawaDetailScreen.tsx",
+      testIDs: ["chk.kawanggawaDetail.waiver", "chk.kawanggawaDetail.contact"] },
+  ];
+
+  it.each(SITES)("$file declares role, state and label on each consent row", ({ file, testIDs }) => {
+    const src = readFileSync(join(SCREENS, file), "utf8");
+    const missing: string[] = [];
+    for (const id of testIDs) {
+      const anchor = src.indexOf(`testID="${id}"`);
+      // Fail loudly rather than pass by finding no site — a rename in the source would
+      // otherwise empty this test silently, the failure mode every guard here already had.
+      if (anchor === -1) { missing.push(`${id}: site not found`); continue; }
+      const open = src.lastIndexOf("<TouchableOpacity", anchor);
+      const close = src.indexOf("</TouchableOpacity>", anchor);
+      const block = src.slice(open, close);
+      if (!/accessibilityRole=["']checkbox["']/.test(block)) missing.push(`${id}: role`);
+      if (!/accessibilityState=\{[^}]*checked\s*:/.test(block)) missing.push(`${id}: state`);
+      if (!/accessibilityLabel[=\s]/.test(block)) missing.push(`${id}: label`);
+    }
+    expect(missing).toEqual([]);
+  });
+});
+
 // ── no screen draws its own status bar ──────────────────────────────────────────────
 //
 // Twenty screens shipped a hard-coded "9:41" and a hand-drawn battery, copied from the
