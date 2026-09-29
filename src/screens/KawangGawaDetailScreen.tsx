@@ -299,6 +299,9 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                   setWaiverChecked((v) => !v);
                   if (waiverHighlight) setWaiverHighlight(false);
                 }}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: waiverChecked }}
+                accessibilityLabel="I agree to the volunteer waiver & guidelines."
               >
                 <View style={[styles.consentBox, waiverChecked && styles.consentBoxChecked, waiverHighlight && styles.consentBoxAlert]}>
                   {waiverChecked && <CheckIcon color="#FFFFFF" size={13} />}
@@ -310,7 +313,12 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                   {/* Inside the tinted block on purpose. Sitting between the two rows, this read
                       as if it belonged to the row BELOW whenever only one consent was missing. */}
                   {waiverHighlight && (
-                    <Text testID="err.kawanggawaDetail.waiver" style={styles.consentError}>
+                    <Text
+                      testID="err.kawanggawaDetail.waiver"
+                      style={styles.consentError}
+                      accessibilityRole="alert"
+                      accessibilityLiveRegion="polite"
+                    >
                       Agree to the waiver to request this shift.
                     </Text>
                   )}
@@ -338,6 +346,9 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
                 activeOpacity={0.85}
                 style={styles.consentRow}
                 onPress={() => setContactChecked((v) => !v)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: contactChecked }}
+                accessibilityLabel={`Share my phone number and email with ${shift.org_name} for this shift.`}
               >
                 <View style={[styles.consentBox, contactChecked && styles.consentBoxChecked]}>
                   {contactChecked && <CheckIcon color="#FFFFFF" size={13} />}
