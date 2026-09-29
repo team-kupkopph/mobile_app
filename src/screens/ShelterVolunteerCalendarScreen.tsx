@@ -12,11 +12,12 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterShift } from "../shelterVolunteer";
-import { shiftTypeLabel } from "../volunteer";
+import { ShelterShift, shiftStatusChip } from "../shelterVolunteer";
+import { shiftHeadline } from "../volunteer";
+import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
-import { Card, Chip, ChipTone, ScreenHeader } from "../components/ui";
+import { Card, Chip, ScreenHeader } from "../components/ui";
 
 function dateHeading(startsAt: string): string {
   return new Date(startsAt).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
@@ -50,36 +51,51 @@ function groupByDate(shifts: ShelterShift[]): { key: string; heading: string; sh
     .sort((a, b) => new Date(a.shifts[0].starts_at).getTime() - new Date(b.shifts[0].starts_at).getTime());
 }
 
-const STATUS_CHIP: Record<ShelterShift["status"], { label: string; tone: ChipTone }> = {
-  open: { label: "Open", tone: "success" },
-  full: { label: "Full", tone: "neutral" },
-  closed: { label: "Closed", tone: "neutral" }
-};
-
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerCalendar">;
 
 export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
   const api = useApi();
   const [shifts, setShifts] = useState<ShelterShift[]>([]);
+  // F-R2-5 · the backend pages 20 at a time and returns `next` as a page number; this screen
+  // used to stop at page 1, so a busy shelter's schedule silently lost everything past the
+  // twentieth activity. Same "Load more" the manage list (K8) follows.
+  const [next, setNext] = useState<number | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   // US-R3 · consolidation, not a bug fix — this screen already split loading/error/empty
   // by hand and got it right. LoadStateView adds the one distinction its own boolean
   // could not make: offline versus the server refusing.
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 
 
-  useFocusEffect(
-    useCallback(() => {
-      setRes(null);
-      // Task 10 (K8) · the schedule only ever shows what's ahead — same `?when=upcoming`
-      // the manage list and the You-tab count now use, so "how many activities" agrees
-      // everywhere it's asked.
-      api.get("/shelter/shifts?when=upcoming").then((r) => {
-        setRes({ ok: r.ok, status: r.status });
-        if (r.ok) setShifts(r.data?.results ?? []);
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
-    }, [])
-  );
+  const load = useCallback(() => {
+    setRes(null);
+    setNext(null);
+    // Task 10 (K8) · the schedule only ever shows what's ahead — same `?when=upcoming`
+    // the manage list and the You-tab count now use, so "how many activities" agrees
+    // everywhere it's asked.
+    api.get("/shelter/shifts?when=upcoming&page=1").then((r) => {
+      setRes({ ok: r.ok, status: r.status });
+      if (r.ok) {
+        setShifts(r.data?.results ?? []);
+        setNext(r.data?.next ?? null);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
+  }, []);
+
+  useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  function loadMore() {
+    if (!next || loadingMore) return;
+    setLoadingMore(true);
+    api.get(`/shelter/shifts?when=upcoming&page=${next}`).then((r) => {
+      setLoadingMore(false);
+      if (r.ok) {
+        setShifts((prev) => [...prev, ...(r.data?.results ?? [])]);
+        setNext(r.data?.next ?? null);
+      }
+    });
+  }
 
   const groups = groupByDate(shifts);
 
@@ -93,6 +109,7 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
           <LoadStateView
             state={loadState(res, groups.length)}
             emptyTitle="No volunteer activities posted yet."
+            onRetry={load}
           />
         </View>
       ) : (
@@ -102,7 +119,7 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
               <View key={group.key} style={styles.section}>
                 <Text style={styles.sectionHeading}>{group.heading}</Text>
                 {group.shifts.map((s) => {
-                  const chip = STATUS_CHIP[s.status];
+                  const chip = shiftStatusChip(s);
                   const signedUp = s.capacity - s.slots_left;
                   return (
                     <TouchableOpacity
@@ -115,7 +132,7 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
                         <VolunteerIcon color={colors.teal} size={22} />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
+                        <Text style={styles.cardTitle} numberOfLines={2}>{shiftHeadline(s)}</Text>
                         <Text style={styles.cardMeta}>
                           {timeRangeLabel(s.starts_at, s.ends_at)} · {signedUp} / {s.capacity} signed up
                         </Text>
@@ -127,6 +144,22 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
               </View>
             ))}
           </Card>
+
+          {next !== null && (
+            <TouchableOpacity
+              style={styles.loadMore}
+              activeOpacity={0.7}
+              hitSlop={TAP_SLOP}
+              onPress={loadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? (
+                <ActivityIndicator color={colors.teal} />
+              ) : (
+                <Text style={styles.loadMoreText}>Load more</Text>
+              )}
+            </TouchableOpacity>
+          )}
         </ScrollView>
       )}
     </View>
@@ -145,5 +178,7 @@ const styles = StyleSheet.create({
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, marginBottom: 10 },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta }
+  cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
+  loadMore: { marginTop: 16, height: 44, alignItems: "center", justifyContent: "center" },
+  loadMoreText: { color: colors.teal, ...typography.strong, fontWeight: "800" }
 });

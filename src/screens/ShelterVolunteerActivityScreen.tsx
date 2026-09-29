@@ -16,7 +16,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { ActivitySection, ShelterShift, activitySection } from "../shelterVolunteer";
+import { ActivitySection, ShelterShift, activitySection, spotsFilledLabel } from "../shelterVolunteer";
 import { shiftHeadline } from "../volunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { PendingSection } from "../components/shelterVolunteer/PendingSection";
@@ -100,7 +100,10 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title={shift ? shiftHeadline(shift) : "Activity"} onBack={() => navigation.goBack()} align="center">
         {!!shift && (
-          <Text style={styles.subtitle}>{shiftWhenLabel(shift.starts_at, shift.ends_at)} · {shift.city}</Text>
+          <>
+            <Text style={styles.subtitle}>{shiftWhenLabel(shift.starts_at, shift.ends_at)} · {shift.city}</Text>
+            <Text style={styles.capacity}>{spotsFilledLabel(shift)}</Text>
+          </>
         )}
       </ScreenHeader>
 
@@ -140,7 +143,10 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
               />
             </View>
             <View style={index === 2 ? undefined : styles.hidden}>
-              <AttendanceSection shiftId={shiftId} />
+              <AttendanceSection
+                shiftId={shiftId}
+                onOpenDetail={(signupId) => navigation.navigate("shelterVolunteerDetail", { signupId })}
+              />
             </View>
           </ScrollView>
 
@@ -177,6 +183,7 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   subtitle: { marginTop: 3, color: colors.muted, ...typography.meta, textAlign: "center" },
+  capacity: { marginTop: 2, color: colors.teal, ...typography.meta, fontWeight: "700", textAlign: "center" },
   segmentWrap: { paddingHorizontal: spacing.lg, paddingTop: 16 },
   bannerBox: { marginHorizontal: spacing.lg, marginTop: 10, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.warningBg },
   bannerText: { color: colors.warningStrong, ...typography.meta, fontWeight: "700", textAlign: "center" },

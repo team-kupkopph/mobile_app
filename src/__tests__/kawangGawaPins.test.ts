@@ -126,3 +126,87 @@ describe("K16 · attendance is not one-tap and irreversible", () => {
     expect(src).toMatch(/\/shelter\/signups\/\$\{signupId\}\/attendance\/undo/);
   });
 });
+
+// ── Runs 2–3 polish (F-R2-5, F-R2-7, F-R2-10, F-R3-6, F-R3-9) ──────────────────────────────
+// The helpers behind F-R2-7 and F-R3-9 are pinned in shelterVolunteer.test.ts; these pin that
+// the screens actually use them.
+
+// The source from `from` up to the next `to` after it.
+function between(src: string, from: string, to: string): string {
+  const i = at(src, from);
+  const j = src.indexOf(to, i);
+  if (j === -1) throw new Error(`no ${to} after ${from}`);
+  return src.slice(i, j);
+}
+
+describe("F-R3-6 · the manage list's load failure offers Try again", () => {
+  const src = read("screens/ShelterVolunteerScreen.tsx");
+
+  it("passes the page-1 loader to LoadStateView as onRetry", () => {
+    expect(between(src, "<LoadStateView", "/>")).toMatch(/onRetry=\{load\}/);
+    expect(between(src, "const load = useCallback", "useFocusEffect(")).toMatch(/\/shelter\/shifts\?when=\$\{when\}&page=1/);
+    expect(src).toMatch(/useFocusEffect\(useCallback\(\(\) => \{ load\(\); \}, \[load\]\)\)/);
+  });
+});
+
+describe("F-R3-9 · list and calendar cards show the activity's title and a time-aware chip", () => {
+  for (const file of ["screens/ShelterVolunteerScreen.tsx", "screens/ShelterVolunteerCalendarScreen.tsx"]) {
+    const src = read(file);
+
+    it(`${file} — the chip comes from shiftStatusChip, not the raw status`, () => {
+      expect(src).toMatch(/const chip = shiftStatusChip\(s\);/);
+      expect(src).not.toMatch(/STATUS_CHIP\[s\.status\]/);
+    });
+
+    it(`${file} — the card title is shiftHeadline, the same as the activity header`, () => {
+      expect(element(src, "{shiftHeadline(s)}", "Text")).toMatch(/style=\{styles\.cardTitle\}/);
+      expect(src).not.toMatch(/shiftTypeLabel\(s\.type\)/);
+    });
+  }
+});
+
+describe("F-R2-5 · the calendar follows `next` past page 1", () => {
+  const src = read("screens/ShelterVolunteerCalendarScreen.tsx");
+
+  it("records next from the first page and appends later pages", () => {
+    const loader = between(src, "const load = useCallback", "function loadMore");
+    expect(loader).toMatch(/when=upcoming&page=1/);
+    expect(loader).toMatch(/setNext\(r\.data\?\.next \?\? null\)/);
+    const more = between(src, "function loadMore", "const groups = groupByDate");
+    expect(more).toMatch(/when=upcoming&page=\$\{next\}/);
+    expect(more).toMatch(/setShifts\(\(prev\) => \[\.\.\.prev, \.\.\.\(r\.data\?\.results \?\? \[\]\)\]\)/);
+  });
+
+  it("shows Load more only while there is a next page, wired to loadMore", () => {
+    expect(guardBefore(src, "style={styles.loadMore}")).toBe("next !== null");
+    expect(element(src, "onPress={loadMore}", "TouchableOpacity")).toMatch(/Load more/);
+  });
+
+  it("offers Try again on a failed first load", () => {
+    expect(between(src, "<LoadStateView", "/>")).toMatch(/onRetry=\{load\}/);
+  });
+});
+
+describe("F-R2-7 · the activity header says how many spots are filled", () => {
+  const src = read("screens/ShelterVolunteerActivityScreen.tsx");
+
+  it("renders spotsFilledLabel(shift) inside the ScreenHeader, once a shift has loaded", () => {
+    expect(element(src, "{spotsFilledLabel(shift)}", "ScreenHeader")).toMatch(/\{!!shift && \(/);
+  });
+});
+
+describe("F-R2-10 · an Attendance roster row opens the volunteer's detail", () => {
+  const section = read("components/shelterVolunteer/AttendanceSection.tsx");
+  const screen = read("screens/ShelterVolunteerActivityScreen.tsx");
+
+  it("the row's card sits inside a touchable that calls onOpenDetail", () => {
+    const row = between(section, "<TouchableOpacity key={row.signup_id}", "<Card style={styles.card}>");
+    expect(row).toMatch(/onPress=\{\(\) => onOpenDetail\(row\.signup_id\)\}/);
+  });
+
+  it("the activity screen routes it to shelterVolunteerDetail, like Pending and Confirmed", () => {
+    expect(between(screen, "<AttendanceSection", "/>"))
+      .toMatch(/onOpenDetail=\{\(signupId\) => navigation\.navigate\("shelterVolunteerDetail", \{ signupId \}\)\}/);
+  });
+});
+

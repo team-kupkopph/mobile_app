@@ -1,6 +1,8 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import { activitySection, attendanceSuggestion, blastRadiusCopy, reapprovalCopy, reliabilityChip } from "../shelterVolunteer";
+import {
+  activitySection, attendanceSuggestion, blastRadiusCopy, reapprovalCopy, reliabilityChip, shiftStatusChip, spotsFilledLabel
+} from "../shelterVolunteer";
 
 const rel = (o: Partial<any>) => ({ shifts_completed: 0, no_shows: 0, consecutive_no_shows: 0,
   needs_reapproval: false, is_reliable: false, ...o });
@@ -119,4 +121,31 @@ describe("per-row action buttons name the volunteer (F-R2-13)", () => {
     // so the announcement disambiguates the row.
     expect(block).toMatch(/accessibilityLabel=\{`[^`]*\$\{row\.volunteer\.display_name\}[^`]*`\}/);
   });
+});
+
+describe("shiftStatusChip · an ended activity never reads Open (F-R3-9)", () => {
+  const END = "2026-09-29T12:00:00Z";
+  const before = new Date("2026-09-29T11:59:00Z").getTime();
+  const after = new Date("2026-09-29T12:00:00Z").getTime();
+
+  it("reads the booking state while the activity is still ahead", () => {
+    expect(shiftStatusChip({ status: "open", ends_at: END }, before)).toEqual({ label: "Open", tone: "success" });
+    expect(shiftStatusChip({ status: "full", ends_at: END }, before)).toEqual({ label: "Full", tone: "neutral" });
+  });
+
+  it("says Ended once ends_at has passed, whether it was open or full", () => {
+    expect(shiftStatusChip({ status: "open", ends_at: END }, after)).toEqual({ label: "Ended", tone: "neutral" });
+    expect(shiftStatusChip({ status: "full", ends_at: END }, after)).toEqual({ label: "Ended", tone: "neutral" });
+  });
+
+  it("keeps a cancelled activity Closed on either side of ends_at", () => {
+    expect(shiftStatusChip({ status: "closed", ends_at: END }, before)).toEqual({ label: "Closed", tone: "neutral" });
+    expect(shiftStatusChip({ status: "closed", ends_at: END }, after)).toEqual({ label: "Closed", tone: "neutral" });
+  });
+});
+
+test("spotsFilledLabel counts filled spots from capacity − slots_left (F-R2-7)", () => {
+  expect(spotsFilledLabel({ capacity: 5, slots_left: 2 })).toBe("3 of 5 spots filled");
+  expect(spotsFilledLabel({ capacity: 4, slots_left: 4 })).toBe("0 of 4 spots filled");
+  expect(spotsFilledLabel({ capacity: 3, slots_left: 0 })).toBe("3 of 3 spots filled");
 });

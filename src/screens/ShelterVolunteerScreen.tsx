@@ -15,12 +15,12 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterShiftRow } from "../shelterVolunteer";
-import { shiftTypeLabel } from "../volunteer";
+import { ShelterShiftRow, shiftStatusChip } from "../shelterVolunteer";
+import { shiftHeadline } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
-import { Card, Chip, ChipTone, ScreenHeader, SegmentedControl } from "../components/ui";
+import { Card, Chip, ScreenHeader, SegmentedControl } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const start = new Date(startsAt);
@@ -30,12 +30,6 @@ function shiftWhenLabel(startsAt: string, endsAt: string): string {
   const endTime = end.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
   return `${date} · ${startTime}–${endTime}`;
 }
-
-const STATUS_CHIP: Record<ShelterShiftRow["status"], { label: string; tone: ChipTone }> = {
-  open: { label: "Open", tone: "success" },
-  full: { label: "Full", tone: "neutral" },
-  closed: { label: "Closed", tone: "neutral" }
-};
 
 const SEGMENTS: Array<"upcoming" | "past"> = ["upcoming", "past"];
 
@@ -61,20 +55,22 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 
 
-  useFocusEffect(
-    useCallback(() => {
-      setRes(null);
-      setNext(null);
-      api.get(`/shelter/shifts?when=${when}&page=1`).then((r) => {
-        setRes({ ok: r.ok, status: r.status });
-        if (r.ok) {
-          setShifts(r.data?.results ?? []);
-          setNext(r.data?.next ?? null);
-        }
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus or segment change
-    }, [when])
-  );
+  // F-R3-6 · named so LoadStateView's "Try again" can re-run it — offline or a 5xx on the
+  // first page otherwise left the shelter with no way back short of leaving the screen.
+  const load = useCallback(() => {
+    setRes(null);
+    setNext(null);
+    api.get(`/shelter/shifts?when=${when}&page=1`).then((r) => {
+      setRes({ ok: r.ok, status: r.status });
+      if (r.ok) {
+        setShifts(r.data?.results ?? []);
+        setNext(r.data?.next ?? null);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus or segment change
+  }, [when]);
+
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
   function loadMore() {
     if (!next || loadingMore) return;
@@ -129,11 +125,12 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
             state={loadState(res, shifts.length)}
             emptyTitle={when === "upcoming" ? "No volunteer activities posted yet" : "No past activities yet"}
             emptyBody={when === "upcoming" ? 'Tap "+ Post an activity" to start.' : undefined}
+            onRetry={load}
           />
         ) : (
           <>
             {shifts.map((s) => {
-              const chip = STATUS_CHIP[s.status];
+              const chip = shiftStatusChip(s);
               const signedUp = s.capacity - s.slots_left;
               const needsAttendance = when === "past" && s.attendance_due > 0;
               return (
@@ -147,7 +144,7 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
                       <VolunteerIcon color={colors.teal} size={22} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.cardTitle}>{shiftTypeLabel(s.type)}</Text>
+                      <Text style={styles.cardTitle} numberOfLines={2}>{shiftHeadline(s)}</Text>
                       <Text style={styles.cardMeta}>{shiftWhenLabel(s.starts_at, s.ends_at)}</Text>
                       <Text style={styles.cardSignedUp}>{signedUp} / {s.capacity} signed up</Text>
                       {needsAttendance && (
