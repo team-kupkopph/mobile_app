@@ -19,8 +19,10 @@ const card = {
 type Props = NativeStackScreenProps<RootStackParamList, "settings">;
 type Row = { label: string; value?: string; danger?: boolean; onPress?: () => void };
 
-export function SettingsScreen({ navigation }: Props) {
+export function SettingsScreen({ navigation, route }: Props) {
   const { signOut } = useAuth();
+  // F-R3-4 · reached from ShelterProfileScreen. See the param's note in navigation/types.ts.
+  const shelter = route.params?.shelter === true;
 
   function handleLogout() {
     Alert.alert("Log out?", "You can sign back in any time.", [
@@ -30,13 +32,14 @@ export function SettingsScreen({ navigation }: Props) {
   }
 
   const groups: { title: string; rows: Row[] }[] = [
-    {
+    // ACCOUNT is owner-only: both rows open owner screens (see `shelter` above).
+    ...(shelter ? [] : [{
       title: "ACCOUNT",
       rows: [
         { label: "Edit profile", onPress: () => navigation.navigate("profile") },
         { label: "Phone number", onPress: () => navigation.navigate("verifyPhone") },
       ],
-    },
+    }]),
     {
       title: "PRIVACY",
       rows: [

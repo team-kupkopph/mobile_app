@@ -70,16 +70,40 @@ export function NotificationsScreen({ navigation }: Props) {
     // US-N1 · was an if/else that silently sent anything non-reportDetail to
     // verifyDocuments — harmless while that was the only other variant, but wrong the
     // moment a third one (myInquiries) existed. Switched to match every variant by name.
-    if (target.screen === "reportDetail") {
-      navigation.navigate("reportDetail", { reportId: target.reportId });
-    } else if (target.screen === "myInquiries") {
-      navigation.navigate("myInquiries");
-    } else if (target.screen === "kawanggawa") {
-      navigation.navigate("kawanggawa", { tab: target.tab });
-    } else if (target.screen === "shelterVolunteerActivity") {
-      navigation.navigate("shelterVolunteerActivity", { shiftId: target.shiftId, section: target.section });
-    } else {
-      navigation.navigate("verifyDocuments");
+    // F-R3-4 · …and it was still an if/else with a catch-all `else`, so the three Sprint 6
+    // variants (impact, myDonations, shelterNeeds) fell into it and opened verifyDocuments —
+    // a shelter tapping "pledge received" in the feed landed on its verification documents.
+    // Push taps were fine (PushBridge navigates generically). Now a switch with a `never`
+    // default: a NotificationTarget variant without a case here fails typecheck.
+    switch (target.screen) {
+      case "reportDetail":
+        navigation.navigate("reportDetail", { reportId: target.reportId });
+        return;
+      case "myInquiries":
+        navigation.navigate("myInquiries");
+        return;
+      case "kawanggawa":
+        navigation.navigate("kawanggawa", { tab: target.tab });
+        return;
+      case "shelterVolunteerActivity":
+        navigation.navigate("shelterVolunteerActivity", { shiftId: target.shiftId, section: target.section });
+        return;
+      case "verifyDocuments":
+        navigation.navigate("verifyDocuments");
+        return;
+      case "impact":
+        navigation.navigate("impact");
+        return;
+      case "myDonations":
+        navigation.navigate("myDonations");
+        return;
+      case "shelterNeeds":
+        navigation.navigate("shelterNeeds");
+        return;
+      default: {
+        const unhandled: never = target;
+        return unhandled;
+      }
     }
   }
 
