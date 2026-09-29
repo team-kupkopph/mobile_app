@@ -82,7 +82,23 @@ export function SegmentedControl({ segments, index, onChange, testID, style }: S
               accessibilityState={{ selected: active }}
               testID={`seg.${label.toLowerCase().replace(/\s+/g, "")}`}
             >
-              <Text style={[styles.label, active && styles.labelActive]} numberOfLines={1}>{label}</Text>
+              {/* F-R3-8 · shrink, never truncate. At Dynamic Type XXXL a third of a 402 pt track
+                  could not hold "Confirmed · 3" and it read "Confirmed…", losing the count. The
+                  track cannot grow (48 pt, the touchTargets veto), so the label gives way — down
+                  to 0.6 ×, about 12 pt at XXXL and still above the caption step (0.7 × was the
+                  first try; by estimate it leaves a two-digit "Confirmed · 24" truncating in a
+                  375 pt SE's 108 pt segment) — and stops scaling at 1.5 ×,
+                  where one line still sits well inside the 38 pt thumb. UISegmentedControl makes
+                  the same trade. */}
+              <Text
+                style={[styles.label, active && styles.labelActive]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.6}
+                maxFontSizeMultiplier={1.5}
+              >
+                {label}
+              </Text>
             </PressScale>
           );
         })}
@@ -115,11 +131,18 @@ const styles = StyleSheet.create({
   segment: {
     flex: 1,
     height: "100%",
+    // A shrunk label still needs air: without it "Pending · 12" ran thumb edge to thumb edge.
+    paddingHorizontal: 6,
     alignItems: "center",
     justifyContent: "center"
   },
   label: {
     ...typography.body,
+    // ⚠️ NO LINE HEIGHT, AND NOT BY OVERSIGHT. iOS's shrink-to-fit mis-measures a label with a
+    // fixed lineHeight: with body's 21 kept, "Browse" and "My shifts" rendered at about four
+    // points on device, far under minimumFontScale. Body's leading is for running copy; this
+    // is one centred line in a fixed thumb, and the default leading is what it needs.
+    lineHeight: undefined,
     fontWeight: "600",
     color: colors.muted
   },

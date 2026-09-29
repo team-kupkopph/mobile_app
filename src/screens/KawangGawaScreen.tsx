@@ -296,11 +296,14 @@ export function KawangGawaScreen({ navigation, route }: Props) {
                       </View>
                       {/* The chip sits in the TITLE row, not a third column. As a column it
                           left the time line about 156 pt and "11:29 PM–1:29 AM · 2 hours"
-                          wrapped onto two lines on a 402 pt screen. */}
+                          wrapped onto two lines on a 402 pt screen.
+                          F-R3-8: the title yields and the chip never does. With neither set,
+                          "Dog walking — tomorrow" held its full width and pushed the chip past
+                          the card edge ("• 2 slot…" on a 375 pt SE, worse at XXXL). */}
                       <View style={styles.cardCopy}>
                         <View style={styles.cardTop}>
                           <Text style={styles.cardTitle} numberOfLines={1}>{shiftHeadline(s)}</Text>
-                          <Chip label={chip.label} tone={chip.tone} />
+                          <Chip label={chip.label} tone={chip.tone} style={styles.cardChip} />
                         </View>
                         <Text style={styles.cardOrg}>
                           {shiftTypeLabel(s.type)} · {s.org_name}{s.city ? ` · ${s.city}` : ""}
@@ -375,7 +378,8 @@ const styles = StyleSheet.create({
   cardIconFull: { backgroundColor: "#ECEAE3" },
   cardCopy: { flex: 1 },
   cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
-  cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800", flexShrink: 1 },
+  cardChip: { flexShrink: 0 },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" }
 });

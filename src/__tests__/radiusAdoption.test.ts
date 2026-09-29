@@ -124,11 +124,41 @@ const numOf = (v?: string) =>
   v !== undefined && /^-?\d+(\.\d+)?$/.test(v.trim()) ? Number(v) : null;
 
 type Site = { file: string; raw: string; radius: number | null; side: number | null;
-              square: boolean };
+              square: boolean;
+              /** The radius a token, a `pill()`/`squircle()` call or a same-file const renders
+               *  at — `radius` above is literals only, which is what the ratchets count. */
+              resolved: number | null; height: number | null; pillArg: number | null };
+
+/** `const HEIGHT = 30;` at a file's top level — how a primitive names the height it halves. */
+function numericConsts(text: string): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const m of text.matchAll(/^(?:export\s+)?const\s+([A-Z_][A-Z0-9_]*)\s*=\s*(-?\d+(?:\.\d+)?)\s*;/gm)) {
+    out[m[1]] = Number(m[2]);
+  }
+  return out;
+}
+
+function resolve(v: string | undefined, consts: Record<string, number>): number | null {
+  if (v === undefined) return null;
+  const t = v.trim();
+  const n = numOf(t);
+  if (n !== null) return n;
+  if (t in consts) return consts[t];
+  const tok = /^radii\.(\w+)$/.exec(t);
+  if (tok) return SCALE[tok[1]] ?? null;
+  const call = /^(pill|squircle)\(\s*([\w.]+)\s*\)$/.exec(t);
+  if (call) {
+    const arg = resolve(call[2], consts);
+    if (arg === null) return null;
+    return call[1] === "pill" ? arg / 2 : squircle(arg);
+  }
+  return null;
+}
 
 const sites: Site[] = [];
 for (const file of sources(SRC)) {
   const text = readFileSync(file, "utf8");
+  const consts = numericConsts(text);
   const seen = new Set<number>();
   const re = /\bborderRadius\s*:/g;
   let m: RegExpExecArray | null;
@@ -141,9 +171,13 @@ for (const file of sources(SRC)) {
     if (raw === undefined) continue;
     const h = numOf(p.height) ?? numOf(p.minHeight);
     const w = numOf(p.width) ?? numOf(p.minWidth);
+    const pillCall = /^pill\(\s*([\w.]+)\s*\)$/.exec(raw.trim());
     sites.push({
       file, raw, radius: numOf(raw), side: h ?? w,
-      square: h !== null && w !== null && h === w && h <= 100
+      square: h !== null && w !== null && h === w && h <= 100,
+      resolved: resolve(raw, consts),
+      height: resolve(p.height, consts) ?? resolve(p.minHeight, consts),
+      pillArg: pillCall ? resolve(pillCall[1], consts) : null
     });
   }
 }
@@ -177,6 +211,30 @@ const geometry = sites.filter((s) => isGeometry(s) && !isPill(s) && !followsSqui
 const offScale = sites.filter(
   (s) => s.radius !== null && !stepValues.includes(s.radius) &&
          !isPill(s) && !followsSquircle(s) && !isGeometry(s)
+);
+
+/**
+ * ⚠️ A NEAR-PILL IS A PILL WITH FLAT SPOTS (F-R2-14). The shared <Chip> was `height: 30,
+ * borderRadius: radii.chip` — 12 on a 30, three points short of the canvas's own 30/15 chip —
+ * and every check above missed it, because they read literals and `radii.chip` is not one.
+ * Resolved, a fixed-height element whose corner is at least 0.35 × its height but not half of
+ * it is neither a pill nor a rounded rectangle: at that ratio the eye reads a pill, and the
+ * straight run left on each end reads as a mistake. Pick one — `pill(h)`, or a container step
+ * that is plainly a corner. The threshold sits just above the squircle rule (0.32 × size), which
+ * is the roundest non-pill corner this scan finds — 52 pt tiles at 17, 0.327, measured.
+ *
+ * Below 20 pt it is drawn geometry, not a control: a 5 pt dot at radius 3, a 9 pt badge at 5 —
+ * an odd height has no whole-point half, and the canvas's smallest chip is 24 tall.
+ */
+const NEAR_PILL_RATIO = 0.35;
+const NEAR_PILL_MIN_HEIGHT = 20;
+const nearPills = sites.filter(
+  (s) => s.resolved !== null && s.height !== null && s.height >= NEAR_PILL_MIN_HEIGHT &&
+         Math.abs(s.resolved - s.height / 2) >= 0.01 && s.resolved >= NEAR_PILL_RATIO * s.height
+);
+/** `pill(n)` on an element whose height is not n — the halving rule, halving the wrong thing. */
+const pillArgMismatch = sites.filter(
+  (s) => s.pillArg !== null && s.height !== null && Math.abs(s.pillArg - s.height) >= 0.01
 );
 
 /**
@@ -312,19 +370,48 @@ describe("screens take corner radii from the theme", () => {
     expect(offScale.length).toBe(OFF_SCALE);
   });
 
+  it("resolves tokens, pill() calls and named heights, so a primitive is not invisible", () => {
+    // Guard the guard: before this, the shared <Chip> resolved to nothing and so could never
+    // be found wrong. It must now resolve, as a pill, at the canvas's 30 / 15.
+    const chip = sites.find((s) => s.file.endsWith(join("components", "ui", "Chip.tsx")));
+    expect(chip).toBeDefined();
+    expect(chip!.height).toBe(30);
+    expect(chip!.resolved).toBe(15);
+    expect(sites.filter((s) => s.resolved !== null && /^radii\./.test(s.raw)).length)
+      .toBe(tokenRefs.length);
+    expect(sites.filter((s) => s.pillArg !== null).length).toBeGreaterThan(0);
+  });
+
+  it("leaves no fixed-height element a near-pill", () => {
+    const where = (xs: Site[]) =>
+      xs.map((s) => `${s.file.replace(/^.*\/src\//, "src/")} (h ${s.height}, r ${s.raw} = ${s.resolved})`);
+    expect(where(nearPills)).toEqual([]);
+    // Mutation check, in-source: the defect this was written for must trip it.
+    const old: Site = { file: "Chip.tsx", raw: "radii.chip", radius: null, side: 30, square: false,
+                        resolved: SCALE.chip, height: 30, pillArg: null };
+    expect(old.resolved! >= NEAR_PILL_RATIO * old.height! && old.resolved !== old.height! / 2).toBe(true);
+  });
+
+  it("halves the element's own height when it calls pill()", () => {
+    expect(pillArgMismatch.map((s) => `${s.file.replace(/^.*\/src\//, "src/")} (h ${s.height}, ${s.raw})`))
+      .toEqual([]);
+  });
+
   it("does not mistake a pill for a scale step", () => {
     // Home's report button: height 44, radius 22. Snapping that to `field` (20) would
     // visibly un-round it, which is why radii.ts tells callers to write the literal.
     const src = "{ height: 44, borderRadius: 22, backgroundColor: colors.white }";
     const blk = enclosingBlock(src, src.indexOf("borderRadius"))!;
     const p = props(src, blk[0], blk[1]);
-    const s: Site = { file: "x", raw: p.borderRadius, radius: 22, side: 44, square: false };
+    const s: Site = { file: "x", raw: p.borderRadius, radius: 22, side: 44, square: false,
+                      resolved: 22, height: 44, pillArg: null };
     expect(isPill(s)).toBe(true);
     expect(stepValues.includes(24)).toBe(true); // 24 IS a step, so the pill check must win
   });
 
   it("reads the squircle rule as the rule, not as a number", () => {
-    const s: Site = { file: "x", raw: "24", radius: 24, side: 76, square: true };
+    const s: Site = { file: "x", raw: "24", radius: 24, side: 76, square: true,
+                      resolved: 24, height: 76, pillArg: null };
     expect(followsSquircle(s)).toBe(true);
     expect(squircle(76)).toBe(24);
     // ...and 24 is also `card`, which is exactly the coincidence this track had to survive.
