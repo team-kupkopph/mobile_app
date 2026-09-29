@@ -41,7 +41,7 @@ import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { useCachedFeed } from "../useCachedFeed";
+import { feedState, useCachedFeed } from "../useCachedFeed";
 import {
   BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
   shiftHeadline, shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
@@ -128,7 +128,7 @@ export function KawangGawaScreen({ navigation, route }: Props) {
   const totalsLabel = volunteerTotalsLabel(volunteerTotals(mine));
   const next = nextBookedShift(mine);
   const groups = groupShiftsByDay(shifts ?? []);
-  const state = loadState(res, shifts?.length);
+  const state = feedState(res, shifts, stale);
   let cardIndex = -1; // flat across day sections — e2e flow 30 taps card.kawanggawa.0
 
   return (

@@ -23,7 +23,7 @@
 import { useCallback, useState } from "react";
 
 import { readCache, writeCache } from "./cache";
-import { Apiish } from "./net";
+import { Apiish, LoadState, loadState } from "./net";
 
 type Api = { get: (path: string) => Promise<{ ok: boolean; status: number; data: any }> };
 
@@ -42,6 +42,28 @@ export function nextFeed<T>(
   // Keep what is on screen. `stale` is true only when there is something to BE stale —
   // a failure with nothing cached is a load state, not a stale one.
   return { rows: current, stale: current !== null };
+}
+
+/**
+ * F-R3-1 · what a feed screen should render, given the hook's three outputs.
+ *
+ * `loadState` alone is the wrong question for a cache-first screen: it answers `offline` or
+ * `error` for any failed response before it looks at the count, so a screen that gated on
+ * it threw away exactly the rows `nextFeed` had just kept — and the `StaleBanner` branch
+ * beside them could never render. Every feed screen did that, which is why this lives here
+ * rather than in four render functions.
+ *
+ *   refresh failed, rows on screen -> `ready`: render them, with the StaleBanner above
+ *   anything else                  -> `loadState`, unchanged
+ *
+ * A failure over a cached EMPTY list stays a load state: there is nothing on screen for the
+ * banner to vouch for.
+ */
+export function feedState<T>(
+  res: Apiish | null | undefined, rows: T[] | null, stale: boolean,
+): LoadState {
+  if (stale && rows && rows.length > 0) return { kind: "ready" };
+  return loadState(res, rows?.length);
 }
 
 export function useCachedFeed<T>(api: Api, pick: (data: any) => T[]) {

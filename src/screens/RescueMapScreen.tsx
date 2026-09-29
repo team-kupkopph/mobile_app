@@ -16,7 +16,7 @@ import { centroidFor } from "../cityCentroids";
 import { LoadStateView } from "../components/LoadStateView";
 import { StaleBanner } from "../components/StaleBanner";
 import { RootStackParamList } from "../navigation/types";
-import { useCachedFeed } from "../useCachedFeed";
+import { feedState, useCachedFeed } from "../useCachedFeed";
 import { isOffline, loadState } from "../net";
 import { relTime, sagipTitle, strayChip } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
@@ -60,7 +60,10 @@ export function RescueMapScreen({ navigation }: Props) {
   }, [city]);
   useFocusEffect(load);
 
-  const state = loadState(res, reports?.length);
+  const state = feedState(res, reports, stale);
+  // The badge's count is a claim about the world, so it follows the REQUEST, not what is on
+  // screen: stale rows are shown (with the banner), but not counted as "nearby" right now.
+  const fetched = loadState(res, reports?.length);
 
   return (
     <View style={styles.screen} testID="screen.rescueMap">
@@ -90,7 +93,7 @@ export function RescueMapScreen({ navigation }: Props) {
                 actually succeeded. "0 nearby" over a failed fetch is the same lie as the
                 empty copy below, just in fewer words. */}
             <Text style={styles.mapBadgeText}>
-              {state.kind === "ready" || state.kind === "empty"
+              {fetched.kind === "ready" || fetched.kind === "empty"
                 ? `${reports?.length ?? 0} nearby · within ${RADIUS_KM} km of ${city}`
                 : `Within ${RADIUS_KM} km of ${city}`}
             </Text>
