@@ -2,6 +2,9 @@
 // PATCH /shelter/profile { vet_name, vet_prc_number } (PRC 6–8 digits, format only) then
 // POST /verifications { type:"shelter_org", bai_pending, documents:[...base, sec_dti, bai_cert?] }.
 // Server enforces tier1 -> tier2 (409 tier1_incomplete) and the required set (422 missing_docs).
+// Upgrade mode (`{ upgrade: true }`, from the approved tier-1's profile): no step 1 — the approved
+// base is on file — so this screen asks for consent itself and POSTs /verifications/upgrade
+// { documents:[sec_dti, bai_cert?] }; the tier moves only when a reviewer approves it.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -21,11 +24,13 @@ type Props = NativeStackScreenProps<RootStackParamList, "shelterVerifyNgo">;
 
 export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
   const api = useApi();
-  const { baseDocs, socialUrl } = route.params;
+  const upgrade = "upgrade" in route.params;
 
   const [sec, setSec] = useState<string | null>(null);
   const [bai, setBai] = useState<string | null>(null);
   const [baiPending, setBaiPending] = useState(false);
+  // Upgrade mode only — the initial flow took consent on step 1.
+  const [consent, setConsent] = useState(false);
   const [vetName, setVetName] = useState("");
   const [prc, setPrc] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -75,6 +80,10 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
       setError("Enter a valid PRC number (6\u20138 digits).");
       return;
     }
+    if (upgrade && !consent) {
+      setError("Tick the consent box to continue.");
+      return;
+    }
     setSubmitting(true);
     setError(undefined);
     try {
@@ -87,15 +96,26 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
         setError(patch.data?.error?.message ?? "Couldn't save the vet details. Try again.");
         return;
       }
-      const documents: ShelterDoc[] = [...baseDocs, { doc_type: "sec_dti", file_url: sec! }];
-      if (!baiPending && bai) documents.push({ doc_type: "bai_cert", file_url: bai });
-      const res = await api.post("/verifications", {
-        type: "shelter_org",
-        social_proof_url: socialUrl,
-        consent_version: DOC_CONSENT_VERSION,
-        bai_pending: baiPending,
-        documents
-      });
+      const ngoDocs: ShelterDoc[] = [{ doc_type: "sec_dti", file_url: sec! }];
+      if (!baiPending && bai) ngoDocs.push({ doc_type: "bai_cert", file_url: bai });
+      const res = "upgrade" in route.params
+        ? await api.post("/verifications/upgrade", {
+            consent_version: DOC_CONSENT_VERSION,
+            bai_pending: baiPending,
+            documents: ngoDocs
+          })
+        : await api.post("/verifications", {
+            type: "shelter_org",
+            social_proof_url: route.params.socialUrl,
+            consent_version: DOC_CONSENT_VERSION,
+            bai_pending: baiPending,
+            documents: [...route.params.baseDocs, ...ngoDocs]
+          });
+      if (upgrade && res.status === 409) {
+        // tier1_incomplete / already_ngo — the server's message says which.
+        setError(res.data?.error?.message ?? "This organisation can't upgrade right now.");
+        return;
+      }
       if (res.status === 409) {
         setError("Please add your base documents (Step 1) first.");
         return;
@@ -120,7 +140,11 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>NGO papers</Text>
-        <Text style={styles.subheading}>Step 2 of 2 — the registration and vet details for a Verified Shelter.</Text>
+        <Text style={styles.subheading}>
+          {upgrade
+            ? "Your base documents are already approved — add the registration and vet details for a Verified Shelter."
+            : "Step 2 of 2 — the registration and vet details for a Verified Shelter."}
+        </Text>
 
         <DocSlot testID="btn.shelterVerifyNgo.uploadSec" label="SEC / DTI registration" hint="Your registration certificate · Required" done={!!sec} busy={busy === "sec"} onPress={() => uploadInto("sec", setSec)} />
         <DocSlot
@@ -149,6 +173,13 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
           keyboardType="number-pad"
           error={prc.trim().length > 0 && !prcValid ? "PRC number must be 6–8 digits." : undefined}
         />
+
+        {upgrade && (
+          <TouchableOpacity testID="chk.shelterVerifyNgo.consentDpa" activeOpacity={0.85} style={styles.consentRow} onPress={() => setConsent((v) => !v)}>
+            <View style={[styles.consentBox, consent && styles.consentBoxChecked]}>{consent && <CheckIcon color="#FFFFFF" size={13} />}</View>
+            <Text style={styles.consentText}>I consent to Kupkop PH collecting these documents solely to verify our organisation.</Text>
+          </TouchableOpacity>
+        )}
 
         {!!error && <Text testID="err.shelterVerifyNgo.form" style={styles.formError}>{error}</Text>}
 
@@ -260,6 +291,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF"
   },
   consentBoxChecked: { backgroundColor: authColors.teal },
+  consentRow: {
+    marginTop: 22,
+    borderRadius: radii.notice,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 14,
+    backgroundColor: colors.soft
+  },
+  consentText: { flex: 1, color: colors.tealDark, ...typography.meta, fontWeight: "700", lineHeight: 19 },
   pendingText: { flex: 1, color: "#633806", ...typography.meta, fontWeight: "700", lineHeight: 19 },
   formError: { marginTop: 12, color: authColors.danger, ...typography.meta, fontWeight: "700" },
   submitButton: { marginTop: 22 }

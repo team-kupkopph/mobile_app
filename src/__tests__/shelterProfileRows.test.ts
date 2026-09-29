@@ -80,6 +80,69 @@ describe("ShelterProfileScreen · no chevron row without an onPress (F-R3-4)", (
   });
 });
 
+/**
+ * The `›` chevrons the screen draws OUTSIDE `<Row` — the accents — each with the innermost
+ * touchable enclosing it (or null). The Row component's own chevron is cut out first: every
+ * `<Row` call site is checked above, so its body would only be a false positive here.
+ */
+function looseChevrons(src: string): { rowChevronCut: boolean; found: Array<{ at: string; wrapper: string | null }> } {
+  const noComments = stripComments(src);
+  const body = noComments.replace(/\nfunction Row\([\s\S]*?\n\}\n/, "\n");
+  const rowChevronCut = body !== noComments;
+  const found: Array<{ at: string; wrapper: string | null }> = [];
+  for (const m of body.matchAll(/›/g)) {
+    // Walk every touchable tag before the glyph with a stack, so a sibling's wrapper that
+    // opened AND closed earlier doesn't count as enclosing it.
+    const stack: string[] = [];
+    for (const t of body.slice(0, m.index).matchAll(/<(\/?)(TouchableOpacity|Pressable)\b/g)) {
+      if (t[1]) stack.pop();
+      else {
+        const tag = openingTag(body, t.index!);
+        if (!tag.endsWith("/>")) stack.push(tag);
+      }
+    }
+    const line = body.slice(body.lastIndexOf("\n", m.index) + 1, body.indexOf("\n", m.index)).trim();
+    found.push({ at: line, wrapper: stack.length ? stack[stack.length - 1] : null });
+  }
+  return { rowChevronCut, found };
+}
+
+describe("ShelterProfileScreen · no `›` glyph outside a touchable with an onPress", () => {
+  // The <Row scan above missed the approved tier-1's "Upgrade to Verified Shelter" accent: a
+  // teal block with a chevron and no touchable at all. Any `›` is a promise, not just Row's.
+  const { rowChevronCut, found } = looseChevrons(read("ShelterProfileScreen.tsx"));
+
+  it("cut Row's own chevron and found the accents' chevrons", () => {
+    expect(rowChevronCut).toBe(true);
+    // The gated accent and the tier-1 upgrade accent, at least.
+    expect(found.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("every `›` sits inside a touchable with an onPress", () => {
+    const dead = found.filter((c) => !c.wrapper || !/\bonPress=/.test(c.wrapper)).map((c) => c.at);
+    expect(dead).toEqual([]);
+  });
+
+  it("the tier-1 upgrade accent opens the NGO papers in upgrade mode", () => {
+    const body = stripComments(read("ShelterProfileScreen.tsx"));
+    expect(body).toMatch(/navigate\(\s*"shelterVerifyNgo",\s*\{\s*upgrade:\s*true\s*\}\s*\)/);
+  });
+});
+
+describe("the tier-1 → tier-2 upgrade posts only the NGO delta", () => {
+  // An approved tier-1's base documents are on file; POST /verifications/upgrade (US-X4)
+  // counts them, so the upgrade must not route through step 1 and re-upload them.
+  const ngo = stripComments(read("ShelterVerifyNgoScreen.tsx"));
+
+  it("upgrade mode posts to /verifications/upgrade", () => {
+    expect(ngo).toMatch(/"\/verifications\/upgrade"/);
+  });
+
+  it("upgrade mode asks for consent itself — there is no step 1 to have asked", () => {
+    expect(ngo).toMatch(/testID="chk\.shelterVerifyNgo\.consentDpa"/);
+  });
+});
+
 describe("the shelter shell reaches its notification feed and settings (F-R3-4)", () => {
   it("the shelter Home header has a bell that opens `notifications`", () => {
     const dash = stripComments(read("ShelterDashboardScreen.tsx"));
