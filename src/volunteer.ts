@@ -240,17 +240,22 @@ export function cancelVariant(item: MySignupItem, nowMs: number = Date.now()): C
   return nowMs > new Date(item.cancel_cutoff_at).getTime() ? "late" : "free";
 }
 
-/** The check-in/out window for a shift: opens 30 min before start, stays open for check-out
- *  until 2 h after the shift ends, and reads as missed once that grace period has passed
- *  without a check-in. */
+/** The check-in/out window for a shift: check-in opens 30 min before start, check-out opens
+ *  AT the start (F-R3-7 — the server refuses an earlier one with `shift_not_started`, so an
+ *  early check-in reads as `checked_in` until then) and stays open until 2 h after the shift
+ *  ends; reads as missed once the shift has ended without a check-in. */
 export type CheckinState =
-  | { kind: "not_yet"; opensAt: string } | { kind: "can_check_in" } | { kind: "can_check_out" }
+  | { kind: "not_yet"; opensAt: string } | { kind: "can_check_in" }
+  | { kind: "checked_in"; startsAt: string } | { kind: "can_check_out" }
   | { kind: "done" } | { kind: "missed" };
 export function checkinState(item: MySignupItem, nowMs: number = Date.now()): CheckinState {
   const start = new Date(item.shift.starts_at).getTime();
   const end = new Date(item.shift.ends_at).getTime();
   if (item.check_out_at) return { kind: "done" };
-  if (item.check_in_at) return nowMs <= end + 2 * H ? { kind: "can_check_out" } : { kind: "done" };
+  if (item.check_in_at) {
+    if (nowMs < start) return { kind: "checked_in", startsAt: item.shift.starts_at };
+    return nowMs <= end + 2 * H ? { kind: "can_check_out" } : { kind: "done" };
+  }
   if (nowMs > end) return { kind: "missed" };
   const opens = start - 30 * 60e3;
   return nowMs < opens ? { kind: "not_yet", opensAt: new Date(opens).toISOString() } : { kind: "can_check_in" };
