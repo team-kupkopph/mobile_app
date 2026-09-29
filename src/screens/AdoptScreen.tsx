@@ -14,11 +14,11 @@ import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { StaleBanner } from "../components/StaleBanner";
-import { isOffline, loadState } from "../net";
+import { isOffline } from "../net";
 import { useAuth } from "../auth/AuthContext";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { RootStackParamList } from "../navigation/types";
-import { useCachedFeed } from "../useCachedFeed";
+import { feedState, useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors } from "../theme";
@@ -57,6 +57,8 @@ export function AdoptScreen({ navigation }: Props) {
   const [segment, setSegment] = useState(0);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  const state = feedState(res, listings, stale);
 
   return (
     <View style={styles.screen} testID="screen.adopt">
@@ -105,9 +107,9 @@ export function AdoptScreen({ navigation }: Props) {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {loadState(res, listings?.length).kind !== "ready" ? (
+        {state.kind !== "ready" ? (
           <LoadStateView
-            state={loadState(res, listings?.length)}
+            state={state}
             emptyTitle={city ? `No pets up for adoption in ${city} yet.`
               : "Set your city to see nearby pets."}
             onRetry={load}

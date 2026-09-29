@@ -152,3 +152,60 @@ describe("US-X1 · a failed refresh must not empty the screen", () => {
     expect(nextFeed(["old"], true, [])).toEqual({ rows: [], stale: false });
   });
 });
+
+describe("F-R3-1 · a failed refresh with rows on screen still SHOWS them", () => {
+  // `nextFeed` kept the rows and raised `stale` — and every feed screen then threw both
+  // away, because it branched on `loadState(res, n).kind !== "ready"`, and `loadState`
+  // answers `offline`/`error` for a failed response before it ever looks at the count. So
+  // the cached rows were replaced by "You're offline" and the StaleBanner branch was dead
+  // code on all four screens. Found live on a device (Run 3, VB-N3).
+  const { feedState } = require("../useCachedFeed");
+  const offline = { ok: false, status: 0 };
+  const serverError = { ok: false, status: 503 };
+
+  it("renders the rows when a refresh failed but rows are cached", () => {
+    expect(feedState(offline, ["old"], true)).toEqual({ kind: "ready" });
+    expect(feedState(serverError, ["old"], true)).toEqual({ kind: "ready" });
+  });
+
+  it("leaves a failure with nothing to show to LoadStateView", () => {
+    expect(feedState(offline, null, false)).toEqual({ kind: "offline" });
+    expect(feedState(serverError, null, false)).toEqual({ kind: "error", retryable: true });
+    // A cached EMPTY list that failed to refresh has nothing to be stale about on screen —
+    // "showing what we saved earlier" above nothing is the offline state with extra words.
+    expect(feedState(offline, [], true)).toEqual({ kind: "offline" });
+  });
+
+  it("is loadState everywhere else", () => {
+    expect(feedState(null, ["old"], false)).toEqual({ kind: "loading" });
+    expect(feedState({ ok: true, status: 200 }, [], false)).toEqual({ kind: "empty" });
+    expect(feedState({ ok: true, status: 200 }, ["new"], false)).toEqual({ kind: "ready" });
+  });
+
+  describe("no feed screen gates its rows on loadState alone", () => {
+    // The pure test above proves the helper; this proves the screens use it. The bug was not
+    // in any one screen — it was the same line hand-written into four — so the guard scans
+    // every screen on the shared hook rather than a list that the fifth one will miss.
+    const { readdirSync, readFileSync } = require("fs");
+    const { join } = require("path");
+    const SCREENS = join(__dirname, "..", "screens");
+    const code = (f: string) => readFileSync(join(SCREENS, f), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
+    const FEEDS: string[] = readdirSync(SCREENS)
+      .filter((f: string) => f.endsWith(".tsx") && /useCachedFeed</.test(code(f)));
+
+    it("finds the feed screens it is guarding", () => {
+      // A scan that matches nothing passes everything. Four today; more is fine.
+      expect(FEEDS.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it.each(FEEDS)("%s decides its render with feedState", (file) => {
+      const src = code(file);
+      expect(src).toMatch(/feedState\(\s*res\s*,/);
+      // Whatever `loadState` is still used for (a count badge, say), it must not be what
+      // decides between rows and LoadStateView.
+      expect(src).not.toMatch(/loadState\([^)]*\)\.kind\s*!==\s*"ready"/);
+    });
+  });
+});

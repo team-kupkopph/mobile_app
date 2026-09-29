@@ -12,10 +12,10 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { Avatar, ScreenHeader } from "../components/ui";
 import { StaleBanner } from "../components/StaleBanner";
-import { isOffline, loadState } from "../net";
+import { isOffline } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { useCachedFeed } from "../useCachedFeed";
+import { feedState, useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 
@@ -55,6 +55,8 @@ export function StoriesScreen({ navigation }: Props) {
   }, []);
   useFocusEffect(load);
 
+  const state = feedState(res, stories, stale);
+
   return (
     <View style={styles.screen}>
       <ScreenHeader
@@ -67,9 +69,9 @@ export function StoriesScreen({ navigation }: Props) {
         }
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {loadState(res, stories?.length).kind !== "ready" ? (
+        {state.kind !== "ready" ? (
           <LoadStateView
-            state={loadState(res, stories?.length)}
+            state={state}
             emptyTitle="No stories yet"
             emptyBody="Be the first to share one."
             onRetry={load}
