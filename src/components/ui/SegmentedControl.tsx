@@ -63,7 +63,8 @@ export function SegmentedControl({ segments, index, onChange, testID, style }: S
       accessibilityRole="tablist"
       onLayout={(e: LayoutChangeEvent) => setTrackWidth(e.nativeEvent.layout.width)}
     >
-      {slot ? (
+      {/* index -1 = nothing chosen yet (e.g. a required choice with no default): no thumb. */}
+      {slot && index >= 0 ? (
         <Animated.View
           pointerEvents="none"
           style={[styles.thumb, { width: slot, transform: [{ translateX: x }] }]}

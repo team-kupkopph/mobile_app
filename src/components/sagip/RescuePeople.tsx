@@ -9,11 +9,11 @@ import { personSummary } from "../../sagip";
 import { colors, spacing, typography } from "../../theme";
 import { Card } from "../ui";
 
-export function RescuePeople({ people }: { people: RescuePerson[] }) {
+export function RescuePeople({ people, title = "People on this rescue" }: { people: RescuePerson[]; title?: string }) {
   if (people.length === 0) return null;
   return (
     <Card style={styles.card}>
-      <Text style={styles.title}>People on this rescue</Text>
+      <Text style={styles.title}>{title}</Text>
       {people.map((p, i) => {
         const s = personSummary(p);
         return (

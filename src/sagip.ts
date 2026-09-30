@@ -244,8 +244,8 @@ export function directionsUrl(lat: number, lng: number, os: string): string {
 
 // S11 · the reasons a reporter may close their own report — the backend's
 // ReportCloseSerializer accepts exactly these keys.
-export type CloseReason = "gone" | "duplicate" | "handled_myself" | "mistake";
-export const CLOSE_REASONS: { key: CloseReason; label: string }[] = [
+export type CloseReason = "gone" | "duplicate" | "handled_myself" | "mistake" | "reunited";
+export const CLOSE_REASONS: { key: CloseReason | "reunited"; label: string }[] = [
   { key: "gone", label: "The animal is gone" },
   { key: "duplicate", label: "Someone already reported it" },
   { key: "handled_myself", label: "I took care of it myself" },
@@ -274,7 +274,7 @@ export function historyNote(note: string | undefined): string | null {
   }
   if (note.startsWith(CLOSE_NOTE_PREFIX)) {
     const key = note.slice(CLOSE_NOTE_PREFIX.length);
-    const reason = CLOSE_REASONS.find((r) => r.key === key);
+    const reason = [...CLOSE_REASONS, ...LOST_CLOSE_REASONS].find((r) => r.key === key);
     return `Closed by you · ${reason ? reason.label : key}`;
   }
   return note;
@@ -285,13 +285,16 @@ export function historyNote(note: string | undefined): string | null {
 /** How a person on a rescue is described to the viewer. `noContact` is what to say when they
  *  haven't shared contact details — null for an anonymous reporter, who can't (D8). */
 export function personSummary(p: RescuePerson): { title: string; detail: string; noContact: string | null } {
-  if (p.role === "reporter" && p.anonymous) {
-    return { title: "The reporter", detail: "Chose to stay anonymous", noContact: null };
+  if (p.anonymous) {
+    return { title: p.role === "finder" ? "The finder" : "The reporter",
+             detail: "Chose to stay anonymous", noContact: null };
   }
   const title = p.display_name ?? "Someone";
   const noContact = "Hasn't shared contact details.";
   if (p.role === "claimer") return { title, detail: "Claimed this rescue", noContact };
   if (p.role === "reporter") return { title, detail: "Reported this", noContact };
+  if (p.role === "finder") return { title, detail: "Says they've seen your pet", noContact };
+  if (p.role === "owner") return { title, detail: "Owner of the lost pet", noContact };
   const offered = p.offer_type ? `Offered ${OFFER_TYPE_LABEL[p.offer_type].toLowerCase()}` : "Offered to help";
   return { title, detail: p.note ? `${offered} · “${p.note}”` : offered, noContact };
 }
@@ -299,4 +302,68 @@ export function personSummary(p: RescuePerson): { title: string; detail: string;
 /** A helper's one switch covers all their offers on a report: on only when every one shares. */
 export function offersShareContact(offers: { contact_shared: boolean }[]): boolean {
   return offers.length > 0 && offers.every((o) => o.contact_shared);
+}
+
+// ── D6 · lost pets ────────────────────────────────────────────────────────────────────
+export type ReportMode = "stray" | "lost" | "found";
+
+/** A report's headline. A lost pet is named ("Lost: Bruno") — its owner published that to be
+ *  recognised; a found animal says so; a stray keeps "Dog · Injured". */
+export function reportTitle(r: { report_type?: string; species: string; condition: string; pet_name?: string }): string {
+  if (r.report_type === "lost") return r.pet_name ? `Lost: ${r.pet_name}` : `Lost ${r.species}`;
+  if (r.report_type === "found") return `Found ${r.species} · ${cap(r.condition)}`;
+  return sagipTitle(r.species, r.condition);
+}
+
+/** A lost pet is never "Reported / Claimed / Rescued" — nobody claims it. Open, it asks the
+ *  world to look (amber: someone must act); resolved, it's home. */
+export function reportKindChip(reportType: string | undefined, status: StrayStatus): { label: string; tone: StrayTone } {
+  if (reportType === "lost") {
+    return status === "resolved" ? { label: "Home again", tone: "grey" } : { label: "Lost pet", tone: "amber" };
+  }
+  return strayChip(status);
+}
+
+// "reunited" is how an owner closes a lost report (backend ReportCloseSerializer accepts it).
+export const LOST_CLOSE_REASONS: { key: CloseReason; label: string }[] = [
+  { key: "reunited", label: "We're back together" },
+  { key: "mistake", label: "I reported it by mistake" }
+];
+
+export function closeReasonsFor(reportType: string | undefined) {
+  return reportType === "lost" ? LOST_CLOSE_REASONS : CLOSE_REASONS;
+}
+
+/** The POST /reports body for each kind of report (S12). A stray's body is exactly what it was
+ *  before lost/found existed; a lost pet carries its pet and no condition or anonymity (its
+ *  owner must be findable); a sighting is a found report pointing at the lost one. */
+export function reportBody(f: {
+  mode: ReportMode; species: string; condition: string; notes: string; anonymous: boolean;
+  shareContact: boolean; coords: { lat: number; lng: number }; locationText: string; city: string;
+  photoUrl: string | null; idempotencyKey: string;
+  petId?: string | null; breed?: string; colorMarkings?: string; sightingOf?: string;
+}): Record<string, unknown> {
+  const anonymous = f.mode !== "lost" && f.anonymous;
+  const body: Record<string, unknown> = {
+    species: f.species, notes: f.notes.trim() || undefined,
+    contact_share_consent: f.shareContact && !anonymous,
+    lat: f.coords.lat, lng: f.coords.lng, location_text: f.locationText || undefined,
+    city: f.city || undefined,
+    photos: f.photoUrl ? [{ file_url: f.photoUrl }] : [],
+    idempotency_key: f.idempotencyKey
+  };
+  if (f.mode !== "lost") {
+    body.condition = f.condition;
+    body.is_anonymous = anonymous;
+  }
+  if (f.mode !== "stray") {
+    body.report_type = f.mode;
+    if (f.colorMarkings?.trim()) body.color_markings = f.colorMarkings.trim();
+  }
+  if (f.mode === "lost") {
+    if (f.petId) body.pet_id = f.petId;
+    if (f.breed?.trim()) body.breed = f.breed.trim();
+  }
+  if (f.mode === "found" && f.sightingOf) body.sighting_of = f.sightingOf;
+  return body;
 }

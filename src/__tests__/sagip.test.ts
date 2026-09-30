@@ -1,5 +1,6 @@
 import { MyReport, RescueCaseSummary } from "../api/types";
 import {
+  closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
   offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip
 } from "../sagip";
@@ -275,5 +276,80 @@ describe("release reasons (D3)", () => {
       .toBe("The rescuer couldn't make it · I couldn't find the animal");
     expect(historyNote("released_by_claimer:something_else"))
       .toBe("The rescuer couldn't make it");
+  });
+});
+
+
+// ── D6 · lost pets ────────────────────────────────────────────────────────────────────
+describe("reportTitle / reportKindChip (D6 · a lost pet reads as one)", () => {
+  it("names a lost pet by name, a found animal as found, a stray as before", () => {
+    expect(reportTitle({ report_type: "lost", species: "dog", condition: "healthy", pet_name: "Bruno" }))
+      .toBe("Lost: Bruno");
+    expect(reportTitle({ report_type: "lost", species: "cat", condition: "healthy" })).toBe("Lost cat");
+    expect(reportTitle({ report_type: "found", species: "dog", condition: "injured" })).toBe("Found dog · Injured");
+    expect(reportTitle({ report_type: "stray", species: "dog", condition: "sick" })).toBe("Dog · Sick");
+    expect(reportTitle({ species: "dog", condition: "sick" })).toBe("Dog · Sick");   // older payloads
+  });
+
+  it("marks an open lost pet as 'Lost pet', never as a rescue status", () => {
+    expect(reportKindChip("lost", "reported")).toEqual({ label: "Lost pet", tone: "amber" });
+    expect(reportKindChip("lost", "resolved")).toEqual({ label: "Home again", tone: "grey" });
+    expect(reportKindChip("found", "claimed")).toEqual(strayChip("claimed"));
+    expect(reportKindChip(undefined, "reported")).toEqual(strayChip("reported"));
+  });
+});
+
+describe("closeReasonsFor (D6)", () => {
+  it("offers a lost pet's owner 'reunited', and strays the original four", () => {
+    expect(closeReasonsFor("lost").map((r) => r.key)).toEqual(["reunited", "mistake"]);
+    expect(closeReasonsFor("stray")).toEqual(CLOSE_REASONS);
+    expect(closeReasonsFor("found")).toEqual(CLOSE_REASONS);
+  });
+
+  it("renders a reunion close in the owner's words", () => {
+    expect(historyNote("closed_by_reporter:reunited")).toBe("Closed by you · We're back together");
+  });
+});
+
+describe("personSummary for a lost<->found match (D6)", () => {
+  it("describes the finder and the owner, and keeps an anonymous finder anonymous", () => {
+    expect(personSummary({ role: "finder", display_name: "Rosa" }))
+      .toMatchObject({ title: "Rosa", detail: "Says they've seen your pet" });
+    expect(personSummary({ role: "owner", display_name: "Ana" }))
+      .toMatchObject({ title: "Ana", detail: "Owner of the lost pet" });
+    expect(personSummary({ role: "finder", anonymous: true }))
+      .toEqual({ title: "The finder", detail: "Chose to stay anonymous", noContact: null });
+  });
+});
+
+describe("reportBody (S12 · each kind of report sends exactly its fields)", () => {
+  const base = {
+    species: "dog", condition: "injured", notes: "  by the gate ", anonymous: false,
+    shareContact: true, coords: { lat: 14.6, lng: 121.1 }, locationText: "Sumulong Hwy",
+    city: "Marikina", photoUrl: null, idempotencyKey: "k1"
+  };
+
+  it("keeps a stray's body exactly as it was", () => {
+    expect(reportBody({ ...base, mode: "stray" })).toEqual({
+      species: "dog", condition: "injured", notes: "by the gate", is_anonymous: false,
+      contact_share_consent: true, lat: 14.6, lng: 121.1, location_text: "Sumulong Hwy",
+      city: "Marikina", photos: [], idempotency_key: "k1"
+    });
+  });
+
+  it("sends a lost pet with its pet and no condition or anonymity", () => {
+    const body = reportBody({ ...base, mode: "lost", petId: "p1", colorMarkings: "brown", anonymous: true });
+    expect(body).toMatchObject({ report_type: "lost", pet_id: "p1", color_markings: "brown" });
+    expect(body).not.toHaveProperty("condition");
+    expect(body).not.toHaveProperty("is_anonymous");
+  });
+
+  it("sends a sighting as a found report pointing at the lost pet", () => {
+    const body = reportBody({ ...base, mode: "found", sightingOf: "lost-1" });
+    expect(body).toMatchObject({ report_type: "found", condition: "injured", sighting_of: "lost-1" });
+  });
+
+  it("never shares contact on an anonymous report", () => {
+    expect(reportBody({ ...base, mode: "found", anonymous: true }).contact_share_consent).toBe(false);
   });
 });

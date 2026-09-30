@@ -20,7 +20,7 @@ import { StaleBanner } from "../components/StaleBanner";
 import { RootStackParamList } from "../navigation/types";
 import { feedState, useCachedFeed } from "../useCachedFeed";
 import { isOffline, loadState } from "../net";
-import { relTime, sagipTitle, strayChip } from "../sagip";
+import { relTime, reportKindChip, reportTitle } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Card } from "../components/ui";
@@ -99,8 +99,8 @@ export function RescueMapScreen({ navigation }: Props) {
                 key={r.report_id}
                 center={{ latitude: r.approx_location.lat, longitude: r.approx_location.lng }}
                 radius={APPROX_RADIUS_M}
-                strokeColor={TONE[strayChip(r.status).tone].fg}
-                fillColor={`${TONE[strayChip(r.status).tone].fg}55`}
+                strokeColor={TONE[reportKindChip(r.report_type, r.status).tone].fg}
+                fillColor={`${TONE[reportKindChip(r.report_type, r.status).tone].fg}55`}
                 strokeWidth={1}
               />
             ) : null)}
@@ -141,7 +141,8 @@ export function RescueMapScreen({ navigation }: Props) {
           <>
           {stale ? <StaleBanner offline={isOffline(res)} /> : null}
           {(reports ?? []).map((r) => {
-            const chip = strayChip(r.status);
+            // D6 · a lost pet reads as one — "Lost dog", chip "Lost pet" — not as a rescue.
+            const chip = reportKindChip(r.report_type, r.status);
             const tone = TONE[chip.tone];
             return (
               <TouchableOpacity
@@ -151,7 +152,7 @@ export function RescueMapScreen({ navigation }: Props) {
               >
                 <Card style={styles.card}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{sagipTitle(r.species, r.condition)}</Text>
+                    <Text style={styles.cardTitle}>{reportTitle(r)}</Text>
                     <Text style={styles.cardMeta}>{(r.city ? r.city + " · " : "") + relTime(r.reported_at)}</Text>
                   </View>
                   <View style={[styles.chip, { backgroundColor: tone.bg }]}>
