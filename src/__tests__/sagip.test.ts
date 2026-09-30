@@ -1,6 +1,6 @@
 import { MyReport, RescueCaseSummary } from "../api/types";
 import {
-  CLOSE_REASONS, offersShareContact, personSummary, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
+  CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
   offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip
 } from "../sagip";
 
@@ -259,5 +259,21 @@ describe("offersShareContact (a helper with several offers has one switch)", () 
     expect(offersShareContact([{ contact_shared: true }, { contact_shared: true }])).toBe(true);
     expect(offersShareContact([{ contact_shared: true }, { contact_shared: false }])).toBe(false);
     expect(offersShareContact([])).toBe(false);
+  });
+});
+
+
+// ── D3 · a claimer who can't make it ──────────────────────────────────────────────────
+describe("release reasons (D3)", () => {
+  it("offers exactly the four reasons the server accepts", () => {
+    expect(RELEASE_REASONS.map((r) => r.key))
+      .toEqual(["cant_get_there", "cant_find", "no_capacity", "something_came_up"]);
+  });
+
+  it("tells the reporter the rescuer couldn't make it, and why", () => {
+    expect(historyNote("released_by_claimer:cant_find"))
+      .toBe("The rescuer couldn't make it · I couldn't find the animal");
+    expect(historyNote("released_by_claimer:something_else"))
+      .toBe("The rescuer couldn't make it");
   });
 });

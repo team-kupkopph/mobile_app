@@ -67,11 +67,12 @@ export function ReportDetailScreen({ navigation, route }: Props) {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   function confirmClaim() {
-    // The exclusivity warning appears before the tap commits to anything — claiming is
-    // final, there's no release once it lands.
+    // The exclusivity warning appears before the tap commits to anything. Since D3 a claim can
+    // be released from the case screen, so the warning asks for intent rather than promising
+    // the claim can never be handed back (which the expiry sweep contradicted anyway).
     Alert.alert(
-      "Claiming is final",
-      "It's locked to you and can't be handed back. Only claim if you're actually going.",
+      "Only claim if you're going",
+      "It's yours until it's done. If plans change, release it from your case so someone else can go.",
       [
         { text: "Not yet", style: "cancel" },
         { text: "Claim this case", style: "default", onPress: claim }
@@ -393,7 +394,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             <View style={styles.actionRow}>
               <Button label="Claim this case" onPress={confirmClaim} loading={claiming} />
               <Text style={styles.claimFine}>
-                Claiming is final — it's locked to you and can't be handed back.
+                Only claim if you're going. If plans change, release it so someone else can.
               </Text>
               <TouchableOpacity
                 style={styles.offerBtn}

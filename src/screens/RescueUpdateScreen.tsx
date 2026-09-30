@@ -7,7 +7,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
@@ -16,7 +16,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { advanceableStatuses, claimDeadline, directionsUrl, sagipTitle, strayChip } from "../sagip";
+import { RELEASE_REASONS, ReleaseReason, advanceableStatuses, claimDeadline, directionsUrl, sagipTitle, strayChip } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
@@ -117,6 +117,29 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     if (!res.ok) setError(res.data?.error?.code === "case_expired"
       ? "This claim lapsed — it's back on the map for someone else to claim."
       : res.data?.error?.message ?? "Couldn't update that. Try again.");
+    load();
+  }
+
+  // D3 · "I can't make it" — the reasons open inline (four is too many for an Android alert).
+  // Only while `claimed`: once rescued, the way out is a handoff, and the server refuses a
+  // release (409 in_custody).
+  const [releasing, setReleasing] = useState(false);
+  const [releaseBusy, setReleaseBusy] = useState(false);
+  async function release(reason: ReleaseReason) {
+    if (releaseBusy) return;
+    setReleaseBusy(true);
+    const res = await api.post(`/cases/${caseId}/release`, { reason });
+    setReleaseBusy(false);
+    if (res.ok) {
+      Alert.alert("Released", "It's back on the map for another rescuer, and the reporter has been told.");
+      navigation.goBack();
+      return;
+    }
+    const code = res.data?.error?.code;
+    setReleasing(false);
+    setError(code === "in_custody" ? "The animal is in your care now — list or place them instead."
+      : code === "case_expired" ? "This claim already lapsed — it's back on the map."
+      : res.data?.error?.message ?? "Couldn't release the claim. Try again.");
     load();
   }
 
@@ -272,6 +295,35 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
               />
             </>
           )}
+
+          {report.status === "claimed" && report.my_case ? (
+            releasing ? (
+              <Card style={styles.releaseCard}>
+                <Text style={styles.releaseTitle}>Why can't you make it?</Text>
+                <Text style={styles.releaseSub}>It goes back on the map at once and the reporter is told.</Text>
+                {RELEASE_REASONS.map((r) => (
+                  <TouchableOpacity
+                    key={r.key}
+                    style={styles.releaseOption}
+                    disabled={releaseBusy}
+                    accessibilityRole="button"
+                    onPress={() => release(r.key)}
+                  >
+                    <Text style={styles.releaseOptionText}>{r.label}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={styles.releaseCancel} accessibilityRole="button"
+                  onPress={() => setReleasing(false)}>
+                  <Text style={styles.releaseCancelText}>I'm still going</Text>
+                </TouchableOpacity>
+              </Card>
+            ) : (
+              <TouchableOpacity style={styles.releaseLink} accessibilityRole="button"
+                testID="btn.rescueUpdate.release" onPress={() => setReleasing(true)}>
+                <Text style={styles.releaseLinkText}>I can't make it</Text>
+              </TouchableOpacity>
+            )
+          ) : null}
         </ScrollView>
       )}
     </View>
@@ -297,6 +349,15 @@ const styles = StyleSheet.create({
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
   handoffBtn: { flex: 1 },
   resolvedNote: { marginTop: 24, color: colors.muted, ...typography.body },
+  releaseLink: { marginTop: 8, minHeight: 44, alignItems: "center", justifyContent: "center" },
+  releaseLinkText: { color: colors.muted, ...typography.subtitle, fontWeight: "700", textDecorationLine: "underline" },
+  releaseCard: { marginTop: 16, padding: spacing.lg },
+  releaseTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  releaseSub: { marginTop: 4, marginBottom: 6, color: colors.muted, ...typography.meta },
+  releaseOption: { minHeight: 48, justifyContent: "center", borderTopWidth: 1, borderTopColor: colors.border },
+  releaseOptionText: { color: colors.ink, ...typography.subtitle },
+  releaseCancel: { minHeight: 48, justifyContent: "center", alignItems: "center", marginTop: 4 },
+  releaseCancelText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   sectionTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
   radioList: { gap: 10 },
   radioRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 16, borderWidth: 2, borderColor: "transparent" },
