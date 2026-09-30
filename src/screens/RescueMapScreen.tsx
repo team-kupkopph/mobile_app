@@ -36,10 +36,11 @@ const APPROX_RADIUS_M = 250;
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueMap">;
 
-export function RescueMapScreen({ navigation }: Props) {
+export function RescueMapScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city: savedCity } = useAuth();
-  const city = savedCity ?? "Marikina";
+  // S16 · a shelter's Rescue card passes the shelter's own city; everyone else gets theirs.
+  const city = route.params?.city ?? savedCity ?? "Marikina";
   const center = centroidFor(city);
   // US-O1 · `null` until a request has actually come back. Initialising to `[]` made "never
   // loaded" indistinguishable from "loaded, and genuinely empty", which is half of the bug

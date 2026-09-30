@@ -1,4 +1,4 @@
-import { Me, ShelterDashboard, ShelterDashboardVolunteer } from "./api/types";
+import { Me, ShelterDashboard, ShelterDashboardRescue, ShelterDashboardVolunteer } from "./api/types";
 
 // US-B5: two derived dashboard states, never one screen. A shelter_org
 // verification_request existing (`submitted`) means "Under review"; no row means the
@@ -49,4 +49,24 @@ export function volunteerSummary(d: ShelterDashboardVolunteer): { line1: string;
     ? `Mark attendance for ${d.attendance_due} volunteer${d.attendance_due === 1 ? "" : "s"}`
     : null;
   return { line1, line2 };
+}
+
+// S16 · the dashboard's "Rescue" card copy. A verified shelter may claim strays and is paged about
+// them, but its shell had no rescue surface. Every number here is one the server counted: a city
+// the map can't search (or none on file) says so, and offers no map, rather than "0 near you".
+export function rescueSummary(r: ShelterDashboardRescue, canClaim: boolean): {
+  line1: string; line2: string; mapCity: string | null; note: string | null;
+} {
+  const n = r.needs_help;
+  const line1 = !r.city ? "Add your shelter's address to see strays near you"
+    : !r.city_supported || n === null ? `The rescue map doesn't cover ${r.city} yet`
+    : n === 0 ? `No strays need help near ${r.city} right now`
+    : `${n} ${n === 1 ? "stray needs" : "strays need"} help near ${r.city}`;
+  const line2 = r.open_cases === 0 ? "No open cases"
+    : `${r.open_cases} open case${r.open_cases === 1 ? "" : "s"}`;
+  return {
+    line1, line2,
+    mapCity: r.city && r.city_supported ? r.city : null,
+    note: canClaim ? null : "Get verified to claim a rescue."
+  };
 }

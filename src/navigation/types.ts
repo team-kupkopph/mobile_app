@@ -97,7 +97,8 @@ export type RootStackParamList = {
   // outbox instead of the server — the success screen says so rather than pretending.
   reportSent: { reportId: string | null; title: string; city: string | null; queued?: boolean };
   myReports: undefined;
-  rescueMap: undefined;
+  // S16 · a shelter opens the map on its own city (its address), not the owner-picked one.
+  rescueMap: { city?: string } | undefined;
   reportDetail: { reportId: string };
   // Track O — the commitment ladder (offers)
   rescueOffer: { reportId: string };
