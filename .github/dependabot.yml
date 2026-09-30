@@ -50,6 +50,16 @@ updates:
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       - dependency-name: "@react-native-community/netinfo"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      # The rest of React Native's own package set (@react-native/assets-registry, babel-preset,
+      # metro-config, …) is versioned in lockstep with react-native itself: 0.81.5 wants 0.81.x.
+      # #24 (2026-09-09) proposed @react-native/assets-registry 0.87.1 — React Native 0.87's —
+      # and passed CI, because nothing in the pipeline runs the native side.
+      - dependency-name: "@react-native/*"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      # jest-expo's major IS the Expo SDK: SDK 54 pins ~54.0.17 in expo/bundledNativeModules.json.
+      # #26 (2026-09-09) proposed 57.0.5, i.e. SDK 57's test preset against an SDK 54 app.
+      - dependency-name: "jest-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       # react / react-dom are chosen by the React Native version, not independently.
       - dependency-name: "react"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]

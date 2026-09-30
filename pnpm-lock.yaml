@@ -20,9 +20,6 @@ importers:
       '@react-native-community/netinfo':
         specifier: 11.4.1
         version: 11.4.1(react-native@0.81.5(@babel/core@7.29.7)(@react-native-community/cli@13.6.9)(@types/react@19.1.17)(react@19.1.0))
-      '@react-native/assets-registry':
-        specifier: 0.74.87
-        version: 0.74.87
       '@react-navigation/native':
         specifier: ^7.3.14
         version: 7.3.14(react-native@0.81.5(@babel/core@7.29.7)(@react-native-community/cli@13.6.9)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -953,10 +950,6 @@ packages:
     resolution: {integrity: sha512-B0BYAkghz3Q2V09BF88RA601XursIEA111tnc2JOaN7axJWmNefmfjZqw/KdSxKZp7CZUuPpjBmz/WCR9uaHYg==}
     peerDependencies:
       react-native: '>=0.59'
-
-  '@react-native/assets-registry@0.74.87':
-    resolution: {integrity: sha512-1XmRhqQchN+pXPKEKYdpJlwESxVomJOxtEnIkbo7GAlaN2sym84fHEGDXAjLilih5GVPpcpSmFzTy8jx3LtaFg==}
-    engines: {node: '>=18'}
 
   '@react-native/assets-registry@0.81.5':
     resolution: {integrity: sha512-705B6x/5Kxm1RKRvSv0ADYWm5JOnoiQ1ufW7h8uu2E6G9Of/eE6hP/Ivw3U5jI16ERqZxiKQwk34VJbB0niX9w==}
@@ -5313,8 +5306,6 @@ snapshots:
   '@react-native-community/netinfo@11.4.1(react-native@0.81.5(@babel/core@7.29.7)(@react-native-community/cli@13.6.9)(@types/react@19.1.17)(react@19.1.0))':
     dependencies:
       react-native: 0.81.5(@babel/core@7.29.7)(@react-native-community/cli@13.6.9)(@types/react@19.1.17)(react@19.1.0)
-
-  '@react-native/assets-registry@0.74.87': {}
 
   '@react-native/assets-registry@0.81.5': {}
 
