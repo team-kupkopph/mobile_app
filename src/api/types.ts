@@ -63,7 +63,24 @@ export type ReportDetail = {
   // Reporter or active claimer only (S8) — as precise as the pin, so it follows the pin.
   location_text?: string | null;
   // Active claimer only (S27 · S9): their case, and when an unposted claim reopens.
-  my_case?: { case_id: string; claim_due_at: string | null };
+  my_case?: { case_id: string; claim_due_at: string | null; contact_shared?: boolean };
+  // D1 + D8 · reporter only: their own contact consent, and whether they reported anonymously.
+  contact_shared?: boolean;
+  is_anonymous?: boolean;
+  // D1 · the viewer's own offers on this report (each carries its own consent).
+  my_offers?: { offer_id: string; offer_type: OfferType; status: OfferListStatus; contact_shared: boolean }[];
+  // D1 + D8 · the other people on this rescue — present only for someone on it, and only once
+  // it's claimed. `contact` is absent unless that person consented.
+  people?: RescuePerson[];
+};
+
+export type RescuePerson = {
+  role: "reporter" | "claimer" | "helper";
+  display_name?: string;
+  anonymous?: boolean;                                   // D8 · an anonymous reporter
+  contact?: { phone: string | null; email: string };
+  offer_type?: OfferType;                                // helpers only
+  note?: string | null;
 };
 
 // Track K — the claim + working-the-case loop

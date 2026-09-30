@@ -20,6 +20,8 @@ import { advanceableStatuses, claimDeadline, directionsUrl, sagipTitle, strayChi
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
+import { ContactShareRow } from "../components/sagip/ContactShareRow";
+import { RescuePeople } from "../components/sagip/RescuePeople";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -105,6 +107,19 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   const tone = chip ? TONE[chip.tone] : null;
   const deadline = claimDeadline(report?.my_case?.claim_due_at);
 
+  // D1 · the claimer's own consent to be contacted by the reporter and matched helpers.
+  const [consentBusy, setConsentBusy] = useState(false);
+  async function setCaseConsent(share: boolean) {
+    if (consentBusy) return;
+    setConsentBusy(true);
+    const res = await api.post(`/cases/${caseId}/contact`, { share });
+    setConsentBusy(false);
+    if (!res.ok) setError(res.data?.error?.code === "case_expired"
+      ? "This claim lapsed — it's back on the map for someone else to claim."
+      : res.data?.error?.message ?? "Couldn't update that. Try again.");
+    load();
+  }
+
   function openInMaps() {
     const at = report?.precise_location;
     if (!at) return;
@@ -164,6 +179,19 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                 testID="btn.rescueUpdate.directions" style={styles.directions} />
             ) : null}
           </Card>
+
+          {/* D1 + D8 · the reporter (or that they chose anonymity) and every matched helper. */}
+          {report.people ? <RescuePeople people={report.people} /> : null}
+          {report.my_case ? (
+            <ContactShareRow
+              label="Share my contact"
+              hint="Lets the reporter and the people who offered help see your phone and email."
+              value={!!report.my_case.contact_shared}
+              disabled={consentBusy}
+              onValueChange={setCaseConsent}
+              testID="switch.rescueUpdate.shareContact"
+            />
+          ) : null}
 
           {/* US-H1/US-H2 — once the case's report is safe, the claiming rescuer can hand it
               off, either publicly (adoption listing) or directly to someone they already

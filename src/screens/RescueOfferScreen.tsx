@@ -3,7 +3,7 @@
 // Reference: screens/user/screen-rescue-offer.png. POST /reports/{id}/offers.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -11,7 +11,8 @@ import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
 import { colors, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { Button, Card, ScreenHeader } from "../components/ui";
+import { Button, Card, Field, ScreenHeader } from "../components/ui";
+import { ContactShareRow } from "../components/sagip/ContactShareRow";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueOffer">;
@@ -20,6 +21,9 @@ export function RescueOfferScreen({ navigation, route }: Props) {
   const api = useApi();
   const { reportId } = route.params;
   const [selected, setSelected] = useState<OfferType | null>(null);
+  // D1 · what the helper can do, and whether the claimer may contact them (off by default).
+  const [note, setNote] = useState("");
+  const [shareContact, setShareContact] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -31,7 +35,9 @@ export function RescueOfferScreen({ navigation, route }: Props) {
     if (!selected) { setError("Choose how you can help first."); return; }
     setSubmitting(true);
     setError(undefined);
-    const res = await api.post(`/reports/${reportId}/offers`, { offer_type: selected });
+    const res = await api.post(`/reports/${reportId}/offers`, {
+      offer_type: selected, note: note.trim(), contact_share_consent: shareContact
+    });
     setSubmitting(false);
     if (res.ok) {
       navigation.replace("rescueOfferSent", { reportId, offerType: selected });
@@ -50,11 +56,12 @@ export function RescueOfferScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Offer help" onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
         <Text style={styles.h1}>Can't claim it? Chip in instead.</Text>
         <Text style={styles.sub}>
-          An offer doesn't commit you to the whole case — pick one thing you can do. Whoever
-          claims this report gets your contact.
+          An offer doesn't commit you to the whole case — pick one thing you can do. If you
+          allow it below, whoever claims this report can contact you.
         </Text>
 
         <View style={styles.cardList}>
@@ -80,6 +87,25 @@ export function RescueOfferScreen({ navigation, route }: Props) {
           })}
         </View>
 
+        <View style={styles.noteField}>
+          <Field
+            label="Anything they should know? (optional)"
+            value={note}
+            onChangeText={setNote}
+            placeholder="e.g. I have a car, free after 6pm"
+            maxLength={200}
+            testID="field.rescueOffer.note"
+          />
+        </View>
+
+        <ContactShareRow
+          label="Let the rescuer contact me"
+          hint="Shares your phone and email with whoever claims this report, only after they claim it."
+          value={shareContact}
+          onValueChange={setShareContact}
+          testID="switch.rescueOffer.shareContact"
+        />
+
         <Text style={styles.fine}>Offers stay open for 48 hours, or until the case is claimed.</Text>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -91,14 +117,15 @@ export function RescueOfferScreen({ navigation, route }: Props) {
           accessibilityHint={selected ? undefined : "Choose how you can help first"}
           style={styles.submit}
         />
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 12 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12 },
+  noteField: { marginTop: 20 },
   h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 10, color: colors.muted, ...typography.body },
   cardList: { marginTop: 24, gap: 12 },
