@@ -13,6 +13,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { centroidFor } from "../cityCentroids";
 import { useOutbox } from "../outbox/OutboxProvider";
+import { ContactShareRow } from "../components/sagip/ContactShareRow";
 import { randomKey } from "../outbox/key";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
@@ -33,6 +34,9 @@ export function ReportStrayScreen({ navigation, route }: Props) {
   const [condition, setCondition] = useState<string>("injured");
   const [notes, setNotes] = useState("");
   const [anonymous, setAnonymous] = useState(false);
+  // D1 · off unless the reporter turns it on. D8 · anonymous forbids it, so switching
+  // anonymous on also switches this off.
+  const [shareContact, setShareContact] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -124,6 +128,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     const idempotencyKey = randomKey();
     const body = {
       species, condition, notes: notes.trim() || undefined, is_anonymous: anonymous,
+      contact_share_consent: shareContact && !anonymous,
       lat: coords.lat, lng: coords.lng, location_text: locationText || undefined,
       city: city || undefined,
       photos: photoUrl ? [{ file_url: photoUrl }] : [],
@@ -229,12 +234,23 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           <Text style={styles.anonLabel}>Report anonymously</Text>
           <Switch
             value={anonymous}
-            onValueChange={setAnonymous}
+            onValueChange={(v) => { setAnonymous(v); if (v) setShareContact(false); }}
             trackColor={{ true: colors.teal }}
             accessibilityLabel="Report anonymously"
             accessibilityHint="Hides your name from other users. The report is still linked to your account."
           />
         </View>
+
+        <ContactShareRow
+          label="Let the rescuer contact me"
+          hint={anonymous
+            ? "Anonymous reports don't share contact details."
+            : "Shares your phone and email with whoever claims this, only after they claim it."}
+          value={shareContact && !anonymous}
+          onValueChange={setShareContact}
+          disabled={anonymous}
+          testID="switch.reportStray.shareContact"
+        />
 
         {error ? (
           <Text style={styles.error} accessibilityRole="alert" accessibilityLiveRegion="polite">

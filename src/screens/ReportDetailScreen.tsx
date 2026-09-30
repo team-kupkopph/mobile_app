@@ -18,7 +18,12 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { CLOSE_REASONS, CloseReason, claimDeadline, escalationLines, historyNote, relTime, sagipTitle, strayChip } from "../sagip";
+import {
+  CLOSE_REASONS, CloseReason, OFFER_TYPE_LABEL, claimDeadline, escalationLines, historyNote,
+  offersShareContact, relTime, sagipTitle, strayChip
+} from "../sagip";
+import { ContactShareRow } from "../components/sagip/ContactShareRow";
+import { RescuePeople } from "../components/sagip/RescuePeople";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 import { TAP_SLOP } from "../touch";
@@ -48,6 +53,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
   // Android, which caps at three buttons), only after the reporter asks for it.
   const [closing, setClosing] = useState(false);
   const [closeBusy, setCloseBusy] = useState(false);
+  const [consentBusy, setConsentBusy] = useState(false);
 
   const load = useCallback(() => {
     setRes(null);
@@ -97,6 +103,21 @@ export function ReportDetailScreen({ navigation, route }: Props) {
       return;
     }
     Alert.alert("Couldn't claim this case", res.data?.error?.message ?? "Try again.");
+  }
+
+  // D1 · the reporter's own consent, and a helper's across all their offers on this report.
+  async function setConsent(paths: string[], share: boolean) {
+    if (consentBusy || paths.length === 0) return;
+    setConsentBusy(true);
+    const results = await Promise.all(paths.map((p) => api.post(p, { share })));
+    setConsentBusy(false);
+    const failed = results.find((r) => !r.ok);
+    if (failed) {
+      Alert.alert("Couldn't update that", failed.data?.error?.code === "anonymous_report"
+        ? "Anonymous reports don't share contact details."
+        : failed.data?.error?.message ?? "Try again.");
+    }
+    load();
   }
 
   async function closeReport(reason: CloseReason) {
@@ -282,6 +303,41 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
+          {/* D1 + D8 · the other people on this rescue, once it's claimed. */}
+          {report.people ? <RescuePeople people={report.people} /> : null}
+
+          {/* D1 · the reporter's own consent. Disabled for an anonymous report (D8). */}
+          {isReporterView && report.status !== "resolved" ? (
+            <ContactShareRow
+              label="Let the rescuer contact me"
+              hint={report.is_anonymous
+                ? "This report is anonymous, so your contact details can't be shared."
+                : "Shares your phone and email with whoever claims this, only once they have."}
+              value={!!report.contact_shared}
+              disabled={!!report.is_anonymous || consentBusy}
+              onValueChange={(share) => setConsent([`/reports/${report.report_id}/contact`], share)}
+              testID="switch.reportDetail.shareContact"
+            />
+          ) : null}
+
+          {/* D1 · a helper's own offers here, with one switch for their contact. */}
+          {report.my_offers && report.my_offers.length > 0 && report.status !== "resolved" ? (
+            <>
+              <Text style={styles.myOffers}>
+                You offered {report.my_offers.map((o) => OFFER_TYPE_LABEL[o.offer_type].toLowerCase()).join(" and ")}.
+              </Text>
+              <ContactShareRow
+                label="Let the rescuer contact me"
+                hint="Shares your phone and email with whoever claims this, only once they have."
+                value={offersShareContact(report.my_offers)}
+                disabled={consentBusy}
+                onValueChange={(share) => setConsent(report.my_offers!.map(
+                  (o) => `/reports/${report.report_id}/offers/${o.offer_id}/contact`), share)}
+                testID="switch.reportDetail.offerShareContact"
+              />
+            </>
+          ) : null}
+
           {/* S11 · a report that no longer needs anyone can be closed while it's unclaimed. */}
           {isReporterView && report.status === "reported" ? (
             closing ? (
@@ -377,6 +433,7 @@ const styles = StyleSheet.create({
   map: { ...StyleSheet.absoluteFillObject },
   mapNote: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 17 },
   landmark: { marginTop: 6, color: colors.ink, ...typography.meta, fontWeight: "700", lineHeight: 17 },
+  myOffers: { marginTop: 24, color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   claimedBy: { marginTop: 10, color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   ladderNote: { marginTop: 2, color: colors.muted, ...typography.meta, lineHeight: 17 },
   outcomeCard: { marginTop: 10, padding: 18, borderRadius: radii.tile, ...card },

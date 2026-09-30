@@ -1,4 +1,4 @@
-import { MyReport, OfferListStatus, OfferType, RescueCaseSummary, StrayStatus } from "./api/types";
+import { MyReport, OfferListStatus, OfferType, RescueCaseSummary, RescuePerson, StrayStatus } from "./api/types";
 
 // Sagip's shared display logic, unit-tested (like shelterDashboard.ts / verifications.ts).
 
@@ -262,4 +262,25 @@ export function historyNote(note: string | undefined): string | null {
     return `Closed by you · ${reason ? reason.label : key}`;
   }
   return note;
+}
+
+// ── D1 + D8 · the people on a rescue ──────────────────────────────────────────────────
+
+/** How a person on a rescue is described to the viewer. `noContact` is what to say when they
+ *  haven't shared contact details — null for an anonymous reporter, who can't (D8). */
+export function personSummary(p: RescuePerson): { title: string; detail: string; noContact: string | null } {
+  if (p.role === "reporter" && p.anonymous) {
+    return { title: "The reporter", detail: "Chose to stay anonymous", noContact: null };
+  }
+  const title = p.display_name ?? "Someone";
+  const noContact = "Hasn't shared contact details.";
+  if (p.role === "claimer") return { title, detail: "Claimed this rescue", noContact };
+  if (p.role === "reporter") return { title, detail: "Reported this", noContact };
+  const offered = p.offer_type ? `Offered ${OFFER_TYPE_LABEL[p.offer_type].toLowerCase()}` : "Offered to help";
+  return { title, detail: p.note ? `${offered} · “${p.note}”` : offered, noContact };
+}
+
+/** A helper's one switch covers all their offers on a report: on only when every one shares. */
+export function offersShareContact(offers: { contact_shared: boolean }[]): boolean {
+  return offers.length > 0 && offers.every((o) => o.contact_shared);
 }

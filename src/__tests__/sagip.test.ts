@@ -1,6 +1,6 @@
 import { MyReport, RescueCaseSummary } from "../api/types";
 import {
-  CLOSE_REASONS, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
+  CLOSE_REASONS, offersShareContact, personSummary, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
   offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip
 } from "../sagip";
 
@@ -228,5 +228,36 @@ describe("close reasons and history notes (S11)", () => {
     expect(historyNote("At the vet")).toBe("At the vet");
     expect(historyNote("")).toBeNull();
     expect(historyNote(undefined)).toBeNull();
+  });
+});
+
+
+// ── D1 + D8 · the people on a rescue ──────────────────────────────────────────────────
+describe("personSummary (D1 + D8 · who each person is, in the viewer's words)", () => {
+  it("names the claimer and the reporter by what they did", () => {
+    expect(personSummary({ role: "claimer", display_name: "Rico" }))
+      .toEqual({ title: "Rico", detail: "Claimed this rescue", noContact: "Hasn't shared contact details." });
+    expect(personSummary({ role: "reporter", display_name: "Ana" }))
+      .toMatchObject({ title: "Ana", detail: "Reported this" });
+  });
+
+  it("says what a helper offered, with their note", () => {
+    expect(personSummary({ role: "helper", display_name: "Ben", offer_type: "transport", note: "I have a car" }))
+      .toMatchObject({ title: "Ben", detail: "Offered transport · “I have a car”" });
+    expect(personSummary({ role: "helper", display_name: "Cora", offer_type: "vet_costs", note: null }))
+      .toMatchObject({ detail: "Offered vet costs" });
+  });
+
+  it("keeps an anonymous reporter anonymous and never asks them for contact (D8)", () => {
+    expect(personSummary({ role: "reporter", anonymous: true }))
+      .toEqual({ title: "The reporter", detail: "Chose to stay anonymous", noContact: null });
+  });
+});
+
+describe("offersShareContact (a helper with several offers has one switch)", () => {
+  it("is on only when every offer shares", () => {
+    expect(offersShareContact([{ contact_shared: true }, { contact_shared: true }])).toBe(true);
+    expect(offersShareContact([{ contact_shared: true }, { contact_shared: false }])).toBe(false);
+    expect(offersShareContact([])).toBe(false);
   });
 });
