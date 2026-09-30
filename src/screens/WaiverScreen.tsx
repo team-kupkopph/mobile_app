@@ -2,9 +2,13 @@
 // KawangGawaDetailScreen. There is no finalised waiver text yet; this screen says so plainly
 // rather than inventing legal language. The volunteer still sends `waiver_accepted: true` when
 // they check the box on the detail screen — the backend stamps the consent version server-side.
+//
+// Body copy lives in `src/launchGates.ts` (M4 launch gate 1) so a single source of truth
+// tracks whether the placeholder is still active; see library/dev/launch-gates.md.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { WAIVER_BODY } from "../launchGates";
 import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
@@ -20,17 +24,9 @@ export function WaiverScreen({ navigation }: Props) {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card style={styles.noticeCard}>
-          {/* TODO(D-S5-1): replace this placeholder with legal's finalised waiver text before M3 beta. */}
-          <Text style={styles.body}>
-            The full liability waiver and volunteer guidelines are still being finalised.
-          </Text>
-          <Text style={styles.body}>
-            They'll be available here before you need to start volunteering, and you'll get a
-            chance to review them then.
-          </Text>
-          <Text style={styles.body}>
-            This page is not the waiver itself — no binding agreement exists yet.
-          </Text>
+          {WAIVER_BODY.map((paragraph, i) => (
+            <Text key={i} style={styles.body}>{paragraph}</Text>
+          ))}
         </Card>
       </ScrollView>
     </View>

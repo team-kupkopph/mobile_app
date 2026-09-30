@@ -8,14 +8,16 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ScrollView, StyleSheet, Switch, Text, View,
+  Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View,
 } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import { privacyPolicyUrl } from "../launchGates";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { privacyRows, Settings } from "../settings";
+import { TAP_SLOP } from "../touch";
 import { ScreenHeader } from "../components/ui";
 import { colors, elevation, radii, typography } from "../theme";
 
@@ -102,6 +104,12 @@ export function SettingsPrivacyScreen({ navigation }: Props) {
           straight away.
         </Text>
 
+        {/* M4 gate 4 · a "Read our privacy policy" link renders ONLY when the URL is set
+            (via EXPO_PUBLIC_PRIVACY_POLICY_URL). While the policy is unpublished the whole
+            section is absent — a broken or placeholder link is worse than no link at all.
+            See library/dev/launch-gates.md. */}
+        <PrivacyPolicyLink />
+
         <Text style={styles.groupTitle}>ALWAYS ON</Text>
         <View style={styles.card}>
           {rows.facts.map((fact, i) => (
@@ -152,6 +160,29 @@ function Header({ navigation }: { navigation: Props["navigation"] }) {
   );
 }
 
+function PrivacyPolicyLink() {
+  const url = privacyPolicyUrl();
+  if (!url) return null;
+  return (
+    <>
+      <Text style={styles.groupTitle}>PRIVACY POLICY</Text>
+      <View style={styles.card}>
+        <TouchableOpacity
+          testID="link.settingsPrivacy.policy"
+          hitSlop={TAP_SLOP}
+          accessibilityRole="link"
+          accessibilityLabel="Read our privacy policy"
+          onPress={() => { void Linking.openURL(url); }}
+          style={styles.policyRow}
+        >
+          <Text style={styles.policyLabel}>Read our privacy policy</Text>
+          <Text style={styles.policyChev}>›</Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { padding: 20, paddingBottom: 48 },
@@ -161,6 +192,10 @@ const styles = StyleSheet.create({
   toggleRow: { paddingHorizontal: 18, paddingVertical: 16, flexDirection: "row", alignItems: "center" },
   toggleText: { flex: 1, paddingRight: 14 },
   toggleLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
+  policyRow: { paddingHorizontal: 18, paddingVertical: 16, minHeight: 44,
+               flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  policyLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
+  policyChev: { fontSize: 19, fontWeight: "700", color: colors.teal },
   factRow: { paddingHorizontal: 18, paddingVertical: 16 },
   factLabel: { ...typography.strong, fontWeight: "700", color: colors.ink },
   note: { ...typography.meta, color: colors.muted, marginTop: 4, lineHeight: 18 },
