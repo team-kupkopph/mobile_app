@@ -175,8 +175,8 @@ function duration(mins: number): string {
   return m === 0 ? `${h} h` : `${h} h ${m} min`;
 }
 
-// S9 · the claim confirm says a claim "can't be handed back", but an unposted claim reopens
-// when its window passes. The claimer is told when, in time left rather than a clock time
+// S9 · an unposted claim reopens when its window passes (and since D3 a claimer can also
+// release it). The claimer is told when, in time left rather than a clock time
 // (the server sends the instant; "within 2 h" needs no time-zone guess). Urgent inside the
 // last 90 minutes: the backend's hourly sweep warns at 75% of the window, so this is the
 // stretch where a push has already gone out.
@@ -253,9 +253,25 @@ export const CLOSE_REASONS: { key: CloseReason; label: string }[] = [
 ];
 const CLOSE_NOTE_PREFIX = "closed_by_reporter:";
 
-/** A status-history note in the reporter's words: their own close named, others as written. */
+// D3 · why a claimer let go, in their own words — the backend's ClaimReleaseSerializer accepts
+// exactly these keys and stamps the reopen row's note `released_by_claimer:<key>`.
+export type ReleaseReason = "cant_get_there" | "cant_find" | "no_capacity" | "something_came_up";
+export const RELEASE_REASONS: { key: ReleaseReason; label: string }[] = [
+  { key: "cant_get_there", label: "I can't get there" },
+  { key: "cant_find", label: "I couldn't find the animal" },
+  { key: "no_capacity", label: "I can't take the animal in" },
+  { key: "something_came_up", label: "Something came up" }
+];
+const RELEASE_NOTE_PREFIX = "released_by_claimer:";
+
+/** A status-history note in the reporter's words: their own close named, a claimer's release
+ *  explained (D3), others as written. */
 export function historyNote(note: string | undefined): string | null {
   if (!note) return null;
+  if (note.startsWith(RELEASE_NOTE_PREFIX)) {
+    const reason = RELEASE_REASONS.find((r) => r.key === note.slice(RELEASE_NOTE_PREFIX.length));
+    return reason ? `The rescuer couldn't make it · ${reason.label}` : "The rescuer couldn't make it";
+  }
   if (note.startsWith(CLOSE_NOTE_PREFIX)) {
     const key = note.slice(CLOSE_NOTE_PREFIX.length);
     const reason = CLOSE_REASONS.find((r) => r.key === key);
