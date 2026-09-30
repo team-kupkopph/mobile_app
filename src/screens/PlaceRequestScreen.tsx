@@ -17,6 +17,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ScreenBackdrop } from "../components/ScreenBackground";
+import { acceptedPlacementParams } from "../shelterAnimals";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radii, spacing, typography } from "../theme";
 import { Button, Card, ScreenHeader } from "../components/ui";
@@ -69,7 +70,8 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
     const res = await api.post(`/inquiries/${inquiryId}/${action}`, {});
     setDeciding(null);
     if (res.ok) {
-      if (action === "accept") navigation.navigate("placeAccepted");
+      // D7 · a shelter's accept returns the draft listing it now owns; a person's returns a pet.
+      if (action === "accept") navigation.navigate("placeAccepted", acceptedPlacementParams(res.data));
       else navigation.goBack();
       return;
     }

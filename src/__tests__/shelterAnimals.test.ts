@@ -1,7 +1,7 @@
 // Task B2 · ShelterAnimalsScreen — the shelter's Animals tab root.
 import { readFileSync } from "fs";
 import { join } from "path";
-import { SEGMENT_STATUS, STATUS_CHIP } from "../shelterAnimals";
+import { DRAFT_STATUS, SEGMENT_STATUS, STATUS_CHIP, acceptedPlacementParams, draftRoute } from "../shelterAnimals";
 
 const SCREEN = join(__dirname, "..", "screens", "ShelterAnimalsScreen.tsx");
 const readScreen = () => readFileSync(SCREEN, "utf8");
@@ -46,5 +46,36 @@ describe("the '+ List an animal' CTA moved here from the dashboard", () => {
 
   it("ShelterAnimalsScreen renders it instead", () => {
     expect(readScreen()).toMatch(/List an animal/);
+  });
+});
+
+
+// D7 · a shelter that accepts a placement gets the animal as a DRAFT listing. Drafts sit in
+// their own strip above the three segments — the segments follow the canvas artboard
+// (Live / Pending / Adopted) and stay exactly as drawn.
+describe("drafts from accepted placements (D7)", () => {
+  it("fetches drafts under their own wire status", () => {
+    expect(DRAFT_STATUS).toBe("draft");
+    expect(readScreen()).toMatch(/status=\$\{DRAFT_STATUS\}/);
+  });
+
+  it("leaves the artboard's three segments untouched", () => {
+    expect(Object.values(SEGMENT_STATUS)).not.toContain("draft");
+  });
+
+  it("opens a draft in the listing form, to finish it before publishing", () => {
+    expect(draftRoute("l-1")).toEqual({ name: "listingForm", params: { listingId: "l-1" } });
+  });
+
+  it("threads the draft's id from the accept response to the confirmation", () => {
+    expect(acceptedPlacementParams({ listing_id: "l-9", draft: true })).toEqual({ listingId: "l-9" });
+    expect(acceptedPlacementParams({ pet_id: "p-1" })).toBeUndefined();
+    expect(acceptedPlacementParams(null)).toBeUndefined();
+  });
+
+  it("offers Publish, not Inquire, on a draft", () => {
+    const detail = readFileSync(join(__dirname, "..", "screens", "ListingDetailScreen.tsx"), "utf8");
+    expect(detail).toMatch(/btn\.listingDetail\.publish/);
+    expect(detail).toMatch(/listing\.status === DRAFT_STATUS/);
   });
 });
