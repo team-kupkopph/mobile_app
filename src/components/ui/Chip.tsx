@@ -1,6 +1,6 @@
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 
-import { colors, radii, typography } from "../../theme";
+import { colors, pill, typography } from "../../theme";
 
 /**
  * The shared status vocabulary. One mapping, used by mobile and the admin console alike, so a
@@ -43,11 +43,20 @@ export function Chip({ label, tone = "neutral", dot = true, style }: ChipProps) 
   );
 }
 
+/**
+ * ⚠️ A PILL, NOT `radii.chip` (F-R2-14). The canvas's own Status chips panel draws this element
+ * at `height: 30px; border-radius: 15px`, and every padded chip on the artboards is exactly
+ * half its height (26/13, 28/14, 32/16). The panel's `12px · chip` radius row contradicts the
+ * chip it draws beside it; 12 on a 30 pt chip left a 6 pt straight run on each end. `radii.chip`
+ * stays for the non-pill small containers that use it (OTP boxes, notes).
+ */
+const HEIGHT = 30;
+
 const styles = StyleSheet.create({
   chip: {
-    height: 30,
+    height: HEIGHT,
     paddingHorizontal: 12,
-    borderRadius: radii.chip,
+    borderRadius: pill(HEIGHT),
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start"
