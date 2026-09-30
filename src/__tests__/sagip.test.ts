@@ -157,24 +157,48 @@ describe("claimDeadline (S9 · the claimer is told when an unposted claim reopen
   });
 });
 
-describe("escalationLines (S5 · only claim who was actually alerted)", () => {
-  it("is empty before any escalation", () => {
-    expect(escalationLines(0, { level_1: 0, level_2: 0 })).toEqual([]);
+describe("escalationLines (S5 · D2 · only claim who was actually alerted)", () => {
+  const counts = (at_report: number | null, level_1 = 0, level_2 = 0) => ({ at_report, level_1, level_2 });
+
+  it("is empty when nothing was sent and nothing has escalated", () => {
+    expect(escalationLines(0, counts(null))).toEqual([]);
     expect(escalationLines(undefined, undefined)).toEqual([]);
   });
 
-  it("counts the people each level reached", () => {
-    expect(escalationLines(1, { level_1: 3, level_2: 0 }))
-      .toEqual(["Widened to your city · 3 verified rescuers alerted."]);
-    expect(escalationLines(2, { level_1: 1, level_2: 2 })).toEqual([
-      "Widened to your city · 1 verified rescuer alerted.",
+  it("says how many were alerted the moment it was reported (D2)", () => {
+    expect(escalationLines(0, counts(3)))
+      .toEqual(["3 verified rescuers and shelters nearby were alerted right away."]);
+    expect(escalationLines(0, counts(1)))
+      .toEqual(["1 verified rescuer or shelter nearby was alerted right away."]);
+  });
+
+  it("says plainly when there was no one to alert — but only when the policy tried", () => {
+    expect(escalationLines(0, counts(0)))
+      .toEqual(["No verified rescuers or shelters in your city to alert yet."]);
+    // null = a healthy stray: the policy sends nothing, so there is nothing to report.
+    expect(escalationLines(0, counts(null))).toEqual([]);
+  });
+
+  it("counts the people each escalation level reached", () => {
+    expect(escalationLines(1, counts(null, 3)))
+      .toEqual(["Widened to your city · 3 verified rescuers and shelters alerted."]);
+    expect(escalationLines(2, counts(2, 1, 2))).toEqual([
+      "2 verified rescuers and shelters nearby were alerted right away.",
+      "Widened to your city · 1 more verified rescuer or shelter alerted.",
       "Widened further · 2 partner shelters nearby alerted."
     ]);
   });
 
+  it("doesn't call level 1 empty when everyone there was already alerted", () => {
+    expect(escalationLines(1, counts(2, 0))).toEqual([
+      "2 verified rescuers and shelters nearby were alerted right away.",
+      "Widened to your city · everyone there was already alerted."
+    ]);
+  });
+
   it("says plainly when a level reached no one — never 'notified'", () => {
-    expect(escalationLines(2, { level_1: 0, level_2: 0 })).toEqual([
-      "Widened to your city · no verified rescuers there to alert yet.",
+    expect(escalationLines(2, counts(null, 0, 0))).toEqual([
+      "Widened to your city · no verified rescuers or shelters there to alert yet.",
       "Widened further · no partner shelter nearby to alert yet."
     ]);
   });

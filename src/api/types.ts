@@ -55,7 +55,8 @@ export type ReportDetail = {
   escalation_level?: number; offers_count?: number;
   status_history?: ReportStatusHistoryEntry[];
   // Reporter only (S5 · S10 · S11) — absent for anyone else, null when not applicable.
-  escalation_notified?: { level_1: number; level_2: number };
+  // at_report (D2): the report-time alert's count, or null when the policy sent nothing.
+  escalation_notified?: { level_1: number; level_2: number; at_report?: number | null };
   claimer?: { display_name: string } | null;
   outcome?: { notes: string | null; photo_url: string | null; resolved_at: string } | null;
   close_reason?: string | null;

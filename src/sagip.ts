@@ -197,27 +197,39 @@ export function claimDeadline(
   };
 }
 
-// S5 · the waiting card used to say "partner shelters notified" at level 2 whether or not a
-// single partner existed. These lines only claim what the server counted: how many people
-// each level actually reached. An older server without the counts gets neutral words.
+// S5 · D2 · the waiting card used to say "partner shelters notified" at level 2 whether or
+// not a single partner existed. These lines only claim what the server counted. `at_report`
+// is the report-time alert (D2): null when the policy sends nothing (a healthy stray), which
+// is different from 0 (it tried, and no one verified is in the city). An older server without
+// the counts gets neutral words.
 export function escalationLines(
-  level: number | undefined, notified: { level_1: number; level_2: number } | undefined
+  level: number | undefined,
+  notified: { level_1: number; level_2: number; at_report?: number | null } | undefined
 ): string[] {
-  if (!level) return [];
-  const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
   const lines: string[] = [];
+  const people = (n: number) => (n === 1 ? "rescuer or shelter" : "rescuers and shelters");
+  const atReport = notified?.at_report;
+  if (atReport != null) {
+    lines.push(atReport > 0
+      ? `${atReport} verified ${people(atReport)} nearby ${atReport === 1 ? "was" : "were"} alerted right away.`
+      : "No verified rescuers or shelters in your city to alert yet.");
+  }
+  if (!level) return lines;
   if (!notified) {
     lines.push("Widened to your city.");
     if (level >= 2) lines.push("Widened further.");
     return lines;
   }
   const n1 = notified.level_1, n2 = notified.level_2;
+  const more = atReport ? "more " : "";
   lines.push(n1 > 0
-    ? `Widened to your city · ${n1} verified ${plural(n1, "rescuer", "rescuers")} alerted.`
-    : "Widened to your city · no verified rescuers there to alert yet.");
+    ? `Widened to your city · ${n1} ${more}verified ${people(n1)} alerted.`
+    : atReport
+      ? "Widened to your city · everyone there was already alerted."
+      : "Widened to your city · no verified rescuers or shelters there to alert yet.");
   if (level >= 2) {
     lines.push(n2 > 0
-      ? `Widened further · ${n2} partner ${plural(n2, "shelter", "shelters")} nearby alerted.`
+      ? `Widened further · ${n2} partner ${n2 === 1 ? "shelter" : "shelters"} nearby alerted.`
       : "Widened further · no partner shelter nearby to alert yet.");
   }
   return lines;

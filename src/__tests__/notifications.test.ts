@@ -83,8 +83,8 @@ describe("notificationTarget", () => {
 // Sagip loop closure (backend: sagip/notices.py). Each routes to the screen that answers the
 // question the notification raised.
 describe("Sagip loop-closure notifications", () => {
-  it("routes case_progress and claim_lapsed to the report", () => {
-    for (const type of ["case_progress", "claim_lapsed"]) {
+  it("routes case_progress, claim_lapsed and report_nearby (D2) to the report", () => {
+    for (const type of ["case_progress", "claim_lapsed", "report_nearby"]) {
       expect(notificationTarget({ type, data: { report_id: "r1", case_id: "c1" } }))
         .toEqual({ screen: "reportDetail", reportId: "r1" });
     }
