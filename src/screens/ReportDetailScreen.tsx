@@ -19,8 +19,8 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import {
-  CLOSE_REASONS, CloseReason, OFFER_TYPE_LABEL, claimDeadline, escalationLines, historyNote,
-  offersShareContact, relTime, sagipTitle, strayChip
+  CloseReason, OFFER_TYPE_LABEL, claimDeadline, closeReasonsFor, escalationLines, historyNote,
+  offersShareContact, relTime, reportKindChip, reportTitle
 } from "../sagip";
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
 import { RescuePeople } from "../components/sagip/RescuePeople";
@@ -140,7 +140,9 @@ export function ReportDetailScreen({ navigation, route }: Props) {
     load();
   }
 
-  const chip = report ? strayChip(report.status) : null;
+  // D6 · a lost pet is never "Reported / Claimed / Rescued" — nobody claims it.
+  const chip = report ? reportKindChip(report.report_type, report.status) : null;
+  const isLost = report?.report_type === "lost";
   const activeIdx = report ? LADDER.indexOf(report.status === "safe" ? "rescued" : report.status) : -1;
   // Present only when the caller IS this report's reporter (US-O3) — the backend omits
   // these fields entirely for anyone else, so their presence alone is the signal.
@@ -174,7 +176,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             <Image source={{ uri: report.photos[0] }} style={styles.photo} resizeMode="cover" />
           ) : null}
 
-          <Text style={styles.h1}>{sagipTitle(report.species, report.condition)}</Text>
+          <Text style={styles.h1}>{reportTitle(report)}</Text>
           <Text style={styles.sub}>
             {(report.city ? report.city + " · " : "") + "reported " + relTime(report.reported_at)}
           </Text>
@@ -186,6 +188,15 @@ export function ReportDetailScreen({ navigation, route }: Props) {
 
           {isReporterView && report.claimer && report.status !== "reported" ? (
             <Text style={styles.claimedBy}>Claimed by {report.claimer.display_name}</Text>
+          ) : null}
+
+          {/* D6 · lost/found: what a stranger needs to recognise the animal. */}
+          {report.describe ? (
+            <Text style={styles.describe}>
+              {[report.describe.breed, report.describe.color_markings, report.describe.size_category,
+                report.describe.sex && report.describe.sex !== "unknown" ? report.describe.sex : null]
+                .filter(Boolean).join(" · ") || null}
+            </Text>
           ) : null}
 
           {report.notes ? (
@@ -260,6 +271,8 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
+          {isLost && !isReporterView ? null : (
+          <>
           <Text style={styles.sectionTitle}>Status</Text>
           {isReporterView && report.status_history && report.status_history.length > 0 ? (
             <View style={styles.ladder}>
@@ -290,6 +303,8 @@ export function ReportDetailScreen({ navigation, route }: Props) {
                 );
               })}
             </View>
+          )}
+          </>
           )}
 
           {/* S10 · how it ended, from the claimer's outcome screen. */}
@@ -344,7 +359,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             closing ? (
               <View style={styles.closeCard}>
                 <Text style={styles.closeTitle}>Why doesn't it need a rescuer?</Text>
-                {CLOSE_REASONS.map((r) => (
+                {closeReasonsFor(report.report_type).map((r) => (
                   <TouchableOpacity
                     key={r.key}
                     style={styles.closeOption}
@@ -390,7 +405,25 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
-          {!isReporterView && !myCase && report.status === "reported" ? (
+          {/* D6 · a lost pet isn't claimed — someone who has seen it files a sighting, which
+              is linked to this report and tells the owner. */}
+          {isLost && !isReporterView && report.status === "reported" ? (
+            <View style={styles.actionRow}>
+              <Button
+                testID="btn.reportDetail.seen"
+                label="I've seen this pet"
+                onPress={() => navigation.navigate("reportStray", {
+                  mode: "found", sightingOf: report.report_id, sightingSpecies: report.species,
+                  sightingName: report.pet_name
+                })}
+              />
+              <Text style={styles.claimFine}>
+                Tell us where — the owner is notified and can reach you if you allow it.
+              </Text>
+            </View>
+          ) : null}
+
+          {!isLost && !isReporterView && !myCase && report.status === "reported" ? (
             <View style={styles.actionRow}>
               <Button label="Claim this case" onPress={confirmClaim} loading={claiming} />
               <Text style={styles.claimFine}>
@@ -432,6 +465,7 @@ const styles = StyleSheet.create({
   matchesChevron: { color: colors.muted, fontSize: 19, fontWeight: "700" },
   mapWrap: { marginTop: 20, height: 160, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
+  describe: { marginTop: 10, color: colors.ink, ...typography.subtitle },
   mapNote: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 17 },
   landmark: { marginTop: 6, color: colors.ink, ...typography.meta, fontWeight: "700", lineHeight: 17 },
   myOffers: { marginTop: 24, color: colors.ink, ...typography.subtitle, fontWeight: "700" },

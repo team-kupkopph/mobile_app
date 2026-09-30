@@ -11,6 +11,11 @@ appId: ph.kupkop.app
     id: "btn.home.report"
 - assertVisible:
     id: "screen.reportStray"
+# S7 · condition has no default any more (defaulting to "injured" paged every verified rescuer
+# in the city after D2's report-time alert), so the flow chooses one. HEALTHY on purpose: it is
+# the one condition that alerts no one at report time, so an e2e run never pages real people.
+- tapOn:
+    id: "seg.healthy"
 - tapOn:
     id: "field.reportStray.notes"
 - inputText: "E2E smoke — limping brown aspin near the covered court."

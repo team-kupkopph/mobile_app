@@ -5,7 +5,7 @@
 // The precise-pin refinement (US-S2 "Adjust") opens AdjustPinScreen (react-native-maps, dev build).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 
@@ -14,15 +14,21 @@ import { useAuth } from "../auth/AuthContext";
 import { centroidFor } from "../cityCentroids";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
+import { LoadStateView } from "../components/LoadStateView";
+import { loadState } from "../net";
 import { randomKey } from "../outbox/key";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { sagipTitle } from "../sagip";
+import { ReportMode, reportBody, reportTitle } from "../sagip";
+import { MyPet } from "../api/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 
 const SPECIES = ["dog", "cat", "other"] as const;
 const CONDITIONS = ["injured", "sick", "healthy", "pregnant"] as const;
+// S12 / D6 · "What happened?" — the one form files all three kinds of report.
+const MODES: ReportMode[] = ["stray", "lost", "found"];
+const MODE_LABELS = ["Stray", "Lost my pet", "Found a pet"];
 
 type Props = NativeStackScreenProps<RootStackParamList, "reportStray">;
 
@@ -30,8 +36,22 @@ export function ReportStrayScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city: savedCity } = useAuth();
   const { enqueue } = useOutbox();
-  const [species, setSpecies] = useState<string>("dog");
-  const [condition, setCondition] = useState<string>("injured");
+  // D6 · "I've seen this pet" arrives with the lost report's id and species, and is always a
+  // found report; otherwise the mode is chosen at the top (or preselected by the caller).
+  const sightingOf = route.params?.sightingOf;
+  const [mode, setMode] = useState<ReportMode>(sightingOf ? "found" : route.params?.mode ?? "stray");
+  const [species, setSpecies] = useState<string>(route.params?.sightingSpecies ?? "dog");
+  // S7 · no default. Defaulting to "injured" made every untouched report the most urgent kind —
+  // since D2 that pages every verified rescuer and shelter in the city.
+  const [condition, setCondition] = useState<string | null>(null);
+  // D6 · a lost report names one of the owner's pets (its photo and details come with it).
+  const [pets, setPets] = useState<MyPet[]>([]);
+  // The pets list is optional (a pet can be described by hand), so its load state renders
+  // INLINE in the pet area — never replacing the form, which would throw away what's typed.
+  const [petsRes, setPetsRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [petId, setPetId] = useState<string | null>(null);
+  const [breed, setBreed] = useState("");
+  const [colorMarkings, setColorMarkings] = useState("");
   const [notes, setNotes] = useState("");
   const [anonymous, setAnonymous] = useState(false);
   // D1 · off unless the reporter turns it on. D8 · anonymous forbids it, so switching
@@ -110,8 +130,27 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     navigation.navigate("adjustPin", { lat: start.lat, lng: start.lng });
   }
 
+  const loadPets = useCallback(() => {
+    setPetsRes(null);
+    api.get("/me/pets").then((r) => {
+      setPetsRes({ ok: r.ok, status: r.status });
+      if (r.ok) setPets(r.data?.results ?? []);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable api
+  }, []);
+  useEffect(() => { if (mode === "lost") loadPets(); }, [mode, loadPets]);
+
+  function choosePet(pet: MyPet | null) {
+    setPetId(pet ? pet.pet_id : null);
+    if (pet) setSpecies(pet.species);
+  }
+
   async function submit() {
     if (submitting) return;
+    if (mode !== "lost" && !condition) {
+      setError("Choose the animal's condition first — it decides how fast help is asked for.");
+      return;
+    }
     if (!coords) {
       // Explains rather than blocks silently (same posture as RescueUpdate's submit).
       setError(locState === "loading"
@@ -126,21 +165,22 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     // this report must carry the same value or the server cannot tell a replay from a second
     // animal, and one animal gets two rescuers.
     const idempotencyKey = randomKey();
-    const body = {
-      species, condition, notes: notes.trim() || undefined, is_anonymous: anonymous,
-      contact_share_consent: shareContact && !anonymous,
-      lat: coords.lat, lng: coords.lng, location_text: locationText || undefined,
-      city: city || undefined,
-      photos: photoUrl ? [{ file_url: photoUrl }] : [],
-      idempotency_key: idempotencyKey,
-    };
+    const body = reportBody({
+      mode, species, condition: condition ?? "healthy", notes, anonymous, shareContact, coords,
+      locationText, city, photoUrl, idempotencyKey, petId, breed, colorMarkings,
+      sightingOf: sightingOf
+    });
+    const title = reportTitle({
+      report_type: mode, species, condition: condition ?? "healthy",
+      pet_name: pets.find((p) => p.pet_id === petId)?.name
+    });
 
     const res = await api.post("/reports", body);
     setSubmitting(false);
 
     if (res.ok) {
       navigation.replace("reportSent", {
-        reportId: res.data.report_id, title: sagipTitle(species, condition),
+        reportId: res.data.report_id, title,
         city: locationText || null
       });
       return;
@@ -152,7 +192,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     if (res.status === 0) {
       await enqueue(body, idempotencyKey);
       navigation.replace("reportSent", {
-        reportId: null, title: sagipTitle(species, condition),
+        reportId: null, title,
         city: locationText || null, queued: true
       });
       return;
@@ -162,11 +202,62 @@ export function ReportStrayScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.reportStray">
-      <ScreenHeader title="Report a stray" onBack={() => navigation.goBack()} />
+      <ScreenHeader
+        title={sightingOf ? "Report a sighting" : mode === "lost" ? "Report a lost pet"
+          : mode === "found" ? "Report a found animal" : "Report a stray"}
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1}>What did you see?</Text>
-        <Text style={styles.sub}>A photo helps — but don't wait for one.</Text>
+        {!sightingOf ? (
+          <>
+            <Text style={styles.label}>What happened?</Text>
+            <SegmentedControl
+              segments={MODE_LABELS}
+              index={MODES.indexOf(mode)}
+              onChange={(i) => { setMode(MODES[i]); setError(undefined); }}
+              testID="seg.reportStray.mode"
+            />
+          </>
+        ) : null}
+
+        <Text style={styles.h1}>
+          {sightingOf ? `Where did you see ${route.params?.sightingName ?? "them"}?`
+            : mode === "lost" ? "Who's missing?"
+            : mode === "found" ? "What did you find?" : "What did you see?"}
+        </Text>
+        <Text style={styles.sub}>
+          {mode === "lost" ? "Their photo and details help people recognise them."
+            : "A photo helps — but don't wait for one."}
+        </Text>
+
+        {/* D6 · the owner picks the missing pet; its photo and details travel with the report. */}
+        {mode === "lost" && loadState(petsRes, pets.length).kind !== "ready" ? (
+          <View style={styles.petState}>
+            <LoadStateView
+              state={loadState(petsRes, pets.length)}
+              subject="your pets"
+              emptyTitle="No pets on your profile yet."
+              emptyBody="Describe them below instead."
+              onRetry={loadPets}
+            />
+          </View>
+        ) : null}
+        {mode === "lost" && pets.length > 0 ? (
+          <View style={styles.petRow}>
+            {pets.map((p) => (
+              <TouchableOpacity
+                key={p.pet_id}
+                style={[styles.petChip, petId === p.pet_id && styles.petChipOn]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: petId === p.pet_id }}
+                onPress={() => choosePet(petId === p.pet_id ? null : p)}
+              >
+                <Text style={[styles.petChipText, petId === p.pet_id && styles.petChipTextOn]}>{p.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
 
         <TouchableOpacity
           style={styles.photoBtn}
@@ -180,11 +271,28 @@ export function ReportStrayScreen({ navigation, route }: Props) {
             : <Text style={styles.photoText}>{photoUrl ? "✓ Photo added" : "Add a photo · optional"}</Text>}
         </TouchableOpacity>
 
-        <Text style={styles.label}>Animal</Text>
-        <Segmented options={SPECIES} value={species} onChange={setSpecies} />
+        {!sightingOf && !(mode === "lost" && petId) ? (
+          <>
+            <Text style={styles.label}>Animal</Text>
+            <Segmented options={SPECIES} value={species} onChange={setSpecies} />
+          </>
+        ) : null}
 
-        <Text style={styles.label}>Condition</Text>
-        <Segmented options={CONDITIONS} value={condition} onChange={setCondition} />
+        {mode !== "lost" ? (
+          <>
+            <Text style={styles.label}>Condition</Text>
+            <Segmented options={CONDITIONS} value={condition} onChange={setCondition} />
+          </>
+        ) : null}
+
+        {mode === "lost" && !petId ? (
+          <Field label="Breed (optional)" value={breed} onChangeText={setBreed} placeholder="e.g. Aspin"
+            testID="field.reportStray.breed" />
+        ) : null}
+        {mode !== "stray" ? (
+          <Field label="Colour and markings (optional)" value={colorMarkings} onChangeText={setColorMarkings}
+            placeholder="e.g. brown, white chest, red collar" testID="field.reportStray.colorMarkings" />
+        ) : null}
 
         <Field
           label="Notes (optional)"
@@ -212,6 +320,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
             </>
           ) : (
             <>
+              {mode === "lost" ? <Text style={styles.locFrom}>Last seen here</Text> : null}
               <Text style={styles.locAddr}>{locationText || "Current location"}</Text>
               <View style={styles.locFooter}>
                 <Text style={styles.locFrom}>From your GPS</Text>
@@ -230,6 +339,8 @@ export function ReportStrayScreen({ navigation, route }: Props) {
         </View>
         <Text style={styles.fine}>Only this report uses your exact spot · your profile still shows just your city.</Text>
 
+        {/* D6 · an owner looking for their pet must be findable, so a lost report isn't anonymous. */}
+        {mode !== "lost" ? (
         <View style={styles.anonRow}>
           <Text style={styles.anonLabel}>Report anonymously</Text>
           <Switch
@@ -240,15 +351,21 @@ export function ReportStrayScreen({ navigation, route }: Props) {
             accessibilityHint="Hides your name from other users. The report is still linked to your account."
           />
         </View>
+        ) : null}
 
         <ContactShareRow
-          label="Let the rescuer contact me"
-          hint={anonymous
+          label={mode === "lost" ? "Let someone who's seen them contact me"
+            : sightingOf ? "Let the owner contact me" : "Let the rescuer contact me"}
+          hint={anonymous && mode !== "lost"
             ? "Anonymous reports don't share contact details."
-            : "Shares your phone and email with whoever claims this, only after they claim it."}
-          value={shareContact && !anonymous}
+            : mode === "lost"
+              ? "Shares your phone and email with anyone whose sighting matches your pet."
+              : sightingOf
+                ? "Shares your phone and email with the owner, so you can reunite them."
+                : "Shares your phone and email with whoever claims this, only after they claim it."}
+          value={shareContact && (mode === "lost" || !anonymous)}
           onValueChange={setShareContact}
-          disabled={anonymous}
+          disabled={anonymous && mode !== "lost"}
           testID="switch.reportStray.shareContact"
         />
 
@@ -260,7 +377,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
 
         <Button
           testID="btn.reportStray.submit"
-          label="Send report"
+          label={mode === "lost" ? "Post lost pet" : sightingOf ? "Send sighting" : "Send report"}
           onPress={submit}
           loading={submitting}
           accessibilityHint={coords ? undefined : "Waiting for your location"}
@@ -272,13 +389,13 @@ export function ReportStrayScreen({ navigation, route }: Props) {
 }
 
 function Segmented({ options, value, onChange }: {
-  options: readonly string[]; value: string; onChange: (v: string) => void;
+  options: readonly string[]; value: string | null; onChange: (v: string) => void;
 }) {
   // The primitive takes labels and an index; the screens keep their string enums.
   return (
     <SegmentedControl
       segments={options.map((opt) => opt.charAt(0).toUpperCase() + opt.slice(1))}
-      index={Math.max(0, options.indexOf(value))}
+      index={value === null ? -1 : options.indexOf(value)}   // S7 · -1 = nothing chosen yet
       onChange={(i) => onChange(options[i])}
     />
   );
@@ -306,6 +423,12 @@ const styles = StyleSheet.create({
   locDenied: { color: colors.warningStrong, ...typography.strong, fontWeight: "700" },
   dropPin: { marginTop: 10, minHeight: 44, justifyContent: "center" },
   fine: { marginTop: 12, color: colors.muted, ...typography.meta, lineHeight: 19 },
+  petState: { marginTop: 12 },
+  petRow: { marginTop: 16, flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  petChip: { minHeight: 44, paddingHorizontal: 18, borderRadius: 22, borderWidth: 2, borderColor: colors.border, justifyContent: "center" },
+  petChipOn: { borderColor: colors.teal, backgroundColor: colors.infoBg },
+  petChipText: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
+  petChipTextOn: { color: colors.tealDark },
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: radii.tile, ...card },
   anonLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },

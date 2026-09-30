@@ -10,6 +10,7 @@ import { matchReasons } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
+import { RescuePeople } from "../components/sagip/RescuePeople";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft
@@ -72,6 +73,15 @@ export function MatchDetailScreen({ navigation, route }: Props) {
           {fact("Colour & markings", rep.color_markings)}
           {fact("Area", rep.city)}
         </View>
+
+        {/* D6 + D1 · who filed the other half, so owner and finder can reunite — named unless
+            anonymous, contact only if they allowed it on their report. */}
+        {match.reporter ? (
+          <RescuePeople
+            title={rep.report_type === "found" ? "Who saw them" : "Who's looking for them"}
+            people={[{ ...match.reporter, role: rep.report_type === "found" ? "finder" : "owner" }]}
+          />
+        ) : null}
 
         <View style={styles.reasonsCard}>
           <Text style={styles.reasonsTitle}>Why we matched these</Text>

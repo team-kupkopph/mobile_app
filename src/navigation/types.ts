@@ -16,6 +16,8 @@ export type MatchShape = {
     report_id: string; report_type: string; species: string; breed: string | null;
     color_markings: string | null; city: string | null; created_at: string;
   };
+  // D6 + D1 · who filed the other half: named unless anonymous, contact only by their consent.
+  reporter?: { display_name?: string; anonymous?: boolean; contact?: { phone: string | null; email: string } };
 };
 
 // US-B2 · a badge, threaded from the impact grid to its detail.
@@ -83,7 +85,12 @@ export type RootStackParamList = {
   };
   // Sagip — report a stray (Track S)
   // adjustedLat/Lng ride back from the US-S2 Adjust map when the reporter refines the exact pin.
-  reportStray: { adjustedLat?: number; adjustedLng?: number } | undefined;
+  // D6 · `mode` preselects stray / lost / found; `sightingOf` makes it "I've seen this pet"
+  // (a found report linked to that lost one), with its species fixed.
+  reportStray: {
+    adjustedLat?: number; adjustedLng?: number;
+    mode?: "stray" | "lost" | "found"; sightingOf?: string; sightingSpecies?: string; sightingName?: string;
+  } | undefined;
   // US-S2 · refine the report's precise pin on a map. Seeded with the current GPS coords.
   adjustPin: { lat: number; lng: number };
   // US-O3 · `reportId` is null and `queued` true when the report went to the offline

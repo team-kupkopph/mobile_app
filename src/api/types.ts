@@ -39,6 +39,7 @@ export type MapReport = {
   // S14 · the coarse (~500 m grid) point report detail already publishes. Optional: a cached
   // payload from before the field existed has none.
   approx_location?: LatLng;
+  report_type?: "stray" | "lost" | "found";   // D6 · absent in a cached pre-D6 payload
 };
 // US-O3 — reporter-only block, present only when the caller IS the report's reporter.
 // `note` — the claimer's note on a move, or a system note (auto-expiry, placement, a
@@ -69,13 +70,17 @@ export type ReportDetail = {
   is_anonymous?: boolean;
   // D1 · the viewer's own offers on this report (each carries its own consent).
   my_offers?: { offer_id: string; offer_type: OfferType; status: OfferListStatus; contact_shared: boolean }[];
+  // D6 · lost/found only: what a stranger needs to recognise the animal; a lost pet's name.
+  describe?: { breed: string | null; color_markings: string | null; size_category: string | null; sex: string | null };
+  pet_name?: string;
   // D1 + D8 · the other people on this rescue — present only for someone on it, and only once
   // it's claimed. `contact` is absent unless that person consented.
   people?: RescuePerson[];
 };
 
 export type RescuePerson = {
-  role: "reporter" | "claimer" | "helper";
+  // finder / owner (D6) · the other side of a lost<->found match.
+  role: "reporter" | "claimer" | "helper" | "finder" | "owner";
   display_name?: string;
   anonymous?: boolean;                                   // D8 · an anonymous reporter
   contact?: { phone: string | null; email: string };
