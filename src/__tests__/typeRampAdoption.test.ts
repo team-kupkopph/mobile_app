@@ -447,10 +447,11 @@ for (const file of sources(SRC)) {
  *     among them unified at the canvas's 19 / 700.
  */
 const OFF_RAMP = 0;
-/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. (34: KawangGawaScreen's
- *  BrowseCalendar draws `‹ ›` prev/next chevrons — same 19 / 700 style as the shipped
- *  `impactChevron` above it. 33 covered the pre-Browse-calendar state.) */
-const GLYPHS = 34;
+/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. (35: SettingsPrivacyScreen's
+ *  `policyChev` — the `›` on the "Read our privacy policy" row, rendered only when
+ *  EXPO_PUBLIC_PRIVACY_POLICY_URL is set. Same 19 / 700 style. 34 covered the state before
+ *  the M4-launch-gate scaffolding landed. 33 covered the pre-Browse-calendar state.) */
+const GLYPHS = 35;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
