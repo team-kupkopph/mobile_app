@@ -13,15 +13,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { AlertIcon, CheckIcon, ClockIcon, VolunteerIcon } from "../components/AppIcons";
+import { AlertIcon, CheckIcon, ClockIcon, LocationPinIcon, VolunteerIcon } from "../components/AppIcons";
 import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterBannerState, shelterBannerState, volunteerSummary } from "../shelterDashboard";
+import { ShelterBannerState, rescueSummary, shelterBannerState, volunteerSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
 import { colors, radii, spacing, typography } from "../theme";
-import { Card } from "../components/ui";
+import { Button, Card } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
@@ -212,6 +212,44 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           </TouchableOpacity>
         )}
 
+        {/* S16 · the Rescue card. A verified shelter may claim strays and is paged about them, but
+            the shell had no rescue surface — and a case it claimed was unreachable once it left
+            the screen. Same load rule as Volunteers: only once `dash` has loaded, and the copy
+            never states a count the server didn't make (rescueSummary). */}
+        {dash?.rescue ? (() => {
+          const rescue = rescueSummary(dash.rescue, verified);
+          return (
+            <Card style={styles.volunteerCard}>
+              <View style={styles.volunteerHeaderRow}>
+                <View style={styles.volunteerIcon}>
+                  <LocationPinIcon color={colors.teal} size={20} />
+                </View>
+                <Text style={styles.volunteerTitle}>Rescue</Text>
+              </View>
+              <Text style={styles.volunteerLine}>{rescue.line1}</Text>
+              <Text style={styles.volunteerLine}>{rescue.line2}</Text>
+              {rescue.note ? <Text style={styles.volunteerWarning}>{rescue.note}</Text> : null}
+              <View style={styles.rescueActions}>
+                {rescue.mapCity ? (
+                  <Button
+                    size="small"
+                    label="See strays nearby"
+                    testID="btn.shelterDashboard.rescueMap"
+                    onPress={() => navigation.navigate("rescueMap", { city: rescue.mapCity! })}
+                  />
+                ) : null}
+                <Button
+                  size="small"
+                  variant="secondary"
+                  label="Our rescue cases"
+                  testID="btn.shelterDashboard.myRescues"
+                  onPress={() => navigation.navigate("myRescues")}
+                />
+              </View>
+            </Card>
+          );
+        })() : null}
+
         {!verified ? (
           <Card accent={colors.teal} style={styles.footCard}>
             <View style={styles.footCopy}>
@@ -318,6 +356,7 @@ const styles = StyleSheet.create({
   statNum: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
   volunteerCard: { marginTop: 16, padding: 18 },
+  rescueActions: { marginTop: 14, gap: 10 },
   volunteerHeaderRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   volunteerIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   volunteerTitle: { color: colors.ink, ...typography.section },
