@@ -56,6 +56,19 @@ describeParity("the volunteer side matches its anchor artboards", () => {
     for (const label of h.filters.split(",").slice(1)) expect(vol).toContain(`"${label}"`);
   });
 
+  it("Browse view sub-toggle — List and Calendar", () => {
+    // Owner request 2026-09-30: organise Browse by day, not one scrolling list. The anchor
+    // adds a `browse-views` marker; the screen mounts a matching SegmentedControl and the
+    // volunteer helpers export the calendar-view utilities the Calendar view consumes.
+    const h = hub();
+    expect(h["browse-views"]).toBe("List,Calendar");
+    const screen = src("screens/KawangGawaScreen.tsx");
+    expect(screen).toContain('segments={["List", "Calendar"]}');
+    const vol = src("volunteer.ts");
+    expect(vol).toContain("export function binShiftsByLocalDate");
+    expect(vol).toContain("export function monthCells");
+  });
+
   it("my-shifts sections, in order", () => {
     // The artboard's `my-sections` marker names buckets (Requested/Upcoming/Past); the
     // on-V3 rule is that copy doesn't change, and MyShifts.tsx already ships the section

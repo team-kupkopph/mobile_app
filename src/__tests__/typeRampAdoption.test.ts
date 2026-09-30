@@ -447,11 +447,10 @@ for (const file of sources(SRC)) {
  *     among them unified at the canvas's 19 / 700.
  */
 const OFF_RAMP = 0;
-/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. (33: SignupWall.tsx's
- *  `heartIcon` — the wall's teal ♥, added by G11 to route the guest-card CTA — is a glyph
- *  drawn as text and lands here. 32 covered the pre-G11 state; 33 covers the state main
- *  has actually been in since #115 merged, which the ratchet had missed until now.) */
-const GLYPHS = 33;
+/** Glyphs drawn as text — see GLYPH_RE. May fall; may not rise. (34: KawangGawaScreen's
+ *  BrowseCalendar draws `‹ ›` prev/next chevrons — same 19 / 700 style as the shipped
+ *  `impactChevron` above it. 33 covered the pre-Browse-calendar state.) */
+const GLYPHS = 34;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {
