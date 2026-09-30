@@ -18,6 +18,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
+import { DRAFT_STATUS } from "../shelterAnimals";
 import { TAP_SLOP } from "../touch";
 import { colors, radii, spacing, typography } from "../theme";
 
@@ -45,6 +46,22 @@ export function ListingDetailScreen({ navigation, route }: Props) {
     { open: false, action: "adopt" });
   const openWall = (action: SignupWallAction) => setWall({ open: true, action });
   const closeWall = () => setWall((w) => ({ ...w, open: false }));
+
+  // D7 · a draft is private to its poster (the server 404s it for anyone else), so seeing one
+  // here means it's yours: offer Publish and Edit instead of Inquire.
+  const [publishing, setPublishing] = useState(false);
+  async function publish() {
+    if (publishing) return;
+    setPublishing(true);
+    const res = await api.post(`/listings/${route.params.listingId}/publish`, {});
+    setPublishing(false);
+    if (!res.ok) {
+      Alert.alert("Couldn't publish", res.data?.error?.message ?? "Try again.");
+      return;
+    }
+    Alert.alert("Published", "It's on the Adopt feed now.");
+    load();
+  }
 
   const load = useCallback(() => {
     setRes(null);
@@ -182,7 +199,27 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             </TouchableOpacity>
           ) : null}
 
-          {inquired ? (
+          {listing.status === DRAFT_STATUS ? (
+            <View style={styles.draftCard}>
+              <Text style={styles.draftTitle}>Draft · only you can see this</Text>
+              <Text style={styles.draftBody}>
+                Add a story and an adoption fee, then publish to put them on the Adopt feed.
+              </Text>
+              <Button
+                testID="btn.listingDetail.publish"
+                label="Publish to the Adopt feed"
+                onPress={publish}
+                loading={publishing}
+                style={styles.inquireBtn}
+              />
+              <Button
+                label="Edit the listing"
+                variant="secondary"
+                onPress={() => navigation.navigate("listingForm", { listingId: listing.listing_id })}
+                style={styles.inquireBtn}
+              />
+            </View>
+          ) : inquired ? (
             <>
               {/* e2e 20-browse-and-inquire asserts this copy: it is the signal the POST was accepted. */}
               <Text style={styles.inquiredNote}>Inquiry sent — the poster will reach out.</Text>
@@ -244,5 +281,8 @@ const styles = StyleSheet.create({
   sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, ...typography.section },
   body: { color: colors.ink, ...typography.body },
   inquiredNote: { marginTop: 30, color: colors.muted, ...typography.strong, fontWeight: "700", textAlign: "center" },
-  inquireBtn: { marginTop: 14 }
+  inquireBtn: { marginTop: 14 },
+  draftCard: { marginTop: 30, padding: 18, borderRadius: radii.tile, backgroundColor: colors.warningBg },
+  draftTitle: { color: colors.warningStrong, ...typography.subtitle, fontWeight: "800" },
+  draftBody: { marginTop: 6, color: colors.ink, ...typography.body }
 });

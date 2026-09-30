@@ -18,7 +18,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { Button, Card, Chip, SegmentedControl } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
-import { ListingStatus, SEGMENT_STATUS, STATUS_CHIP } from "../shelterAnimals";
+import { DRAFT_STATUS, ListingStatus, SEGMENT_STATUS, STATUS_CHIP, draftRoute } from "../shelterAnimals";
 import { colors, spacing, squircle, typography } from "../theme";
 
 /** The canvas's Animals artboard: ["Live", "Pending", "Adopted"] — see shelterAnimals.ts's
@@ -33,6 +33,10 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
   const [segment, setSegment] = useState(0);
   const [listings, setListings] = useState<Listing[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  // D7 · animals taken in from a rescuer's placement arrive as private drafts. Fetched on
+  // their own, independent of the segment, and shown only when there are some — a failed
+  // fetch shows nothing rather than claiming there are none.
+  const [drafts, setDrafts] = useState<Listing[]>([]);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   // Re-derived on every segment change too, same shape as AdoptScreen's species filter.
@@ -43,6 +47,9 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
       api.get(`/listings?mine=true&status=${status}`).then((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setListings(r.data?.results ?? []);
+      });
+      api.get(`/listings?mine=true&status=${DRAFT_STATUS}`).then((r) => {
+        if (r.ok) setDrafts(r.data?.results ?? []);
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + segment change
     }, [segment]);
@@ -61,6 +68,32 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
         <View style={styles.header}>
           <Text style={styles.pageTitle}>Animals</Text>
         </View>
+
+        {drafts.length > 0 ? (
+          <Card style={styles.draftsCard}>
+            <Text style={styles.draftsTitle}>
+              {drafts.length === 1 ? "1 draft to finish" : `${drafts.length} drafts to finish`}
+            </Text>
+            <Text style={styles.draftsSub}>
+              Taken in from a rescue. Add a story and fee, then publish. Only you can see these.
+            </Text>
+            {drafts.map((d) => {
+              const to = draftRoute(d.listing_id);
+              return (
+                <TouchableOpacity
+                  key={d.listing_id}
+                  style={styles.draftRow}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Finish the listing for ${d.pet.name || "this animal"}`}
+                  onPress={() => navigation.navigate(to.name, to.params)}
+                >
+                  <Text style={styles.draftName} numberOfLines={1}>{d.pet.name || "Unnamed"}</Text>
+                  <Chip tone="warning" dot={false} label="Draft" />
+                </TouchableOpacity>
+              );
+            })}
+          </Card>
+        ) : null}
 
         <SegmentedControl
           segments={SEGMENTS}
@@ -133,6 +166,11 @@ const styles = StyleSheet.create({
   segmented: { marginTop: 18 },
   primaryButton: { marginTop: 18 },
   row: { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 14, padding: 14 },
+  draftsCard: { marginTop: 14, padding: spacing.lg },
+  draftsTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  draftsSub: { marginTop: 4, marginBottom: 6, color: colors.muted, ...typography.meta, lineHeight: 17 },
+  draftRow: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderTopWidth: 1, borderTopColor: colors.border },
+  draftName: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   photo: { width: 56, height: 56, borderRadius: squircle(56), backgroundColor: colors.border },
   photoPlaceholder: {
     width: 56, height: 56, borderRadius: squircle(56), backgroundColor: colors.teal,

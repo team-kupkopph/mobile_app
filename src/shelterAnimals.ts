@@ -27,3 +27,19 @@ export const STATUS_CHIP: Record<ListingStatus, { label: string; tone: ChipTone 
   pending: { label: "Pending", tone: "warning" },
   adopted: { label: "Adopted", tone: "success" }
 };
+
+// D7 (dev/sagip-build-review.md) · a shelter that accepts a rescuer's placement gets the animal
+// as a private DRAFT listing (backend: listings/views.py::_shelter_draft_from). Drafts are not
+// a fourth segment — the three above follow the canvas artboard — they sit in their own strip.
+export const DRAFT_STATUS = "draft" as const;
+
+/** Where a tap on a draft goes: the form, so the shelter can add the story and fee first. */
+export function draftRoute(listingId: string): { name: "listingForm"; params: { listingId: string } } {
+  return { name: "listingForm", params: { listingId } };
+}
+
+/** The accept response is `{ listing_id, draft: true }` for a shelter and `{ pet_id }` for a
+ *  person; only the former has somewhere to go next. */
+export function acceptedPlacementParams(data: any): { listingId: string } | undefined {
+  return data?.draft && data?.listing_id ? { listingId: data.listing_id } : undefined;
+}
