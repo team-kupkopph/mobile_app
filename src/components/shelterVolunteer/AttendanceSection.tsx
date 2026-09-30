@@ -34,9 +34,11 @@ const OUTCOME_CHIP: Record<"completed" | "no_show", { label: string; tone: ChipT
 
 type Props = {
   shiftId: string;
+  // F-R2-10 · same as Pending/Confirmed — a roster row opens the volunteer's detail.
+  onOpenDetail: (signupId: string) => void;
 };
 
-export function AttendanceSection({ shiftId }: Props) {
+export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
   const api = useApi();
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -113,45 +115,47 @@ export function AttendanceSection({ shiftId }: Props) {
           const busy = busySignupId === row.signup_id;
           const suggestion = attendanceSuggestion(row);
           return (
-            <Card key={row.signup_id} style={styles.card}>
-              <View style={styles.cardTop}>
-                <Avatar initials={initials(row.volunteer.display_name)} size={44} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.name}>{row.volunteer.display_name}</Text>
-                  {row.status === "approved" && <Text style={styles.times}>{checkTimes(row)}</Text>}
+            <TouchableOpacity key={row.signup_id} activeOpacity={0.85} onPress={() => onOpenDetail(row.signup_id)} disabled={busy}>
+              <Card style={styles.card}>
+                <View style={styles.cardTop}>
+                  <Avatar initials={initials(row.volunteer.display_name)} size={44} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.name}>{row.volunteer.display_name}</Text>
+                    {row.status === "approved" && <Text style={styles.times}>{checkTimes(row)}</Text>}
+                  </View>
+                  {row.status !== "approved" && (
+                    <Chip label={OUTCOME_CHIP[row.status].label} tone={OUTCOME_CHIP[row.status].tone} />
+                  )}
                 </View>
-                {row.status !== "approved" && (
-                  <Chip label={OUTCOME_CHIP[row.status].label} tone={OUTCOME_CHIP[row.status].tone} />
-                )}
-              </View>
 
-              {row.status === "approved" ? (
-                <View style={styles.actionsRow}>
-                  <Button
-                    size="small"
-                    variant={suggestion === "completed" ? "secondary" : "primary"}
-                    label="No-show"
-                    accessibilityLabel={`No-show ${row.volunteer.display_name}`}
-                    onPress={() => setNoShowSignupId(row.signup_id)}
-                    loading={busy}
-                    style={styles.half}
-                  />
-                  <Button
-                    size="small"
-                    variant={suggestion === "completed" ? "primary" : "secondary"}
-                    label="Attended"
-                    accessibilityLabel={`Attended ${row.volunteer.display_name}`}
-                    onPress={() => markAttendance(row.signup_id, "completed")}
-                    loading={busy}
-                    style={styles.half}
-                  />
-                </View>
-              ) : row.can_undo ? (
-                <TouchableOpacity style={styles.undoBtn} onPress={() => undo(row.signup_id)} disabled={busy}>
-                  <Text style={styles.undoText}>{busy ? "Undoing…" : "Undo"}</Text>
-                </TouchableOpacity>
-              ) : null}
-            </Card>
+                {row.status === "approved" ? (
+                  <View style={styles.actionsRow}>
+                    <Button
+                      size="small"
+                      variant={suggestion === "completed" ? "secondary" : "primary"}
+                      label="No-show"
+                      accessibilityLabel={`No-show ${row.volunteer.display_name}`}
+                      onPress={() => setNoShowSignupId(row.signup_id)}
+                      loading={busy}
+                      style={styles.half}
+                    />
+                    <Button
+                      size="small"
+                      variant={suggestion === "completed" ? "primary" : "secondary"}
+                      label="Attended"
+                      accessibilityLabel={`Attended ${row.volunteer.display_name}`}
+                      onPress={() => markAttendance(row.signup_id, "completed")}
+                      loading={busy}
+                      style={styles.half}
+                    />
+                  </View>
+                ) : row.can_undo ? (
+                  <TouchableOpacity style={styles.undoBtn} onPress={() => undo(row.signup_id)} disabled={busy}>
+                    <Text style={styles.undoText}>{busy ? "Undoing…" : "Undo"}</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </Card>
+            </TouchableOpacity>
           );
         })
       )}

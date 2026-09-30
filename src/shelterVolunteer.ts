@@ -48,6 +48,21 @@ export function activitySection(shift: ShelterShift, pendingCount: number, nowMs
   return pendingCount > 0 ? "pending" : "confirmed";
 }
 
+// F-R3-9 · a manage-list / calendar card's chip. `status` is the booking state (open, full,
+// closed = cancelled) and says nothing about time, so a Past-tab activity still read "Open".
+// Ended wins over open/full; a cancelled one stays "Closed" — it never ran, so it didn't end.
+export function shiftStatusChip(
+  shift: Pick<ShelterShift, "status" | "ends_at">, nowMs: number = Date.now()
+): { label: string; tone: ChipTone } {
+  if (shift.status === "closed") return { label: "Closed", tone: "neutral" };
+  if (nowMs >= new Date(shift.ends_at).getTime()) return { label: "Ended", tone: "neutral" };
+  return shift.status === "full" ? { label: "Full", tone: "neutral" } : { label: "Open", tone: "success" };
+}
+
+// F-R2-7 · the activity header's capacity line, lost in the Task-9 rewrite.
+export const spotsFilledLabel = (shift: Pick<ShelterShift, "capacity" | "slots_left">): string =>
+  `${shift.capacity - shift.slots_left} of ${shift.capacity} spots filled`;
+
 export function blastRadiusCopy(n: number): string {
   if (n <= 0) return "No volunteers will be notified.";
   return `${n} volunteer${n === 1 ? "" : "s"} will be notified.`;
