@@ -65,5 +65,11 @@ export function requestRoute(item: ShelterRequest): { name: string; params: Reco
   if (item.kind === "volunteer") {
     return { name: "shelterVolunteerActivity", params: { shiftId: item.target.id, section: "pending" } };
   }
+  // S17 · a placement still awaiting this shelter's answer opens the Accept/Decline screen —
+  // the ladder behind it has every stage skipped and no buttons. Same rule as InquiryList's
+  // pendingPlacement on the pet-owner side.
+  if (item.kind === "placement" && item.status === "active") {
+    return { name: "placeRequest", params: { inquiryId: item.target.id } };
+  }
   return { name: "inquiry", params: { inquiryId: item.target.id } };
 }

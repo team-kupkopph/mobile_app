@@ -10,6 +10,8 @@ import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TouchableOpaci
 import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 
 import { useApi } from "../api/useApi";
+import { useAuth } from "../auth/AuthContext";
+import { centroidFor } from "../cityCentroids";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { randomKey } from "../outbox/key";
 import { pickAndUpload } from "../media/pickAndUpload";
@@ -25,6 +27,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "reportStray">;
 
 export function ReportStrayScreen({ navigation, route }: Props) {
   const api = useApi();
+  const { city: savedCity } = useAuth();
   const { enqueue } = useOutbox();
   const [species, setSpecies] = useState<string>("dog");
   const [condition, setCondition] = useState<string>("injured");
@@ -96,8 +99,22 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     if (res?.ok) setPhotoUrl(res.fileUrl);
   }
 
+  // S23 · with location off there was no way to say where the animal is, and Send silently
+  // did nothing. The reporter can now place the pin by hand, starting from their own city.
+  function dropPin() {
+    const start = coords ?? centroidFor(savedCity);
+    navigation.navigate("adjustPin", { lat: start.lat, lng: start.lng });
+  }
+
   async function submit() {
-    if (!coords || submitting) return;
+    if (submitting) return;
+    if (!coords) {
+      // Explains rather than blocks silently (same posture as RescueUpdate's submit).
+      setError(locState === "loading"
+        ? "Still finding your location — or drop a pin on the map instead."
+        : "Add the location first — turn on location, or drop a pin on the map.");
+      return;
+    }
     setSubmitting(true);
     setError(undefined);
 
@@ -177,7 +194,17 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           {locState === "loading" ? (
             <View style={styles.locRow}><ActivityIndicator color={colors.teal} /><Text style={styles.locText}>Finding your location…</Text></View>
           ) : locState === "denied" ? (
-            <Text style={styles.locDenied}>Location off — turn it on so a rescuer can find the animal.</Text>
+            <>
+              <Text style={styles.locDenied}>Location off — turn it on, or show a rescuer where the animal is on the map.</Text>
+              <TouchableOpacity
+                style={styles.dropPin}
+                onPress={dropPin}
+                accessibilityRole="button"
+                testID="btn.reportStray.dropPin"
+              >
+                <Text style={styles.adjust}>Drop a pin on the map instead ›</Text>
+              </TouchableOpacity>
+            </>
           ) : (
             <>
               <Text style={styles.locAddr}>{locationText || "Current location"}</Text>
@@ -261,6 +288,7 @@ const styles = StyleSheet.create({
   locFrom: { color: colors.muted, ...typography.meta, fontWeight: "600" },
   adjust: { color: colors.teal, ...typography.strong, fontWeight: "800" },
   locDenied: { color: colors.warningStrong, ...typography.strong, fontWeight: "700" },
+  dropPin: { marginTop: 10, minHeight: 44, justifyContent: "center" },
   fine: { marginTop: 12, color: colors.muted, ...typography.meta, lineHeight: 19 },
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: radii.tile, ...card },
   anonLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },

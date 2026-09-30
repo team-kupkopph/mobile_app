@@ -1,10 +1,13 @@
 // US-K2 · work a claimed case toward safe/resolved. Reference: screens/user/screen-rescue-update.png.
+// S8/S9 (dev/sagip-build-review.md) · this is the screen a rescuer has open in the field, so it
+// carries what finding the animal takes — the photo, the reporter's notes and landmark, a way
+// into Maps — and, while the claim can still lapse, how long is left to post an update.
 // POST /cases/{id}/status. Forward-only (the backend allows skipping ahead, not just one
 // step at a time — see advanceableStatuses in ../sagip) and `resolved` is terminal.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
@@ -13,7 +16,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { advanceableStatuses, sagipTitle, strayChip } from "../sagip";
+import { advanceableStatuses, claimDeadline, directionsUrl, sagipTitle, strayChip } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
@@ -100,6 +103,13 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
 
   const chip = report ? strayChip(report.status) : null;
   const tone = chip ? TONE[chip.tone] : null;
+  const deadline = claimDeadline(report?.my_case?.claim_due_at);
+
+  function openInMaps() {
+    const at = report?.precise_location;
+    if (!at) return;
+    void Linking.openURL(directionsUrl(at.lat, at.lng, Platform.OS));
+  }
 
   return (
     <View style={styles.screen}>
@@ -111,7 +121,16 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {deadline ? (
+            <Card accent={deadline.urgent ? colors.warningStrong : colors.tealDark} style={styles.deadlineCard}>
+              <Text style={[styles.deadlineText, deadline.urgent && styles.deadlineUrgent]}>{deadline.text}</Text>
+            </Card>
+          ) : null}
           <Card>
+            {report.photos.length > 0 ? (
+              <Image source={{ uri: report.photos[0] }} style={styles.photo} resizeMode="cover"
+                accessibilityLabel="Photo from the report" />
+            ) : null}
             <Text style={styles.h1}>{sagipTitle(report.species, report.condition)}</Text>
             {report.city ? <Text style={styles.sub}>{report.city}</Text> : null}
             {chip && tone ? (
@@ -135,6 +154,14 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                   <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
                 </MapView>
               </View>
+            ) : null}
+            {report.location_text ? (
+              <Text style={styles.landmark}>Near: {report.location_text}</Text>
+            ) : null}
+            {report.notes ? <Text style={styles.notes}>{report.notes}</Text> : null}
+            {report.precise_location ? (
+              <Button label="Open in Maps" variant="secondary" onPress={openInMaps}
+                testID="btn.rescueUpdate.directions" style={styles.directions} />
             ) : null}
           </Card>
 
@@ -232,6 +259,13 @@ const styles = StyleSheet.create({
   mapWrap: { marginTop: 18, height: 150, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { ...typography.meta, fontWeight: "800" },
+  photo: { width: "100%", height: 180, borderRadius: radii.field, marginBottom: 16, backgroundColor: colors.soft },
+  landmark: { marginTop: 12, color: colors.ink, ...typography.subtitle, fontWeight: "700" },
+  notes: { marginTop: 8, color: colors.ink, ...typography.body },
+  directions: { marginTop: 16 },
+  deadlineCard: { marginBottom: 14 },
+  deadlineText: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
+  deadlineUrgent: { color: colors.warningStrong, fontWeight: "800" },
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
   handoffBtn: { flex: 1 },
   resolvedNote: { marginTop: 24, color: colors.muted, ...typography.body },

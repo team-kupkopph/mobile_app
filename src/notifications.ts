@@ -7,6 +7,11 @@
 export type NotificationTarget =
   | { screen: "verifyDocuments" }
   | { screen: "reportDetail"; reportId: string }
+  // Sagip loop closure · claim_due opens the claimer's case (where the update is posted);
+  // placement_decided opens their cases list. Param names match the routes, because
+  // PushBridge navigates with the target's fields as params.
+  | { screen: "rescueUpdate"; caseId: string; reportId: string }
+  | { screen: "myRescues" }
   | { screen: "myInquiries" }
   | { screen: "kawanggawa"; tab: "mine" }
   // Task 9 · the pending-requests and attendance-roster screens folded into one activity
@@ -22,7 +27,10 @@ export type NotificationTarget =
 
 const REPORT_LINKED_TYPES = new Set([
   "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened",
-  "match_suggested"   // {report_id} → the report; a possible-matches row lives there (L3)
+  "match_suggested",  // {report_id} → the report; a possible-matches row lives there (L3)
+  // Sagip loop closure: the reporter's case_progress (the report shows the steps and the
+  // outcome) and the claimer's claim_lapsed (the report shows it's back on the map).
+  "case_progress", "claim_lapsed"
 ]);
 const VERIFICATION_TYPES = new Set([
   "verification_approved", "verification_rejected", "verification_needs_info"
@@ -64,6 +72,12 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   }
   if (REPORT_LINKED_TYPES.has(n.type) && n.data?.report_id) {
     return { screen: "reportDetail", reportId: n.data.report_id };
+  }
+  if (n.type === "claim_due" && n.data?.case_id && n.data?.report_id) {
+    return { screen: "rescueUpdate", caseId: n.data.case_id, reportId: n.data.report_id };
+  }
+  if (n.type === "placement_decided") {
+    return { screen: "myRescues" };
   }
   if (MY_INQUIRIES_TYPES.has(n.type)) {
     return { screen: "myInquiries" };

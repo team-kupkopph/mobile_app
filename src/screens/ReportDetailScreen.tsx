@@ -1,7 +1,12 @@
 // US-S5 · report detail (city-level, public shared-link) + Track K/O — claim it, offer
 // help, or (if you're the reporter) see the waiting view. Reference:
 // screens/user/screen-report-detail.png (+ -waiting, -unclaimed).
-// GET /reports/{id}; POST /reports/{id}/claim.
+// GET /reports/{id}; POST /reports/{id}/claim; POST /reports/{id}/close (S11).
+//
+// Sagip loop closure (dev/sagip-build-review.md): the reporter sees who has it, each step
+// with its note, and how it ended (S10), can close a report that no longer needs anyone
+// (S11), and is told only how many people escalation actually reached (S5). A claimer
+// reading their own report finds their case and its deadline (S27 · S9).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -13,7 +18,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { relTime, sagipTitle, strayChip } from "../sagip";
+import { CLOSE_REASONS, CloseReason, claimDeadline, escalationLines, historyNote, relTime, sagipTitle, strayChip } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 import { TAP_SLOP } from "../touch";
@@ -39,6 +44,10 @@ export function ReportDetailScreen({ navigation, route }: Props) {
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 
   const [claiming, setClaiming] = useState(false);
+  // S11 · the reason list is shown inline (four choices is too many for a native alert on
+  // Android, which caps at three buttons), only after the reporter asks for it.
+  const [closing, setClosing] = useState(false);
+  const [closeBusy, setCloseBusy] = useState(false);
 
   const load = useCallback(() => {
     setRes(null);
@@ -90,11 +99,33 @@ export function ReportDetailScreen({ navigation, route }: Props) {
     Alert.alert("Couldn't claim this case", res.data?.error?.message ?? "Try again.");
   }
 
+  async function closeReport(reason: CloseReason) {
+    if (closeBusy) return;
+    setCloseBusy(true);
+    const res = await api.post(`/reports/${route.params.reportId}/close`, { reason });
+    setCloseBusy(false);
+    if (res.ok) {
+      setClosing(false);
+      load();
+      return;
+    }
+    Alert.alert(
+      "Couldn't close this report",
+      res.data?.error?.code === "report_not_open"
+        ? "A rescuer has already claimed it — they're on the way."
+        : res.data?.error?.message ?? "Try again."
+    );
+    load();
+  }
+
   const chip = report ? strayChip(report.status) : null;
   const activeIdx = report ? LADDER.indexOf(report.status === "safe" ? "rescued" : report.status) : -1;
   // Present only when the caller IS this report's reporter (US-O3) — the backend omits
   // these fields entirely for anyone else, so their presence alone is the signal.
   const isReporterView = report?.status_history !== undefined;
+  // Present only for the report's ACTIVE claimer (S27) — same presence-is-the-signal rule.
+  const myCase = report?.my_case;
+  const deadline = claimDeadline(myCase?.claim_due_at);
 
   return (
     <View style={styles.screen}>
@@ -129,6 +160,10 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             <View style={[styles.chip, { backgroundColor: TONE[chip.tone].bg }]}>
               <Text style={[styles.chipText, { color: TONE[chip.tone].fg }]}>{chip.label}</Text>
             </View>
+          ) : null}
+
+          {isReporterView && report.claimer && report.status !== "reported" ? (
+            <Text style={styles.claimedBy}>Claimed by {report.claimer.display_name}</Text>
           ) : null}
 
           {report.notes ? (
@@ -181,6 +216,10 @@ export function ReportDetailScreen({ navigation, route }: Props) {
               ? "Exact spot — shown to you because you reported this or claimed it."
               : "Approximate area only · the exact spot goes to the reporter and whoever claims this."}
           </Text>
+          {/* S8 · the landmark the reporter typed — sent only where the exact pin is. */}
+          {report.location_text ? (
+            <Text style={styles.landmark}>Near: {report.location_text}</Text>
+          ) : null}
 
           {isReporterView && report.status === "reported" ? (
             <View style={styles.waitingCard}>
@@ -189,25 +228,30 @@ export function ReportDetailScreen({ navigation, route }: Props) {
                   ? "No one has offered yet — you'd be on your own for this one."
                   : `${report.offers_count} ${report.offers_count === 1 ? "person has" : "people have"} offered to help.`}
               </Text>
-              {report.escalation_level === 1 ? (
-                <Text style={styles.waitingSub}>Widened to ~5 km · nearby rescuers notified.</Text>
-              ) : report.escalation_level === 2 ? (
-                <Text style={styles.waitingSub}>Widened further · partner shelters notified.</Text>
-              ) : null}
+              {/* S5 · only what the server counted — never "notified" on faith. */}
+              {escalationLines(report.escalation_level, report.escalation_notified).map((line) => (
+                <Text key={line} style={styles.waitingSub}>{line}</Text>
+              ))}
             </View>
           ) : null}
 
           <Text style={styles.sectionTitle}>Status</Text>
           {isReporterView && report.status_history && report.status_history.length > 0 ? (
             <View style={styles.ladder}>
-              {report.status_history.map((h, i) => (
-                <View key={i} style={styles.ladderRow}>
-                  <View style={[styles.ladderDot, styles.ladderDotDone]} />
-                  <Text style={[styles.ladderLabel, styles.ladderLabelDone]}>
-                    {LADDER_LABEL[h.status]} · {relTime(h.changed_at)}
-                  </Text>
-                </View>
-              ))}
+              {report.status_history.map((h, i) => {
+                const note = historyNote(h.note);
+                return (
+                  <View key={i} style={styles.ladderRow}>
+                    <View style={[styles.ladderDot, styles.ladderDotDone]} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.ladderLabel, styles.ladderLabelDone]}>
+                        {LADDER_LABEL[h.status]} · {relTime(h.changed_at)}
+                      </Text>
+                      {note ? <Text style={styles.ladderNote}>{note}</Text> : null}
+                    </View>
+                  </View>
+                );
+              })}
             </View>
           ) : (
             <View style={styles.ladder}>
@@ -223,7 +267,70 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             </View>
           )}
 
-          {!isReporterView && report.status === "reported" ? (
+          {/* S10 · how it ended, from the claimer's outcome screen. */}
+          {isReporterView && report.outcome ? (
+            <View style={styles.outcomeCard} testID="card.reportDetail.outcome">
+              <Text style={styles.outcomeTitle}>How it ended</Text>
+              {report.outcome.photo_url ? (
+                <Image source={{ uri: report.outcome.photo_url }} style={styles.outcomePhoto} resizeMode="cover" />
+              ) : null}
+              {report.outcome.notes ? <Text style={styles.outcomeNotes}>{report.outcome.notes}</Text> : null}
+              <Text style={styles.outcomeMeta}>Resolved {relTime(report.outcome.resolved_at)}</Text>
+            </View>
+          ) : null}
+
+          {/* S11 · a report that no longer needs anyone can be closed while it's unclaimed. */}
+          {isReporterView && report.status === "reported" ? (
+            closing ? (
+              <View style={styles.closeCard}>
+                <Text style={styles.closeTitle}>Why doesn't it need a rescuer?</Text>
+                {CLOSE_REASONS.map((r) => (
+                  <TouchableOpacity
+                    key={r.key}
+                    style={styles.closeOption}
+                    activeOpacity={0.85}
+                    disabled={closeBusy}
+                    accessibilityRole="button"
+                    onPress={() => closeReport(r.key)}
+                  >
+                    <Text style={styles.closeOptionText}>{r.label}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity
+                  style={styles.closeCancel}
+                  accessibilityRole="button"
+                  onPress={() => setClosing(false)}
+                >
+                  <Text style={styles.closeCancelText}>Keep it open</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.closeLink}
+                accessibilityRole="button"
+                testID="btn.reportDetail.close"
+                onPress={() => setClosing(true)}
+              >
+                <Text style={styles.closeLinkText}>It doesn't need a rescuer anymore</Text>
+              </TouchableOpacity>
+            )
+          ) : null}
+
+          {/* S27 · the claimer's way back to their case, with its deadline (S9). */}
+          {myCase ? (
+            <View style={styles.actionRow}>
+              {deadline ? (
+                <Text style={[styles.deadline, deadline.urgent && styles.deadlineUrgent]}>{deadline.text}</Text>
+              ) : null}
+              <Button
+                label="Open your case"
+                testID="btn.reportDetail.openCase"
+                onPress={() => navigation.navigate("rescueUpdate", { caseId: myCase.case_id, reportId: report.report_id })}
+              />
+            </View>
+          ) : null}
+
+          {!isReporterView && !myCase && report.status === "reported" ? (
             <View style={styles.actionRow}>
               <Button label="Claim this case" onPress={confirmClaim} loading={claiming} />
               <Text style={styles.claimFine}>
@@ -266,6 +373,24 @@ const styles = StyleSheet.create({
   mapWrap: { marginTop: 20, height: 160, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   mapNote: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 17 },
+  landmark: { marginTop: 6, color: colors.ink, ...typography.meta, fontWeight: "700", lineHeight: 17 },
+  claimedBy: { marginTop: 10, color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
+  ladderNote: { marginTop: 2, color: colors.muted, ...typography.meta, lineHeight: 17 },
+  outcomeCard: { marginTop: 10, padding: 18, borderRadius: radii.tile, ...card },
+  outcomeTitle: { color: colors.ink, ...typography.section },
+  outcomePhoto: { marginTop: 12, width: "100%", height: 180, borderRadius: radii.tile, backgroundColor: colors.border },
+  outcomeNotes: { marginTop: 12, color: colors.ink, ...typography.body },
+  outcomeMeta: { marginTop: 8, color: colors.muted, ...typography.meta },
+  closeLink: { marginTop: 24, minHeight: 44, alignItems: "center", justifyContent: "center" },
+  closeLinkText: { color: colors.muted, ...typography.subtitle, fontWeight: "700", textDecorationLine: "underline" },
+  closeCard: { marginTop: 24, padding: 18, borderRadius: radii.tile, ...card },
+  closeTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800", marginBottom: 8 },
+  closeOption: { minHeight: 48, justifyContent: "center", borderTopWidth: 1, borderTopColor: colors.border },
+  closeOptionText: { color: colors.ink, ...typography.subtitle },
+  closeCancel: { minHeight: 48, justifyContent: "center", alignItems: "center", marginTop: 4 },
+  closeCancelText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
+  deadline: { marginBottom: 12, color: colors.tealDark, ...typography.meta, lineHeight: 18, textAlign: "center" },
+  deadlineUrgent: { color: colors.warningStrong, fontWeight: "800" },
   waitingCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, backgroundColor: colors.infoBg },
   waitingLine: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   waitingSub: { marginTop: 6, color: colors.tealDark, ...typography.meta },

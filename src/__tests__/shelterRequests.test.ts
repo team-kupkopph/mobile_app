@@ -41,10 +41,21 @@ describe("requestRoute", () => {
     }))).toEqual({ name: "shelterVolunteerActivity", params: { shiftId: "shift-1", section: "pending" } });
   });
 
-  it("routes a placement item to the inquiry ladder", () => {
+  // S17 · a placement still awaiting the shelter's answer used to open the read-only ladder
+  // (every stage skipped, no buttons); Accept/Decline was reachable only from the pet-owner
+  // inquiry list. It now opens the decision screen, as InquiryList already does.
+  it("routes a placement awaiting a decision to the accept/decline screen", () => {
     expect(requestRoute(item({
-      kind: "placement", id: "iq-2", target: { route: "inquiry", id: "iq-2" }
-    }))).toEqual({ name: "inquiry", params: { inquiryId: "iq-2" } });
+      kind: "placement", id: "iq-2", status: "active", target: { route: "inquiry", id: "iq-2" }
+    }))).toEqual({ name: "placeRequest", params: { inquiryId: "iq-2" } });
+  });
+
+  it("routes a decided placement to the inquiry ladder", () => {
+    for (const status of ["adopted", "declined"]) {
+      expect(requestRoute(item({
+        kind: "placement", id: "iq-3", status, target: { route: "inquiry", id: "iq-3" }
+      }))).toEqual({ name: "inquiry", params: { inquiryId: "iq-3" } });
+    }
   });
 });
 

@@ -166,3 +166,88 @@ export function pickSpotlight(
 
   return null;
 }
+
+// ── Sagip loop closure (dev/sagip-build-review.md) ────────────────────────────────────
+
+function duration(mins: number): string {
+  const h = Math.floor(mins / 60), m = mins % 60;
+  if (h === 0) return `${m} min`;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}
+
+// S9 · the claim confirm says a claim "can't be handed back", but an unposted claim reopens
+// when its window passes. The claimer is told when, in time left rather than a clock time
+// (the server sends the instant; "within 2 h" needs no time-zone guess). Urgent inside the
+// last 90 minutes: the backend's hourly sweep warns at 75% of the window, so this is the
+// stretch where a push has already gone out.
+export function claimDeadline(
+  claimDueAt: string | null | undefined, nowMs: number = Date.now()
+): { text: string; short: string; urgent: boolean } | null {
+  if (!claimDueAt) return null;
+  const mins = Math.floor((new Date(claimDueAt).getTime() - nowMs) / 60000);
+  if (mins <= 0) {
+    return {
+      text: "The update window has passed — this may reopen for another rescuer any moment.",
+      short: "Update overdue", urgent: true
+    };
+  }
+  return {
+    text: `Post an update within ${duration(mins)} or it reopens for another rescuer.`,
+    short: `Update within ${duration(mins)}`, urgent: mins <= 90
+  };
+}
+
+// S5 · the waiting card used to say "partner shelters notified" at level 2 whether or not a
+// single partner existed. These lines only claim what the server counted: how many people
+// each level actually reached. An older server without the counts gets neutral words.
+export function escalationLines(
+  level: number | undefined, notified: { level_1: number; level_2: number } | undefined
+): string[] {
+  if (!level) return [];
+  const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+  const lines: string[] = [];
+  if (!notified) {
+    lines.push("Widened to your city.");
+    if (level >= 2) lines.push("Widened further.");
+    return lines;
+  }
+  const n1 = notified.level_1, n2 = notified.level_2;
+  lines.push(n1 > 0
+    ? `Widened to your city · ${n1} verified ${plural(n1, "rescuer", "rescuers")} alerted.`
+    : "Widened to your city · no verified rescuers there to alert yet.");
+  if (level >= 2) {
+    lines.push(n2 > 0
+      ? `Widened further · ${n2} partner ${plural(n2, "shelter", "shelters")} nearby alerted.`
+      : "Widened further · no partner shelter nearby to alert yet.");
+  }
+  return lines;
+}
+
+// S8 · "Open in Maps" from the case screen, to the exact point the claimer is entitled to.
+export function directionsUrl(lat: number, lng: number, os: string): string {
+  return os === "ios"
+    ? `http://maps.apple.com/?daddr=${lat},${lng}`
+    : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+// S11 · the reasons a reporter may close their own report — the backend's
+// ReportCloseSerializer accepts exactly these keys.
+export type CloseReason = "gone" | "duplicate" | "handled_myself" | "mistake";
+export const CLOSE_REASONS: { key: CloseReason; label: string }[] = [
+  { key: "gone", label: "The animal is gone" },
+  { key: "duplicate", label: "Someone already reported it" },
+  { key: "handled_myself", label: "I took care of it myself" },
+  { key: "mistake", label: "I reported it by mistake" }
+];
+const CLOSE_NOTE_PREFIX = "closed_by_reporter:";
+
+/** A status-history note in the reporter's words: their own close named, others as written. */
+export function historyNote(note: string | undefined): string | null {
+  if (!note) return null;
+  if (note.startsWith(CLOSE_NOTE_PREFIX)) {
+    const key = note.slice(CLOSE_NOTE_PREFIX.length);
+    const reason = CLOSE_REASONS.find((r) => r.key === key);
+    return `Closed by you · ${reason ? reason.label : key}`;
+  }
+  return note;
+}

@@ -1,5 +1,8 @@
 import { MyReport, RescueCaseSummary } from "../api/types";
-import { advanceableStatuses, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip } from "../sagip";
+import {
+  CLOSE_REASONS, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
+  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip
+} from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
   it("maps each status to a labelled tone", () => {
@@ -120,5 +123,86 @@ describe("pickSpotlight — the one thing waiting on you", () => {
     expect(s?.chip).toEqual({ label: "Claimed", tone: "teal" });
     expect(s?.since).toBe("claimed 3 h ago");
     expect(s?.title).toBe("Dog · Injured");
+  });
+});
+
+
+// ── Sagip loop closure ────────────────────────────────────────────────────────────────
+describe("claimDeadline (S9 · the claimer is told when an unposted claim reopens)", () => {
+  const now = Date.parse("2026-09-30T10:00:00Z");
+  const inMin = (m: number) => new Date(now + m * 60000).toISOString();
+
+  it("says nothing when there is no deadline (rescued, safe, expired)", () => {
+    expect(claimDeadline(null, now)).toBeNull();
+    expect(claimDeadline(undefined, now)).toBeNull();
+  });
+
+  it("names the time left, calmly while there's room", () => {
+    expect(claimDeadline(inMin(135), now)).toEqual({
+      text: "Post an update within 2 h 15 min or it reopens for another rescuer.",
+      short: "Update within 2 h 15 min", urgent: false
+    });
+  });
+
+  it("turns urgent inside the last 90 minutes", () => {
+    expect(claimDeadline(inMin(45), now)).toMatchObject({ short: "Update within 45 min", urgent: true });
+    expect(claimDeadline(inMin(120), now)?.short).toBe("Update within 2 h");
+  });
+
+  it("says so honestly once the window has passed (the sweep runs hourly)", () => {
+    expect(claimDeadline(inMin(-5), now)).toEqual({
+      text: "The update window has passed — this may reopen for another rescuer any moment.",
+      short: "Update overdue", urgent: true
+    });
+  });
+});
+
+describe("escalationLines (S5 · only claim who was actually alerted)", () => {
+  it("is empty before any escalation", () => {
+    expect(escalationLines(0, { level_1: 0, level_2: 0 })).toEqual([]);
+    expect(escalationLines(undefined, undefined)).toEqual([]);
+  });
+
+  it("counts the people each level reached", () => {
+    expect(escalationLines(1, { level_1: 3, level_2: 0 }))
+      .toEqual(["Widened to your city · 3 verified rescuers alerted."]);
+    expect(escalationLines(2, { level_1: 1, level_2: 2 })).toEqual([
+      "Widened to your city · 1 verified rescuer alerted.",
+      "Widened further · 2 partner shelters nearby alerted."
+    ]);
+  });
+
+  it("says plainly when a level reached no one — never 'notified'", () => {
+    expect(escalationLines(2, { level_1: 0, level_2: 0 })).toEqual([
+      "Widened to your city · no verified rescuers there to alert yet.",
+      "Widened further · no partner shelter nearby to alert yet."
+    ]);
+  });
+
+  it("falls back to neutral words when an older server sends no counts", () => {
+    const lines = escalationLines(2, undefined);
+    expect(lines).toEqual(["Widened to your city.", "Widened further."]);
+    expect(lines.join(" ")).not.toMatch(/notified|alerted/);
+  });
+});
+
+describe("directionsUrl (S8 · Open in Maps)", () => {
+  it("opens Apple Maps on iOS and Google Maps elsewhere, with the exact point", () => {
+    expect(directionsUrl(14.65, 121.1, "ios")).toBe("http://maps.apple.com/?daddr=14.65,121.1");
+    expect(directionsUrl(14.65, 121.1, "android"))
+      .toBe("https://www.google.com/maps/dir/?api=1&destination=14.65,121.1");
+  });
+});
+
+describe("close reasons and history notes (S11)", () => {
+  it("offers exactly the four reasons the server accepts", () => {
+    expect(CLOSE_REASONS.map((r) => r.key)).toEqual(["gone", "duplicate", "handled_myself", "mistake"]);
+  });
+
+  it("renders a reporter's close in words, other notes as written, and blanks as nothing", () => {
+    expect(historyNote("closed_by_reporter:handled_myself")).toBe("Closed by you · I took care of it myself");
+    expect(historyNote("At the vet")).toBe("At the vet");
+    expect(historyNote("")).toBeNull();
+    expect(historyNote(undefined)).toBeNull();
   });
 });
