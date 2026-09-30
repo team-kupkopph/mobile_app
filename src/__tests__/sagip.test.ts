@@ -204,6 +204,15 @@ describe("escalationLines (S5 · D2 · only claim who was actually alerted)", ()
     ]);
   });
 
+  it("adds how many more were alerted when a claimed report reopened", () => {
+    expect(escalationLines(0, { ...counts(2), reopened: 3 })).toEqual([
+      "2 verified rescuers and shelters nearby were alerted right away.",
+      "It reopened · 3 more verified rescuers and shelters alerted."
+    ]);
+    // 0 can't tell "never reopened" from "reopened, no one left to ask", so it says nothing.
+    expect(escalationLines(0, { ...counts(2), reopened: 0 })).toHaveLength(1);
+  });
+
   it("falls back to neutral words when an older server sends no counts", () => {
     const lines = escalationLines(2, undefined);
     expect(lines).toEqual(["Widened to your city.", "Widened further."]);

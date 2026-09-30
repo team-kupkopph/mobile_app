@@ -204,7 +204,7 @@ export function claimDeadline(
 // the counts gets neutral words.
 export function escalationLines(
   level: number | undefined,
-  notified: { level_1: number; level_2: number; at_report?: number | null } | undefined
+  notified: { level_1: number; level_2: number; at_report?: number | null; reopened?: number | null } | undefined
 ): string[] {
   const lines: string[] = [];
   const people = (n: number) => (n === 1 ? "rescuer or shelter" : "rescuers and shelters");
@@ -213,6 +213,12 @@ export function escalationLines(
     lines.push(atReport > 0
       ? `${atReport} verified ${people(atReport)} nearby ${atReport === 1 ? "was" : "were"} alerted right away.`
       : "No verified rescuers or shelters in your city to alert yet.");
+  }
+  // Re-alert · a claimed report that went back on the map paged the people not yet asked.
+  // Only a positive count is said: 0 can't tell "never reopened" from "no one left to ask".
+  const reopened = notified?.reopened ?? 0;
+  if (reopened > 0) {
+    lines.push(`It reopened · ${reopened} more verified ${people(reopened)} alerted.`);
   }
   if (!level) return lines;
   if (!notified) {
