@@ -30,7 +30,9 @@ const REPORT_LINKED_TYPES = new Set([
   "match_suggested",  // {report_id} → the report; a possible-matches row lives there (L3)
   // Sagip loop closure: the reporter's case_progress (the report shows the steps and the
   // outcome) and the claimer's claim_lapsed (the report shows it's back on the map).
-  "case_progress", "claim_lapsed"
+  "case_progress", "claim_lapsed",
+  // D2 · an urgent stray was just reported nearby — the report is where to claim or offer.
+  "report_nearby"
 ]);
 const VERIFICATION_TYPES = new Set([
   "verification_approved", "verification_rejected", "verification_needs_info"

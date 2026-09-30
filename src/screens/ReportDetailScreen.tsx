@@ -225,7 +225,10 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             <View style={styles.waitingCard}>
               <Text style={styles.waitingLine}>
                 {(report.offers_count ?? 0) === 0
-                  ? "No one has offered yet — you'd be on your own for this one."
+                  // S28 · was "you'd be on your own for this one", which read as if the
+                  // reporter had to do the rescue — and now sits right above a line saying
+                  // how many rescuers were alerted (D2).
+                  ? "No one has offered help yet."
                   : `${report.offers_count} ${report.offers_count === 1 ? "person has" : "people have"} offered to help.`}
               </Text>
               {/* S5 · only what the server counted — never "notified" on faith. */}
