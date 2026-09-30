@@ -1,7 +1,8 @@
 import {
-  BrowseShift, MySignupItem, MySignups, groupShiftsByDay, historyHours, lateCancelCopy,
-  nextBookedShift, shiftDayLabel, shiftDurationLabel, shiftSlotsChip, shiftTypeLabel,
-  shiftTimeRange, volunteerTotals, volunteerTotalsLabel
+  BrowseShift, MySignupItem, MySignups, binShiftsByLocalDate, groupShiftsByDay, historyHours,
+  lateCancelCopy, localIsoDate, monthCells, monthLabel, nextBookedShift, selectedDayHeading,
+  shiftDayLabel, shiftDurationLabel, shiftSlotsChip, shiftTypeLabel, shiftTimeRange,
+  volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
 
 test("shiftTypeLabel maps the six enum values", () => {
@@ -249,4 +250,40 @@ test("todayShift is the approved shift from 3h before start until checked out", 
   expect(todayShift(mine, T0 - 2 * 3600e3)?.signup_id).toBe("s1");
   mine.upcoming[0].check_out_at = "done";
   expect(todayShift(mine, T0)).toBeNull();
+});
+
+// ── Browse calendar view helpers (Browse sub-toggle, 2026-09-30) ──────────────────────────
+
+test("localIsoDate is the local calendar date, not the UTC one", () => {
+  // 2026-10-01T02:00:00 in a +08:00 zone is still Oct 1 locally.
+  const t = new Date(2026, 9, 1, 2, 0, 0).toISOString();
+  expect(localIsoDate(t)).toBe("2026-10-01");
+});
+
+test("binShiftsByLocalDate keys the map by local YYYY-MM-DD and preserves per-day order", () => {
+  const s1 = shift({ shift_id: "a", starts_at: new Date(2026, 9, 1, 9, 0).toISOString() });
+  const s2 = shift({ shift_id: "b", starts_at: new Date(2026, 9, 1, 13, 0).toISOString() });
+  const s3 = shift({ shift_id: "c", starts_at: new Date(2026, 9, 3, 10, 0).toISOString() });
+  const bins = binShiftsByLocalDate([s1, s2, s3]);
+  expect([...bins.keys()].sort()).toEqual(["2026-10-01", "2026-10-03"]);
+  expect(bins.get("2026-10-01")!.map((s) => s.shift_id)).toEqual(["a", "b"]);
+  expect(bins.get("2026-10-03")!.map((s) => s.shift_id)).toEqual(["c"]);
+});
+
+test("monthCells returns 42 cells with the month's days in the right weekday columns", () => {
+  const oct1 = shift({ starts_at: new Date(2026, 9, 1, 9).toISOString() });
+  const cells = monthCells(2026, 9, binShiftsByLocalDate([oct1]));
+  expect(cells).toHaveLength(42);
+  // October 2026 starts on Thursday (weekday 4). Cell 4 is Oct 1.
+  expect(cells[4]).toMatchObject({ day: 1, iso: "2026-10-01", count: 1, hasShifts: true });
+  // Cells 0..3 are the leading blanks.
+  expect(cells.slice(0, 4).every((c) => c.day === null)).toBe(true);
+  // A day with no shifts is present but empty.
+  expect(cells[5]).toMatchObject({ day: 2, iso: "2026-10-02", count: 0, hasShifts: false });
+});
+
+test("monthLabel and selectedDayHeading use human month + weekday names", () => {
+  expect(monthLabel(2026, 9)).toBe("October 2026");
+  expect(selectedDayHeading("2026-10-01", 2)).toBe("Thu Oct 1 · 2 shifts");
+  expect(selectedDayHeading("2026-10-04", 1)).toBe("Sun Oct 4 · 1 shift");
 });

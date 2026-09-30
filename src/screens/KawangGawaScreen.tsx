@@ -43,8 +43,9 @@ import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { feedState, useCachedFeed } from "../useCachedFeed";
 import {
-  BrowseShift, MySignups, ShiftType, groupShiftsByDay, nextBookedShift, shiftDurationLabel,
-  shiftHeadline, shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
+  BrowseShift, MySignups, ShiftType, binShiftsByLocalDate, groupShiftsByDay, monthCells,
+  monthLabel, nextBookedShift, selectedDayHeading, shiftDurationLabel, shiftHeadline,
+  shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
 import { colors, spacing, typography } from "../theme";
 import { Card, Chip, SegmentedControl } from "../components/ui";
@@ -87,6 +88,14 @@ export function KawangGawaScreen({ navigation, route }: Props) {
   const [wall, setWall] = useState<SignupWallAction | null>(null);
 
   const [tabIndex, setTabIndex] = useState(route.params?.tab === "mine" ? 1 : 0);
+  // Browse sub-toggle (2026-09-30, owner request): view === 0 is the shipped scrolling list;
+  // view === 1 is a month grid drilling into a selected-day list. Anchored by the
+  // `browse-views` marker in design/mobile-v3/VolunteerHub.dc.html.
+  const [browseView, setBrowseView] = useState(0);
+  const today = new Date();
+  const [calYear, setCalYear] = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [selectedIso, setSelectedIso] = useState<string | null>(null);
   // The hub is a single screen for the life of the volunteer's session — a notification tap
   // or the Requested screen's "View my shifts" CTA navigate back to an ALREADY-MOUNTED hub
   // with a fresh `tab` param, which does not re-run useState's initializer. This keeps the
@@ -235,6 +244,16 @@ export function KawangGawaScreen({ navigation, route }: Props) {
           )}
         </View>
 
+        {/* Browse sub-toggle — List ↔ Calendar. Anchored by `browse-views` in
+            design/mobile-v3/VolunteerHub.dc.html. */}
+        <SegmentedControl
+          segments={["List", "Calendar"]}
+          index={browseView}
+          onChange={setBrowseView}
+          style={styles.browseView}
+          testID="seg.kawanggawa.view"
+        />
+
         {/* One scrolling row. Seven chips wrapped onto three rows before, taking ~140 pt of
             the screen above a list that is often shorter than the filter that sorts it. */}
         <ScrollView
@@ -256,7 +275,18 @@ export function KawangGawaScreen({ navigation, route }: Props) {
           ))}
         </ScrollView>
 
-        {state.kind !== "ready" ? (
+        {browseView === 1 ? (
+          <BrowseCalendar
+            shifts={shifts ?? []}
+            year={calYear}
+            month={calMonth}
+            selectedIso={selectedIso}
+            onPrev={() => { setSelectedIso(null); const m = calMonth - 1; if (m < 0) { setCalMonth(11); setCalYear(calYear - 1); } else setCalMonth(m); }}
+            onNext={() => { setSelectedIso(null); const m = calMonth + 1; if (m > 11) { setCalMonth(0); setCalYear(calYear + 1); } else setCalMonth(m); }}
+            onSelect={setSelectedIso}
+            onOpenShift={(shiftId) => navigation.navigate("kawanggawaDetail", { shiftId })}
+          />
+        ) : state.kind !== "ready" ? (
           <>
             <LoadStateView
               state={state}
@@ -358,6 +388,7 @@ const styles = StyleSheet.create({
   header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4 },
   title: { color: colors.ink, ...typography.hero },
   segmented: { marginTop: 16 },
+  browseView: { width: 168, alignSelf: "flex-start", marginBottom: 12 },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 130 },
   impact: { paddingVertical: 16, paddingHorizontal: 18, marginBottom: 18 },
   impactTotals: { color: colors.ink, ...typography.section },
@@ -392,4 +423,176 @@ const styles = StyleSheet.create({
   cardChip: { flexShrink: 0 },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" }
+});
+
+// ── Calendar view for Browse (2026-09-30, owner request) ───────────────────────────────────
+// Bins the current /shifts response by local date, renders a month grid with a small dot+count
+// on days with shifts, and drills the selected day into a list of the SAME tile-title-meta-chip
+// rows used by the list view above. Anchored by `browse-views` = "List,Calendar" in
+// design/mobile-v3/VolunteerHub.dc.html.
+type BrowseCalendarProps = {
+  shifts: BrowseShift[];
+  year: number;
+  month: number;
+  selectedIso: string | null;
+  onPrev: () => void;
+  onNext: () => void;
+  onSelect: (iso: string) => void;
+  onOpenShift: (shiftId: string) => void;
+};
+
+function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSelect, onOpenShift }: BrowseCalendarProps) {
+  const byDate = binShiftsByLocalDate(shifts);
+  const cells = monthCells(year, month, byDate);
+  const dayShifts = selectedIso ? (byDate.get(selectedIso) ?? []) : [];
+  const heading = selectedIso ? selectedDayHeading(selectedIso, dayShifts.length) : "";
+
+  return (
+    <View testID="calendar.kawanggawa">
+      <View style={calStyles.header}>
+        <Text style={calStyles.monthLabel}>{monthLabel(year, month)}</Text>
+        <View style={calStyles.navGroup}>
+          <TouchableOpacity
+            hitSlop={TAP_SLOP}
+            style={calStyles.nav}
+            onPress={onPrev}
+            accessibilityRole="button"
+            accessibilityLabel={`Previous month, ${monthLabel(month === 0 ? year - 1 : year, month === 0 ? 11 : month - 1)}`}
+          >
+            <Text style={calStyles.chev}>‹</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            hitSlop={TAP_SLOP}
+            style={calStyles.nav}
+            onPress={onNext}
+            accessibilityRole="button"
+            accessibilityLabel={`Next month, ${monthLabel(month === 11 ? year + 1 : year, month === 11 ? 0 : month + 1)}`}
+          >
+            <Text style={calStyles.chev}>›</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={calStyles.weekdayRow}>
+        {["S", "M", "T", "W", "T", "F", "S"].map((w, i) => (
+          <Text key={i} style={calStyles.weekday}>{w}</Text>
+        ))}
+      </View>
+
+      <View style={calStyles.grid}>
+        {cells.map((c, i) => {
+          const isSelected = c.iso !== null && c.iso === selectedIso;
+          return (
+            <TouchableOpacity
+              key={i}
+              style={calStyles.cell}
+              activeOpacity={c.hasShifts ? 0.7 : 1}
+              disabled={!c.hasShifts}
+              onPress={() => { if (c.hasShifts && c.iso) onSelect(c.iso); }}
+              accessibilityRole={c.hasShifts ? "button" : undefined}
+              accessibilityLabel={c.iso ? `${c.iso}, ${c.count} shift${c.count === 1 ? "" : "s"}` : undefined}
+            >
+              {c.day !== null && (
+                <View style={[calStyles.dayBubble, isSelected && calStyles.dayBubbleSelected]}>
+                  <Text
+                    style={[
+                      calStyles.dayText,
+                      c.hasShifts ? calStyles.dayTextOn : calStyles.dayTextOff,
+                    ]}
+                  >
+                    {c.day}
+                  </Text>
+                </View>
+              )}
+              {c.hasShifts && (
+                <View style={calStyles.dotRow}>
+                  <View style={calStyles.dot} />
+                  <Text style={calStyles.count}>{c.count}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {selectedIso ? (
+        dayShifts.length > 0 ? (
+          <>
+            <Text style={calStyles.dayHeading}>{heading}</Text>
+            {dayShifts.map((s, i) => {
+              const chip = shiftSlotsChip(s.slots_left, s.capacity);
+              const full = s.slots_left <= 0;
+              return (
+                <TouchableOpacity
+                  key={s.shift_id}
+                  testID={`card.kawanggawa.calendar.${i}`}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${shiftTypeLabel(s.type)} at ${s.org_name}, ${shiftTimeRange(s.starts_at, s.ends_at)}, ${chip.label}`}
+                  onPress={() => onOpenShift(s.shift_id)}
+                >
+                  <Card style={calStyles.card}>
+                    <View style={[calStyles.cardIcon, full && calStyles.cardIconFull]}>
+                      <VolunteerIcon color={full ? colors.muted : colors.teal} size={22} />
+                    </View>
+                    <View style={calStyles.cardCopy}>
+                      <View style={calStyles.cardTop}>
+                        <Text style={calStyles.cardTitle} numberOfLines={1}>{shiftHeadline(s)}</Text>
+                        <Chip label={chip.label} tone={chip.tone} style={calStyles.cardChip} />
+                      </View>
+                      <Text style={calStyles.cardOrg}>
+                        {shiftTypeLabel(s.type)} · {s.org_name}{s.city ? ` · ${s.city}` : ""}
+                      </Text>
+                      <Text style={calStyles.cardMeta}>
+                        {shiftTimeRange(s.starts_at, s.ends_at)} · {shiftDurationLabel(s.starts_at, s.ends_at)}
+                      </Text>
+                    </View>
+                  </Card>
+                </TouchableOpacity>
+              );
+            })}
+          </>
+        ) : (
+          <Text style={calStyles.emptyDay}>No shifts on this day.</Text>
+        )
+      ) : null}
+    </View>
+  );
+}
+
+const calStyles = StyleSheet.create({
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+            marginTop: 4 },
+  monthLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  navGroup: { flexDirection: "row" },
+  nav: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
+  chev: { color: colors.teal, fontSize: 19, fontWeight: "700" },
+  weekdayRow: { flexDirection: "row", marginTop: 6 },
+  weekday: { flex: 1, textAlign: "center", color: colors.muted,
+             ...typography.meta, fontWeight: "700" },
+  grid: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
+  cell: { width: `${100 / 7}%`, height: 52, alignItems: "center", justifyContent: "flex-start",
+          paddingTop: 4 },
+  dayBubble: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  dayBubbleSelected: { backgroundColor: colors.soft },
+  dayText: { ...typography.meta, fontWeight: "700" },
+  dayTextOn: { color: colors.ink, fontWeight: "800" },
+  dayTextOff: { color: colors.muted, opacity: 0.55 },
+  dotRow: { flexDirection: "row", alignItems: "center", marginTop: 2, gap: 3 },
+  dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: colors.tealDark },
+  count: { color: colors.tealDark, ...typography.caption, fontWeight: "800" },
+  dayHeading: { marginTop: 18, marginBottom: 10, color: colors.muted, ...typography.meta,
+                fontWeight: "800", letterSpacing: 0.8, textTransform: "uppercase" },
+  card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
+  cardIcon: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.soft,
+              alignItems: "center", justifyContent: "center" },
+  cardIconFull: { backgroundColor: colors.greyPill },
+  cardCopy: { flex: 1 },
+  cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+  cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800", flexShrink: 1 },
+  cardChip: { flexShrink: 0 },
+  cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
+  cardMeta: { marginTop: 6, color: colors.teal, ...typography.meta, fontWeight: "700" },
+  emptyDay: { marginTop: 20, textAlign: "center", color: colors.muted,
+              ...typography.strong, fontWeight: "700" },
 });

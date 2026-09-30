@@ -209,6 +209,70 @@ export function groupShiftsByDay(shifts: BrowseShift[], nowMs: number = Date.now
   return groups;
 }
 
+// ── Browse calendar view (Browse sub-toggle, 2026-09-30) ───────────────────────────────────
+// Owner request: organise Browse shifts by day rather than one scrolling list. The list view
+// is kept intact; the calendar view drills a month grid into a selected-day list of the SAME
+// tile-title-meta-chip rows. See design/mobile-v3/VolunteerHub.dc.html for the anchor artboard
+// and its `browse-views` parity marker.
+
+/** The shift's start rendered as a local YYYY-MM-DD, the key the grid buckets by. Local, not
+ *  UTC, because a 8:00 AM Manila shift belongs to that Manila day even when the server sent
+ *  the timestamp as a Zulu offset that lands on the previous UTC date. */
+export function localIsoDate(startsAt: string): string {
+  const d = new Date(startsAt);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** shifts → Map<"YYYY-MM-DD", BrowseShift[]>, keyed by local start date. Preserves input order
+ *  within a day (the /shifts endpoint already returns by starts_at). */
+export function binShiftsByLocalDate(shifts: BrowseShift[]): Map<string, BrowseShift[]> {
+  const out = new Map<string, BrowseShift[]>();
+  for (const s of shifts) {
+    const key = localIsoDate(s.starts_at);
+    const bucket = out.get(key);
+    if (bucket) bucket.push(s);
+    else out.set(key, [s]);
+  }
+  return out;
+}
+
+export type CalendarCell = { iso: string | null; day: number | null; count: number; hasShifts: boolean };
+
+/** 42 cells (6 rows × 7 cols, Sun–Sat) for the given year/month. Leading/trailing cells outside
+ *  the month are `{ iso: null, day: null, count: 0, hasShifts: false }`. */
+export function monthCells(year: number, month: number, byDate: Map<string, BrowseShift[]>): CalendarCell[] {
+  const firstWeekday = new Date(year, month, 1).getDay(); // 0 = Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells: CalendarCell[] = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push({ iso: null, day: null, count: 0, hasShifts: false });
+  const ym = `${year}-${String(month + 1).padStart(2, "0")}`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = `${ym}-${String(d).padStart(2, "0")}`;
+    const bucket = byDate.get(iso);
+    const count = bucket?.length ?? 0;
+    cells.push({ iso, day: d, count, hasShifts: count > 0 });
+  }
+  while (cells.length < 42) cells.push({ iso: null, day: null, count: 0, hasShifts: false });
+  return cells;
+}
+
+const MONTH_LONG = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"];
+const MONTH_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export const monthLabel = (year: number, month: number): string => `${MONTH_LONG[month]} ${year}`;
+
+/** "Thu Oct 1 · 2 shifts" — the section heading above the selected day's rows. */
+export function selectedDayHeading(iso: string, count: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dow = new Date(y, m - 1, d).getDay();
+  return `${WEEKDAY_SHORT[dow]} ${MONTH_SHORT[m - 1]} ${d} · ${count} shift${count === 1 ? "" : "s"}`;
+}
+
 // ── Kawang-Gawa shift detail (P2 · what/where/who, 2026-09-23) ─────────────────────────────
 
 /** The shift's name, falling back to its type when the shelter didn't title it. */
