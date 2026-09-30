@@ -79,3 +79,29 @@ describe("notificationTarget", () => {
       .toEqual({ screen: "reportDetail", reportId: "r" });
   });
 });
+
+// Sagip loop closure (backend: sagip/notices.py). Each routes to the screen that answers the
+// question the notification raised.
+describe("Sagip loop-closure notifications", () => {
+  it("routes case_progress and claim_lapsed to the report", () => {
+    for (const type of ["case_progress", "claim_lapsed"]) {
+      expect(notificationTarget({ type, data: { report_id: "r1", case_id: "c1" } }))
+        .toEqual({ screen: "reportDetail", reportId: "r1" });
+    }
+  });
+
+  it("routes claim_due straight to the claimer's case, where the update is posted", () => {
+    expect(notificationTarget({ type: "claim_due", data: { report_id: "r1", case_id: "c1" } }))
+      .toEqual({ screen: "rescueUpdate", caseId: "c1", reportId: "r1" });
+  });
+
+  it("is a no-op for claim_due missing either id", () => {
+    expect(notificationTarget({ type: "claim_due", data: { case_id: "c1" } })).toBeNull();
+    expect(notificationTarget({ type: "claim_due", data: { report_id: "r1" } })).toBeNull();
+  });
+
+  it("routes placement_decided to the rescuer's cases", () => {
+    expect(notificationTarget({ type: "placement_decided", data: { decision: "declined" } }))
+      .toEqual({ screen: "myRescues" });
+  });
+});

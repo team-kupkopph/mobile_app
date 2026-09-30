@@ -82,6 +82,12 @@ export function NotificationsScreen({ navigation }: Props) {
       case "myInquiries":
         navigation.navigate("myInquiries");
         return;
+      case "rescueUpdate":
+        navigation.navigate("rescueUpdate", { caseId: target.caseId, reportId: target.reportId });
+        return;
+      case "myRescues":
+        navigation.navigate("myRescues");
+        return;
       case "kawanggawa":
         navigation.navigate("kawanggawa", { tab: target.tab });
         return;

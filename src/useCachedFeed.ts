@@ -71,6 +71,9 @@ export function useCachedFeed<T>(api: Api, pick: (data: any) => T[]) {
   const [res, setRes] = useState<Apiish | null>(null);
   /** True only when a refresh failed and older rows are still on screen. */
   const [stale, setStale] = useState(false);
+  /** The payload the rows came from (cache, then the last good response) — for a feed's
+   *  top-level fields beside its rows, e.g. the rescue map's `city_supported`. */
+  const [data, setData] = useState<any>(null);
 
   const load = useCallback(
     async (path: string) => {
@@ -81,7 +84,10 @@ export function useCachedFeed<T>(api: Api, pick: (data: any) => T[]) {
       // via the functional form so a slow cache read can never clobber a fast response that
       // already landed.
       const cached = await readCache<any>(path);
-      if (cached) setRows((current) => current ?? pick(cached));
+      if (cached) {
+        setRows((current) => current ?? pick(cached));
+        setData((current: any) => current ?? cached);
+      }
 
       const r = await api.get(path);
       setRes({ ok: r.ok, status: r.status });
@@ -92,11 +98,14 @@ export function useCachedFeed<T>(api: Api, pick: (data: any) => T[]) {
         setStale(next.stale);
         return next.rows;
       });
-      if (r.ok) await writeCache(path, r.data);
+      if (r.ok) {
+        setData(r.data);
+        await writeCache(path, r.data);
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `pick` is inline at every call site
     [],
   );
 
-  return { rows, res, stale, load };
+  return { rows, res, stale, load, data };
 }

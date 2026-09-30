@@ -36,9 +36,14 @@ export type MyReport = {
 export type MapReport = {
   report_id: string; species: string; condition: string;
   status: StrayStatus; city: string | null; reported_at: string;
+  // S14 · the coarse (~500 m grid) point report detail already publishes. Optional: a cached
+  // payload from before the field existed has none.
+  approx_location?: LatLng;
 };
 // US-O3 — reporter-only block, present only when the caller IS the report's reporter.
-export type ReportStatusHistoryEntry = { status: StrayStatus; changed_at: string };
+// `note` — the claimer's note on a move, or a system note (auto-expiry, placement, a
+// reporter's close). See sagip.ts::historyNote.
+export type ReportStatusHistoryEntry = { status: StrayStatus; changed_at: string; note?: string };
 // US-SEC1 — approx_location is always present (coarsened, ~500m grid, everyone incl.
 // guests); precise_location appears ONLY for the reporter or the report's active claimer.
 export type LatLng = { lat: number; lng: number };
@@ -49,6 +54,15 @@ export type ReportDetail = {
   approx_location: LatLng; precise_location?: LatLng;
   escalation_level?: number; offers_count?: number;
   status_history?: ReportStatusHistoryEntry[];
+  // Reporter only (S5 · S10 · S11) — absent for anyone else, null when not applicable.
+  escalation_notified?: { level_1: number; level_2: number };
+  claimer?: { display_name: string } | null;
+  outcome?: { notes: string | null; photo_url: string | null; resolved_at: string } | null;
+  close_reason?: string | null;
+  // Reporter or active claimer only (S8) — as precise as the pin, so it follows the pin.
+  location_text?: string | null;
+  // Active claimer only (S27 · S9): their case, and when an unposted claim reopens.
+  my_case?: { case_id: string; claim_due_at: string | null };
 };
 
 // Track K — the claim + working-the-case loop
@@ -56,6 +70,7 @@ export type RescueCaseSummary = {
   case_id: string;
   report: { report_id: string; species: string; condition: string; city: string | null };
   status: StrayStatus; claimed_at: string; expired_at: string | null;
+  claim_due_at?: string | null;   // S9 · null once the case can't lapse
 };
 // GET /cases/{id} (US-SEC1) — the claimer's own case; precise_location present only
 // while the claim is still active (absent once expired, even for the original claimer).
