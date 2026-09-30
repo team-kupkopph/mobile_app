@@ -60,6 +60,11 @@ updates:
       # #26 (2026-09-09) proposed 57.0.5, i.e. SDK 57's test preset against an SDK 54 app.
       - dependency-name: "jest-expo"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      # babel-preset-expo's major is also the Expo SDK: 54.x for SDK 54, 57.x for SDK 57.
+      # #137 (2026-09-30) proposed 57.0.13 against an SDK 54 app and was merged before this
+      # rule existed; it is being reverted in the same PR that added this line.
+      - dependency-name: "babel-preset-expo"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
       # react / react-dom are chosen by the React Native version, not independently.
       - dependency-name: "react"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
