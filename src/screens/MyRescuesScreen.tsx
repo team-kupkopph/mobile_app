@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { relTime, sagipTitle, strayChip } from "../sagip";
+import { claimDeadline, relTime, sagipTitle, strayChip } from "../sagip";
 import { colors, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Card, ScreenHeader } from "../components/ui";
@@ -58,6 +58,7 @@ export function MyRescuesScreen({ navigation }: Props) {
             // current (possibly re-claimed by someone else) status.
             const chip = c.expired_at ? { label: "Expired", tone: "grey" as const } : strayChip(c.status);
             const tone = TONE[chip.tone];
+            const deadline = c.expired_at ? null : claimDeadline(c.claim_due_at);
             return (
               <TouchableOpacity
                 key={c.case_id}
@@ -72,6 +73,10 @@ export function MyRescuesScreen({ navigation }: Props) {
                     <Text style={styles.cardMeta}>
                       {(c.report.city ? c.report.city + " · " : "") + "claimed " + relTime(c.claimed_at)}
                     </Text>
+                    {/* S9 · while an unposted claim can still lapse, say how long is left. */}
+                    {deadline ? (
+                      <Text style={[styles.deadline, deadline.urgent && styles.deadlineUrgent]}>{deadline.short}</Text>
+                    ) : null}
                   </View>
                   <View style={[styles.chip, { backgroundColor: tone.bg }]}>
                     <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
@@ -92,6 +97,8 @@ const styles = StyleSheet.create({
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
+  deadline: { marginTop: 4, color: colors.tealDark, ...typography.meta, fontWeight: "700" },
+  deadlineUrgent: { color: colors.warningStrong, fontWeight: "800" },
   chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" }

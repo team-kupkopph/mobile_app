@@ -1,7 +1,9 @@
 // US-S4 · the public rescue map. Reference: screens/user/screen-rescue-map.png. GET /reports/map.
-// The map is a CITY-SCOPED backdrop only: it centres on the queried city and draws the search
-// radius. It deliberately shows NO per-report pins — the backend withholds each report's precise
-// geom (§12.5 / decision 11), so the strays live in the colour-coded list, not as map markers.
+// The map centres on the queried city and draws the search radius, plus one translucent circle
+// per report at its COARSE point (S14): the ~500 m grid cell `approx_location` that report
+// detail already publishes to anyone. Never a marker — a pin would imply the exact spot, which
+// the backend withholds (§12.5 / decision 11) and only rescuers on the report ever see.
+// S15 · a city the map can't search says so, rather than "no strays — good news".
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
@@ -28,6 +30,9 @@ const TONE = {
   green: { bg: colors.successBg, fg: colors.success }, grey: { bg: colors.greyPill, fg: colors.muted }
 } as const;
 const RADIUS_KM = 10;
+// Half the backend's 500 m coarsening cell (sagip/geo.py::COARSEN_CELL_SIZE_M): the circle
+// covers roughly the cell the report is somewhere in, without claiming more precision.
+const APPROX_RADIUS_M = 250;
 
 type Props = NativeStackScreenProps<RootStackParamList, "rescueMap">;
 
@@ -42,8 +47,10 @@ export function RescueMapScreen({ navigation }: Props) {
   // US-X1 · cache-first, and the screen that most needs it: a rescuer opening this on the
   // street has the worst connection of anyone using the app. `/reports/map` is coarsened to
   // a ~500m grid, which is why it may go to disk at all — see the §12.5 header in cache.ts.
-  const { rows: reports, res, stale, load: loadFeed } =
+  const { rows: reports, res, stale, load: loadFeed, data } =
     useCachedFeed<MapReport>(api, (d) => d?.reports ?? []);
+  // Absent (an older server or cache) reads as covered — the pre-S15 behaviour.
+  const citySupported = data?.city_supported !== false;
   // The RESULT is kept, not just the rows — now inside the hook. The original line here was
   // `r.ok && setReports(...)`: on a failure that evaluates to false and records NOTHING, so
   // the screen could not tell a dead network from an empty city. It reads like ordinary
@@ -87,19 +94,31 @@ export function RescueMapScreen({ navigation }: Props) {
               fillColor="rgba(28,107,107,0.12)"
               strokeWidth={2}
             />
+            {(reports ?? []).map((r) => r.approx_location ? (
+              <Circle
+                key={r.report_id}
+                center={{ latitude: r.approx_location.lat, longitude: r.approx_location.lng }}
+                radius={APPROX_RADIUS_M}
+                strokeColor={TONE[strayChip(r.status).tone].fg}
+                fillColor={`${TONE[strayChip(r.status).tone].fg}55`}
+                strokeWidth={1}
+              />
+            ) : null)}
           </MapView>
           <View style={styles.mapBadge} pointerEvents="none">
             {/* The count is a claim about the world, so it is only made once a request has
                 actually succeeded. "0 nearby" over a failed fetch is the same lie as the
                 empty copy below, just in fewer words. */}
             <Text style={styles.mapBadgeText}>
-              {fetched.kind === "ready" || fetched.kind === "empty"
-                ? `${reports?.length ?? 0} nearby · within ${RADIUS_KM} km of ${city}`
-                : `Within ${RADIUS_KM} km of ${city}`}
+              {!citySupported
+                ? `Not covered yet · ${city}`
+                : fetched.kind === "ready" || fetched.kind === "empty"
+                  ? `${reports?.length ?? 0} nearby · within ${RADIUS_KM} km of ${city}`
+                  : `Within ${RADIUS_KM} km of ${city}`}
             </Text>
           </View>
         </View>
-        <Text style={styles.mapNote}>Shown by city — a report's exact spot goes only to rescuers.</Text>
+        <Text style={styles.mapNote}>Each circle is an approximate area (about 500 m). A report's exact spot goes only to rescuers.</Text>
 
         <View style={styles.legendRow}>
           <Legend color={colors.warningStrong} label="Needs help" />
@@ -110,8 +129,12 @@ export function RescueMapScreen({ navigation }: Props) {
         {state.kind !== "ready" ? (
           <LoadStateView
             state={state}
-            emptyTitle={`No strays reported near ${city} right now.`}
-            emptyBody="That's good news — check back later."
+            emptyTitle={citySupported
+              ? `No strays reported near ${city} right now.`
+              : `The rescue map doesn't cover ${city} yet.`}
+            emptyBody={citySupported
+              ? "That's good news — check back later."
+              : "It covers Metro Manila for now. You can still report a stray from Home."}
             onRetry={load}
           />
         ) : (
