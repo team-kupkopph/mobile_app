@@ -5,6 +5,10 @@ import fs from "fs";
 test("ReportStray: the pin option shows while locating, and upload failures are said", () => {
   const src = fs.readFileSync("src/screens/ReportStrayScreen.tsx", "utf8");
   expect(src).toContain("withTimeout(Location.getCurrentPositionAsync({}), GPS_TIMEOUT_MS)");
+  // PR3-F3 · the last-known fallback is bounded: a fix from yesterday's street is not this one.
+  expect(src).toContain(
+    "Location.getLastKnownPositionAsync({ maxAge: LAST_KNOWN_MAX_AGE_MS, requiredAccuracy: LAST_KNOWN_MAX_ACCURACY_M })");
+  expect(src).not.toContain("getLastKnownPositionAsync()");
   expect(src.match(/testID="btn\.reportStray\.dropPin"/g)?.length).toBe(1);
   expect(src).toContain('locState !== "ready"');       // the pin button's render condition
   expect(src).toContain("uploadErrorMessage(");

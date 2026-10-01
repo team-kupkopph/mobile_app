@@ -399,6 +399,11 @@ export function reportBody(f: {
 
 // C24 · expo-location has no timeout; a phone indoors can wait for a fix forever.
 export const GPS_TIMEOUT_MS = 15000;
+// PR3-F3 · the last-known fallback only counts if it is recent and reasonably precise; anything
+// older or vaguer would file the report where the reporter was, not where the animal is. With no
+// qualifying fix the form offers the pin instead.
+export const LAST_KNOWN_MAX_AGE_MS = 5 * 60_000;
+export const LAST_KNOWN_MAX_ACCURACY_M = 200;
 // PR3-F2 · why a report went to the outbox. "offline" = no answer at all; "server" = the phone
 // is online but Kupkop isn't answering (a C17 timeout, or a 502/503/504 from the gateway).
 export type QueuedReason = "offline" | "server";

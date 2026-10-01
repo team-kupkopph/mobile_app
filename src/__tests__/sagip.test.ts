@@ -3,7 +3,7 @@ import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
   myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
-  queuedReason, queuedReportLine
+  queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -446,4 +446,9 @@ describe("queuedReason / queuedReportLine (PR3-F2 · a queued report says why it
     expect(queuedReportLine("offline")).toBe("You're offline. This sends by itself the moment you're back.");
     expect(queuedReportLine(undefined)).toBe("You're offline. This sends by itself the moment you're back.");
   });
+});
+
+test("PR3-F3 · the last-known fallback takes only a recent, reasonably precise fix", () => {
+  expect(LAST_KNOWN_MAX_AGE_MS).toBe(5 * 60_000);
+  expect(LAST_KNOWN_MAX_ACCURACY_M).toBe(200);
 });

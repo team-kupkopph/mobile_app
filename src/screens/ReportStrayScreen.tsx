@@ -21,7 +21,8 @@ import { shouldQueue } from "../outbox";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import {
-  GPS_TIMEOUT_MS, ReportMode, gpsMayApply, queuedReason, reportBody, reportTitle, throttledReportMessage, withTimeout,
+  GPS_TIMEOUT_MS, LAST_KNOWN_MAX_ACCURACY_M, LAST_KNOWN_MAX_AGE_MS, ReportMode, gpsMayApply, queuedReason,
+  reportBody, reportTitle, throttledReportMessage, withTimeout,
 } from "../sagip";
 import { uploadErrorMessage } from "../upload";
 import { MyPet } from "../api/types";
@@ -90,9 +91,10 @@ export function ReportStrayScreen({ navigation, route }: Props) {
         if (stale()) return;
         if (status !== "granted") { setLocState("denied"); return; }
         // C24 · no GPS fix for 15s (indoors) falls back to the last known position; with
-        // neither, the denied state is the one that offers the pin.
+        // neither, the denied state is the one that offers the pin. PR3-F3 · only a last-known
+        // fix from the last 5 min, within 200 m, counts — expo-location returns null otherwise.
         const loc = (await withTimeout(Location.getCurrentPositionAsync({}), GPS_TIMEOUT_MS))
-          ?? (await Location.getLastKnownPositionAsync());
+          ?? (await Location.getLastKnownPositionAsync({ maxAge: LAST_KNOWN_MAX_AGE_MS, requiredAccuracy: LAST_KNOWN_MAX_ACCURACY_M }));
         if (stale()) return;
         if (!loc) { setLocState("denied"); return; }
         setCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
