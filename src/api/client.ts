@@ -23,6 +23,31 @@ const NETWORK_FAIL: ApiResult = {
   data: { error: { code: "network_error", message: "Couldn't reach the server." } }
 };
 
+// C17 · RN's fetch has no timeout of its own (Android: none; iOS: ~60 s idle). A report sent from a
+// weak street signal must fall through to the outbox, not spin.
+export const REQUEST_TIMEOUT_MS = 20000;
+const TIMEOUT: ApiResult = {
+  ok: false, status: 0,
+  data: { error: { code: "timeout", message: "The server took too long to answer." } }
+};
+
+// Runs one fetch under the C17 timeout. Resolves to the Response, or to a failure result
+// (TIMEOUT / NETWORK_FAIL) — never rejects, and always clears its timer.
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response | ApiResult> {
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch {
+    return timedOut ? TIMEOUT : NETWORK_FAIL;   // offline / DNS / timeout — never rejects
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+const isFailure = (r: Response | ApiResult): r is ApiResult => r === TIMEOUT || r === NETWORK_FAIL;
+
 export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Promise<void>) {
   async function raw(method: string, path: string, body?: any, retry = true, accessOverride?: string): Promise<ApiResult> {
     const tokens = getTokens();
@@ -30,14 +55,11 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (access) headers.Authorization = `Bearer ${access}`;
 
-    let res: Response;
-    try {
-      res = await fetch(`${BASE}${path}`, {
-        method, headers, body: body ? JSON.stringify(body) : undefined,
-      });
-    } catch {
-      return NETWORK_FAIL;   // offline / DNS / timeout — never rejects to the caller
-    }
+    const first = await fetchWithTimeout(`${BASE}${path}`, {
+      method, headers, body: body ? JSON.stringify(body) : undefined,
+    });
+    if (isFailure(first)) return first;
+    const res = first;
 
     // A non-JSON body (an error page, a truncated response) must not throw — keep the real
     // HTTP status and fall back to empty data so `res.ok`/`res.status` stay meaningful.
@@ -51,15 +73,13 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
     }
 
     if (res.status === 401 && retry && tokens?.refresh) {
-      let r: Response;
-      try {
-        r = await fetch(`${BASE}/auth/refresh`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refresh: tokens.refresh }),
-        });
-      } catch {
-        return NETWORK_FAIL;   // can't even reach refresh — don't wipe the session on a blip
-      }
+      const refreshed = await fetchWithTimeout(`${BASE}/auth/refresh`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh: tokens.refresh }),
+      });
+      // can't even reach refresh (or it hung) — don't wipe the session on a blip
+      if (isFailure(refreshed)) return refreshed;
+      const r = refreshed;
       if (r.ok) {
         let rd: any;
         try {

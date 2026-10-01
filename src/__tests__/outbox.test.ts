@@ -1,5 +1,5 @@
 import {
-  applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, pendingLabel, queueReport,
+  applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, pendingLabel, queueReport, shouldQueue,
 } from "../outbox";
 
 const NOW = 1_000_000;
@@ -111,4 +111,9 @@ describe("pendingLabel", () => {
     expect(pendingLabel(item({ attempts: 2 }))).toMatch(/retry/i);
     expect(pendingLabel(item({ attempts: MAX_ATTEMPTS }))).toMatch(/not sent/i);
   });
+});
+
+test("shouldQueue: offline and gateway failures queue; a real answer doesn't (C17)", () => {
+  [0, 502, 503, 504].forEach((s) => expect(shouldQueue(s)).toBe(true));
+  [400, 401, 403, 409, 429, 500].forEach((s) => expect(shouldQueue(s)).toBe(false));
 });

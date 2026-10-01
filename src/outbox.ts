@@ -99,6 +99,12 @@ export function applyResult(
   };
 }
 
+/** C17 · what the report form hands to the outbox instead of showing an error: no answer at all,
+ *  or a gateway saying the server is down (a deploy, an outage). A real answer (4xx, 500) is shown. */
+export function shouldQueue(status: number): boolean {
+  return status === 0 || status === 502 || status === 503 || status === 504;
+}
+
 /** A fresh queue entry. */
 export function queueReport(
   body: Record<string, unknown>, idempotencyKey: string, now: number,

@@ -17,6 +17,7 @@ import { ContactShareRow } from "../components/sagip/ContactShareRow";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { randomKey } from "../outbox/key";
+import { shouldQueue } from "../outbox";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { ReportMode, reportBody, reportTitle } from "../sagip";
@@ -189,7 +190,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     // §13.3 · "never silently lose a user's report". A connectivity failure is not a dead
     // end: the report is queued and sent when the network returns, and the person is told
     // so rather than being asked to remember and re-file it.
-    if (res.status === 0) {
+    if (shouldQueue(res.status)) {
       await enqueue(body, idempotencyKey);
       navigation.replace("reportSent", {
         reportId: null, title,
