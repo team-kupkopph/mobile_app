@@ -20,7 +20,8 @@ import { randomKey } from "../outbox/key";
 import { shouldQueue } from "../outbox";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { ReportMode, reportBody, reportTitle } from "../sagip";
+import { GPS_TIMEOUT_MS, ReportMode, reportBody, reportTitle, withTimeout } from "../sagip";
+import { uploadErrorMessage } from "../upload";
 import { MyPet } from "../api/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
@@ -76,7 +77,11 @@ export function ReportStrayScreen({ navigation, route }: Props) {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") { setLocState("denied"); return; }
-        const loc = await Location.getCurrentPositionAsync({});
+        // C24 · no GPS fix for 15s (indoors) falls back to the last known position; with
+        // neither, the denied state is the one that offers the pin.
+        const loc = (await withTimeout(Location.getCurrentPositionAsync({}), GPS_TIMEOUT_MS))
+          ?? (await Location.getLastKnownPositionAsync());
+        if (!loc) { setLocState("denied"); return; }
         setCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
         try {
           const [place] = await Location.reverseGeocodeAsync(loc.coords);
@@ -121,7 +126,9 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     setUploading(true);
     const res = await pickAndUpload(api, "stray_photo");
     setUploading(false);
+    // C24 · a failed upload says why; null means the person cancelled, which says nothing.
     if (res?.ok) setPhotoUrl(res.fileUrl);
+    else if (res) setError(uploadErrorMessage(res.reason));
   }
 
   // S23 · with location off there was no way to say where the animal is, and Send silently
@@ -148,6 +155,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
 
   async function submit() {
     if (submitting) return;
+    if (uploading) { setError("The photo is still uploading — one moment."); return; }
     if (mode !== "lost" && !condition) {
       setError("Choose the animal's condition first — it decides how fast help is asked for.");
       return;
@@ -310,14 +318,6 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           ) : locState === "denied" ? (
             <>
               <Text style={styles.locDenied}>Location off — turn it on, or show a rescuer where the animal is on the map.</Text>
-              <TouchableOpacity
-                style={styles.dropPin}
-                onPress={dropPin}
-                accessibilityRole="button"
-                testID="btn.reportStray.dropPin"
-              >
-                <Text style={styles.adjust}>Drop a pin on the map instead ›</Text>
-              </TouchableOpacity>
             </>
           ) : (
             <>
@@ -337,6 +337,17 @@ export function ReportStrayScreen({ navigation, route }: Props) {
               </View>
             </>
           )}
+          {/* C24 · the pin is offered while still locating too, not only once location is off. */}
+          {locState !== "ready" ? (
+            <TouchableOpacity
+              style={styles.dropPin}
+              onPress={dropPin}
+              accessibilityRole="button"
+              testID="btn.reportStray.dropPin"
+            >
+              <Text style={styles.adjust}>Drop a pin on the map instead ›</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
         <Text style={styles.fine}>Only this report uses your exact spot · your profile still shows just your city.</Text>
 

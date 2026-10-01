@@ -15,6 +15,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
+import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
 import { RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, sagipTitle, strayChip } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
@@ -77,7 +78,9 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     // (S3 is still a dev seam), but the client-side wiring is real.
     const res = await pickAndUpload(api, "rescue_outcome_photo");
     setUploadingPhoto(false);
+    // C24 · a failed upload says why (shown under the button); a cancel (null) says nothing.
     if (res?.ok) setOutcomePhotoUrl(res.fileUrl);
+    else if (res) setError(uploadErrorMessage(res.reason));
   }
 
   async function submit() {

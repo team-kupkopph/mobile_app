@@ -2,7 +2,7 @@ import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
-  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip
+  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -375,5 +375,16 @@ describe("caseScreenState (C11 — the screen follows YOUR claim, not the report
     expect(caseScreenState({ status: "rescued", my_case: mine })).toBe("custody");
     expect(caseScreenState({ status: "safe", my_case: mine })).toBe("custody");
     expect(caseScreenState({ status: "resolved", my_case: mine })).toBe("resolved");
+  });
+});
+
+describe("withTimeout (C24 — a GPS fix that never comes)", () => {
+  it("resolves null once the time is up, and the value when it comes first", async () => {
+    jest.useFakeTimers();
+    const never = withTimeout(new Promise<number>(() => {}), 1000);
+    jest.advanceTimersByTime(1000);
+    await expect(never).resolves.toBeNull();
+    jest.useRealTimers();
+    await expect(withTimeout(Promise.resolve(7), 1000)).resolves.toBe(7);
   });
 });

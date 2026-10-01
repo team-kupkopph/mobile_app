@@ -382,3 +382,12 @@ export function reportBody(f: {
   if (f.mode === "found" && f.sightingOf) body.sighting_of = f.sightingOf;
   return body;
 }
+
+// C24 · expo-location has no timeout; a phone indoors can wait for a fix forever.
+export const GPS_TIMEOUT_MS = 15000;
+export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
+  return new Promise((resolve) => {
+    const t = setTimeout(() => resolve(null), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); }, () => { clearTimeout(t); resolve(null); });
+  });
+}
