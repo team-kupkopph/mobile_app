@@ -241,10 +241,13 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
             <Text style={styles.resolvedNote}>This case is resolved — there's nothing left to update.</Text>
           ) : null}
 
+          {/* D1 + D8 · the reporter (or that they chose anonymity) and every matched helper.
+              PR3-F4 · shown on a resolved case too: the backend keeps consented contact for 7 days
+              after resolution (C2). Only a claimer whose claim ended loses it. */}
+          {state !== "ended" && report.people ? <RescuePeople people={report.people} /> : null}
+
           {holdsClaim ? (
             <>
-              {/* D1 + D8 · the reporter (or that they chose anonymity) and every matched helper. */}
-              {report.people ? <RescuePeople people={report.people} /> : null}
               {report.my_case ? (
                 <ContactShareRow
                   label="Share my contact"
