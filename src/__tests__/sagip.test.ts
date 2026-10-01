@@ -3,7 +3,8 @@ import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
   myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
-  queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M, endedCaseLine
+  queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M, endedCaseLine,
+  handoffCancelMessage, handoffConflictAction
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -460,5 +461,52 @@ describe("endedCaseLine (PR3-F6 · an ended claim says what became of the report
       "It's back on the map. If you can go now, you can claim it again from the report.");
     (["claimed", "rescued", "safe"] as const).forEach((s) =>
       expect(endedCaseLine(s)).toBe("Another rescuer has it now."));
+  });
+});
+
+describe("handoffCancelMessage (C14)", () => {
+  it("words each refusal", () => {
+    expect(handoffCancelMessage("has_active_inquiries"))
+      .toBe("People have asked about this animal, so it can't be taken down from here.");
+    expect(handoffCancelMessage("already_adopted")).toBe("This animal already has a home.");
+    expect(handoffCancelMessage("no_handoff")).toBe("There's nothing to take back — they aren't listed or offered to anyone.");
+    expect(handoffCancelMessage("case_expired"))
+      .toBe("This claim has lapsed — it's back on the map for someone else to claim.");
+    expect(handoffCancelMessage(undefined)).toBe("Couldn't take that back. Try again.");
+    expect(handoffCancelMessage("something_else")).toBe("Couldn't take that back. Try again.");
+  });
+});
+
+describe("handoffConflictAction (C14/C15)", () => {
+  it("reopens an unfinished draft instead of showing an error", () => {
+    expect(handoffConflictAction({
+      code: "already_handed_off", details: { listing_id: "l1", listing_status: "draft" }
+    })).toEqual({ kind: "openDraft", listingId: "l1" });
+  });
+
+  it("says take it back first when the animal is already published, pending or adopted", () => {
+    for (const listing_status of ["available", "pending", "adopted"]) {
+      expect(handoffConflictAction({ code: "already_handed_off", details: { listing_id: "l1", listing_status } }))
+        .toEqual({ kind: "message",
+                   text: "This animal is already listed or offered to someone — take that back first." });
+    }
+  });
+
+  it("falls back to the message when the details are missing or the draft id is", () => {
+    const text = "This animal is already listed or offered to someone — take that back first.";
+    expect(handoffConflictAction({ code: "already_handed_off" })).toEqual({ kind: "message", text });
+    expect(handoffConflictAction({ code: "already_handed_off", details: { listing_status: "draft" } }))
+      .toEqual({ kind: "message", text });
+  });
+
+  it("words a lapsed claim", () => {
+    expect(handoffConflictAction({ code: "case_expired" })).toEqual({
+      kind: "message", text: "This claim has lapsed — it's back on the map for someone else to claim."
+    });
+  });
+
+  it("has no opinion on any other error", () => {
+    expect(handoffConflictAction({ code: "fee_over_cap" })).toBeNull();
+    expect(handoffConflictAction(undefined)).toBeNull();
   });
 });

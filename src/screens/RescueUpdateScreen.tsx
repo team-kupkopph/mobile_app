@@ -19,7 +19,7 @@ import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
 import {
   RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, endedCaseLine,
-  sagipTitle, strayChip,
+  handoffCancelMessage, sagipTitle, strayChip,
 } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -166,6 +166,31 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     load();
   }
 
+  // C14 · take a handoff back: a draft listing or an unanswered placement. The server refuses
+  // once people have asked about the animal, or it is adopted (see handoffCancelMessage).
+  const [cancelBusy, setCancelBusy] = useState(false);
+  function confirmCancelHandoff() {
+    if (cancelBusy) return;
+    Alert.alert("Take it back?",
+      "A draft or an unanswered placement is withdrawn at once. The person you offered them to is told.",
+      [{ text: "Not now", style: "cancel" },
+       { text: "Take back", onPress: () => { void cancelHandoff(); } }]);
+  }
+  async function cancelHandoff() {
+    if (cancelBusy) return; // busy guard — one cancel in flight at a time
+    setCancelBusy(true);
+    setError(undefined);
+    const res = await api.post(`/cases/${caseId}/handoff/cancel`, {});
+    setCancelBusy(false);
+    if (res.ok) {
+      Alert.alert("Taken back", "You can list or place them again.");
+      load();
+      return;
+    }
+    setError(handoffCancelMessage(res.data?.error?.code));
+    load(); // a lapsed claim or an adoption changes what this screen offers
+  }
+
   function openInMaps() {
     const at = report?.precise_location;
     if (!at) return;
@@ -266,18 +291,24 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                   know. Shown alongside the forward-status options below (a safe case can still be
                   moved on to resolved), not instead of them. */}
               {canHandOff ? (
-                <View style={styles.handoffRow}>
-                  <Button
-                    label="List for adoption"
-                    onPress={() => navigation.navigate("rescueList", { caseId })}
-                    variant="secondary"
-                  />
-                  <Button
-                    label="Place with someone"
-                    onPress={() => navigation.navigate("rescuePlace", { caseId })}
-                    variant="secondary"
-                  />
-                </View>
+                <>
+                  <View style={styles.handoffRow}>
+                    <Button
+                      label="List for adoption"
+                      onPress={() => navigation.navigate("rescueList", { caseId })}
+                      variant="secondary"
+                    />
+                    <Button
+                      label="Place with someone"
+                      onPress={() => navigation.navigate("rescuePlace", { caseId })}
+                      variant="secondary"
+                    />
+                  </View>
+                  <TouchableOpacity style={styles.releaseLink} accessibilityRole="button"
+                    testID="btn.rescueUpdate.cancelHandoff" disabled={cancelBusy} onPress={confirmCancelHandoff}>
+                    <Text style={styles.releaseLinkText}>Take back a listing or placement</Text>
+                  </TouchableOpacity>
+                </>
               ) : null}
 
               {options.length > 0 ? (
