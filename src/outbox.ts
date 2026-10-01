@@ -143,6 +143,13 @@ export function ownedBy(i: QueuedReport, ownerId: string | null): boolean {
   return ownerId !== null && (!i.ownerId || i.ownerId === ownerId);
 }
 
+/** C16 · D14 · what discardAllFor(owner) keeps: everything the owner does NOT own. Legacy items
+ *  (no ownerId) count as the signed-in owner's (ownedBy), so they go with that owner's discard.
+ *  A null owner owns nothing, so nothing is discarded. */
+export function withoutOwned(queue: QueuedReport[], ownerId: string | null): QueuedReport[] {
+  return queue.filter((i) => !ownedBy(i, ownerId));
+}
+
 export function visibleTo(queue: QueuedReport[], ownerId: string | null): QueuedReport[] {
   return queue.filter((i) => ownedBy(i, ownerId));
 }

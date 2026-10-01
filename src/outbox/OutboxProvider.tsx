@@ -16,7 +16,7 @@ import { useAuth } from "../auth/AuthContext";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { useConnectivity } from "../net/ConnectivityProvider";
 import {
-  applyFlushResult, applyResult, dueItems, nextFlushDelay, ownedBy, QueuedReport, queueReport, visibleTo,
+  applyFlushResult, applyResult, dueItems, nextFlushDelay, QueuedReport, queueReport, visibleTo, withoutOwned,
 } from "../outbox";
 
 const KEY = "kupkop.outbox.reports";
@@ -139,7 +139,7 @@ export function OutboxProvider({ children }: { children: React.ReactNode }) {
   }, [write]);
 
   const discardAllFor = useCallback(async (owner: string | null) => {
-    await write(queueRef.current.filter((i) => !ownedBy(i, owner)));
+    await write(withoutOwned(queueRef.current, owner));
   }, [write]);
 
   return (
