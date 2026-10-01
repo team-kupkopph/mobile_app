@@ -9,7 +9,7 @@ export function ReportRemovedCard({ onBack }: { onBack: () => void }) {
   return (
     <View style={styles.wrap}>
       <Card accent={colors.danger} testID="card.reportRemoved">
-        <Text style={styles.title}>This report was removed by moderation</Text>
+        <Text style={styles.title} accessibilityRole="header">This report was removed by moderation</Text>
         <Text style={styles.body}>There's nothing left to do on it.</Text>
         <View style={styles.action}>
           <Button label="Back" variant="secondary" onPress={onBack} testID="btn.reportRemoved.back" />

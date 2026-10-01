@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -134,7 +134,7 @@ describe("inquireRefusalMessage (D15)", () => {
 
 describe("inquiryClosedNote / inquiryIsClosed (D15)", () => {
   it("withdrawn and declined inquiries are closed, with a one-line note", () => {
-    expect(inquiryClosedNote("withdrawn")).toBe("The rescuer took this listing down, so this inquiry is closed.");
+    expect(inquiryClosedNote("withdrawn")).toBe("This animal is no longer available, so this inquiry is closed.");
     expect(inquiryClosedNote("declined")).toBe("This inquiry was declined.");
     expect(inquiryIsClosed("withdrawn")).toBe(true);
     expect(inquiryIsClosed("declined")).toBe(true);
@@ -148,5 +148,20 @@ describe("inquiryClosedNote / inquiryIsClosed (D15)", () => {
   });
   it("the note never says 'You withdrew'", () => {
     expect(inquiryClosedNote("withdrawn")).not.toMatch(/you withdrew/i);
+  });
+});
+
+describe("ladderStageTone (D15 · a closed inquiry shows no progress)", () => {
+  it("is unchanged while the inquiry is open", () => {
+    expect(ladderStageTone("in_progress", false)).toBe("active");
+    expect(ladderStageTone("done", false)).toBe("done");
+    expect(ladderStageTone("skipped", false)).toBe("skipped");
+    expect(ladderStageTone("not_started", false)).toBe("muted");
+  });
+  it("mutes an in_progress stage once the inquiry is closed, leaving the rest as they were", () => {
+    expect(ladderStageTone("in_progress", true)).toBe("muted");
+    expect(ladderStageTone("done", true)).toBe("done");
+    expect(ladderStageTone("skipped", true)).toBe("skipped");
+    expect(ladderStageTone("not_started", true)).toBe("muted");
   });
 });

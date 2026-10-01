@@ -17,6 +17,9 @@ describe("the removed-report card", () => {
     expect(card).toMatch(/<Button[^>]*label="Back"/);
     expect(card).toContain("onBack");
   });
+  it("marks the title as a header for screen readers", () => {
+    expect(card).toMatch(/<Text style=\{styles\.title\} accessibilityRole="header">/);
+  });
 });
 
 describe.each(["screens/RescueUpdateScreen.tsx", "screens/ReportDetailScreen.tsx"])("%s", (file) => {

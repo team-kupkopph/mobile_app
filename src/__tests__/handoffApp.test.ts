@@ -87,6 +87,14 @@ test("The ladder says a closed inquiry is closed and drops the progress chrome (
   expect(src).toMatch(/!closed[\s\S]*?Tap any step to see what it involves\./);
 });
 
+test("A closed inquiry's ladder neither auto-opens nor marks a stage current; the pet card names the status (D15)", () => {
+  const src = read("src/screens/InquiryScreen.tsx");
+  expect(src).toContain("ladderStageTone(");
+  expect(src).toMatch(/!inquiryIsClosed\(found\.status\)[\s\S]*?setOpen\(/);
+  expect(src).toMatch(/current = tone === "active"/);
+  expect(src).toContain("View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status)}");
+});
+
 test("A closed inquiry card shows no stage progress, and chip labels are derived (D15)", () => {
   const src = read("src/components/InquiryList.tsx");
   expect(src).toContain("inquiryIsClosed(iq.status)");

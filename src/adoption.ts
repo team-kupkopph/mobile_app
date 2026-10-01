@@ -29,7 +29,7 @@ export function inquiryStatusLabel(status: string): string {
 // showing stage progress. `null` = still open (or adopted), so the screen keeps its ladder.
 export function inquiryClosedNote(status: string): string | null {
   switch (status) {
-    case "withdrawn": return "The rescuer took this listing down, so this inquiry is closed.";
+    case "withdrawn": return "This animal is no longer available, so this inquiry is closed.";
     case "declined": return "This inquiry was declined.";
     default: return null;
   }
@@ -61,6 +61,13 @@ export function stageStateChip(state: string): { label: string; tone: StageTone 
     default:
       return { label: "Not started", tone: "muted" };
   }
+}
+
+// D15 · a closed inquiry shows no progress: a stage the server left `in_progress` reads muted,
+// not teal "current" — the ladder would otherwise say the adoption is still moving.
+export function ladderStageTone(state: string, closed: boolean): StageTone {
+  const tone = stageStateChip(state).tone;
+  return closed && tone === "active" ? "muted" : tone;
 }
 
 // The adopter's one-line "where does this stand" summary: the furthest stage that's
