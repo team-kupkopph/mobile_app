@@ -35,3 +35,11 @@ test("ReportStray: a photo failure shows under the photo button, not down by Sen
   expect(src.indexOf("{photoError ?")).toBeGreaterThan(src.indexOf("onPress={addPhoto}"));
   expect(src.indexOf("{photoError ?")).toBeLessThan(src.indexOf("{error ?"));
 });
+
+test("PR3-F2 · a queued report carries why it queued to the sent screen, which says it", () => {
+  const form = fs.readFileSync("src/screens/ReportStrayScreen.tsx", "utf8");
+  expect(form).toMatch(/queuedReason: queuedReason\(res\.status, res\.data\?\.error\?\.code\)/);
+  const sent = fs.readFileSync("src/screens/ReportSentScreen.tsx", "utf8");
+  expect(sent).toContain("queuedReportLine(queuedReason)");
+  expect(sent).not.toContain("You're offline. This sends by itself");   // the copy lives in sagip.ts
+});

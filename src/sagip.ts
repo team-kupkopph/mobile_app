@@ -399,6 +399,17 @@ export function reportBody(f: {
 
 // C24 · expo-location has no timeout; a phone indoors can wait for a fix forever.
 export const GPS_TIMEOUT_MS = 15000;
+// PR3-F2 · why a report went to the outbox. "offline" = no answer at all; "server" = the phone
+// is online but Kupkop isn't answering (a C17 timeout, or a 502/503/504 from the gateway).
+export type QueuedReason = "offline" | "server";
+export function queuedReason(status: number, errorCode: string | undefined): QueuedReason {
+  return status !== 0 || errorCode === "timeout" ? "server" : "offline";
+}
+export function queuedReportLine(reason: QueuedReason | undefined): string {
+  return reason === "server"
+    ? "Couldn't reach Kupkop right now — this sends by itself shortly."
+    : "You're offline. This sends by itself the moment you're back.";
+}
 // C18 · the report limit is per day (ReportCreateThrottle, 20/day); "try again shortly" was wrong.
 export function throttledReportMessage(retryAfterSeconds: number | undefined): string {
   const base = "You've sent 20 reports today — the most one account can send.";

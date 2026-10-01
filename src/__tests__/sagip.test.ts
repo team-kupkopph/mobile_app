@@ -2,7 +2,8 @@ import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
-  myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage
+  myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
+  queuedReason, queuedReportLine
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -429,5 +430,20 @@ describe("throttledReportMessage (C18)", () => {
       "You've sent 20 reports today — the most one account can send. You can send more in about 4 h.");
     expect(throttledReportMessage(undefined)).toBe(
       "You've sent 20 reports today — the most one account can send. Try again later today.");
+  });
+});
+
+describe("queuedReason / queuedReportLine (PR3-F2 · a queued report says why it waited)", () => {
+  it("no answer at all is offline; a timeout or a gateway error is the server", () => {
+    expect(queuedReason(0, "network_error")).toBe("offline");
+    expect(queuedReason(0, undefined)).toBe("offline");
+    expect(queuedReason(0, "timeout")).toBe("server");
+    [502, 503, 504].forEach((s) => expect(queuedReason(s, undefined)).toBe("server"));
+  });
+
+  it("tells an online person the server is the problem, and an offline one their signal is", () => {
+    expect(queuedReportLine("server")).toBe("Couldn't reach Kupkop right now — this sends by itself shortly.");
+    expect(queuedReportLine("offline")).toBe("You're offline. This sends by itself the moment you're back.");
+    expect(queuedReportLine(undefined)).toBe("You're offline. This sends by itself the moment you're back.");
   });
 });

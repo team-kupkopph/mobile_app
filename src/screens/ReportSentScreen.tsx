@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
+import { queuedReportLine } from "../sagip";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { Button } from "../components/ui";
@@ -18,7 +19,7 @@ const NEXT = [
 ];
 
 export function ReportSentScreen({ navigation, route }: Props) {
-  const { reportId, title, city, queued } = route.params;
+  const { reportId, title, city, queued, queuedReason } = route.params;
   return (
     <View style={styles.screen} testID="screen.reportSent">
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -30,7 +31,7 @@ export function ReportSentScreen({ navigation, route }: Props) {
           <Text style={styles.heroTitle}>{queued ? "Saved — we'll send it" : "Report sent"}</Text>
           <Text style={styles.heroBody}>
             {queued
-              ? "You're offline. This sends by itself the moment you're back."
+              ? queuedReportLine(queuedReason)   // PR3-F2 · offline, or Kupkop not answering
               : `Rescuers near ${city ?? "you"} have been alerted.`}
           </Text>
         </View>

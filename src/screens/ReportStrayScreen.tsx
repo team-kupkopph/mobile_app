@@ -20,7 +20,9 @@ import { randomKey } from "../outbox/key";
 import { shouldQueue } from "../outbox";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { GPS_TIMEOUT_MS, ReportMode, gpsMayApply, reportBody, reportTitle, throttledReportMessage, withTimeout } from "../sagip";
+import {
+  GPS_TIMEOUT_MS, ReportMode, gpsMayApply, queuedReason, reportBody, reportTitle, throttledReportMessage, withTimeout,
+} from "../sagip";
 import { uploadErrorMessage } from "../upload";
 import { MyPet } from "../api/types";
 import { TAP_SLOP } from "../touch";
@@ -219,7 +221,9 @@ export function ReportStrayScreen({ navigation, route }: Props) {
       await enqueue(body, idempotencyKey);
       navigation.replace("reportSent", {
         reportId: null, title,
-        city: locationText || null, queued: true
+        city: locationText || null, queued: true,
+        // PR3-F2 · offline, or online with Kupkop not answering — the sent screen says which.
+        queuedReason: queuedReason(res.status, res.data?.error?.code)
       });
       return;
     }
