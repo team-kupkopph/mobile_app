@@ -2,7 +2,7 @@ import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
-  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout
+  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -386,5 +386,14 @@ describe("withTimeout (C24 — a GPS fix that never comes)", () => {
     await expect(never).resolves.toBeNull();
     jest.useRealTimers();
     await expect(withTimeout(Promise.resolve(7), 1000)).resolves.toBe(7);
+  });
+});
+
+describe("gpsMayApply (C24 — a dropped pin wins over a late GPS fix)", () => {
+  it("applies a location result only while nothing is pinned and the screen is mounted", () => {
+    expect(gpsMayApply(false, false)).toBe(true);
+    expect(gpsMayApply(true, false)).toBe(false);   // pinned: fix, last-known and denied are all dropped
+    expect(gpsMayApply(false, true)).toBe(false);   // unmounted
+    expect(gpsMayApply(true, true)).toBe(false);
   });
 });

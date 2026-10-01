@@ -391,3 +391,9 @@ export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
     p.then((v) => { clearTimeout(t); resolve(v); }, () => { clearTimeout(t); resolve(null); });
   });
 }
+
+// C24 · a pin the person dropped wins over a late GPS fix (or the stale last-known fallback,
+// or a "denied" verdict): once pinned, or once the screen is gone, a location result is dropped.
+export function gpsMayApply(pinned: boolean, cancelled: boolean): boolean {
+  return !pinned && !cancelled;
+}

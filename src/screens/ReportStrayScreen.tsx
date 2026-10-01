@@ -5,7 +5,7 @@
 // The precise-pin refinement (US-S2 "Adjust") opens AdjustPinScreen (react-native-maps, dev build).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import * as Location from "expo-location";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 
@@ -20,7 +20,7 @@ import { randomKey } from "../outbox/key";
 import { shouldQueue } from "../outbox";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { GPS_TIMEOUT_MS, ReportMode, reportBody, reportTitle, withTimeout } from "../sagip";
+import { GPS_TIMEOUT_MS, ReportMode, gpsMayApply, reportBody, reportTitle, withTimeout } from "../sagip";
 import { uploadErrorMessage } from "../upload";
 import { MyPet } from "../api/types";
 import { TAP_SLOP } from "../touch";
@@ -61,6 +61,9 @@ export function ReportStrayScreen({ navigation, route }: Props) {
   const [shareContact, setShareContact] = useState(false);
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  // C24 · the photo's own failure message, shown right under the photo button (the form's
+  // `error` sits down by Send, off-screen from the photo in the scroll view).
+  const [photoError, setPhotoError] = useState<string | undefined>(undefined);
 
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locationText, setLocationText] = useState<string>("");
@@ -72,19 +75,28 @@ export function ReportStrayScreen({ navigation, route }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
+  // C24 · a pin the person dropped wins over a late GPS fix. The pin option is offered while
+  // still locating, so every write below checks that no pin has been set (and the screen is
+  // still mounted) — including the "denied" paths, which must not undo a pinned form.
+  const pinnedRef = useRef(false);
   useEffect(() => {
+    let cancelled = false;
+    const stale = () => !gpsMayApply(pinnedRef.current, cancelled);
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
+        if (stale()) return;
         if (status !== "granted") { setLocState("denied"); return; }
         // C24 · no GPS fix for 15s (indoors) falls back to the last known position; with
         // neither, the denied state is the one that offers the pin.
         const loc = (await withTimeout(Location.getCurrentPositionAsync({}), GPS_TIMEOUT_MS))
           ?? (await Location.getLastKnownPositionAsync());
+        if (stale()) return;
         if (!loc) { setLocState("denied"); return; }
         setCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
         try {
           const [place] = await Location.reverseGeocodeAsync(loc.coords);
+          if (stale()) return;
           if (place) {
             const line = [place.name, place.street, place.city].filter(Boolean).join(", ");
             setLocationText(line || place.city || "");
@@ -93,11 +105,14 @@ export function ReportStrayScreen({ navigation, route }: Props) {
         } catch {
           // reverse-geocode is best-effort; the coords are what matter
         }
+        if (stale()) return;
         setLocState("ready");
       } catch {
+        if (stale()) return;
         setLocState("denied");
       }
     })();
+    return () => { cancelled = true; };
   }, []);
 
   // US-S2 · the Adjust map pops back with refined coords — adopt them and refresh the address.
@@ -105,6 +120,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
   const adjLng = route.params?.adjustedLng;
   useEffect(() => {
     if (adjLat == null || adjLng == null) return;
+    pinnedRef.current = true;   // C24 · from here on a GPS result is ignored
     setCoords({ lat: adjLat, lng: adjLng });
     setLocState("ready");
     (async () => {
@@ -124,11 +140,12 @@ export function ReportStrayScreen({ navigation, route }: Props) {
   async function addPhoto() {
     if (uploading) return;
     setUploading(true);
+    setPhotoError(undefined);
     const res = await pickAndUpload(api, "stray_photo");
     setUploading(false);
     // C24 · a failed upload says why; null means the person cancelled, which says nothing.
     if (res?.ok) setPhotoUrl(res.fileUrl);
-    else if (res) setError(uploadErrorMessage(res.reason));
+    else if (res) setPhotoError(uploadErrorMessage(res.reason));
   }
 
   // S23 · with location off there was no way to say where the animal is, and Send silently
@@ -279,6 +296,11 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           {uploading ? <ActivityIndicator color={colors.teal} />
             : <Text style={styles.photoText}>{photoUrl ? "✓ Photo added" : "Add a photo · optional"}</Text>}
         </TouchableOpacity>
+        {photoError ? (
+          <Text style={styles.photoError} accessibilityRole="alert" accessibilityLiveRegion="polite">
+            {photoError}
+          </Text>
+        ) : null}
 
         {!sightingOf && !(mode === "lost" && petId) ? (
           <>
@@ -444,5 +466,6 @@ const styles = StyleSheet.create({
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: radii.tile, ...card },
   anonLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
+  photoError: { marginTop: 10, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }
 });

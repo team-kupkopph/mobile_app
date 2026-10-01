@@ -14,3 +14,24 @@ test("ReportStray: the pin option shows while locating, and upload failures are 
 test("RescueUpdate: an outcome photo failure is said", () => {
   expect(fs.readFileSync("src/screens/RescueUpdateScreen.tsx", "utf8")).toContain("uploadErrorMessage(");
 });
+
+test("ReportStray: a dropped pin wins over a late GPS fix (every location write is gated)", () => {
+  const src = fs.readFileSync("src/screens/ReportStrayScreen.tsx", "utf8");
+  expect(src).toContain("pinnedRef.current = true");
+  expect(src).toContain("gpsMayApply(pinnedRef.current, cancelled)");
+  expect(src).toContain("return () => { cancelled = true; }");
+  // the location effect: after the permission await, after the fix await, after the
+  // reverse-geocode, before "ready", and in the catch (denied) path
+  const effect = src.slice(src.indexOf("const pinnedRef"), src.indexOf("// US-S2"));
+  expect(effect.match(/if \(stale\(\)\) return;/g)?.length).toBeGreaterThanOrEqual(5);
+  // no state write in the effect that is not preceded by a gate: the denied/ready writes
+  expect(effect).not.toMatch(/catch \{\s*setLocState/);
+});
+
+test("ReportStray: a photo failure shows under the photo button, not down by Send", () => {
+  const src = fs.readFileSync("src/screens/ReportStrayScreen.tsx", "utf8");
+  expect(src).toContain("setPhotoError(uploadErrorMessage(");
+  expect(src).toContain("setPhotoError(undefined)");
+  expect(src.indexOf("{photoError ?")).toBeGreaterThan(src.indexOf("onPress={addPhoto}"));
+  expect(src.indexOf("{photoError ?")).toBeLessThan(src.indexOf("{error ?"));
+});
