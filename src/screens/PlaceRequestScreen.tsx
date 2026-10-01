@@ -3,7 +3,8 @@
 // RootStackParamList). C25 · GET /inquiries/{id} returns the one inquiry (a /me/inquiries row's
 // shape; 404 for anyone but the adopter) — it used to scan page 1 of /me/inquiries, which lost
 // an offer once the adopter had more than a page of inquiries. The public listing detail is then
-// fetched for the richer view (photo/fee/description), same call ListingDetailScreen makes. POST /inquiries/{id}/accept | /decline (PlacementDecisionView) does the actual decision;
+// fetched for the richer view (photo/fee/description), same call ListingDetailScreen makes.
+// POST /inquiries/{id}/accept | /decline (PlacementDecisionView) does the actual decision;
 // its guard (select_for_update + a status re-check) is what makes double-tap and cross-tab
 // races safe — this screen just needs to not let a second tap for the SAME session double-fire,
 // which the shared `deciding` busy flag below covers.
@@ -94,6 +95,9 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
       : code === "not_a_placement" ? "This isn't a direct placement."
       : "Couldn't process that right now. Try again."
     );
+    // C14 · already_decided can mean the rescuer took the offer back while this was open:
+    // refetch, so a closed offer shows as closed and the buttons go.
+    if (code === "already_decided") load();
   }
 
   const alreadyDecided = inquiry != null && inquiry.status !== "active";

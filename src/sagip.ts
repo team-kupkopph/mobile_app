@@ -470,5 +470,6 @@ export function handoffConflictAction(
   if (error?.code !== "already_handed_off") return null;
   const d = error.details;
   if (d?.listing_status === "draft" && d.listing_id) return { kind: "openDraft", listingId: d.listing_id };
+  if (d?.listing_status === "adopted") return { kind: "message", text: "This animal already has a home." };
   return { kind: "message", text: "This animal is already listed or offered to someone — take that back first." };
 }

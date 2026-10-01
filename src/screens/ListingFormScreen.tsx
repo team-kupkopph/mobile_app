@@ -198,7 +198,9 @@ export function ListingFormScreen({ navigation, route }: Props) {
         {isEdit && wasPublic && wasPublic !== "available" ? (
           <View style={styles.statusNote}>
             <Text style={styles.statusNoteText}>
-              This listing is currently {wasPublic} — it won't show as available while you edit it.
+              {wasPublic === "draft"
+                ? "This is a draft — only you can see it until you publish it."
+                : `This listing is currently ${wasPublic} — it won't show as available while you edit it.`}
             </Text>
           </View>
         ) : null}

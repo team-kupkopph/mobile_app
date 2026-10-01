@@ -484,8 +484,13 @@ describe("handoffConflictAction (C14/C15)", () => {
     })).toEqual({ kind: "openDraft", listingId: "l1" });
   });
 
-  it("says take it back first when the animal is already published, pending or adopted", () => {
-    for (const listing_status of ["available", "pending", "adopted"]) {
+  it("says it already has a home when the listing is adopted", () => {
+    expect(handoffConflictAction({ code: "already_handed_off", details: { listing_id: "l1", listing_status: "adopted" } }))
+      .toEqual({ kind: "message", text: "This animal already has a home." });
+  });
+
+  it("says take it back first when the animal is already published or pending", () => {
+    for (const listing_status of ["available", "pending"]) {
       expect(handoffConflictAction({ code: "already_handed_off", details: { listing_id: "l1", listing_status } }))
         .toEqual({ kind: "message",
                    text: "This animal is already listed or offered to someone — take that back first." });

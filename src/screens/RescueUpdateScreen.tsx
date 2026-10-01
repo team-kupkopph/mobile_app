@@ -187,7 +187,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
       load();
       return;
     }
-    setError(handoffCancelMessage(res.data?.error?.code));
+    // An Alert, not setError: the error line renders far below, inside the status form.
+    Alert.alert("Couldn't take that back", handoffCancelMessage(res.data?.error?.code));
     load(); // a lapsed claim or an adoption changes what this screen offers
   }
 
@@ -305,8 +306,11 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                     />
                   </View>
                   <TouchableOpacity style={styles.releaseLink} accessibilityRole="button"
-                    testID="btn.rescueUpdate.cancelHandoff" disabled={cancelBusy} onPress={confirmCancelHandoff}>
-                    <Text style={styles.releaseLinkText}>Take back a listing or placement</Text>
+                    testID="btn.rescueUpdate.cancelHandoff" disabled={cancelBusy} onPress={confirmCancelHandoff}
+                    accessibilityState={{ disabled: cancelBusy, busy: cancelBusy }}>
+                    {cancelBusy ? <ActivityIndicator color={colors.muted} /> : (
+                      <Text style={styles.releaseLinkText}>Take back a listing or placement</Text>
+                    )}
                   </TouchableOpacity>
                 </>
               ) : null}

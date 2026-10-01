@@ -4,7 +4,7 @@
 // irreversible POST /cases/{caseId}/place fires.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
@@ -42,10 +42,13 @@ export function RescuePlaceConfirmScreen({ navigation, route }: Props) {
       navigation.navigate("rescuePlaceSent");
       return;
     }
-    // C14 · an unfinished draft listing already exists for this animal: reopen it, don't refuse.
+    // C14 · an unfinished draft listing already exists for this animal: say so, then reopen it.
+    // (RescueListScreen replaces straight away — there the person asked to list.)
     const action = handoffConflictAction(res.data?.error);
     if (action?.kind === "openDraft") {
-      navigation.replace("listingForm", { listingId: action.listingId });
+      Alert.alert("You already started a listing",
+        "Finish it or take it back before placing them with someone.",
+        [{ text: "Open the listing", onPress: () => navigation.replace("listingForm", { listingId: action.listingId }) }]);
       return;
     }
     const code = res.data?.error?.code;
