@@ -441,3 +441,35 @@ export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
 export function gpsMayApply(pinned: boolean, cancelled: boolean): boolean {
   return !pinned && !cancelled;
 }
+
+// C14 · the refusals of POST /cases/{id}/handoff/cancel, in words.
+export function handoffCancelMessage(code: string | undefined): string {
+  switch (code) {
+    case "has_active_inquiries": return "People have asked about this animal, so it can't be taken down from here.";
+    case "already_adopted": return "This animal already has a home.";
+    case "no_handoff": return "There's nothing to take back — they aren't listed or offered to anyone.";
+    case "case_expired": return "This claim has lapsed — it's back on the map for someone else to claim.";
+    default: return "Couldn't take that back. Try again.";
+  }
+}
+
+// C14/C15 · what List and Place do with a 409. `already_handed_off` carries the existing
+// listing in `details`: an unfinished DRAFT is reopened (it is the rescuer's own work in
+// progress), anything else means "take that back first". `null` = not one of these conflicts,
+// so the screen keeps its own mapping (fee_over_cap, case_not_safe, ...).
+export type HandoffConflictAction =
+  | { kind: "openDraft"; listingId: string }
+  | { kind: "message"; text: string };
+
+export function handoffConflictAction(
+  error: { code?: string; details?: { listing_id?: string; listing_status?: string } } | undefined
+): HandoffConflictAction | null {
+  if (error?.code === "case_expired") {
+    return { kind: "message", text: "This claim has lapsed — it's back on the map for someone else to claim." };
+  }
+  if (error?.code !== "already_handed_off") return null;
+  const d = error.details;
+  if (d?.listing_status === "draft" && d.listing_id) return { kind: "openDraft", listingId: d.listing_id };
+  if (d?.listing_status === "adopted") return { kind: "message", text: "This animal already has a home." };
+  return { kind: "message", text: "This animal is already listed or offered to someone — take that back first." };
+}

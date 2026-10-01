@@ -70,7 +70,8 @@ const SHELTER_VOLUNTEER = [
 const VERIFIED_MEMBER = ["MemberUpgradeScreen", "MemberVerifyScreen", "MemberSubmittedScreen"] as const;
 
 /**
- * Sagip rescuer (12 — RootNavigator.tsx-verified, not the plan's 13; see file header).
+ * Sagip rescuer (11 now — 12 RootNavigator.tsx-verified, not the plan's 13, see file header, minus
+ * RescueListedScreen, deleted by C15).
  * RescueMapScreen is counted once here, covering both the map screen itself and its chrome.
  */
 const SAGIP_RESCUER = [
@@ -78,7 +79,6 @@ const SAGIP_RESCUER = [
   "MyOffersScreen",
   "RescueMapScreen",
   "RescueListScreen",
-  "RescueListedScreen",
   "RescueOfferScreen",
   "RescueOfferSentScreen",
   "RescuePlaceScreen",

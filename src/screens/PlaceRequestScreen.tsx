@@ -1,9 +1,10 @@
 // US-H3 · the recipient's side of a direct placement (US-H2): accept or decline the animal
 // a rescuer/shelter placed with them. The route carries only `inquiryId` (see
-// RootStackParamList) — there's no GET /inquiries/{id}, so this screen resolves the listing
-// the same way MyInquiriesScreen does (GET /me/inquiries, matched by id) and then fetches the
-// public listing detail for the richer view (photo/fee/description), same call ListingDetailScreen
-// makes. POST /inquiries/{id}/accept | /decline (PlacementDecisionView) does the actual decision;
+// RootStackParamList). C25 · GET /inquiries/{id} returns the one inquiry (a /me/inquiries row's
+// shape; 404 for anyone but the adopter) — it used to scan page 1 of /me/inquiries, which lost
+// an offer once the adopter had more than a page of inquiries. The public listing detail is then
+// fetched for the richer view (photo/fee/description), same call ListingDetailScreen makes.
+// POST /inquiries/{id}/accept | /decline (PlacementDecisionView) does the actual decision;
 // its guard (select_for_update + a status re-check) is what makes double-tap and cross-tab
 // races safe — this screen just needs to not let a second tap for the SAME session double-fire,
 // which the shared `deciding` busy flag below covers.
@@ -32,7 +33,7 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
   const { inquiryId } = route.params;
 
   const [inquiry, setInquiry] = useState<MyInquiry | null>(null);
-  // US-R4 · a FAILED /me/inquiries left `found` undefined exactly like a successful one that
+  // US-R4 · a FAILED fetch left `found` undefined exactly like a successful one that
   // does not contain this offer, so both rendered "This placement offer wasn't found." —
   // telling someone offline that a real, live offer of a home for their pet does not exist.
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -43,11 +44,9 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
 
   const load = useCallback(() => {
     setRes(null);
-    api.get("/me/inquiries").then((r) => {
+    api.get(`/inquiries/${inquiryId}`).then((r) => {
       setRes({ ok: r.ok, status: r.status });
-      const found: MyInquiry | undefined = r.ok
-        ? (r.data?.results ?? []).find((iq: MyInquiry) => iq.inquiry_id === inquiryId)
-        : undefined;
+      const found: MyInquiry | undefined = r.ok ? (r.data as MyInquiry) : undefined;
       setInquiry(found ?? null);
       if (found) {
         // Secondary, per US-R2's multi-fetch rule: the photo and city are decoration on a
@@ -96,6 +95,9 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
       : code === "not_a_placement" ? "This isn't a direct placement."
       : "Couldn't process that right now. Try again."
     );
+    // C14 · already_decided can mean the rescuer took the offer back while this was open:
+    // refetch, so a closed offer shows as closed and the buttons go.
+    if (code === "already_decided") load();
   }
 
   const alreadyDecided = inquiry != null && inquiry.status !== "active";
@@ -106,8 +108,8 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
       <ScreenHeader title="Placement offer" onBack={() => navigation.goBack()} />
 
       {!inquiry ? (
-        // The list came back fine and this offer is not in it: withdrawn, or never addressed
-        // to this account. That is `gone` — a real answer — not a network failure.
+        // The server answered and has no such offer for this account (404): never addressed to
+        // them. That is `gone` — a real answer — not a network failure.
         <LoadStateView
           state={res?.ok ? ({ kind: "gone" } as const) : loadState(res)}
           subject="placement offer"
@@ -143,7 +145,8 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
             <Text style={styles.decidedNote}>
               {inquiry.status === "adopted" ? "You already accepted this placement."
                 : inquiry.status === "declined" ? "You already declined this placement."
-                : "This placement is no longer active."}
+                // C14 · the rescuer took it back, or it lapsed — the inquiry can't tell which.
+                : "This offer is no longer open."}
             </Text>
           ) : null}
 

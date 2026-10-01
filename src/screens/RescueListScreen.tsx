@@ -1,6 +1,8 @@
 // US-H1 · list an adoption from a SAFE rescue case. POST /cases/{caseId}/list — species is
 // inherited server-side from the report, so this form only asks for city, fee, and an
 // optional name. Fee capping mirrors ListingFormScreen (same fee_cap_for on the backend).
+// C15 · it creates a PRIVATE DRAFT carrying the report's photos, then continues into the
+// listing form, where the rescuer adds the story and publishes. Nothing is public before that.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -8,6 +10,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
+import { handoffConflictAction } from "../sagip";
 import { colors, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Field, ScreenHeader } from "../components/ui";
@@ -38,12 +41,19 @@ export function RescueListScreen({ navigation, route }: Props) {
 
     setSubmitting(false);
     if (res.ok) {
-      navigation.navigate("rescueListed");
+      navigation.replace("listingForm", { listingId: res.data.listing_id });
+      return;
+    }
+    // C14 · an unfinished draft already exists for this animal: reopen it rather than refuse.
+    const action = handoffConflictAction(res.data?.error);
+    if (action?.kind === "openDraft") {
+      navigation.replace("listingForm", { listingId: action.listingId });
       return;
     }
     const code = res.data?.error?.code;
     setError(
-      code === "fee_over_cap" ? `The adoption fee can't exceed ₱${res.data.error.details?.cap ?? 500}.`
+      action ? action.text
+      : code === "fee_over_cap" ? `The adoption fee can't exceed ₱${res.data.error.details?.cap ?? 500}.`
       : code === "case_not_safe" ? "This case isn't marked safe yet — update its status first."
       : res.data?.error?.message ?? "Couldn't create the listing. Try again."
     );
@@ -56,7 +66,7 @@ export function RescueListScreen({ navigation, route }: Props) {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.draftNote}>
-          The animal's species carries over from the rescue report — just fill in where it's going and any fee.
+          This saves a private draft with the report's photos — only you can see it. Next you add their story and publish it.
         </Text>
 
         <Field label="Name (optional)" value={name} onChangeText={setName} placeholder="Bantay" />

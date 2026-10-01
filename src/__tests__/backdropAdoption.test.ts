@@ -53,7 +53,8 @@ describe("V3 screens sit on the backdrop", () => {
     // timeline) — two fewer screen files, not two fewer in-scope features.
     // 35 -> 41: P5 Task 3 (K24/K26) moves the six KawangGawa*/WaiverScreen screens from
     // V3_EXCLUDED into scope, now that they're converted.
-    expect(V3_SCOPE.length).toBe(41);
+    // 41 -> 40: C15 deleted RescueListedScreen (List for adoption now continues into the form).
+    expect(V3_SCOPE.length).toBe(40);
   });
 
   it("every in-scope screen not in the holdout list renders ScreenBackdrop", () => {

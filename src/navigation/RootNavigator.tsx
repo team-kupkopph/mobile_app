@@ -72,7 +72,6 @@ import { MyOffersScreen } from "../screens/MyOffersScreen";
 import { MyRescuesScreen } from "../screens/MyRescuesScreen";
 import { RescueUpdateScreen } from "../screens/RescueUpdateScreen";
 import { RescueListScreen } from "../screens/RescueListScreen";
-import { RescueListedScreen } from "../screens/RescueListedScreen";
 import { RescuePlaceScreen } from "../screens/RescuePlaceScreen";
 import { RescuePlaceConfirmScreen } from "../screens/RescuePlaceConfirmScreen";
 import { RescuePlaceSentScreen } from "../screens/RescuePlaceSentScreen";
@@ -164,7 +163,6 @@ export function RootNavigator() {
       <Stack.Screen name="rescueUpdate" component={RescueUpdateScreen} />
       {/* US-H1 — list an adoption from a safe rescue case. */}
       <Stack.Screen name="rescueList" component={RescueListScreen} />
-      <Stack.Screen name="rescueListed" component={RescueListedScreen} />
       {/* US-H2 — place an animal directly with a known verified member/shelter, no public listing. */}
       <Stack.Screen name="rescuePlace" component={RescuePlaceScreen} />
       <Stack.Screen name="rescuePlaceConfirm" component={RescuePlaceConfirmScreen} />
