@@ -1,4 +1,4 @@
-import { createApi } from "../client";
+import { REQUEST_TIMEOUT_MS, createApi } from "../client";
 
 function mockFetchSequence(responses: Array<{ status: number; body: any }>) {
   let i = 0;
@@ -71,4 +71,52 @@ test("US-C1 · a non-JSON body keeps the HTTP status and falls back to empty dat
   expect(res.ok).toBe(false);
   expect(res.status).toBe(500);
   expect(res.data).toEqual({});
+});
+
+test("a request that never answers resolves as status 0 'timeout' after REQUEST_TIMEOUT_MS (C17)", async () => {
+  jest.useFakeTimers();
+  try {
+    global.fetch = jest.fn((_url: any, init: any) => new Promise((_res, rej) => {
+      init.signal.addEventListener("abort", () => rej(new Error("aborted")));
+    })) as any;
+    const p = createApi(() => null, async () => {}).post("/reports", {});
+    jest.advanceTimersByTime(REQUEST_TIMEOUT_MS);
+    await expect(p).resolves.toMatchObject({ ok: false, status: 0, data: { error: { code: "timeout" } } });
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("a hung /auth/refresh also times out as status 0 (C17)", async () => {
+  jest.useFakeTimers();
+  try {
+    let call = 0;
+    global.fetch = jest.fn((_url: any, init: any) => {
+      if (call++ === 0) {
+        return Promise.resolve({ status: 401, ok: false, json: async () => ({}) } as Response);
+      }
+      return new Promise((_res, rej) => {
+        init.signal.addEventListener("abort", () => rej(new Error("aborted")));
+      });
+    }) as any;
+    const setTokens = jest.fn(async () => {});
+    const p = createApi(() => ({ access: "a", refresh: "r" }), setTokens).get("/me");
+    await jest.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
+    await expect(p).resolves.toMatchObject({ ok: false, status: 0, data: { error: { code: "timeout" } } });
+    expect(setTokens).not.toHaveBeenCalled();   // a hung refresh must not wipe the session
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("a fast answer clears the timeout timer (C17)", async () => {
+  jest.useFakeTimers();
+  try {
+    mockFetchSequence([{ status: 200, body: { ok: 1 } }]);
+    const res = await createApi(() => null, async () => {}).get("/x");
+    expect(res.ok).toBe(true);
+    expect(jest.getTimerCount()).toBe(0);
+  } finally {
+    jest.useRealTimers();
+  }
 });

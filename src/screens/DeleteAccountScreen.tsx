@@ -19,6 +19,8 @@ import {
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { accountIdFromAccessToken } from "../auth/idToken";
+import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
 import { colors, elevation, radii, typography } from "../theme";
@@ -35,7 +37,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "deleteAccount">;
 
 export function DeleteAccountScreen({ navigation }: Props) {
   const api = useApi();
-  const { signOut } = useAuth();
+  const { signOut, tokens } = useAuth();
+  const { discardAllFor } = useOutbox();
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -56,6 +59,8 @@ export function DeleteAccountScreen({ navigation }: Props) {
     if (res.status === 204) {
       // Every token is already dead server-side; clearing them locally drops us straight to
       // the signed-out shell rather than bouncing off a 401 on the next screen.
+      // C16 · a deleted account's queued reports can never be sent.
+      await discardAllFor(accountIdFromAccessToken(tokens?.access));
       await signOut();
       return;
     }

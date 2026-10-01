@@ -15,6 +15,9 @@ import MapView, { Circle, Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
+import { useAuth } from "../auth/AuthContext";
+import { SignupWall, SignupWallAction } from "../components/SignupWall";
+import { setIntent } from "../guestIntent";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
@@ -25,7 +28,7 @@ import {
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
 import { RescuePeople } from "../components/sagip/RescuePeople";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, Card, ScreenHeader } from "../components/ui";
 import { TAP_SLOP } from "../touch";
 
 const TONE = {
@@ -41,6 +44,16 @@ type Props = NativeStackScreenProps<RootStackParamList, "reportDetail">;
 
 export function ReportDetailScreen({ navigation, route }: Props) {
   const api = useApi();
+  const { tokens } = useAuth();
+  const isGuest = tokens === null;
+  // C6+ · a guest can open a report from a shared link, but every action on it needs an
+  // account. Each gated tap raises the signup wall instead of hitting the API (a raw 401):
+  // "Report this" → the generic "account" copy; the sighting / claim / offer taps → "report".
+  // The action outlives `open` so the copy doesn't flip while the sheet slides out.
+  const [wall, setWall] = useState<{ open: boolean; action: SignupWallAction }>(
+    { open: false, action: "report" });
+  const openWall = (action: SignupWallAction) => setWall({ open: true, action });
+  const closeWall = () => setWall((w) => ({ ...w, open: false }));
   const [report, setReport] = useState<ReportDetail | null>(null);
   // US-R4 · "{X} not found." was shown for EVERY failure, not just a missing row — so
   // someone offline, or hitting a 500, was told the thing does not exist. R2's `gone`
@@ -160,7 +173,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           <TouchableOpacity
             style={styles.flagLink}
             hitSlop={TAP_SLOP}
-            onPress={() => navigation.navigate("reportContent",
+            onPress={() => isGuest ? openWall("account") : navigation.navigate("reportContent",
               { targetType: "report", targetId: report.report_id })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
@@ -180,6 +193,12 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           <Text style={styles.sub}>
             {(report.city ? report.city + " · " : "") + "reported " + relTime(report.reported_at)}
           </Text>
+          {/* C13 · the reporter's own report, taken down by moderation. */}
+          {report.hidden ? (
+            <Card accent={colors.danger} style={styles.removedCard}>
+              <Text style={styles.removedText}>Removed by moderation. It isn't shown to anyone else, and no one is being alerted about it.</Text>
+            </Card>
+          ) : null}
           {chip ? (
             <View style={[styles.chip, { backgroundColor: TONE[chip.tone].bg }]}>
               <Text style={[styles.chipText, { color: TONE[chip.tone].fg }]}>{chip.label}</Text>
@@ -254,7 +273,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             <Text style={styles.landmark}>Near: {report.location_text}</Text>
           ) : null}
 
-          {isReporterView && report.status === "reported" ? (
+          {isReporterView && report.status === "reported" && !report.hidden ? (
             <View style={styles.waitingCard}>
               <Text style={styles.waitingLine}>
                 {(report.offers_count ?? 0) === 0
@@ -323,7 +342,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           {report.people ? <RescuePeople people={report.people} /> : null}
 
           {/* D1 · the reporter's own consent. Disabled for an anonymous report (D8). */}
-          {isReporterView && report.status !== "resolved" ? (
+          {isReporterView && report.status !== "resolved" && !report.hidden ? (
             <ContactShareRow
               label="Let the rescuer contact me"
               hint={report.is_anonymous
@@ -355,7 +374,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           ) : null}
 
           {/* S11 · a report that no longer needs anyone can be closed while it's unclaimed. */}
-          {isReporterView && report.status === "reported" ? (
+          {isReporterView && report.status === "reported" && !report.hidden ? (
             closing ? (
               <View style={styles.closeCard}>
                 <Text style={styles.closeTitle}>Why doesn't it need a rescuer?</Text>
@@ -412,7 +431,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
               <Button
                 testID="btn.reportDetail.seen"
                 label="I've seen this pet"
-                onPress={() => navigation.navigate("reportStray", {
+                onPress={() => isGuest ? openWall("report") : navigation.navigate("reportStray", {
                   mode: "found", sightingOf: report.report_id, sightingSpecies: report.species,
                   sightingName: report.pet_name
                 })}
@@ -425,14 +444,14 @@ export function ReportDetailScreen({ navigation, route }: Props) {
 
           {!isLost && !isReporterView && !myCase && report.status === "reported" ? (
             <View style={styles.actionRow}>
-              <Button label="Claim this case" onPress={confirmClaim} loading={claiming} />
+              <Button label="Claim this case" onPress={() => isGuest ? openWall("report") : confirmClaim()} loading={claiming} />
               <Text style={styles.claimFine}>
                 Only claim if you're going. If plans change, release it so someone else can.
               </Text>
               <TouchableOpacity
                 style={styles.offerBtn}
                 activeOpacity={0.85}
-                onPress={() => navigation.navigate("rescueOffer", { reportId: report.report_id })}
+                onPress={() => isGuest ? openWall("report") : navigation.navigate("rescueOffer", { reportId: report.report_id })}
               >
                 <Text style={styles.offerBtnText}>Can't go? Offer help instead</Text>
               </TouchableOpacity>
@@ -440,6 +459,13 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           ) : null}
         </ScrollView>
       )}
+      <SignupWall
+        visible={wall.open}
+        action={wall.action}
+        onCreateAccount={() => { setIntent(wall.action); closeWall(); navigation.navigate("accountType"); }}
+        onLogin={() => { closeWall(); navigation.navigate("signin"); }}
+        onDismiss={closeWall}
+      />
     </View>
   );
 }
@@ -486,6 +512,8 @@ const styles = StyleSheet.create({
   closeCancelText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   deadline: { marginBottom: 12, color: colors.tealDark, ...typography.meta, lineHeight: 18, textAlign: "center" },
   deadlineUrgent: { color: colors.warningStrong, fontWeight: "800" },
+  removedCard: { marginTop: 12 },
+  removedText: { color: colors.ink, ...typography.subtitle },
   waitingCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, backgroundColor: colors.infoBg },
   waitingLine: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   waitingSub: { marginTop: 6, color: colors.tealDark, ...typography.meta },

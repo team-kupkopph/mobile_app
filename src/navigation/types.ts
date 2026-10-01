@@ -1,5 +1,6 @@
 import { ShelterTier } from "../api/types";
 import { SocialIdentity } from "../auth/socialAuth";
+import type { QueuedReason } from "../sagip";
 import { ActivitySection } from "../shelterVolunteer";
 
 // Base document collected in the tier-1 step, threaded to the NGO step so the final
@@ -95,7 +96,11 @@ export type RootStackParamList = {
   adjustPin: { lat: number; lng: number };
   // US-O3 · `reportId` is null and `queued` true when the report went to the offline
   // outbox instead of the server — the success screen says so rather than pretending.
-  reportSent: { reportId: string | null; title: string; city: string | null; queued?: boolean };
+  reportSent: {
+    reportId: string | null; title: string; city: string | null; queued?: boolean;
+    /** PR3-F2 · why it queued; absent reads as offline. */
+    queuedReason?: QueuedReason;
+  };
   myReports: undefined;
   // S16 · a shelter opens the map on its own city (its address), not the owner-picked one.
   rescueMap: { city?: string } | undefined;

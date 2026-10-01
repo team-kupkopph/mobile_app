@@ -1,8 +1,9 @@
 import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
-  CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
-  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip
+  CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
+  myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
+  queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M, endedCaseLine
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -155,6 +156,31 @@ describe("claimDeadline (S9 · the claimer is told when an unposted claim reopen
       text: "The update window has passed — this may reopen for another rescuer any moment.",
       short: "Update overdue", urgent: true
     });
+  });
+});
+
+describe("escalationLines · held report-time alerts (C12)", () => {
+  it("says why nobody was alerted right away instead of 'no one in your city'", () => {
+    expect(escalationLines(0, { level_1: 0, level_2: 0, at_report: 0, at_report_held: "phone_unverified" })[0])
+      .toBe("Nearby rescuers weren't alerted right away — verify your phone number so your urgent reports alert them. They'll still be asked if no one claims it soon.");
+    expect(escalationLines(0, { level_1: 0, level_2: 0, at_report: 0, at_report_held: "reporter_cap" })[0])
+      .toBe("You've sent several urgent reports today, so this one wasn't sent as an alert. Rescuers can still see it on the map, and they'll be asked if no one claims it soon.");
+  });
+  it("a null held reason keeps the plain at_report line", () => {
+    expect(escalationLines(0, { level_1: 0, level_2: 0, at_report: 0, at_report_held: null }))
+      .toEqual(["No verified rescuers or shelters in your city to alert yet."]);
+  });
+});
+
+describe("myReportChip (C13 · a removed report says so)", () => {
+  const row = (over: Partial<MyReport>): MyReport =>
+    ({ report_id: "r", species: "dog", condition: "healthy", status: "reported", city: null, created_at: "", ...over });
+  it("shows a grey 'Removed by moderation' chip for a hidden report", () => {
+    expect(myReportChip(row({ hidden: true }))).toEqual({ label: "Removed by moderation", tone: "grey" });
+  });
+  it("falls back to the status chip otherwise (and for an older server's rows)", () => {
+    expect(myReportChip(row({ hidden: false }))).toEqual(strayChip("reported"));
+    expect(myReportChip(row({}))).toEqual(strayChip("reported"));
   });
 });
 
@@ -360,5 +386,79 @@ describe("reportBody (S12 · each kind of report sends exactly its fields)", () 
 
   it("never shares contact on an anonymous report", () => {
     expect(reportBody({ ...base, mode: "found", anonymous: true }).contact_share_consent).toBe(false);
+  });
+});
+
+describe("caseScreenState (C11 — the screen follows YOUR claim, not the report)", () => {
+  it("is 'ended' whenever the caller no longer holds the claim, whatever the report says", () => {
+    expect(caseScreenState({ status: "reported", my_case: undefined })).toBe("ended");
+    expect(caseScreenState({ status: "claimed", my_case: undefined })).toBe("ended");
+    expect(caseScreenState({ status: "safe", my_case: undefined })).toBe("ended");
+  });
+  it("follows the report while the claim is live", () => {
+    const mine = { case_id: "c", claim_due_at: null };
+    expect(caseScreenState({ status: "claimed", my_case: mine })).toBe("active");
+    expect(caseScreenState({ status: "rescued", my_case: mine })).toBe("custody");
+    expect(caseScreenState({ status: "safe", my_case: mine })).toBe("custody");
+    expect(caseScreenState({ status: "resolved", my_case: mine })).toBe("resolved");
+  });
+});
+
+describe("withTimeout (C24 — a GPS fix that never comes)", () => {
+  it("resolves null once the time is up, and the value when it comes first", async () => {
+    jest.useFakeTimers();
+    const never = withTimeout(new Promise<number>(() => {}), 1000);
+    jest.advanceTimersByTime(1000);
+    await expect(never).resolves.toBeNull();
+    jest.useRealTimers();
+    await expect(withTimeout(Promise.resolve(7), 1000)).resolves.toBe(7);
+  });
+});
+
+describe("gpsMayApply (C24 — a dropped pin wins over a late GPS fix)", () => {
+  it("applies a location result only while nothing is pinned and the screen is mounted", () => {
+    expect(gpsMayApply(false, false)).toBe(true);
+    expect(gpsMayApply(true, false)).toBe(false);   // pinned: fix, last-known and denied are all dropped
+    expect(gpsMayApply(false, true)).toBe(false);   // unmounted
+    expect(gpsMayApply(true, true)).toBe(false);
+  });
+});
+
+describe("throttledReportMessage (C18)", () => {
+  it("names the daily limit and when it resets", () => {
+    expect(throttledReportMessage(3 * 3600 + 5)).toBe(
+      "You've sent 20 reports today — the most one account can send. You can send more in about 4 h.");
+    expect(throttledReportMessage(undefined)).toBe(
+      "You've sent 20 reports today — the most one account can send. Try again later today.");
+  });
+});
+
+describe("queuedReason / queuedReportLine (PR3-F2 · a queued report says why it waited)", () => {
+  it("no answer at all is offline; a timeout or a gateway error is the server", () => {
+    expect(queuedReason(0, "network_error")).toBe("offline");
+    expect(queuedReason(0, undefined)).toBe("offline");
+    expect(queuedReason(0, "timeout")).toBe("server");
+    [502, 503, 504].forEach((s) => expect(queuedReason(s, undefined)).toBe("server"));
+  });
+
+  it("tells an online person the server is the problem, and an offline one their signal is", () => {
+    expect(queuedReportLine("server")).toBe("Couldn't reach Kupkop right now — this sends by itself shortly.");
+    expect(queuedReportLine("offline")).toBe("You're offline. This sends by itself the moment you're back.");
+    expect(queuedReportLine(undefined)).toBe("You're offline. This sends by itself the moment you're back.");
+  });
+});
+
+test("PR3-F3 · the last-known fallback takes only a recent, reasonably precise fix", () => {
+  expect(LAST_KNOWN_MAX_AGE_MS).toBe(5 * 60_000);
+  expect(LAST_KNOWN_MAX_ACCURACY_M).toBe(200);
+});
+
+describe("endedCaseLine (PR3-F6 · an ended claim says what became of the report)", () => {
+  it("closed, back on the map, or with another rescuer", () => {
+    expect(endedCaseLine("resolved")).toBe("This report has been closed.");
+    expect(endedCaseLine("reported")).toBe(
+      "It's back on the map. If you can go now, you can claim it again from the report.");
+    (["claimed", "rescued", "safe"] as const).forEach((s) =>
+      expect(endedCaseLine(s)).toBe("Another rescuer has it now."));
   });
 });

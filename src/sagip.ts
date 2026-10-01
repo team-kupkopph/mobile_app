@@ -1,4 +1,4 @@
-import { MyReport, OfferListStatus, OfferType, RescueCaseSummary, RescuePerson, StrayStatus } from "./api/types";
+import { MyReport, OfferListStatus, OfferType, RescueCaseSummary, RescuePerson, ReportDetail, StrayStatus } from "./api/types";
 
 // Sagip's shared display logic, unit-tested (like shelterDashboard.ts / verifications.ts).
 
@@ -21,6 +21,11 @@ export function strayChip(status: StrayStatus): { label: string; tone: StrayTone
   }
 }
 
+// C13 · a report moderation removed says so, in place of whatever status it had.
+export function myReportChip(r: Pick<MyReport, "status" | "hidden">): { label: string; tone: StrayTone } {
+  return r.hidden ? { label: "Removed by moderation", tone: "grey" } : strayChip(r.status);
+}
+
 function cap(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
@@ -38,6 +43,22 @@ export function advanceableStatuses(current: StrayStatus): StrayStatus[] {
   const idx = CASE_ORDER.indexOf(current);
   if (idx === -1) return []; // 'reported' (not yet claimed) or an unknown value
   return CASE_ORDER.slice(idx + 1);
+}
+
+// C11 · the case screen is about YOUR claim. A lapsed or released claimer (no `my_case`) must not
+// see "resolved" (the report is open again) or someone else's case with actions that 403.
+export type CaseScreenState = "active" | "custody" | "ended" | "resolved";
+export function caseScreenState(r: Pick<ReportDetail, "status" | "my_case">): CaseScreenState {
+  if (!r.my_case) return "ended";
+  if (r.status === "resolved") return "resolved";
+  return r.status === "claimed" ? "active" : "custody";
+}
+
+// C11 · PR3-F6 · what the ended card says became of the report once your claim is gone.
+export function endedCaseLine(status: StrayStatus): string {
+  if (status === "resolved") return "This report has been closed.";
+  if (status === "reported") return "It's back on the map. If you can go now, you can claim it again from the report.";
+  return "Another rescuer has it now.";
 }
 
 // Track O (US-O1) — the three offer types. Centralised so the offer sheet, the offer
@@ -204,12 +225,21 @@ export function claimDeadline(
 // the counts gets neutral words.
 export function escalationLines(
   level: number | undefined,
-  notified: { level_1: number; level_2: number; at_report?: number | null; reopened?: number | null } | undefined
+  notified: {
+    level_1: number; level_2: number; at_report?: number | null; reopened?: number | null;
+    at_report_held?: "phone_unverified" | "reporter_cap" | null;
+  } | undefined
 ): string[] {
   const lines: string[] = [];
   const people = (n: number) => (n === 1 ? "rescuer or shelter" : "rescuers and shelters");
   const atReport = notified?.at_report;
-  if (atReport != null) {
+  // C12 · a held report-time alert says why, instead of "no one in your city".
+  const held = notified?.at_report_held;
+  if (held === "phone_unverified") {
+    lines.push("Nearby rescuers weren't alerted right away — verify your phone number so your urgent reports alert them. They'll still be asked if no one claims it soon.");
+  } else if (held === "reporter_cap") {
+    lines.push("You've sent several urgent reports today, so this one wasn't sent as an alert. Rescuers can still see it on the map, and they'll be asked if no one claims it soon.");
+  } else if (atReport != null) {
     lines.push(atReport > 0
       ? `${atReport} verified ${people(atReport)} nearby ${atReport === 1 ? "was" : "were"} alerted right away.`
       : "No verified rescuers or shelters in your city to alert yet.");
@@ -372,4 +402,42 @@ export function reportBody(f: {
   }
   if (f.mode === "found" && f.sightingOf) body.sighting_of = f.sightingOf;
   return body;
+}
+
+// C24 · expo-location has no timeout; a phone indoors can wait for a fix forever.
+export const GPS_TIMEOUT_MS = 15000;
+// PR3-F3 · the last-known fallback only counts if it is recent and reasonably precise; anything
+// older or vaguer would file the report where the reporter was, not where the animal is. With no
+// qualifying fix the form offers the pin instead.
+export const LAST_KNOWN_MAX_AGE_MS = 5 * 60_000;
+export const LAST_KNOWN_MAX_ACCURACY_M = 200;
+// PR3-F2 · why a report went to the outbox. "offline" = no answer at all; "server" = the phone
+// is online but Kupkop isn't answering (a C17 timeout, or a 502/503/504 from the gateway).
+export type QueuedReason = "offline" | "server";
+export function queuedReason(status: number, errorCode: string | undefined): QueuedReason {
+  return status !== 0 || errorCode === "timeout" ? "server" : "offline";
+}
+export function queuedReportLine(reason: QueuedReason | undefined): string {
+  return reason === "server"
+    ? "Couldn't reach Kupkop right now — this sends by itself shortly."
+    : "You're offline. This sends by itself the moment you're back.";
+}
+// C18 · the report limit is per day (ReportCreateThrottle, 20/day); "try again shortly" was wrong.
+export function throttledReportMessage(retryAfterSeconds: number | undefined): string {
+  const base = "You've sent 20 reports today — the most one account can send.";
+  if (!retryAfterSeconds) return `${base} Try again later today.`;
+  return `${base} You can send more in about ${Math.max(1, Math.ceil(retryAfterSeconds / 3600))} h.`;
+}
+
+export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
+  return new Promise((resolve) => {
+    const t = setTimeout(() => resolve(null), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); }, () => { clearTimeout(t); resolve(null); });
+  });
+}
+
+// C24 · a pin the person dropped wins over a late GPS fix (or the stale last-known fallback,
+// or a "denied" verdict): once pinned, or once the screen is gone, a location result is dropped.
+export function gpsMayApply(pinned: boolean, cancelled: boolean): boolean {
+  return !pinned && !cancelled;
 }

@@ -16,3 +16,12 @@ export function decodeIdTokenPayload(idToken: string): Record<string, unknown> |
     return null;
   }
 }
+
+// C16 · the account a session belongs to, from the access token's own `account_id` claim
+// (accounts/tokens.py). Unverified on purpose, like decodeIdTokenPayload: it only decides which
+// queued reports this device may send now; the server still authenticates every request.
+export function accountIdFromAccessToken(access: string | undefined): string | null {
+  if (!access) return null;
+  const id = decodeIdTokenPayload(access)?.account_id;
+  return typeof id === "string" ? id : null;
+}

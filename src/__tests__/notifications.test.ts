@@ -104,4 +104,9 @@ describe("Sagip loop-closure notifications", () => {
     expect(notificationTarget({ type: "placement_decided", data: { decision: "declined" } }))
       .toEqual({ screen: "myRescues" });
   });
+
+  it("report_removed opens My rescues", () => {
+    expect(notificationTarget({ type: "report_removed", data: { report_id: "r" } }))
+      .toEqual({ screen: "myRescues" });
+  });
 });

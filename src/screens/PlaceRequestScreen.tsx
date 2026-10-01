@@ -10,7 +10,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -63,7 +63,21 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  async function decide(action: Decision) {
+  // C23 · accepting makes the animal yours and declining tells the rescuer; neither can be undone.
+  function decide(action: Decision) {
+    if (deciding) return;
+    if (action === "accept") {
+      Alert.alert("Take them in?", "They become yours to care for. This can't be undone.",
+        [{ text: "Not yet", style: "cancel" },
+         { text: "Accept", onPress: () => { void send("accept"); } }]);
+    } else {
+      Alert.alert("Decline this placement?", "The rescuer will be told and can place them with someone else.",
+        [{ text: "Not yet", style: "cancel" },
+         { text: "Decline", style: "destructive", onPress: () => { void send("decline"); } }]);
+    }
+  }
+
+  async function send(action: Decision) {
     if (deciding) return; // busy guard — one decision in flight at a time
     setDeciding(action);
     setError(undefined);
@@ -136,7 +150,7 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
           {/* A decided placement has no decision to make; the note above says which way it went.
-              `decide` guards on `deciding`, so the other button stays tappable but inert. */}
+              `send` guards on `deciding`, so the other button stays tappable but inert. */}
           {!alreadyDecided && (
             <>
               <Button label="Accept" onPress={() => decide("accept")} loading={deciding === "accept"} style={styles.acceptBtn} />

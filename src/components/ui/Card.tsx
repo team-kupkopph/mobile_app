@@ -10,11 +10,13 @@ type CardProps = {
   /** A left accent bar carrying a status colour. Reads state before a word is read. */
   accent?: string;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 };
 
-export function Card({ children, tone = "default", accent, style }: CardProps) {
+export function Card({ children, tone = "default", accent, style, testID }: CardProps) {
   return (
     <View
+      testID={testID}
       style={[
         styles.card,
         tone === "hero" && styles.hero,

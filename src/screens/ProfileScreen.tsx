@@ -14,6 +14,9 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { Me } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
+import { accountIdFromAccessToken } from "../auth/idToken";
+import { useOutbox } from "../outbox/OutboxProvider";
+import { confirmSignOutWithQueue } from "../outbox/signOutGuard";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
@@ -43,7 +46,8 @@ export function ProfileScreen({ navigation }: Props) {
    */
   const insets = useSafeAreaInsets();
   const api = useApi();
-  const { city, signOut } = useAuth();
+  const { city, signOut, tokens } = useAuth();
+  const { queue, discardAllFor } = useOutbox();
   const [me, setMe] = useState<Me | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [editing, setEditing] = useState(false);
@@ -92,11 +96,18 @@ export function ProfileScreen({ navigation }: Props) {
     }
   }
 
-  async function handleLogout() {
+  async function signOutAndLeave() {
     await signOut();
     // Single stack (see RootNavigator) — signing out doesn't cross a stack boundary on its own,
     // so land the user back on welcome explicitly rather than stranding them on a gated screen.
     navigation.reset({ index: 0, routes: [{ name: "welcome" }] });
+  }
+
+  // C16 · D14 — unsent reports are kept for this account's next sign-in, or discarded.
+  function handleLogout() {
+    confirmSignOutWithQueue(queue.length, () => { void signOutAndLeave(); }, () => {
+      void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOutAndLeave());
+    });
   }
 
   // US-R1 · when the load FAILED and we have nothing, say so instead of rendering the

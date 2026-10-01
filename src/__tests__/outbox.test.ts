@@ -1,5 +1,9 @@
+import fs from "fs";
+
 import {
-  applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, pendingLabel, queueReport,
+  applyFlushResult, applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, nextFlushDelay, pendingLabel,
+  queueReport, shouldQueue,
+  visibleTo,
 } from "../outbox";
 
 const NOW = 1_000_000;
@@ -96,12 +100,12 @@ describe("dueItems", () => {
       item({ idempotency_key: "new", createdAt: NOW + 500 }),
       item({ idempotency_key: "old", createdAt: NOW - 500 }),
     ];
-    expect(dueItems(queue, NOW).map((i) => i.idempotency_key)).toEqual(["old", "new"]);
+    expect(dueItems(queue, NOW, "acct-A").map((i) => i.idempotency_key)).toEqual(["old", "new"]);
   });
 
   it("skips what is not due", () => {
     const queue = [item({ attempts: 2, nextAttemptAt: NOW + 60_000 })];
-    expect(dueItems(queue, NOW)).toEqual([]);
+    expect(dueItems(queue, NOW, "acct-A")).toEqual([]);
   });
 });
 
@@ -111,4 +115,79 @@ describe("pendingLabel", () => {
     expect(pendingLabel(item({ attempts: 2 }))).toMatch(/retry/i);
     expect(pendingLabel(item({ attempts: MAX_ATTEMPTS }))).toMatch(/not sent/i);
   });
+});
+
+test("shouldQueue: offline and gateway failures queue; a real answer doesn't (C17)", () => {
+  [0, 502, 503, 504].forEach((s) => expect(shouldQueue(s)).toBe(true));
+  [400, 401, 403, 409, 429, 500].forEach((s) => expect(shouldQueue(s)).toBe(false));
+});
+
+test("C16 · a queued report is sent and shown only for the account that queued it", () => {
+  const a = queueReport({ species: "dog" }, "k1", 0, undefined, "acct-A");
+  const b = queueReport({ species: "cat" }, "k2", 0, undefined, "acct-B");
+  const legacy = queueReport({ species: "dog" }, "k3", 0);          // queued before owners existed
+  expect(dueItems([a, b, legacy], 1, "acct-A").map((i) => i.idempotency_key)).toEqual(["k1", "k3"]);
+  expect(dueItems([a, b, legacy], 1, null)).toEqual([]);           // signed out: nothing is sent
+  expect(visibleTo([a, b, legacy], "acct-B").map((i) => i.idempotency_key)).toEqual(["k2", "k3"]);
+});
+
+describe("applyFlushResult (PR3-F1)", () => {
+  // The flush loop awaits a POST for up to 20 s. Whatever was written to the queue meanwhile is
+  // the truth; the result of the send is applied to THAT, never to the snapshot taken before.
+  const sent = queueReport({ species: "dog" }, "sent", 0, undefined, "acct-A");
+  const other = queueReport({ species: "cat" }, "other", 0, undefined, "acct-A");
+  const added = queueReport({ species: "dog" }, "added", 1, undefined, "acct-A");
+
+  it("keeps a report enqueued while the send was in flight", () => {
+    const latest = [sent, other, added];
+    expect(applyFlushResult(latest, sent, null).map((i) => i.idempotency_key)).toEqual(["other", "added"]);
+    const retried = applyResult(sent, { ok: false, status: 503 }, NOW)!;
+    expect(applyFlushResult(latest, sent, retried)).toEqual([retried, other, added]);
+  });
+
+  it("does not resurrect a report discarded while the send was in flight", () => {
+    const latest = [other];                                   // "sent" was discarded mid-flush
+    const retried = applyResult(sent, { ok: false, status: 0 }, NOW)!;
+    expect(applyFlushResult(latest, sent, retried)).toBe(latest);
+    expect(applyFlushResult(latest, sent, null)).toBe(latest);
+  });
+});
+
+test("PR3-F1 · the flush loop applies each result to the queue as it is after the send", () => {
+  const src = fs.readFileSync("src/outbox/OutboxProvider.tsx", "utf8");
+  expect(src).toMatch(/const latest = queueRef\.current;\s*const updated = applyFlushResult\(latest, item, next\)/);
+  expect(src).not.toMatch(/let current = queueRef\.current/);
+});
+
+describe("nextFlushDelay (PR3-F2 · a report queued while online still retries)", () => {
+  // C17 queues timeouts and 502/503/504 while NetInfo says online, so no reconnect will ever come
+  // to flush them. The provider sets a timer for the earliest retry this account is owed.
+  const mine = (key: string, nextAttemptAt: number, attempts = 1) =>
+    ({ ...queueReport({}, key, 0, undefined, "acct-A"), attempts, nextAttemptAt });
+
+  it("waits for the earliest retry of this account's reports", () => {
+    expect(nextFlushDelay([mine("a", NOW + 40_000), mine("b", NOW + 10_000)], NOW, "acct-A")).toBe(10_000);
+  });
+
+  it("never fires sooner than 1 s, even for something already due", () => {
+    expect(nextFlushDelay([mine("a", NOW - 5_000)], NOW, "acct-A")).toBe(1_000);
+    expect(nextFlushDelay([mine("a", NOW + 200)], NOW, "acct-A")).toBe(1_000);
+  });
+
+  it("has nothing to wait for: an empty queue, another account's, a stuck one, or signed out", () => {
+    const theirs = { ...mine("b", NOW + 10_000), ownerId: "acct-B" };
+    const stuck = mine("s", NOW + 10_000, MAX_ATTEMPTS);   // only a manual "Try again" sends it
+    expect(nextFlushDelay([], NOW, "acct-A")).toBeNull();
+    expect(nextFlushDelay([theirs, stuck], NOW, "acct-A")).toBeNull();
+    expect(nextFlushDelay([mine("a", NOW + 10_000)], NOW, null)).toBeNull();
+  });
+});
+
+test("PR3-F2 · the provider retries on a timer while online, and right after queueing", () => {
+  const src = fs.readFileSync("src/outbox/OutboxProvider.tsx", "utf8");
+  expect(src).toMatch(/nextFlushDelay\(queue, Date\.now\(\), ownerId\)/);
+  expect(src).toMatch(/setTimeout\(\(\) => \{ void flush\(\); \}, delay\)/);
+  expect(src).toContain("clearTimeout(");
+  const enqueue = src.slice(src.indexOf("const enqueue"), src.indexOf("const retry"));
+  expect(enqueue).toMatch(/if \(online\) void flush\(\)|if \(online\) await flush\(\)/);
 });

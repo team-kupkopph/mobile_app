@@ -28,6 +28,8 @@ export type QueuedReport = {
   /** Epoch ms before which we should not retry. */
   nextAttemptAt: number;
   lastError?: string;
+  /** C16 · the account that queued it. Absent on items queued before owners existed. */
+  ownerId?: string;
 };
 
 export const MAX_ATTEMPTS = 8;
@@ -99,10 +101,31 @@ export function applyResult(
   };
 }
 
+/**
+ * PR3-F1 · apply one send's outcome to the queue AS IT IS NOW, not to the snapshot the flush
+ * started from. A POST can take up to 20 s; in that time a new report may have been queued, or
+ * this one discarded (Log out → Discard, account deleted). If the item is gone, it stays gone —
+ * `latest` comes back unchanged. `next` is applyResult's answer: null = sent, leave the queue.
+ */
+export function applyFlushResult(
+  latest: QueuedReport[], item: QueuedReport, next: QueuedReport | null,
+): QueuedReport[] {
+  if (!latest.some((i) => i.idempotency_key === item.idempotency_key)) return latest;
+  return next
+    ? latest.map((i) => (i.idempotency_key === item.idempotency_key ? next : i))
+    : latest.filter((i) => i.idempotency_key !== item.idempotency_key);
+}
+
+/** C17 · what the report form hands to the outbox instead of showing an error: no answer at all,
+ *  or a gateway saying the server is down (a deploy, an outage). A real answer (4xx, 500) is shown. */
+export function shouldQueue(status: number): boolean {
+  return status === 0 || status === 502 || status === 503 || status === 504;
+}
+
 /** A fresh queue entry. */
 export function queueReport(
   body: Record<string, unknown>, idempotencyKey: string, now: number,
-  pendingPhotoUri?: string,
+  pendingPhotoUri?: string, ownerId?: string,
 ): QueuedReport {
   return {
     idempotency_key: idempotencyKey,
@@ -111,10 +134,44 @@ export function queueReport(
     createdAt: now,
     attempts: 0,
     nextAttemptAt: now,        // try immediately; the network may already be back
+    ...(ownerId ? { ownerId } : {}),
   };
 }
 
-/** Which queued reports should be attempted now, oldest first (fairness). */
-export function dueItems(queue: QueuedReport[], now: number): QueuedReport[] {
-  return queue.filter((i) => isDue(i, now)).sort((a, b) => a.createdAt - b.createdAt);
+/** C16 · items queued before owners existed (no ownerId) stay sendable by whoever is signed in. */
+export function ownedBy(i: QueuedReport, ownerId: string | null): boolean {
+  return ownerId !== null && (!i.ownerId || i.ownerId === ownerId);
+}
+
+/** C16 · D14 · what discardAllFor(owner) keeps: everything the owner does NOT own. Legacy items
+ *  (no ownerId) count as the signed-in owner's (ownedBy), so they go with that owner's discard.
+ *  A null owner owns nothing, so nothing is discarded. */
+export function withoutOwned(queue: QueuedReport[], ownerId: string | null): QueuedReport[] {
+  return queue.filter((i) => !ownedBy(i, ownerId));
+}
+
+export function visibleTo(queue: QueuedReport[], ownerId: string | null): QueuedReport[] {
+  return queue.filter((i) => ownedBy(i, ownerId));
+}
+
+/** Which queued reports should be attempted now, oldest first (fairness). C16 · only the signed-in
+ *  account's own, and nothing at all when signed out. */
+export function dueItems(queue: QueuedReport[], now: number, ownerId: string | null): QueuedReport[] {
+  return queue.filter((i) => ownedBy(i, ownerId) && isDue(i, now)).sort((a, b) => a.createdAt - b.createdAt);
+}
+
+/** PR3-F2 · the provider never fires the retry timer sooner than this. */
+export const MIN_FLUSH_DELAY_MS = 1_000;
+
+/**
+ * PR3-F2 · how long until this account's next queued report is owed a retry, or null when nothing
+ * is waiting. C17 queues a timeout or a 502/503/504 while the phone is online, so no reconnect
+ * will come to flush it — the provider sets a timer for this instead. Stuck items are left to the
+ * person's own "Try again" (§13.3: kept and visible, not hammered).
+ */
+export function nextFlushDelay(queue: QueuedReport[], now: number, ownerId: string | null): number | null {
+  const waiting = queue.filter((i) => ownedBy(i, ownerId) && !isStuck(i));
+  if (waiting.length === 0) return null;
+  const earliest = Math.min(...waiting.map((i) => i.nextAttemptAt));
+  return Math.max(MIN_FLUSH_DELAY_MS, earliest - now);
 }
