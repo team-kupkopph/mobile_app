@@ -21,6 +21,11 @@ export function strayChip(status: StrayStatus): { label: string; tone: StrayTone
   }
 }
 
+// C13 · a report moderation removed says so, in place of whatever status it had.
+export function myReportChip(r: Pick<MyReport, "status" | "hidden">): { label: string; tone: StrayTone } {
+  return r.hidden ? { label: "Removed by moderation", tone: "grey" } : strayChip(r.status);
+}
+
 function cap(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
@@ -213,12 +218,21 @@ export function claimDeadline(
 // the counts gets neutral words.
 export function escalationLines(
   level: number | undefined,
-  notified: { level_1: number; level_2: number; at_report?: number | null; reopened?: number | null } | undefined
+  notified: {
+    level_1: number; level_2: number; at_report?: number | null; reopened?: number | null;
+    at_report_held?: "phone_unverified" | "reporter_cap" | null;
+  } | undefined
 ): string[] {
   const lines: string[] = [];
   const people = (n: number) => (n === 1 ? "rescuer or shelter" : "rescuers and shelters");
   const atReport = notified?.at_report;
-  if (atReport != null) {
+  // C12 · a held report-time alert says why, instead of "no one in your city".
+  const held = notified?.at_report_held;
+  if (held === "phone_unverified") {
+    lines.push("Nearby rescuers weren't alerted right away — verify your phone number so your urgent reports alert them. They'll still be asked if no one claims it soon.");
+  } else if (held === "reporter_cap") {
+    lines.push("You've sent several urgent reports today, so this one wasn't sent as an alert. Rescuers can still see it on the map, and they'll be asked if no one claims it soon.");
+  } else if (atReport != null) {
     lines.push(atReport > 0
       ? `${atReport} verified ${people(atReport)} nearby ${atReport === 1 ? "was" : "were"} alerted right away.`
       : "No verified rescuers or shelters in your city to alert yet.");

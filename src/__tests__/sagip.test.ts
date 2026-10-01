@@ -2,7 +2,7 @@ import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
-  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage
+  myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -155,6 +155,31 @@ describe("claimDeadline (S9 · the claimer is told when an unposted claim reopen
       text: "The update window has passed — this may reopen for another rescuer any moment.",
       short: "Update overdue", urgent: true
     });
+  });
+});
+
+describe("escalationLines · held report-time alerts (C12)", () => {
+  it("says why nobody was alerted right away instead of 'no one in your city'", () => {
+    expect(escalationLines(0, { level_1: 0, level_2: 0, at_report: 0, at_report_held: "phone_unverified" })[0])
+      .toBe("Nearby rescuers weren't alerted right away — verify your phone number so your urgent reports alert them. They'll still be asked if no one claims it soon.");
+    expect(escalationLines(0, { level_1: 0, level_2: 0, at_report: 0, at_report_held: "reporter_cap" })[0])
+      .toBe("You've sent several urgent reports today, so this one wasn't sent as an alert. Rescuers can still see it on the map, and they'll be asked if no one claims it soon.");
+  });
+  it("a null held reason keeps the plain at_report line", () => {
+    expect(escalationLines(0, { level_1: 0, level_2: 0, at_report: 0, at_report_held: null }))
+      .toEqual(["No verified rescuers or shelters in your city to alert yet."]);
+  });
+});
+
+describe("myReportChip (C13 · a removed report says so)", () => {
+  const row = (over: Partial<MyReport>): MyReport =>
+    ({ report_id: "r", species: "dog", condition: "healthy", status: "reported", city: null, created_at: "", ...over });
+  it("shows a grey 'Removed by moderation' chip for a hidden report", () => {
+    expect(myReportChip(row({ hidden: true }))).toEqual({ label: "Removed by moderation", tone: "grey" });
+  });
+  it("falls back to the status chip otherwise (and for an older server's rows)", () => {
+    expect(myReportChip(row({ hidden: false }))).toEqual(strayChip("reported"));
+    expect(myReportChip(row({}))).toEqual(strayChip("reported"));
   });
 });
 

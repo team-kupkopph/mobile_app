@@ -32,6 +32,8 @@ export type StrayStatus = "reported" | "claimed" | "rescued" | "safe" | "resolve
 export type MyReport = {
   report_id: string; species: string; condition: string;
   status: StrayStatus; city: string | null; created_at: string;
+  // C13 · true once moderation removed the report. Absent from an older server.
+  hidden?: boolean;
 };
 export type MapReport = {
   report_id: string; species: string; condition: string;
@@ -58,7 +60,13 @@ export type ReportDetail = {
   // Reporter only (S5 · S10 · S11) — absent for anyone else, null when not applicable.
   // at_report (D2): the report-time alert's count, or null when the policy sent nothing.
   // reopened (re-alert): how many more were paged when a claimed report reopened.
-  escalation_notified?: { level_1: number; level_2: number; at_report?: number | null; reopened?: number | null };
+  // at_report_held (C12): why the report-time alert was held back — null when it wasn't.
+  escalation_notified?: {
+    level_1: number; level_2: number; at_report?: number | null; reopened?: number | null;
+    at_report_held?: "phone_unverified" | "reporter_cap" | null;
+  };
+  // C13 · reporter only: moderation removed this report.
+  hidden?: boolean;
   claimer?: { display_name: string } | null;
   outcome?: { notes: string | null; photo_url: string | null; resolved_at: string } | null;
   close_reason?: string | null;

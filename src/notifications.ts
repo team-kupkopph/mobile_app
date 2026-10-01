@@ -78,7 +78,8 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   if (n.type === "claim_due" && n.data?.case_id && n.data?.report_id) {
     return { screen: "rescueUpdate", caseId: n.data.case_id, reportId: n.data.report_id };
   }
-  if (n.type === "placement_decided") {
+  // C13 · a takedown ended their claim: the claimer's list is where that shows.
+  if (n.type === "placement_decided" || n.type === "report_removed") {
     return { screen: "myRescues" };
   }
   if (MY_INQUIRIES_TYPES.has(n.type)) {

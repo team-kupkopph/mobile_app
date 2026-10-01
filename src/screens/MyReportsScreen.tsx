@@ -12,7 +12,7 @@ import { loadState } from "../net";
 import { isStuck, pendingLabel } from "../outbox";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
-import { relTime, sagipTitle, strayChip } from "../sagip";
+import { myReportChip, relTime, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 
@@ -129,7 +129,7 @@ export function MyReportsScreen({ navigation }: Props) {
             />
           ) : (
           shown.map((r, i) => {
-            const chip = strayChip(r.status);
+            const chip = myReportChip(r);  // C13 · "Removed by moderation" when hidden
             const tone = TONE[chip.tone];
             return (
               <TouchableOpacity

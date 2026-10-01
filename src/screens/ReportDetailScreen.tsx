@@ -28,7 +28,7 @@ import {
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
 import { RescuePeople } from "../components/sagip/RescuePeople";
 import { colors, elevation, radii, spacing, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
+import { Button, Card, ScreenHeader } from "../components/ui";
 import { TAP_SLOP } from "../touch";
 
 const TONE = {
@@ -193,6 +193,12 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           <Text style={styles.sub}>
             {(report.city ? report.city + " · " : "") + "reported " + relTime(report.reported_at)}
           </Text>
+          {/* C13 · the reporter's own report, taken down by moderation. */}
+          {report.hidden ? (
+            <Card accent={colors.danger} style={styles.removedCard}>
+              <Text style={styles.removedText}>Removed by moderation. It isn't shown to anyone else, and no one is being alerted about it.</Text>
+            </Card>
+          ) : null}
           {chip ? (
             <View style={[styles.chip, { backgroundColor: TONE[chip.tone].bg }]}>
               <Text style={[styles.chipText, { color: TONE[chip.tone].fg }]}>{chip.label}</Text>
@@ -267,7 +273,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             <Text style={styles.landmark}>Near: {report.location_text}</Text>
           ) : null}
 
-          {isReporterView && report.status === "reported" ? (
+          {isReporterView && report.status === "reported" && !report.hidden ? (
             <View style={styles.waitingCard}>
               <Text style={styles.waitingLine}>
                 {(report.offers_count ?? 0) === 0
@@ -336,7 +342,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           {report.people ? <RescuePeople people={report.people} /> : null}
 
           {/* D1 · the reporter's own consent. Disabled for an anonymous report (D8). */}
-          {isReporterView && report.status !== "resolved" ? (
+          {isReporterView && report.status !== "resolved" && !report.hidden ? (
             <ContactShareRow
               label="Let the rescuer contact me"
               hint={report.is_anonymous
@@ -368,7 +374,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           ) : null}
 
           {/* S11 · a report that no longer needs anyone can be closed while it's unclaimed. */}
-          {isReporterView && report.status === "reported" ? (
+          {isReporterView && report.status === "reported" && !report.hidden ? (
             closing ? (
               <View style={styles.closeCard}>
                 <Text style={styles.closeTitle}>Why doesn't it need a rescuer?</Text>
@@ -506,6 +512,8 @@ const styles = StyleSheet.create({
   closeCancelText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   deadline: { marginBottom: 12, color: colors.tealDark, ...typography.meta, lineHeight: 18, textAlign: "center" },
   deadlineUrgent: { color: colors.warningStrong, fontWeight: "800" },
+  removedCard: { marginTop: 12 },
+  removedText: { color: colors.ink, ...typography.subtitle },
   waitingCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, backgroundColor: colors.infoBg },
   waitingLine: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   waitingSub: { marginTop: 6, color: colors.tealDark, ...typography.meta },
