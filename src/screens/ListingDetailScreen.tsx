@@ -13,6 +13,7 @@ import { ListingDetail } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { inquireRefusalMessage } from "../adoption";
 import { useAuth } from "../auth/AuthContext";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
@@ -114,6 +115,14 @@ export function ListingDetailScreen({ navigation, route }: Props) {
         "The poster reaches you by phone — verify a mobile number, then send your inquiry.",
         [{ text: "Not now", style: "cancel" },
          { text: "Verify phone", onPress: () => navigation.navigate("verifyPhone") }]);
+      return;
+    }
+    // D15 · the rescuer took the animal back while this screen was open: say so, and refetch so
+    // the listing shows its real status instead of an Inquire button that can only fail.
+    const refusal = inquireRefusalMessage(code);
+    if (refusal) {
+      Alert.alert("No longer available", refusal);
+      load();
       return;
     }
     Alert.alert("Couldn't send the inquiry", res.data?.error?.message ?? "Try again.");

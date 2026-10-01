@@ -19,7 +19,7 @@ import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
 import {
   RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, endedCaseLine,
-  handoffCancelMessage, sagipTitle, strayChip,
+  handoffCancelMessage, closeInquiriesPrompt, closedInquiriesDone, sagipTitle, strayChip,
 } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -167,7 +167,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   }
 
   // C14 · take a handoff back: a draft listing or an unanswered placement. The server refuses
-  // once people have asked about the animal, or it is adopted (see handoffCancelMessage).
+  // once it is adopted (see handoffCancelMessage); if people have asked, D15 confirms first and
+  // resends with close_inquiries.
   const [cancelBusy, setCancelBusy] = useState(false);
   function confirmCancelHandoff() {
     if (cancelBusy) return;
@@ -176,15 +177,32 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
       [{ text: "Not now", style: "cancel" },
        { text: "Take back", onPress: () => { void cancelHandoff(); } }]);
   }
-  async function cancelHandoff() {
+  async function cancelHandoff(closeInquiries = false, confirmedN?: number) {
     if (cancelBusy) return; // busy guard — one cancel in flight at a time
     setCancelBusy(true);
     setError(undefined);
-    const res = await api.post(`/cases/${caseId}/handoff/cancel`, {});
+    const res = await api.post(`/cases/${caseId}/handoff/cancel`, closeInquiries ? { close_inquiries: true } : {});
     setCancelBusy(false);
     if (res.ok) {
-      Alert.alert("Taken back", "You can list or place them again.");
+      if (closeInquiries) {
+        // D15 · N can exceed what was confirmed (someone inquired in between): trust the server.
+        const closed = res.data?.closed_inquiries;
+        const done = closedInquiriesDone(typeof closed === "number" ? closed : confirmedN ?? 0);
+        Alert.alert(done.title, done.body);
+      } else {
+        Alert.alert("Taken back", "You can list or place them again.");
+      }
       load();
+      return;
+    }
+    // D15 · people have asked: not a refusal but a confirm. Without details.active_inquiries
+    // (an older server) fall through to the plain refusal below.
+    const active = res.data?.error?.details?.active_inquiries;
+    if (!closeInquiries && res.data?.error?.code === "has_active_inquiries" && typeof active === "number") {
+      const p = closeInquiriesPrompt(active);
+      Alert.alert(p.title, p.body,
+        [{ text: p.keep, style: "cancel" },
+         { text: p.confirm, style: "destructive", onPress: () => { void cancelHandoff(true, active); } }]);
       return;
     }
     // An Alert, not setError: the error line renders far below, inside the status form.

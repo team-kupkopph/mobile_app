@@ -19,7 +19,7 @@ import { MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "./LoadStateView";
 import { loadState } from "../net";
-import { inquiryProgressLabel } from "../adoption";
+import { inquiryProgressLabel, inquiryStatusLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, pill, radii, typography } from "../theme";
@@ -36,7 +36,7 @@ const STATUS_TONE: Record<string, { tone: ChipTone; label: string }> = {
   active: { tone: "info", label: "Active" },
   adopted: { tone: "success", label: "Adopted" },
   declined: { tone: "danger", label: "Declined" },
-  withdrawn: { tone: "neutral", label: "Withdrawn" }
+  withdrawn: { tone: "neutral", label: inquiryStatusLabel("withdrawn") } // D15 · never "You withdrew"
 };
 
 // See the file header: every stage SKIPPED is the direct-placement bypass. `some` guards

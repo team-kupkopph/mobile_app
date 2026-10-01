@@ -49,9 +49,11 @@ const VERIFICATION_TYPES = new Set([
 // tap-through to placeRequest. Routing both directions here to myInquiries is a deliberate
 // over-approximation: harmless for (a) (they land on their own — unrelated — inquiry list,
 // same as tapping the bell icon itself would), and correct for (b).
+// D15 · listing_withdrawn ({listing_id, inquiry_id}) is an adopter told the rescuer took the listing
+// down — it opens My inquiries, where the inquiry now reads "No longer available".
 // C14 · placement_withdrawn ({listing_id, inquiry_id}) is the recipient being told the rescuer took
 // an offer back — it lands where stage_advanced does, and the offer itself says it is closed.
-const MY_INQUIRIES_TYPES = new Set(["stage_advanced", "inquiry_received", "placement_withdrawn"]);
+const MY_INQUIRIES_TYPES = new Set(["stage_advanced", "inquiry_received", "placement_withdrawn", "listing_withdrawn"]);
 // US-V8 · the volunteer side of notify(): schedule and history folded onto one hub screen
 // (Task 5, K30/G9) — every volunteer notification now opens the hub on its "My shifts" tab,
 // whether it's "look at your upcoming shifts" (shift_confirmed/shift_reminder) or "see what

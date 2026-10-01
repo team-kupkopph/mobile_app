@@ -453,6 +453,25 @@ export function handoffCancelMessage(code: string | undefined): string {
   }
 }
 
+// D15 · Take back on a listing people have asked about: the server answers 409
+// has_active_inquiries with details.active_inquiries = N, and the rescuer must confirm before
+// the listing comes down and those N people are told. Copy lives here so it is tested.
+const peopleHave = (n: number) => `${n} ${n === 1 ? "person has" : "people have"}`;
+const peopleWere = (n: number) => `${n} ${n === 1 ? "person was" : "people were"}`;
+
+export function closeInquiriesPrompt(n: number): { title: string; body: string; keep: string; confirm: string } {
+  return {
+    title: "People have asked about them",
+    body: `${peopleHave(n)} asked about this animal. Taking the listing down tells them it's no longer available.`,
+    keep: "Keep it listed",
+    confirm: "Take it down"
+  };
+}
+
+export function closedInquiriesDone(n: number): { title: string; body: string } {
+  return { title: "Taken back", body: `The listing is down, and ${peopleWere(n)} told.` };
+}
+
 // C14/C15 · what List and Place do with a 409. `already_handed_off` carries the existing
 // listing in `details`: an unfinished DRAFT is reopened (it is the rescuer's own work in
 // progress), anything else means "take that back first". `null` = not one of these conflicts,

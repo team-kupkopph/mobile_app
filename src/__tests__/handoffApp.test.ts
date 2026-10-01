@@ -57,6 +57,27 @@ test("A refused Take back is an Alert, not a line far down the form; the link sh
   expect(src).toContain("accessibilityState={{ disabled: cancelBusy, busy: cancelBusy }}");
 });
 
+test("Take back on a listing people asked about confirms, then resends close_inquiries (D15)", () => {
+  const src = read("src/screens/RescueUpdateScreen.tsx");
+  expect(src).toContain("has_active_inquiries");
+  expect(src).toContain("active_inquiries");
+  expect(src).toContain("closeInquiriesPrompt(");
+  expect(src).toContain("closedInquiriesDone(");
+  expect(src).toContain("close_inquiries: true");
+});
+
+test("The inquire POST shows the unavailable message and refetches the listing (D15)", () => {
+  const src = read("src/screens/ListingDetailScreen.tsx");
+  expect(src).toContain("inquireRefusalMessage(");
+  expect(src).toMatch(/inquireRefusalMessage\([\s\S]*?load\(\)/);
+});
+
+test("A withdrawn inquiry chip comes from inquiryStatusLabel, not a 'Withdrawn' literal (D15)", () => {
+  const src = read("src/components/InquiryList.tsx");
+  expect(src).toContain("inquiryStatusLabel(");
+  expect(src).not.toContain('"Withdrawn"');
+});
+
 test("Place confirm tells the person about the draft before opening it", () => {
   const src = read("src/screens/RescuePlaceConfirmScreen.tsx");
   expect(src).toContain('Alert.alert("You already started a listing"');

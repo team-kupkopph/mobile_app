@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -107,5 +107,23 @@ describe("stageMeta", () => {
     expect(stageMeta("in_progress", "2026-07-12T03:21:00Z", now)).toBe("In progress");
     expect(stageMeta("skipped", null, now)).toBe("Skipped");
     expect(stageMeta("not_started", null, now)).toBe("");
+  });
+});
+
+describe("inquiryStatusLabel (D15)", () => {
+  it("a withdrawn inquiry is 'No longer available', never 'You withdrew'", () => {
+    expect(inquiryStatusLabel("withdrawn")).toBe("No longer available");
+    expect(inquiryStatusLabel("active")).toBe("Active");
+    expect(inquiryStatusLabel("adopted")).toBe("Adopted");
+    expect(inquiryStatusLabel("declined")).toBe("Declined");
+    expect(inquiryStatusLabel("withdrawn")).not.toMatch(/withdrew/i);
+  });
+});
+
+describe("inquireRefusalMessage (D15)", () => {
+  it("shows the listing_unavailable message and leaves other codes to the screen", () => {
+    expect(inquireRefusalMessage("listing_unavailable")).toBe("This animal is no longer available for adoption.");
+    expect(inquireRefusalMessage("already_inquired")).toBeNull();
+    expect(inquireRefusalMessage(undefined)).toBeNull();
   });
 });

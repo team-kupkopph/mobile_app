@@ -116,6 +116,12 @@ describe("Sagip loop-closure notifications", () => {
     expect(withdrawn).toEqual(notificationTarget({ type: "stage_advanced", data: { inquiry_id: "i1", stage_key: "vet_check" } }));
   });
 
+  it("routes listing_withdrawn exactly like stage_advanced (D15)", () => {
+    const withdrawn = notificationTarget({ type: "listing_withdrawn", data: { listing_id: "l1", inquiry_id: "i1" } });
+    expect(withdrawn).toEqual({ screen: "myInquiries" });
+    expect(withdrawn).toEqual(notificationTarget({ type: "stage_advanced", data: { inquiry_id: "i1", stage_key: "vet_check" } }));
+  });
+
   it("an expired placement_decided still opens My rescues", () => {
     expect(notificationTarget({ type: "placement_decided", data: { decision: "expired" } }))
       .toEqual({ screen: "myRescues" });

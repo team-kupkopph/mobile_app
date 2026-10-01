@@ -4,7 +4,7 @@ import {
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
   myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
   queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M, endedCaseLine,
-  handoffCancelMessage, handoffConflictAction
+  handoffCancelMessage, handoffConflictAction, closeInquiriesPrompt, closedInquiriesDone
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -513,5 +513,21 @@ describe("handoffConflictAction (C14/C15)", () => {
   it("has no opinion on any other error", () => {
     expect(handoffConflictAction({ code: "fee_over_cap" })).toBeNull();
     expect(handoffConflictAction(undefined)).toBeNull();
+  });
+});
+
+describe("closeInquiriesPrompt / closedInquiriesDone (D15)", () => {
+  it("asks the rescuer to confirm, with the right singular and plural", () => {
+    expect(closeInquiriesPrompt(1)).toEqual({
+      title: "People have asked about them",
+      body: "1 person has asked about this animal. Taking the listing down tells them it's no longer available.",
+      keep: "Keep it listed", confirm: "Take it down"
+    });
+    expect(closeInquiriesPrompt(3).body)
+      .toBe("3 people have asked about this animal. Taking the listing down tells them it's no longer available.");
+  });
+  it("says how many were told", () => {
+    expect(closedInquiriesDone(1)).toEqual({ title: "Taken back", body: "The listing is down, and 1 person was told." });
+    expect(closedInquiriesDone(2).body).toBe("The listing is down, and 2 people were told.");
   });
 });

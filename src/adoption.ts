@@ -14,6 +14,23 @@ export const STAGE_LABEL: Record<string, string> = {
   interview: "Interview", vet_clearance: "Vet clearance", finalization: "Finalization"
 };
 
+// D15 · a WITHDRAWN inquiry means the rescuer took the animal back or the placement was
+// withdrawn — never something the adopter did, so it never reads "You withdrew".
+export function inquiryStatusLabel(status: string): string {
+  switch (status) {
+    case "adopted": return "Adopted";
+    case "declined": return "Declined";
+    case "withdrawn": return "No longer available";
+    default: return "Active";
+  }
+}
+
+// D15 · the server's refusal to inquire on a listing that is no longer AVAILABLE. `null` = not
+// this refusal, so the screen keeps its own mapping.
+export function inquireRefusalMessage(code: string | undefined): string | null {
+  return code === "listing_unavailable" ? "This animal is no longer available for adoption." : null;
+}
+
 export type StageTone = "muted" | "active" | "done" | "skipped";
 
 // state -> label + tone. `not_started` is muted (nothing's happened), `in_progress`
