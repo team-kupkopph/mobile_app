@@ -152,3 +152,19 @@ export function visibleTo(queue: QueuedReport[], ownerId: string | null): Queued
 export function dueItems(queue: QueuedReport[], now: number, ownerId: string | null): QueuedReport[] {
   return queue.filter((i) => ownedBy(i, ownerId) && isDue(i, now)).sort((a, b) => a.createdAt - b.createdAt);
 }
+
+/** PR3-F2 · the provider never fires the retry timer sooner than this. */
+export const MIN_FLUSH_DELAY_MS = 1_000;
+
+/**
+ * PR3-F2 · how long until this account's next queued report is owed a retry, or null when nothing
+ * is waiting. C17 queues a timeout or a 502/503/504 while the phone is online, so no reconnect
+ * will come to flush it — the provider sets a timer for this instead. Stuck items are left to the
+ * person's own "Try again" (§13.3: kept and visible, not hammered).
+ */
+export function nextFlushDelay(queue: QueuedReport[], now: number, ownerId: string | null): number | null {
+  const waiting = queue.filter((i) => ownedBy(i, ownerId) && !isStuck(i));
+  if (waiting.length === 0) return null;
+  const earliest = Math.min(...waiting.map((i) => i.nextAttemptAt));
+  return Math.max(MIN_FLUSH_DELAY_MS, earliest - now);
+}

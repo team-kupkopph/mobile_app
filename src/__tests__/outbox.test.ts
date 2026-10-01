@@ -1,7 +1,8 @@
 import fs from "fs";
 
 import {
-  applyFlushResult, applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, pendingLabel, queueReport, shouldQueue,
+  applyFlushResult, applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, nextFlushDelay, pendingLabel,
+  queueReport, shouldQueue,
   visibleTo,
 } from "../outbox";
 
@@ -156,4 +157,37 @@ test("PR3-F1 · the flush loop applies each result to the queue as it is after t
   const src = fs.readFileSync("src/outbox/OutboxProvider.tsx", "utf8");
   expect(src).toMatch(/const latest = queueRef\.current;\s*const updated = applyFlushResult\(latest, item, next\)/);
   expect(src).not.toMatch(/let current = queueRef\.current/);
+});
+
+describe("nextFlushDelay (PR3-F2 · a report queued while online still retries)", () => {
+  // C17 queues timeouts and 502/503/504 while NetInfo says online, so no reconnect will ever come
+  // to flush them. The provider sets a timer for the earliest retry this account is owed.
+  const mine = (key: string, nextAttemptAt: number, attempts = 1) =>
+    ({ ...queueReport({}, key, 0, undefined, "acct-A"), attempts, nextAttemptAt });
+
+  it("waits for the earliest retry of this account's reports", () => {
+    expect(nextFlushDelay([mine("a", NOW + 40_000), mine("b", NOW + 10_000)], NOW, "acct-A")).toBe(10_000);
+  });
+
+  it("never fires sooner than 1 s, even for something already due", () => {
+    expect(nextFlushDelay([mine("a", NOW - 5_000)], NOW, "acct-A")).toBe(1_000);
+    expect(nextFlushDelay([mine("a", NOW + 200)], NOW, "acct-A")).toBe(1_000);
+  });
+
+  it("has nothing to wait for: an empty queue, another account's, a stuck one, or signed out", () => {
+    const theirs = { ...mine("b", NOW + 10_000), ownerId: "acct-B" };
+    const stuck = mine("s", NOW + 10_000, MAX_ATTEMPTS);   // only a manual "Try again" sends it
+    expect(nextFlushDelay([], NOW, "acct-A")).toBeNull();
+    expect(nextFlushDelay([theirs, stuck], NOW, "acct-A")).toBeNull();
+    expect(nextFlushDelay([mine("a", NOW + 10_000)], NOW, null)).toBeNull();
+  });
+});
+
+test("PR3-F2 · the provider retries on a timer while online, and right after queueing", () => {
+  const src = fs.readFileSync("src/outbox/OutboxProvider.tsx", "utf8");
+  expect(src).toMatch(/nextFlushDelay\(queue, Date\.now\(\), ownerId\)/);
+  expect(src).toMatch(/setTimeout\(\(\) => \{ void flush\(\); \}, delay\)/);
+  expect(src).toContain("clearTimeout(");
+  const enqueue = src.slice(src.indexOf("const enqueue"), src.indexOf("const retry"));
+  expect(enqueue).toMatch(/if \(online\) void flush\(\)|if \(online\) await flush\(\)/);
 });
