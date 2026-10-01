@@ -47,3 +47,11 @@ test("PR3-F2 · a queued report carries why it queued to the sent screen, which 
   expect(sent).toContain("queuedReportLine(queuedReason)");
   expect(sent).not.toContain("You're offline. This sends by itself");   // the copy lives in sagip.ts
 });
+
+test("PR3-F5 · RescueUpdate: Mark waits for the outcome photo, and a good pick clears its error", () => {
+  const src = fs.readFileSync("src/screens/RescueUpdateScreen.tsx", "utf8");
+  const submit = src.slice(src.indexOf("async function submit("), src.indexOf("setSubmitting(true)"));
+  expect(submit).toContain('if (uploadingPhoto) { setError("The photo is still uploading — one moment."); return; }');
+  const pick = src.slice(src.indexOf("async function addOutcomePhoto"), src.indexOf("async function submit("));
+  expect(pick).toMatch(/if \(res\?\.ok\) \{ setOutcomePhotoUrl\(res\.fileUrl\); setError\(undefined\); \}/);
+});

@@ -79,12 +79,15 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     const res = await pickAndUpload(api, "rescue_outcome_photo");
     setUploadingPhoto(false);
     // C24 · a failed upload says why (shown under the button); a cancel (null) says nothing.
-    if (res?.ok) setOutcomePhotoUrl(res.fileUrl);
+    // PR3-F5 · a good pick clears the earlier failure's message.
+    if (res?.ok) { setOutcomePhotoUrl(res.fileUrl); setError(undefined); }
     else if (res) setError(uploadErrorMessage(res.reason));
   }
 
   async function submit(confirmedResolve = false) {
     if (submitting) return;
+    // PR3-F5 · sending now would drop the outcome photo still on its way up.
+    if (uploadingPhoto) { setError("The photo is still uploading — one moment."); return; }
     // ⚠️ Explains rather than blocks. This condition used to live in the early return while
     // the button was also disabled on it, so tapping with nothing chosen did nothing and
     // said nothing. The fade stays — it is a hint (see colors.tealIdle), not a block.
