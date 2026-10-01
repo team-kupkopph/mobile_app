@@ -15,6 +15,9 @@ import MapView, { Circle, Marker } from "react-native-maps";
 
 import { ReportDetail, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
+import { useAuth } from "../auth/AuthContext";
+import { SignupWall, SignupWallAction } from "../components/SignupWall";
+import { setIntent } from "../guestIntent";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
@@ -41,6 +44,16 @@ type Props = NativeStackScreenProps<RootStackParamList, "reportDetail">;
 
 export function ReportDetailScreen({ navigation, route }: Props) {
   const api = useApi();
+  const { tokens } = useAuth();
+  const isGuest = tokens === null;
+  // C6+ · a guest can open a report from a shared link, but every action on it needs an
+  // account. Each gated tap raises the signup wall instead of hitting the API (a raw 401):
+  // "Report this" → the generic "account" copy; the sighting / claim / offer taps → "report".
+  // The action outlives `open` so the copy doesn't flip while the sheet slides out.
+  const [wall, setWall] = useState<{ open: boolean; action: SignupWallAction }>(
+    { open: false, action: "report" });
+  const openWall = (action: SignupWallAction) => setWall({ open: true, action });
+  const closeWall = () => setWall((w) => ({ ...w, open: false }));
   const [report, setReport] = useState<ReportDetail | null>(null);
   // US-R4 · "{X} not found." was shown for EVERY failure, not just a missing row — so
   // someone offline, or hitting a 500, was told the thing does not exist. R2's `gone`
@@ -160,7 +173,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           <TouchableOpacity
             style={styles.flagLink}
             hitSlop={TAP_SLOP}
-            onPress={() => navigation.navigate("reportContent",
+            onPress={() => isGuest ? openWall("account") : navigation.navigate("reportContent",
               { targetType: "report", targetId: report.report_id })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
@@ -412,7 +425,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
               <Button
                 testID="btn.reportDetail.seen"
                 label="I've seen this pet"
-                onPress={() => navigation.navigate("reportStray", {
+                onPress={() => isGuest ? openWall("report") : navigation.navigate("reportStray", {
                   mode: "found", sightingOf: report.report_id, sightingSpecies: report.species,
                   sightingName: report.pet_name
                 })}
@@ -425,14 +438,14 @@ export function ReportDetailScreen({ navigation, route }: Props) {
 
           {!isLost && !isReporterView && !myCase && report.status === "reported" ? (
             <View style={styles.actionRow}>
-              <Button label="Claim this case" onPress={confirmClaim} loading={claiming} />
+              <Button label="Claim this case" onPress={() => isGuest ? openWall("report") : confirmClaim()} loading={claiming} />
               <Text style={styles.claimFine}>
                 Only claim if you're going. If plans change, release it so someone else can.
               </Text>
               <TouchableOpacity
                 style={styles.offerBtn}
                 activeOpacity={0.85}
-                onPress={() => navigation.navigate("rescueOffer", { reportId: report.report_id })}
+                onPress={() => isGuest ? openWall("report") : navigation.navigate("rescueOffer", { reportId: report.report_id })}
               >
                 <Text style={styles.offerBtnText}>Can't go? Offer help instead</Text>
               </TouchableOpacity>
@@ -440,6 +453,13 @@ export function ReportDetailScreen({ navigation, route }: Props) {
           ) : null}
         </ScrollView>
       )}
+      <SignupWall
+        visible={wall.open}
+        action={wall.action}
+        onCreateAccount={() => { setIntent(wall.action); closeWall(); navigation.navigate("accountType"); }}
+        onLogin={() => { closeWall(); navigation.navigate("signin"); }}
+        onDismiss={closeWall}
+      />
     </View>
   );
 }

@@ -18,3 +18,15 @@ test.each([
   const onPress = src.lastIndexOf("onPress=", nav);
   expect(src.slice(onPress, nav)).toContain('isGuest ? openWall("account") :');
 });
+
+// C6+ · the report-detail screen (a public shared link a guest can open) has four
+// signed-in-only taps. Each raises the wall for a guest instead of 401ing.
+test("ReportDetailScreen walls every signed-in-only action for guests (C6+)", () => {
+  const src = fs.readFileSync("src/screens/ReportDetailScreen.tsx", "utf8");
+  expect(src).toContain("const isGuest = tokens === null;");
+  expect(src).toMatch(/isGuest \? openWall\("account"\) : navigation\.navigate\("reportContent"/);
+  expect(src).toMatch(/isGuest \? openWall\("report"\) : navigation\.navigate\("reportStray"/);
+  expect(src).toMatch(/isGuest \? openWall\("report"\) : confirmClaim\(\)/);
+  expect(src).toMatch(/isGuest \? openWall\("report"\) : navigation\.navigate\("rescueOffer"/);
+  expect(src).toContain("<SignupWall");
+});
