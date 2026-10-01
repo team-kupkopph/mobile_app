@@ -9,6 +9,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
+import { handoffConflictAction } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Field, ScreenHeader } from "../components/ui";
@@ -41,9 +42,16 @@ export function RescuePlaceConfirmScreen({ navigation, route }: Props) {
       navigation.navigate("rescuePlaceSent");
       return;
     }
+    // C14 · an unfinished draft listing already exists for this animal: reopen it, don't refuse.
+    const action = handoffConflictAction(res.data?.error);
+    if (action?.kind === "openDraft") {
+      navigation.replace("listingForm", { listingId: action.listingId });
+      return;
+    }
     const code = res.data?.error?.code;
     setError(
-      code === "recipient_not_verified" ? "That person isn't a verified member or shelter yet."
+      action ? action.text
+      : code === "recipient_not_verified" ? "That person isn't a verified member or shelter yet."
       : res.status === 404 && code === "recipient_not_found" ? "No account with that email."
       : code === "fee_over_cap" ? `The adoption fee can't exceed ₱${res.data.error.details?.cap ?? 500}.`
       : code === "case_not_safe" ? "This case isn't marked safe yet — update its status first."

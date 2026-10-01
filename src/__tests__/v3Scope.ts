@@ -78,7 +78,6 @@ const SAGIP_RESCUER = [
   "MyOffersScreen",
   "RescueMapScreen",
   "RescueListScreen",
-  "RescueListedScreen",
   "RescueOfferScreen",
   "RescueOfferSentScreen",
   "RescuePlaceScreen",

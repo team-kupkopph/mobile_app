@@ -1,4 +1,4 @@
-// US-H2 · direct-placement confirmation. Like RescueListedScreen (US-H1), no id rides along
+// US-H2 · direct-placement confirmation. No id rides along
 // here — POST /cases/{caseId}/place's response isn't threaded through, and the route carries
 // no params (see RootStackParamList) — so this is a plain confirmation, not a link-through.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
