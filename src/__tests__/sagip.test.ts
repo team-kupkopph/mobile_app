@@ -2,7 +2,7 @@ import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
-  myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
+  myReportChip, isReportRemoved, rescueRowChip, reporterDetailChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
   queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M, endedCaseLine,
   handoffCancelMessage, handoffConflictAction, closeInquiriesPrompt, closedInquiriesDone
 } from "../sagip";
@@ -529,5 +529,43 @@ describe("closeInquiriesPrompt / closedInquiriesDone (D15)", () => {
   it("says how many were told", () => {
     expect(closedInquiriesDone(1)).toEqual({ title: "Taken back", body: "The listing is down, and 1 person was told." });
     expect(closedInquiriesDone(2).body).toBe("The listing is down, and 2 people were told.");
+  });
+});
+
+describe("P2 · a removed report says so", () => {
+  it("isReportRemoved is true only for a 410 report_removed", () => {
+    expect(isReportRemoved({ ok: false, status: 410 }, "report_removed")).toBe(true);
+    expect(isReportRemoved({ ok: false, status: 410 }, undefined)).toBe(false);
+    expect(isReportRemoved({ ok: false, status: 410 }, "something_else")).toBe(false);
+    expect(isReportRemoved({ ok: false, status: 404 }, "report_removed")).toBe(false);
+    expect(isReportRemoved({ ok: false, status: 404 }, undefined)).toBe(false);
+    expect(isReportRemoved({ ok: true, status: 200 }, undefined)).toBe(false);
+    expect(isReportRemoved(null, "report_removed")).toBe(false);
+  });
+
+  const rescue = (over: Partial<RescueCaseSummary>): RescueCaseSummary => ({
+    case_id: "c", report: { report_id: "r", species: "dog", condition: "injured", city: null },
+    status: "claimed", claimed_at: "", expired_at: null, ...over });
+  it("a hidden rescue row shows a grey Removed chip, even on an active case", () => {
+    expect(rescueRowChip(rescue({ hidden: true }))).toEqual({ label: "Removed", tone: "grey" });
+    expect(rescueRowChip(rescue({ hidden: true, status: "safe" }))).toEqual({ label: "Removed", tone: "grey" });
+  });
+  it("other rows keep Expired / the status chip (and an older server's rows have no hidden)", () => {
+    expect(rescueRowChip(rescue({ hidden: false }))).toEqual(strayChip("claimed"));
+    expect(rescueRowChip(rescue({}))).toEqual(strayChip("claimed"));
+    expect(rescueRowChip(rescue({ expired_at: "2026-01-01" }))).toEqual({ label: "Expired", tone: "grey" });
+  });
+
+  it("the reporter's detail chip is the grey Removed by moderation chip on a hidden report", () => {
+    expect(reporterDetailChip({ report_type: "stray", status: "claimed", hidden: true }))
+      .toEqual({ label: "Removed by moderation", tone: "grey" });
+    expect(reporterDetailChip({ report_type: "stray", status: "claimed", hidden: false }))
+      .toEqual(reportKindChip("stray", "claimed"));
+    expect(reporterDetailChip({ report_type: undefined, status: "reported" }))
+      .toEqual(reportKindChip(undefined, "reported"));
+  });
+
+  it("a staff restore note renders in words, never the raw key", () => {
+    expect(historyNote("restored_by_moderation")).toBe("Restored by moderation");
   });
 });

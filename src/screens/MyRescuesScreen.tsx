@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { claimDeadline, relTime, sagipTitle, strayChip } from "../sagip";
+import { claimDeadline, relTime, rescueRowChip, sagipTitle } from "../sagip";
 import { colors, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Card, ScreenHeader } from "../components/ui";
@@ -55,8 +55,9 @@ export function MyRescuesScreen({ navigation }: Props) {
         ) : (
           cases.map((c) => {
             // An expired claim shows its own lapsed state rather than the report's
-            // current (possibly re-claimed by someone else) status.
-            const chip = c.expired_at ? { label: "Expired", tone: "grey" as const } : strayChip(c.status);
+            // current (possibly re-claimed by someone else) status. P2 · a removed report says
+            // "Removed" instead — the row stays tappable, as the case may still be active.
+            const chip = rescueRowChip(c);
             const tone = TONE[chip.tone];
             const deadline = c.expired_at ? null : claimDeadline(c.claim_due_at);
             return (

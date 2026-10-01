@@ -13,13 +13,14 @@ import MapView, { Marker } from "react-native-maps";
 import { ReportDetail, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import { ReportRemovedCard } from "../components/sagip/ReportRemovedCard";
 import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
 import {
   RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, endedCaseLine,
-  handoffCancelMessage, closeInquiriesPrompt, closedInquiriesDone, sagipTitle, strayChip,
+  handoffCancelMessage, closeInquiriesPrompt, closedInquiriesDone, isReportRemoved, sagipTitle, strayChip,
 } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -49,6 +50,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   // on focus and after each successful update, and `setReport` only runs on success, so a
   // failed refetch leaves the form (and the note being typed into it) exactly where it was.
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  // P2 · the error code of a failed load — a 410 is "removed by moderation" only with this code.
+  const [resCode, setResCode] = useState<string | undefined>(undefined);
   const [target, setTarget] = useState<StrayStatus | null>(null);
   const [note, setNote] = useState("");
   const [outcomeNotes, setOutcomeNotes] = useState("");
@@ -61,6 +64,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     setRes(null);
     api.get(`/reports/${reportId}`).then((r) => {
       setRes({ ok: r.ok, status: r.status });
+      setResCode(r.data?.error?.code);
       if (r.ok) setReport(r.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus
@@ -222,8 +226,11 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
       <ScreenHeader title="Update case" onBack={() => navigation.goBack()} />
 
       {!report ? (
+        // P2 · a removed report (410 report_removed) says so, rather than "gone".
+        isReportRemoved(res, resCode) ? <ReportRemovedCard onBack={() => navigation.goBack()} /> : (
         <LoadStateView state={loadState(res)} subject="case" onRetry={load}
           onBack={() => navigation.goBack()} />
+        )
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {holdsClaim && deadline ? (

@@ -103,6 +103,8 @@ export type RescueCaseSummary = {
   report: { report_id: string; species: string; condition: string; city: string | null };
   status: StrayStatus; claimed_at: string; expired_at: string | null;
   claim_due_at?: string | null;   // S9 · null once the case can't lapse
+  // P2 · moderation removed the report. Can be true on an ACTIVE case; absent from an older server.
+  hidden?: boolean;
 };
 // GET /cases/{id} (US-SEC1) — the claimer's own case; precise_location present only
 // while the claim is still active (absent once expired, even for the original claimer).
