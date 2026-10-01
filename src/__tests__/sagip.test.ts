@@ -1,7 +1,7 @@
 import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
-  CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, claimDeadline, directionsUrl, escalationLines, historyNote,
+  CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
   offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip
 } from "../sagip";
 
@@ -360,5 +360,20 @@ describe("reportBody (S12 · each kind of report sends exactly its fields)", () 
 
   it("never shares contact on an anonymous report", () => {
     expect(reportBody({ ...base, mode: "found", anonymous: true }).contact_share_consent).toBe(false);
+  });
+});
+
+describe("caseScreenState (C11 — the screen follows YOUR claim, not the report)", () => {
+  it("is 'ended' whenever the caller no longer holds the claim, whatever the report says", () => {
+    expect(caseScreenState({ status: "reported", my_case: undefined })).toBe("ended");
+    expect(caseScreenState({ status: "claimed", my_case: undefined })).toBe("ended");
+    expect(caseScreenState({ status: "safe", my_case: undefined })).toBe("ended");
+  });
+  it("follows the report while the claim is live", () => {
+    const mine = { case_id: "c", claim_due_at: null };
+    expect(caseScreenState({ status: "claimed", my_case: mine })).toBe("active");
+    expect(caseScreenState({ status: "rescued", my_case: mine })).toBe("custody");
+    expect(caseScreenState({ status: "safe", my_case: mine })).toBe("custody");
+    expect(caseScreenState({ status: "resolved", my_case: mine })).toBe("resolved");
   });
 });

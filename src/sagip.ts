@@ -1,4 +1,4 @@
-import { MyReport, OfferListStatus, OfferType, RescueCaseSummary, RescuePerson, StrayStatus } from "./api/types";
+import { MyReport, OfferListStatus, OfferType, RescueCaseSummary, RescuePerson, ReportDetail, StrayStatus } from "./api/types";
 
 // Sagip's shared display logic, unit-tested (like shelterDashboard.ts / verifications.ts).
 
@@ -38,6 +38,15 @@ export function advanceableStatuses(current: StrayStatus): StrayStatus[] {
   const idx = CASE_ORDER.indexOf(current);
   if (idx === -1) return []; // 'reported' (not yet claimed) or an unknown value
   return CASE_ORDER.slice(idx + 1);
+}
+
+// C11 · the case screen is about YOUR claim. A lapsed or released claimer (no `my_case`) must not
+// see "resolved" (the report is open again) or someone else's case with actions that 403.
+export type CaseScreenState = "active" | "custody" | "ended" | "resolved";
+export function caseScreenState(r: Pick<ReportDetail, "status" | "my_case">): CaseScreenState {
+  if (!r.my_case) return "ended";
+  if (r.status === "resolved") return "resolved";
+  return r.status === "claimed" ? "active" : "custody";
 }
 
 // Track O (US-O1) — the three offer types. Centralised so the offer sheet, the offer

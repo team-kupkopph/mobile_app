@@ -16,7 +16,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { RELEASE_REASONS, ReleaseReason, advanceableStatuses, claimDeadline, directionsUrl, sagipTitle, strayChip } from "../sagip";
+import { RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, sagipTitle, strayChip } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
@@ -65,6 +65,11 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const options = report ? advanceableStatuses(report.status) : [];
+  // C11 · what this screen offers follows the caller's own claim, not the report's status.
+  const state = report ? caseScreenState(report) : null;
+  const holdsClaim = state === "active" || state === "custody";
+  // US-H1/H2 · the handoff is the claimer's, once the animal is safe in their care.
+  const canHandOff = state === "custody" && report?.status === "safe";
 
   async function addOutcomePhoto() {
     if (uploadingPhoto) return;
@@ -159,7 +164,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {deadline ? (
+          {holdsClaim && deadline ? (
             <Card accent={deadline.urgent ? colors.warningStrong : colors.tealDark} style={styles.deadlineCard}>
               <Text style={[styles.deadlineText, deadline.urgent && styles.deadlineUrgent]}>{deadline.text}</Text>
             </Card>
@@ -171,158 +176,181 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
             ) : null}
             <Text style={styles.h1}>{sagipTitle(report.species, report.condition)}</Text>
             {report.city ? <Text style={styles.sub}>{report.city}</Text> : null}
-            {chip && tone ? (
+            {state !== "ended" && chip && tone ? (
               <View style={[styles.currentChip, { backgroundColor: tone.bg }]}>
                 <Text style={[styles.currentChipText, { color: tone.fg }]}>Currently: {chip.label}</Text>
               </View>
             ) : null}
 
-            {/* US-SEC1 — GET /reports/{id} already includes precise_location for the
-                active claimer (that's you, on this screen), so no second fetch is needed. */}
-            {report.precise_location ? (
-              <View style={styles.mapWrap}>
-                <MapView
-                  style={styles.map}
-                  pointerEvents="none"
-                  initialRegion={{
-                    latitude: report.precise_location.lat, longitude: report.precise_location.lng,
-                    latitudeDelta: 0.01, longitudeDelta: 0.01
-                  }}
-                >
-                  <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
-                </MapView>
-              </View>
-            ) : null}
-            {report.location_text ? (
-              <Text style={styles.landmark}>Near: {report.location_text}</Text>
-            ) : null}
-            {report.notes ? <Text style={styles.notes}>{report.notes}</Text> : null}
-            {report.precise_location ? (
-              <Button label="Open in Maps" variant="secondary" onPress={openInMaps}
-                testID="btn.rescueUpdate.directions" style={styles.directions} />
+            {state !== "ended" ? (
+              <>
+                {/* US-SEC1 — GET /reports/{id} already includes precise_location for the
+                    active claimer (that's you, on this screen), so no second fetch is needed. */}
+                {report.precise_location ? (
+                  <View style={styles.mapWrap}>
+                    <MapView
+                      style={styles.map}
+                      pointerEvents="none"
+                      initialRegion={{
+                        latitude: report.precise_location.lat, longitude: report.precise_location.lng,
+                        latitudeDelta: 0.01, longitudeDelta: 0.01
+                      }}
+                    >
+                      <Marker coordinate={{ latitude: report.precise_location.lat, longitude: report.precise_location.lng }} />
+                    </MapView>
+                  </View>
+                ) : null}
+                {report.location_text ? (
+                  <Text style={styles.landmark}>Near: {report.location_text}</Text>
+                ) : null}
+                {report.notes ? <Text style={styles.notes}>{report.notes}</Text> : null}
+                {report.precise_location ? (
+                  <Button label="Open in Maps" variant="secondary" onPress={openInMaps}
+                    testID="btn.rescueUpdate.directions" style={styles.directions} />
+                ) : null}
+              </>
             ) : null}
           </Card>
 
-          {/* D1 + D8 · the reporter (or that they chose anonymity) and every matched helper. */}
-          {report.people ? <RescuePeople people={report.people} /> : null}
-          {report.my_case ? (
-            <ContactShareRow
-              label="Share my contact"
-              hint="Lets the reporter and the people who offered help see your phone and email."
-              value={!!report.my_case.contact_shared}
-              disabled={consentBusy}
-              onValueChange={setCaseConsent}
-              testID="switch.rescueUpdate.shareContact"
-            />
+          {state === "ended" ? (
+            <Card accent={colors.muted} style={styles.endedCard} testID="card.rescueUpdate.ended">
+              <Text style={styles.endedTitle}>Your claim on this report has ended</Text>
+              <Text style={styles.endedBody}>
+                {report.status === "reported"
+                  ? "It's back on the map. If you can go now, you can claim it again from the report."
+                  : "Another rescuer has it now."}
+              </Text>
+              <Button label="Open the report" variant="secondary"
+                onPress={() => navigation.replace("reportDetail", { reportId })} />
+            </Card>
           ) : null}
 
-          {/* US-H1/US-H2 — once the case's report is safe, the claiming rescuer can hand it
-              off, either publicly (adoption listing) or directly to someone they already
-              know. Shown alongside the forward-status options below (a safe case can still be
-              moved on to resolved), not instead of them. */}
-          {report.status === "safe" ? (
-            <View style={styles.handoffRow}>
-              <Button
-                label="List for adoption"
-                onPress={() => navigation.navigate("rescueList", { caseId })}
-                variant="secondary"
-              />
-              <Button
-                label="Place with someone"
-                onPress={() => navigation.navigate("rescuePlace", { caseId })}
-                variant="secondary"
-              />
-            </View>
-          ) : null}
-
-          {options.length === 0 ? (
+          {state === "resolved" ? (
             <Text style={styles.resolvedNote}>This case is resolved — there's nothing left to update.</Text>
-          ) : (
+          ) : null}
+
+          {holdsClaim ? (
             <>
-              <Text style={styles.sectionTitle}>Move it forward to</Text>
-              <View style={styles.radioList}>
-                {options.map((status) => {
-                  const active = status === target;
-                  return (
-                    <TouchableOpacity
-                      key={status}
-                      onPress={() => setTarget(status)}
-                      activeOpacity={0.85}
-                    >
-                      <Card style={[styles.radioRow, active && styles.radioRowActive]}>
-                        <View style={[styles.radio, active && styles.radioActive]}>
-                          {active ? <View style={styles.radioDot} /> : null}
-                        </View>
-                        <Text style={styles.radioLabel}>{STATUS_LABEL[status]}</Text>
-                      </Card>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+              {/* D1 + D8 · the reporter (or that they chose anonymity) and every matched helper. */}
+              {report.people ? <RescuePeople people={report.people} /> : null}
+              {report.my_case ? (
+                <ContactShareRow
+                  label="Share my contact"
+                  hint="Lets the reporter and the people who offered help see your phone and email."
+                  value={!!report.my_case.contact_shared}
+                  disabled={consentBusy}
+                  onValueChange={setCaseConsent}
+                  testID="switch.rescueUpdate.shareContact"
+                />
+              ) : null}
 
-              <Field
-                label="Note (optional)"
-                value={note}
-                onChangeText={setNote}
-                placeholder="What happened at this step?"
-                multiline
-              />
+              {/* US-H1/US-H2 — once the case's report is safe, the claiming rescuer can hand it
+                  off, either publicly (adoption listing) or directly to someone they already
+                  know. Shown alongside the forward-status options below (a safe case can still be
+                  moved on to resolved), not instead of them. */}
+              {canHandOff ? (
+                <View style={styles.handoffRow}>
+                  <Button
+                    label="List for adoption"
+                    onPress={() => navigation.navigate("rescueList", { caseId })}
+                    variant="secondary"
+                  />
+                  <Button
+                    label="Place with someone"
+                    onPress={() => navigation.navigate("rescuePlace", { caseId })}
+                    variant="secondary"
+                  />
+                </View>
+              ) : null}
 
-              {target === "resolved" ? (
+              {options.length > 0 ? (
                 <>
+                  <Text style={styles.sectionTitle}>Move it forward to</Text>
+                  <View style={styles.radioList}>
+                    {options.map((status) => {
+                      const active = status === target;
+                      return (
+                        <TouchableOpacity
+                          key={status}
+                          onPress={() => setTarget(status)}
+                          activeOpacity={0.85}
+                        >
+                          <Card style={[styles.radioRow, active && styles.radioRowActive]}>
+                            <View style={[styles.radio, active && styles.radioActive]}>
+                              {active ? <View style={styles.radioDot} /> : null}
+                            </View>
+                            <Text style={styles.radioLabel}>{STATUS_LABEL[status]}</Text>
+                          </Card>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
                   <Field
-                    label="Outcome (optional)"
-                    value={outcomeNotes}
-                    onChangeText={setOutcomeNotes}
-                    placeholder="How this case ended — reunited, adopted, in foster care…"
+                    label="Note (optional)"
+                    value={note}
+                    onChangeText={setNote}
+                    placeholder="What happened at this step?"
                     multiline
                   />
-                  <TouchableOpacity style={styles.photoBtn} onPress={addOutcomePhoto} activeOpacity={0.85}>
-                    {uploadingPhoto ? <ActivityIndicator color={colors.teal} />
-                      : <Text style={styles.photoText}>{outcomePhotoUrl ? "✓ Photo added" : "Add an outcome photo · optional"}</Text>}
-                  </TouchableOpacity>
+
+                  {target === "resolved" ? (
+                    <>
+                      <Field
+                        label="Outcome (optional)"
+                        value={outcomeNotes}
+                        onChangeText={setOutcomeNotes}
+                        placeholder="How this case ended — reunited, adopted, in foster care…"
+                        multiline
+                      />
+                      <TouchableOpacity style={styles.photoBtn} onPress={addOutcomePhoto} activeOpacity={0.85}>
+                        {uploadingPhoto ? <ActivityIndicator color={colors.teal} />
+                          : <Text style={styles.photoText}>{outcomePhotoUrl ? "✓ Photo added" : "Add an outcome photo · optional"}</Text>}
+                      </TouchableOpacity>
+                    </>
+                  ) : null}
+
+                  {error ? <Text style={styles.error}>{error}</Text> : null}
+
+                  <Button
+                    label={target ? `Mark ${STATUS_LABEL[target]}` : "Pick a status above"}
+                    onPress={submit}
+                    loading={submitting}
+                    accessibilityHint={target ? undefined : "Choose the new status first"}
+                    style={styles.submit}
+                  />
                 </>
               ) : null}
 
-              {error ? <Text style={styles.error}>{error}</Text> : null}
-
-              <Button
-                label={target ? `Mark ${STATUS_LABEL[target]}` : "Pick a status above"}
-                onPress={submit}
-                loading={submitting}
-                accessibilityHint={target ? undefined : "Choose the new status first"}
-                style={styles.submit}
-              />
-            </>
-          )}
-
-          {report.status === "claimed" && report.my_case ? (
-            releasing ? (
-              <Card style={styles.releaseCard}>
-                <Text style={styles.releaseTitle}>Why can't you make it?</Text>
-                <Text style={styles.releaseSub}>It goes back on the map at once and the reporter is told.</Text>
-                {RELEASE_REASONS.map((r) => (
-                  <TouchableOpacity
-                    key={r.key}
-                    style={styles.releaseOption}
-                    disabled={releaseBusy}
-                    accessibilityRole="button"
-                    onPress={() => release(r.key)}
-                  >
-                    <Text style={styles.releaseOptionText}>{r.label}</Text>
+              {state === "active" ? (
+                releasing ? (
+                  <Card style={styles.releaseCard}>
+                    <Text style={styles.releaseTitle}>Why can't you make it?</Text>
+                    <Text style={styles.releaseSub}>It goes back on the map at once and the reporter is told.</Text>
+                    {RELEASE_REASONS.map((r) => (
+                      <TouchableOpacity
+                        key={r.key}
+                        style={styles.releaseOption}
+                        disabled={releaseBusy}
+                        accessibilityRole="button"
+                        onPress={() => release(r.key)}
+                      >
+                        <Text style={styles.releaseOptionText}>{r.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                    <TouchableOpacity style={styles.releaseCancel} accessibilityRole="button"
+                      onPress={() => setReleasing(false)}>
+                      <Text style={styles.releaseCancelText}>I'm still going</Text>
+                    </TouchableOpacity>
+                  </Card>
+                ) : (
+                  <TouchableOpacity style={styles.releaseLink} accessibilityRole="button"
+                    testID="btn.rescueUpdate.release" onPress={() => setReleasing(true)}>
+                    <Text style={styles.releaseLinkText}>I can't make it</Text>
                   </TouchableOpacity>
-                ))}
-                <TouchableOpacity style={styles.releaseCancel} accessibilityRole="button"
-                  onPress={() => setReleasing(false)}>
-                  <Text style={styles.releaseCancelText}>I'm still going</Text>
-                </TouchableOpacity>
-              </Card>
-            ) : (
-              <TouchableOpacity style={styles.releaseLink} accessibilityRole="button"
-                testID="btn.rescueUpdate.release" onPress={() => setReleasing(true)}>
-                <Text style={styles.releaseLinkText}>I can't make it</Text>
-              </TouchableOpacity>
-            )
+                )
+              ) : null}
+            </>
           ) : null}
         </ScrollView>
       )}
@@ -346,6 +374,9 @@ const styles = StyleSheet.create({
   deadlineCard: { marginBottom: 14 },
   deadlineText: { color: colors.tealDark, ...typography.subtitle, fontWeight: "700" },
   deadlineUrgent: { color: colors.warningStrong, fontWeight: "800" },
+  endedCard: { marginTop: 14 },
+  endedTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  endedBody: { marginTop: 6, marginBottom: 14, color: colors.muted, ...typography.body },
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
   handoffBtn: { flex: 1 },
   resolvedNote: { marginTop: 24, color: colors.muted, ...typography.body },
