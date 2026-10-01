@@ -51,3 +51,14 @@ describe("withoutOwned — the discardAllFor rule (C16 · D14)", () => {
       .toContain("await write(withoutOwned(queueRef.current, owner));");
   });
 });
+
+test("PR3-F8 · Settings asks one question at Log out, never an alert inside an alert", () => {
+  const src = fs.readFileSync("src/screens/SettingsScreen.tsx", "utf8");
+  const logout = src.slice(src.indexOf("function handleLogout"), src.indexOf("const groups"));
+  // unsent reports → only the keep/discard prompt (it has its own Cancel)…
+  expect(logout).toMatch(/if \(queue\.length > 0\) \{\s*confirmSignOutWithQueue\(/);
+  // …otherwise the plain confirm, which no longer opens a second alert from its button
+  const confirm = logout.slice(logout.indexOf('Alert.alert("Log out?"'));
+  expect(confirm).toContain('Alert.alert("Log out?"');
+  expect(confirm).not.toContain("confirmSignOutWithQueue(");
+});
