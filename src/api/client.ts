@@ -26,6 +26,10 @@ const NETWORK_FAIL: ApiResult = {
 // C17 · RN's fetch has no timeout of its own (Android: none; iOS: ~60 s idle). A report sent from a
 // weak street signal must fall through to the outbox, not spin.
 export const REQUEST_TIMEOUT_MS = 20000;
+// P1 · GET /me/export builds the whole document synchronously and can legitimately take longer than
+// the 20 s every other call gets; it opts into this limit per call so a slow build is not a "timeout".
+export const EXPORT_TIMEOUT_MS = 120000;
+export type RequestOptions = { timeoutMs?: number };
 const TIMEOUT: ApiResult = {
   ok: false, status: 0,
   data: { error: { code: "timeout", message: "The server took too long to answer." } }
@@ -33,10 +37,12 @@ const TIMEOUT: ApiResult = {
 
 // Runs one fetch under the C17 timeout. Resolves to the Response, or to a failure result
 // (TIMEOUT / NETWORK_FAIL) — never rejects, and always clears its timer.
-async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response | ApiResult> {
+async function fetchWithTimeout(
+  url: string, init: RequestInit, timeoutMs: number = REQUEST_TIMEOUT_MS
+): Promise<Response | ApiResult> {
   const controller = new AbortController();
   let timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
   try {
     return await fetch(url, { ...init, signal: controller.signal });
   } catch {
@@ -49,7 +55,9 @@ async function fetchWithTimeout(url: string, init: RequestInit): Promise<Respons
 const isFailure = (r: Response | ApiResult): r is ApiResult => r === TIMEOUT || r === NETWORK_FAIL;
 
 export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Promise<void>) {
-  async function raw(method: string, path: string, body?: any, retry = true, accessOverride?: string): Promise<ApiResult> {
+  async function raw(
+    method: string, path: string, body?: any, opts?: RequestOptions, retry = true, accessOverride?: string
+  ): Promise<ApiResult> {
     const tokens = getTokens();
     const access = accessOverride ?? tokens?.access;
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -57,7 +65,7 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
 
     const first = await fetchWithTimeout(`${BASE}${path}`, {
       method, headers, body: body ? JSON.stringify(body) : undefined,
-    });
+    }, opts?.timeoutMs);
     if (isFailure(first)) return first;
     const res = first;
 
@@ -89,17 +97,17 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
           return { ok: false, status: r.status, data: {} };
         }
         await setTokens({ access: rd.access, refresh: tokens.refresh });
-        return raw(method, path, body, false, rd.access);
+        return raw(method, path, body, opts, false, rd.access);
       }
       await setTokens(null);
     }
     return { ok: res.status < 400, status: res.status, data };
   }
   return {
-    get: (p: string) => raw("GET", p),
-    post: (p: string, b?: any) => raw("POST", p, b),
-    patch: (p: string, b?: any) => raw("PATCH", p, b),
-    put: (p: string, b?: any) => raw("PUT", p, b),
-    del: (p: string) => raw("DELETE", p),
+    get: (p: string, o?: RequestOptions) => raw("GET", p, undefined, o),
+    post: (p: string, b?: any, o?: RequestOptions) => raw("POST", p, b, o),
+    patch: (p: string, b?: any, o?: RequestOptions) => raw("PATCH", p, b, o),
+    put: (p: string, b?: any, o?: RequestOptions) => raw("PUT", p, b, o),
+    del: (p: string, o?: RequestOptions) => raw("DELETE", p, undefined, o),
   };
 }

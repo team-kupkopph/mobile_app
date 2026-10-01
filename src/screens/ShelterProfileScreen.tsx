@@ -19,7 +19,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { useOutbox } from "../outbox/OutboxProvider";
+import { confirmSignOutWithQueue } from "../outbox/signOutGuard";
 import { useAuth } from "../auth/AuthContext";
+import { accountIdFromAccessToken } from "../auth/idToken";
 import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
@@ -46,7 +49,20 @@ export function ShelterProfileScreen({ navigation }: Props) {
   // put the profile heading under the clock once it was not.
   const insets = useSafeAreaInsets();
   const api = useApi();
-  const { signOut } = useAuth();
+  const { signOut, tokens } = useAuth();
+  const { queue, discardAllFor } = useOutbox();
+
+  // P1 · same as Settings (C16 · D14): unsent reports are kept for this account's next sign-in or
+  // discarded — and that prompt is the only question when there are any (it has its own Cancel).
+  function handleLogout() {
+    if (queue.length > 0) {
+      confirmSignOutWithQueue(queue.length, () => { void signOut(); }, () => {
+        void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOut());
+      });
+      return;
+    }
+    void signOut();
+  }
   const [me, setMe] = useState<Me | null>(null);
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -258,7 +274,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("settings", { shelter: true })}>
             <Row label="Account settings" />
           </TouchableOpacity>
-          <TouchableOpacity activeOpacity={0.8} style={styles.row} onPress={signOut}>
+          <TouchableOpacity activeOpacity={0.8} style={styles.row} onPress={handleLogout}>
             <Text style={styles.rowDanger}>Log out</Text>
           </TouchableOpacity>
         </Card>

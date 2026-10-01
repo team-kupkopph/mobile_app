@@ -1,5 +1,5 @@
 import {
-  blockerCopy, blockerHeadline, confirmationMatches, exportFilename, humanSize, privacyRows,
+  blockerCopy, blockerHeadline, confirmationMatches, exportErrorMessage, exportFilename, humanSize, privacyRows,
 } from "../settings";
 
 const settings = {
@@ -106,4 +106,30 @@ describe("humanSize", () => {
     expect(humanSize(151552)).toBe("148 KB");
     expect(humanSize(3 * 1024 * 1024)).toBe("3.0 MB");
   });
+});
+
+// P1 · the export has its own time limit, so a timeout is not "offline".
+describe("exportErrorMessage", () => {
+  const fail = (status: number, code?: string) => ({ ok: false, status, data: code ? { error: { code } } : {} });
+
+  it("says it is taking longer than expected on a timeout (status 0, code timeout)", () => {
+    expect(exportErrorMessage(fail(0, "timeout")))
+      .toBe("Your export is taking longer than expected. Try again in a few minutes.");
+  });
+
+  it("keeps the offline copy for a real network failure", () => {
+    expect(exportErrorMessage(fail(0, "network_error"))).toMatch(/offline/i);
+    expect(exportErrorMessage(fail(0))).toMatch(/offline/i);
+  });
+
+  it("keeps the throttle and generic copy", () => {
+    expect(exportErrorMessage(fail(429))).toBe("You've exported a few times today. Try again tomorrow.");
+    expect(exportErrorMessage(fail(500))).toBe("Couldn't build your export. Try again.");
+  });
+});
+
+test("P1 · the export screen asks for the export time limit and uses the helper", () => {
+  const src = require("fs").readFileSync("src/screens/ExportDataScreen.tsx", "utf8");
+  expect(src).toContain('api.get("/me/export", { timeoutMs: EXPORT_TIMEOUT_MS })');
+  expect(src).toContain("exportErrorMessage(res)");
 });

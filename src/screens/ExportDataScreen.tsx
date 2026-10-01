@@ -13,9 +13,10 @@ import {
   ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from "react-native";
 
+import { EXPORT_TIMEOUT_MS } from "../api/client";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
-import { exportFilename, humanSize } from "../settings";
+import { exportErrorMessage, exportFilename, humanSize } from "../settings";
 import { Button, ScreenHeader } from "../components/ui";
 import { colors, elevation, radii, typography } from "../theme";
 
@@ -61,16 +62,12 @@ export function ExportDataScreen({ navigation }: Props) {
     setBusy(true);
     setError(undefined);
 
-    const res = await api.get("/me/export");
+    // P1 · its own, longer time limit — the document is built on request.
+    const res = await api.get("/me/export", { timeoutMs: EXPORT_TIMEOUT_MS });
     if (!res.ok) {
       setBusy(false);
-      // 429 is a real outcome here, not an edge case — the endpoint is deliberately
-      // throttled to 3/day, and "try again" without saying why would just be repeated.
-      setError(
-        res.status === 0 ? "You're offline — try again when you're connected."
-        : res.status === 429 ? "You've exported a few times today. Try again tomorrow."
-        : "Couldn't build your export. Try again."
-      );
+      // 429 is a real outcome here (throttled to 3/day), and a timeout is not "offline" (P1).
+      setError(exportErrorMessage(res));
       return;
     }
 

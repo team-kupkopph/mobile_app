@@ -1,4 +1,4 @@
-import { REQUEST_TIMEOUT_MS, createApi } from "../client";
+import { EXPORT_TIMEOUT_MS, REQUEST_TIMEOUT_MS, createApi } from "../client";
 
 function mockFetchSequence(responses: Array<{ status: number; body: any }>) {
   let i = 0;
@@ -116,6 +116,46 @@ test("a fast answer clears the timeout timer (C17)", async () => {
     const res = await createApi(() => null, async () => {}).get("/x");
     expect(res.ok).toBe(true);
     expect(jest.getTimerCount()).toBe(0);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("P1 · a per-call timeoutMs overrides the default; other calls keep REQUEST_TIMEOUT_MS", async () => {
+  jest.useFakeTimers();
+  try {
+    global.fetch = jest.fn((_url: any, init: any) => new Promise((_res, rej) => {
+      init.signal.addEventListener("abort", () => rej(new Error("aborted")));
+    })) as any;
+    const api = createApi(() => null, async () => {});
+    expect(EXPORT_TIMEOUT_MS).toBe(120000);
+
+    const slow = api.get("/me/export", { timeoutMs: EXPORT_TIMEOUT_MS });
+    const normal = api.get("/me");
+    // the default call times out at 20 s…
+    await jest.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS);
+    await expect(normal).resolves.toMatchObject({ status: 0, data: { error: { code: "timeout" } } });
+    // …the export call is still waiting, and times out only at its own limit
+    let settled = false;
+    void slow.then(() => { settled = true; });
+    await jest.advanceTimersByTimeAsync(EXPORT_TIMEOUT_MS - REQUEST_TIMEOUT_MS - 1);
+    expect(settled).toBe(false);
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(slow).resolves.toMatchObject({ status: 0, data: { error: { code: "timeout" } } });
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("P1 · post/patch/put/del accept per-call options too", async () => {
+  jest.useFakeTimers();
+  try {
+    global.fetch = jest.fn((_url: any, init: any) => new Promise((_res, rej) => {
+      init.signal.addEventListener("abort", () => rej(new Error("aborted")));
+    })) as any;
+    const p = createApi(() => null, async () => {}).post("/x", {}, { timeoutMs: 5000 });
+    await jest.advanceTimersByTimeAsync(5000);
+    await expect(p).resolves.toMatchObject({ status: 0, data: { error: { code: "timeout" } } });
   } finally {
     jest.useRealTimers();
   }
