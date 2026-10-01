@@ -20,7 +20,7 @@ import { randomKey } from "../outbox/key";
 import { shouldQueue } from "../outbox";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { GPS_TIMEOUT_MS, ReportMode, gpsMayApply, reportBody, reportTitle, withTimeout } from "../sagip";
+import { GPS_TIMEOUT_MS, ReportMode, gpsMayApply, reportBody, reportTitle, throttledReportMessage, withTimeout } from "../sagip";
 import { uploadErrorMessage } from "../upload";
 import { MyPet } from "../api/types";
 import { TAP_SLOP } from "../touch";
@@ -221,6 +221,11 @@ export function ReportStrayScreen({ navigation, route }: Props) {
         reportId: null, title,
         city: locationText || null, queued: true
       });
+      return;
+    }
+    // C18 · the daily limit is a known state: say what it is and when it lifts.
+    if (res.data?.error?.code === "throttled") {
+      setError(throttledReportMessage(res.data.error.details?.retry_after));
       return;
     }
     setError(res.data?.error?.message ?? "Couldn't send the report. Try again.");

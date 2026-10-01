@@ -83,12 +83,21 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     else if (res) setError(uploadErrorMessage(res.reason));
   }
 
-  async function submit() {
+  async function submit(confirmedResolve = false) {
     if (submitting) return;
     // ⚠️ Explains rather than blocks. This condition used to live in the early return while
     // the button was also disabled on it, so tapping with nothing chosen did nothing and
     // said nothing. The fade stays — it is a hint (see colors.tealIdle), not a block.
     if (!target) { setError("Choose the new status first."); return; }
+    // C23 · resolving ends the case for everyone and can't be reopened — ask first. This returns
+    // before `setSubmitting(true)`; the confirmed call re-enters with the busy guard intact.
+    if (target === "resolved" && !confirmedResolve) {
+      Alert.alert("Mark this rescue resolved?",
+        "This ends the case for you, the reporter and the helpers. It can't be reopened.",
+        [{ text: "Not yet", style: "cancel" },
+         { text: "Mark resolved", onPress: () => { void submit(true); } }]);
+      return;
+    }
     setSubmitting(true);
     setError(undefined);
     const body: Record<string, string> = { status: target };
@@ -317,7 +326,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
 
                   <Button
                     label={target ? `Mark ${STATUS_LABEL[target]}` : "Pick a status above"}
-                    onPress={submit}
+                    onPress={() => { void submit(); }}
                     loading={submitting}
                     accessibilityHint={target ? undefined : "Choose the new status first"}
                     style={styles.submit}

@@ -385,6 +385,13 @@ export function reportBody(f: {
 
 // C24 · expo-location has no timeout; a phone indoors can wait for a fix forever.
 export const GPS_TIMEOUT_MS = 15000;
+// C18 · the report limit is per day (ReportCreateThrottle, 20/day); "try again shortly" was wrong.
+export function throttledReportMessage(retryAfterSeconds: number | undefined): string {
+  const base = "You've sent 20 reports today — the most one account can send.";
+  if (!retryAfterSeconds) return `${base} Try again later today.`;
+  return `${base} You can send more in about ${Math.max(1, Math.ceil(retryAfterSeconds / 3600))} h.`;
+}
+
 export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
   return new Promise((resolve) => {
     const t = setTimeout(() => resolve(null), ms);

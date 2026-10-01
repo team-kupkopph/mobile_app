@@ -2,7 +2,7 @@ import { MyReport, RescueCaseSummary } from "../api/types";
 import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
-  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply
+  offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -395,5 +395,14 @@ describe("gpsMayApply (C24 — a dropped pin wins over a late GPS fix)", () => {
     expect(gpsMayApply(true, false)).toBe(false);   // pinned: fix, last-known and denied are all dropped
     expect(gpsMayApply(false, true)).toBe(false);   // unmounted
     expect(gpsMayApply(true, true)).toBe(false);
+  });
+});
+
+describe("throttledReportMessage (C18)", () => {
+  it("names the daily limit and when it resets", () => {
+    expect(throttledReportMessage(3 * 3600 + 5)).toBe(
+      "You've sent 20 reports today — the most one account can send. You can send more in about 4 h.");
+    expect(throttledReportMessage(undefined)).toBe(
+      "You've sent 20 reports today — the most one account can send. Try again later today.");
   });
 });
