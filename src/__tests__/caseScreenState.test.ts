@@ -19,3 +19,9 @@ test("PR3-F4 · People shows on every state but ended — a resolved case keeps 
   expect(src.indexOf("<ContactShareRow")).toBeGreaterThan(claimBlock);
   expect(src.indexOf("canHandOff ? (")).toBeGreaterThan(claimBlock);
 });
+
+test("PR3-F6 · the ended card's line comes from endedCaseLine", () => {
+  const src = fs.readFileSync("src/screens/RescueUpdateScreen.tsx", "utf8");
+  expect(src).toContain("endedCaseLine(report.status)");
+  expect(src).not.toContain("Another rescuer has it now.");
+});

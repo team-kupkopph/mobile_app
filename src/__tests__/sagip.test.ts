@@ -3,7 +3,7 @@ import {
   closeReasonsFor, reportBody, reportKindChip, reportTitle,
   CLOSE_REASONS, RELEASE_REASONS, offersShareContact, personSummary, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, escalationLines, historyNote,
   myReportChip, offerStatusChip, pickSpotlight, relTime, sagipTitle, strayChip, withTimeout, gpsMayApply, throttledReportMessage,
-  queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M
+  queuedReason, queuedReportLine, LAST_KNOWN_MAX_AGE_MS, LAST_KNOWN_MAX_ACCURACY_M, endedCaseLine
 } from "../sagip";
 
 describe("strayChip (only unclaimed is amber — the app's 'someone must act' colour)", () => {
@@ -451,4 +451,14 @@ describe("queuedReason / queuedReportLine (PR3-F2 · a queued report says why it
 test("PR3-F3 · the last-known fallback takes only a recent, reasonably precise fix", () => {
   expect(LAST_KNOWN_MAX_AGE_MS).toBe(5 * 60_000);
   expect(LAST_KNOWN_MAX_ACCURACY_M).toBe(200);
+});
+
+describe("endedCaseLine (PR3-F6 · an ended claim says what became of the report)", () => {
+  it("closed, back on the map, or with another rescuer", () => {
+    expect(endedCaseLine("resolved")).toBe("This report has been closed.");
+    expect(endedCaseLine("reported")).toBe(
+      "It's back on the map. If you can go now, you can claim it again from the report.");
+    (["claimed", "rescued", "safe"] as const).forEach((s) =>
+      expect(endedCaseLine(s)).toBe("Another rescuer has it now."));
+  });
 });

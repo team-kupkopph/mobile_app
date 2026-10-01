@@ -54,6 +54,13 @@ export function caseScreenState(r: Pick<ReportDetail, "status" | "my_case">): Ca
   return r.status === "claimed" ? "active" : "custody";
 }
 
+// C11 · PR3-F6 · what the ended card says became of the report once your claim is gone.
+export function endedCaseLine(status: StrayStatus): string {
+  if (status === "resolved") return "This report has been closed.";
+  if (status === "reported") return "It's back on the map. If you can go now, you can claim it again from the report.";
+  return "Another rescuer has it now.";
+}
+
 // Track O (US-O1) — the three offer types. Centralised so the offer sheet, the offer
 // list and my-offers can't drift on labels the way HANDOFF's OFFERS map does on web.
 export const OFFER_TYPES: OfferType[] = ["transport", "vet_costs", "supplies"];

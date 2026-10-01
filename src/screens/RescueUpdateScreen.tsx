@@ -17,7 +17,10 @@ import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
-import { RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, sagipTitle, strayChip } from "../sagip";
+import {
+  RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, endedCaseLine,
+  sagipTitle, strayChip,
+} from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
@@ -230,11 +233,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
           {state === "ended" ? (
             <Card accent={colors.muted} style={styles.endedCard} testID="card.rescueUpdate.ended">
               <Text style={styles.endedTitle}>Your claim on this report has ended</Text>
-              <Text style={styles.endedBody}>
-                {report.status === "reported"
-                  ? "It's back on the map. If you can go now, you can claim it again from the report."
-                  : "Another rescuer has it now."}
-              </Text>
+              <Text style={styles.endedBody}>{endedCaseLine(report.status)}</Text>
               <Button label="Open the report" variant="secondary"
                 onPress={() => navigation.replace("reportDetail", { reportId })} />
             </Card>
