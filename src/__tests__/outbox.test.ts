@@ -1,5 +1,6 @@
 import {
   applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, pendingLabel, queueReport, shouldQueue,
+  visibleTo,
 } from "../outbox";
 
 const NOW = 1_000_000;
@@ -96,12 +97,12 @@ describe("dueItems", () => {
       item({ idempotency_key: "new", createdAt: NOW + 500 }),
       item({ idempotency_key: "old", createdAt: NOW - 500 }),
     ];
-    expect(dueItems(queue, NOW).map((i) => i.idempotency_key)).toEqual(["old", "new"]);
+    expect(dueItems(queue, NOW, "acct-A").map((i) => i.idempotency_key)).toEqual(["old", "new"]);
   });
 
   it("skips what is not due", () => {
     const queue = [item({ attempts: 2, nextAttemptAt: NOW + 60_000 })];
-    expect(dueItems(queue, NOW)).toEqual([]);
+    expect(dueItems(queue, NOW, "acct-A")).toEqual([]);
   });
 });
 
@@ -116,4 +117,13 @@ describe("pendingLabel", () => {
 test("shouldQueue: offline and gateway failures queue; a real answer doesn't (C17)", () => {
   [0, 502, 503, 504].forEach((s) => expect(shouldQueue(s)).toBe(true));
   [400, 401, 403, 409, 429, 500].forEach((s) => expect(shouldQueue(s)).toBe(false));
+});
+
+test("C16 · a queued report is sent and shown only for the account that queued it", () => {
+  const a = queueReport({ species: "dog" }, "k1", 0, undefined, "acct-A");
+  const b = queueReport({ species: "cat" }, "k2", 0, undefined, "acct-B");
+  const legacy = queueReport({ species: "dog" }, "k3", 0);          // queued before owners existed
+  expect(dueItems([a, b, legacy], 1, "acct-A").map((i) => i.idempotency_key)).toEqual(["k1", "k3"]);
+  expect(dueItems([a, b, legacy], 1, null)).toEqual([]);           // signed out: nothing is sent
+  expect(visibleTo([a, b, legacy], "acct-B").map((i) => i.idempotency_key)).toEqual(["k2", "k3"]);
 });

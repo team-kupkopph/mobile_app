@@ -28,6 +28,8 @@ export type QueuedReport = {
   /** Epoch ms before which we should not retry. */
   nextAttemptAt: number;
   lastError?: string;
+  /** C16 · the account that queued it. Absent on items queued before owners existed. */
+  ownerId?: string;
 };
 
 export const MAX_ATTEMPTS = 8;
@@ -108,7 +110,7 @@ export function shouldQueue(status: number): boolean {
 /** A fresh queue entry. */
 export function queueReport(
   body: Record<string, unknown>, idempotencyKey: string, now: number,
-  pendingPhotoUri?: string,
+  pendingPhotoUri?: string, ownerId?: string,
 ): QueuedReport {
   return {
     idempotency_key: idempotencyKey,
@@ -117,10 +119,21 @@ export function queueReport(
     createdAt: now,
     attempts: 0,
     nextAttemptAt: now,        // try immediately; the network may already be back
+    ...(ownerId ? { ownerId } : {}),
   };
 }
 
-/** Which queued reports should be attempted now, oldest first (fairness). */
-export function dueItems(queue: QueuedReport[], now: number): QueuedReport[] {
-  return queue.filter((i) => isDue(i, now)).sort((a, b) => a.createdAt - b.createdAt);
+/** C16 · items queued before owners existed (no ownerId) stay sendable by whoever is signed in. */
+export function ownedBy(i: QueuedReport, ownerId: string | null): boolean {
+  return ownerId !== null && (!i.ownerId || i.ownerId === ownerId);
+}
+
+export function visibleTo(queue: QueuedReport[], ownerId: string | null): QueuedReport[] {
+  return queue.filter((i) => ownedBy(i, ownerId));
+}
+
+/** Which queued reports should be attempted now, oldest first (fairness). C16 · only the signed-in
+ *  account's own, and nothing at all when signed out. */
+export function dueItems(queue: QueuedReport[], now: number, ownerId: string | null): QueuedReport[] {
+  return queue.filter((i) => ownedBy(i, ownerId) && isDue(i, now)).sort((a, b) => a.createdAt - b.createdAt);
 }

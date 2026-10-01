@@ -8,6 +8,9 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 import { ScreenHeader } from "../components/ui";
 
 import { useAuth } from "../auth/AuthContext";
+import { accountIdFromAccessToken } from "../auth/idToken";
+import { useOutbox } from "../outbox/OutboxProvider";
+import { confirmSignOutWithQueue } from "../outbox/signOutGuard";
 import { RootStackParamList } from "../navigation/types";
 import { privacySummary } from "../settings";
 import { colors, elevation, radii, typography } from "../theme";
@@ -20,14 +23,20 @@ type Props = NativeStackScreenProps<RootStackParamList, "settings">;
 type Row = { label: string; value?: string; danger?: boolean; onPress?: () => void };
 
 export function SettingsScreen({ navigation, route }: Props) {
-  const { signOut } = useAuth();
+  const { signOut, tokens } = useAuth();
+  const { queue, discardAllFor } = useOutbox();
   // F-R3-4 · reached from ShelterProfileScreen. See the param's note in navigation/types.ts.
   const shelter = route.params?.shelter === true;
 
   function handleLogout() {
     Alert.alert("Log out?", "You can sign back in any time.", [
       { text: "Cancel", style: "cancel" },
-      { text: "Log out", style: "destructive", onPress: () => { void signOut(); } },
+      { text: "Log out", style: "destructive", onPress: () => {
+        // C16 · D14 — unsent reports are kept for this account's next sign-in, or discarded.
+        confirmSignOutWithQueue(queue.length, () => { void signOut(); }, () => {
+          void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOut());
+        });
+      } },
     ]);
   }
 

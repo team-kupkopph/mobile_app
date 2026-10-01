@@ -13,8 +13,9 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { accountIdFromAccessToken } from "../auth/idToken";
 import { useConnectivity } from "../net/ConnectivityProvider";
-import { applyResult, dueItems, QueuedReport, queueReport } from "../outbox";
+import { applyResult, dueItems, ownedBy, QueuedReport, queueReport, visibleTo } from "../outbox";
 
 const KEY = "kupkop.outbox.reports";
 
@@ -28,11 +29,14 @@ type Value = {
   retry: (key: string) => Promise<void>;
   /** The user chose to discard it. The ONLY way a report leaves unsent. */
   discard: (key: string) => Promise<void>;
+  /** C16 · drop every queued report that belongs to this account (Log out → Discard, or the
+   *  account being deleted). Legacy items without an owner count as the account's. */
+  discardAllFor: (ownerId: string | null) => Promise<void>;
 };
 
 const OutboxContext = createContext<Value>({
   queue: [], enqueue: async () => {}, flush: async () => {},
-  retry: async () => {}, discard: async () => {},
+  retry: async () => {}, discard: async () => {}, discardAllFor: async () => {},
 });
 
 async function load(): Promise<QueuedReport[]> {
@@ -56,6 +60,8 @@ export function OutboxProvider({ children }: { children: React.ReactNode }) {
   const api = useApi();
   const { tokens } = useAuth();
   const { online, onReconnect } = useConnectivity();
+  // C16 · whose reports this session may send and see.
+  const ownerId = accountIdFromAccessToken(tokens?.access ?? undefined);
   const [queue, setQueue] = useState<QueuedReport[]>([]);
   const flushing = useRef(false);
   const queueRef = useRef<QueuedReport[]>([]);
@@ -78,7 +84,7 @@ export function OutboxProvider({ children }: { children: React.ReactNode }) {
     try {
       const now = Date.now();
       let current = queueRef.current;
-      for (const item of dueItems(current, now)) {
+      for (const item of dueItems(current, now, ownerId)) {
         const res = await api.post("/reports", item.body);
         const next = applyResult(item, { ok: res.ok, status: res.status }, Date.now());
         current = next
@@ -89,7 +95,7 @@ export function OutboxProvider({ children }: { children: React.ReactNode }) {
     } finally {
       flushing.current = false;
     }
-  }, [api, tokens, write]);
+  }, [api, tokens, ownerId, write]);
 
   // Flush when the network comes back — the whole point of queueing.
   useEffect(() => onReconnect(() => { void flush(); }), [onReconnect, flush]);
@@ -97,8 +103,8 @@ export function OutboxProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { if (online && tokens) void flush(); }, [online, tokens, flush]);
 
   const enqueue = useCallback(async (body: Record<string, unknown>, key: string, photoUri?: string) => {
-    await write([...queueRef.current, queueReport(body, key, Date.now(), photoUri)]);
-  }, [write]);
+    await write([...queueRef.current, queueReport(body, key, Date.now(), photoUri, ownerId ?? undefined)]);
+  }, [write, ownerId]);
 
   const retry = useCallback(async (key: string) => {
     await write(queueRef.current.map((i) =>
@@ -110,8 +116,12 @@ export function OutboxProvider({ children }: { children: React.ReactNode }) {
     await write(queueRef.current.filter((i) => i.idempotency_key !== key));
   }, [write]);
 
+  const discardAllFor = useCallback(async (owner: string | null) => {
+    await write(queueRef.current.filter((i) => !ownedBy(i, owner)));
+  }, [write]);
+
   return (
-    <OutboxContext.Provider value={{ queue, enqueue, flush, retry, discard }}>
+    <OutboxContext.Provider value={{ queue: visibleTo(queue, ownerId), enqueue, flush, retry, discard, discardAllFor }}>
       {children}
     </OutboxContext.Provider>
   );
