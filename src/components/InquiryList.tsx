@@ -19,7 +19,7 @@ import { MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "./LoadStateView";
 import { loadState } from "../net";
-import { inquiryProgressLabel, inquiryStatusLabel } from "../adoption";
+import { inquiryIsClosed, inquiryProgressLabel, inquiryStatusLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, pill, radii, typography } from "../theme";
@@ -32,11 +32,12 @@ import { Chip, type ChipTone } from "./ui";
 // `info` (#E2EEF0). Same foreground, and the design system's own rule is that a status reuses
 // this mapping rather than inventing a colour per feature. Contrast is unchanged in practice —
 // tealDark clears 7:1 on both.
-const STATUS_TONE: Record<string, { tone: ChipTone; label: string }> = {
-  active: { tone: "info", label: "Active" },
-  adopted: { tone: "success", label: "Adopted" },
-  declined: { tone: "danger", label: "Declined" },
-  withdrawn: { tone: "neutral", label: inquiryStatusLabel("withdrawn") } // D15 · never "You withdrew"
+// D15 · the LABEL is not here: it comes from inquiryStatusLabel (adoption.ts), so it can't drift.
+const STATUS_TONE: Record<string, ChipTone> = {
+  active: "info",
+  adopted: "success",
+  declined: "danger",
+  withdrawn: "neutral"
 };
 
 // See the file header: every stage SKIPPED is the direct-placement bypass. `some` guards
@@ -81,6 +82,7 @@ export function InquiryList() {
         ) : (
           inquiries.map((iq) => {
             const tone = STATUS_TONE[iq.status] ?? STATUS_TONE.active;
+            const closed = inquiryIsClosed(iq.status);
             const placement = isPlacement(iq);
             const pendingPlacement = placement && iq.status === "active";
             // A placement still awaiting the recipient's decision goes to the accept/decline
@@ -103,11 +105,11 @@ export function InquiryList() {
                     <Text style={styles.cardName}>{iq.listing.name}</Text>
                     <Text style={styles.cardMeta}>{capitalize(iq.listing.species)}</Text>
                   </View>
-                  <Chip label={tone.label} tone={tone.tone} />
+                  <Chip label={inquiryStatusLabel(iq.status)} tone={tone} />
                 </View>
                 {pendingPlacement ? (
                   <Text style={styles.placementNote}>Placement offer — tap to accept or decline</Text>
-                ) : (
+                ) : closed ? null : ( // D15 · a closed inquiry has no progress to report
                   <Text style={styles.progress}>{inquiryProgressLabel(iq.stages)}</Text>
                 )}
                 {/* US-T2 · the "Share your adoption story" CTA goes live on an adopted inquiry

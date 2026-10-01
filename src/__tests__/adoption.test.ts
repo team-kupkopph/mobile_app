@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -118,6 +118,10 @@ describe("inquiryStatusLabel (D15)", () => {
     expect(inquiryStatusLabel("declined")).toBe("Declined");
     expect(inquiryStatusLabel("withdrawn")).not.toMatch(/withdrew/i);
   });
+  it("an unknown status falls back to Active", () => {
+    expect(inquiryStatusLabel("something_new")).toBe("Active");
+    expect(inquiryStatusLabel("")).toBe("Active");
+  });
 });
 
 describe("inquireRefusalMessage (D15)", () => {
@@ -125,5 +129,24 @@ describe("inquireRefusalMessage (D15)", () => {
     expect(inquireRefusalMessage("listing_unavailable")).toBe("This animal is no longer available for adoption.");
     expect(inquireRefusalMessage("already_inquired")).toBeNull();
     expect(inquireRefusalMessage(undefined)).toBeNull();
+  });
+});
+
+describe("inquiryClosedNote / inquiryIsClosed (D15)", () => {
+  it("withdrawn and declined inquiries are closed, with a one-line note", () => {
+    expect(inquiryClosedNote("withdrawn")).toBe("The rescuer took this listing down, so this inquiry is closed.");
+    expect(inquiryClosedNote("declined")).toBe("This inquiry was declined.");
+    expect(inquiryIsClosed("withdrawn")).toBe(true);
+    expect(inquiryIsClosed("declined")).toBe(true);
+  });
+  it("active and adopted inquiries are not closed", () => {
+    expect(inquiryClosedNote("active")).toBeNull();
+    expect(inquiryClosedNote("adopted")).toBeNull();
+    expect(inquiryClosedNote("something_new")).toBeNull();
+    expect(inquiryIsClosed("active")).toBe(false);
+    expect(inquiryIsClosed("adopted")).toBe(false);
+  });
+  it("the note never says 'You withdrew'", () => {
+    expect(inquiryClosedNote("withdrawn")).not.toMatch(/you withdrew/i);
   });
 });

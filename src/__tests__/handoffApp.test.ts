@@ -78,6 +78,29 @@ test("A withdrawn inquiry chip comes from inquiryStatusLabel, not a 'Withdrawn' 
   expect(src).not.toContain('"Withdrawn"');
 });
 
+test("The ladder says a closed inquiry is closed and drops the progress chrome (D15)", () => {
+  const src = read("src/screens/InquiryScreen.tsx");
+  expect(src).toContain("inquiryClosedNote(");
+  expect(src).toContain("inquiryStatusLabel(");
+  expect(src).toContain("inquiryIsClosed(");
+  expect(src).toMatch(/closed \? \([\s\S]*?\) : \([\s\S]*?Step \$\{step\} of/);
+  expect(src).toMatch(/!closed[\s\S]*?Tap any step to see what it involves\./);
+});
+
+test("A closed inquiry card shows no stage progress, and chip labels are derived (D15)", () => {
+  const src = read("src/components/InquiryList.tsx");
+  expect(src).toContain("inquiryIsClosed(iq.status)");
+  expect(src).not.toMatch(/label: "(Active|Adopted|Declined|Withdrawn)"/);
+});
+
+test("Inquire shows only on an available listing; otherwise 'No longer available for adoption.' (D15)", () => {
+  const src = read("src/screens/ListingDetailScreen.tsx");
+  expect(src).toContain('listing.status !== "available"');
+  expect(src).toContain("No longer available for adoption.");
+  expect(src).toContain("DRAFT_STATUS");
+  expect(src).toContain('testID="btn.listingDetail.publish"');
+});
+
 test("Place confirm tells the person about the draft before opening it", () => {
   const src = read("src/screens/RescuePlaceConfirmScreen.tsx");
   expect(src).toContain('Alert.alert("You already started a listing"');

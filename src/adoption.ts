@@ -25,6 +25,20 @@ export function inquiryStatusLabel(status: string): string {
   }
 }
 
+// D15 · withdrawn and declined inquiries are over: the ladder and the card say so instead of
+// showing stage progress. `null` = still open (or adopted), so the screen keeps its ladder.
+export function inquiryClosedNote(status: string): string | null {
+  switch (status) {
+    case "withdrawn": return "The rescuer took this listing down, so this inquiry is closed.";
+    case "declined": return "This inquiry was declined.";
+    default: return null;
+  }
+}
+
+export function inquiryIsClosed(status: string): boolean {
+  return inquiryClosedNote(status) !== null;
+}
+
 // D15 · the server's refusal to inquire on a listing that is no longer AVAILABLE. `null` = not
 // this refusal, so the screen keeps its own mapping.
 export function inquireRefusalMessage(code: string | undefined): string | null {

@@ -118,7 +118,8 @@ export function ListingDetailScreen({ navigation, route }: Props) {
       return;
     }
     // D15 · the rescuer took the animal back while this screen was open: say so, and refetch so
-    // the listing shows its real status instead of an Inquire button that can only fail.
+    // the listing shows its real status ("No longer available for adoption.") instead of an
+    // Inquire button that can only fail.
     const refusal = inquireRefusalMessage(code);
     if (refusal) {
       Alert.alert("No longer available", refusal);
@@ -239,6 +240,12 @@ export function ListingDetailScreen({ navigation, route }: Props) {
                 style={styles.inquireBtn}
               />
             </>
+          ) : listing.status !== "available" ? (
+            // D15 · the server still serves a withdrawn (or pending/adopted) listing at 200, so
+            // Inquire is offered only while it is AVAILABLE.
+            <Text style={styles.inquiredNote} testID="text.listingDetail.unavailable">
+              No longer available for adoption.
+            </Text>
           ) : (
             <Button
               testID="btn.listingDetail.inquire"

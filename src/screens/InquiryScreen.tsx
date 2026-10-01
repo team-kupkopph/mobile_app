@@ -27,7 +27,7 @@ import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderStep, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -118,6 +118,9 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
   const { step, of } = ladderStep(inquiry.stages);
   const byKey = new Map(inquiry.stages.map((s) => [s.stage_key, s]));
   const photo = listing?.photos?.[0];
+  // D15 · a withdrawn/declined inquiry is over: say so, drop the "Step N of 6" chrome.
+  const closed = inquiryIsClosed(inquiry.status);
+  const closedNote = inquiryClosedNote(inquiry.status);
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -140,13 +143,20 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
                 {poster ? `${poster.name}${poster.city ? ` · ${poster.city}` : ""}` : capitalize(inquiry.listing.species)}
               </Text>
             </View>
-            <Chip label={`Step ${step} of ${of}`} tone="info" dot={false} />
+            {closed ? (
+              <Chip label={inquiryStatusLabel(inquiry.status)} tone={inquiry.status === "declined" ? "danger" : "neutral"} dot={false} />
+            ) : (
+              <Chip label={`Step ${step} of ${of}`} tone="info" dot={false} />
+            )}
           </View>
-          <View style={styles.track} accessibilityRole="progressbar"
-            accessibilityValue={{ min: 0, max: of, now: step }}>
-            <LinearGradient colors={gradients.button} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={[styles.fill, { width: `${Math.round((step / of) * 100)}%` }]} />
-          </View>
+          {closed ? null : (
+            <View style={styles.track} accessibilityRole="progressbar"
+              accessibilityValue={{ min: 0, max: of, now: step }}>
+              <LinearGradient colors={gradients.button} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={[styles.fill, { width: `${Math.round((step / of) * 100)}%` }]} />
+            </View>
+          )}
+          {closedNote ? <Text style={styles.closedNote} testID="text.inquiry.closedNote">{closedNote}</Text> : null}
         </Card>
       </PressScale>
 
@@ -224,7 +234,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
         </Card>
       ) : null}
 
-      <Text style={styles.hint}>Tap any step to see what it involves.</Text>
+      {!closed ? <Text style={styles.hint}>Tap any step to see what it involves.</Text> : null}
     </ScrollView>
   );
 }
@@ -288,5 +298,6 @@ const styles = StyleSheet.create({
   contactName: { ...typography.subtitle, fontWeight: "800", color: colors.ink, flexShrink: 1 },
   contactMeta: { marginTop: 3, ...typography.meta, color: colors.muted },
 
+  closedNote: { marginTop: 12, ...typography.meta, color: colors.muted },
   hint: { marginTop: 18, textAlign: "center", ...typography.meta, color: colors.muted }
 });
