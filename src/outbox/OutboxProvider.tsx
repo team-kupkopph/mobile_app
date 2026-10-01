@@ -15,7 +15,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { useConnectivity } from "../net/ConnectivityProvider";
-import { applyResult, dueItems, ownedBy, QueuedReport, queueReport, visibleTo } from "../outbox";
+import { applyFlushResult, applyResult, dueItems, ownedBy, QueuedReport, queueReport, visibleTo } from "../outbox";
 
 const KEY = "kupkop.outbox.reports";
 
@@ -83,14 +83,16 @@ export function OutboxProvider({ children }: { children: React.ReactNode }) {
     flushing.current = true;
     try {
       const now = Date.now();
-      let current = queueRef.current;
-      for (const item of dueItems(current, now, ownerId)) {
+      for (const item of dueItems(queueRef.current, now, ownerId)) {
+        // PR3-F1 · an item discarded while an earlier POST was in flight is not sent.
+        if (!queueRef.current.some((i) => i.idempotency_key === item.idempotency_key)) continue;
         const res = await api.post("/reports", item.body);
         const next = applyResult(item, { ok: res.ok, status: res.status }, Date.now());
-        current = next
-          ? current.map((i) => (i.idempotency_key === item.idempotency_key ? next : i))
-          : current.filter((i) => i.idempotency_key !== item.idempotency_key);
-        await write(current);
+        // PR3-F1 · re-read the queue AFTER the await: a report enqueued or discarded during the
+        // send must survive / stay discarded, not be overwritten by a stale snapshot.
+        const latest = queueRef.current;
+        const updated = applyFlushResult(latest, item, next);
+        if (updated !== latest) await write(updated);
       }
     } finally {
       flushing.current = false;

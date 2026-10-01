@@ -1,5 +1,7 @@
+import fs from "fs";
+
 import {
-  applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, pendingLabel, queueReport, shouldQueue,
+  applyFlushResult, applyResult, backoffMs, dueItems, isDue, isStuck, MAX_ATTEMPTS, pendingLabel, queueReport, shouldQueue,
   visibleTo,
 } from "../outbox";
 
@@ -126,4 +128,32 @@ test("C16 · a queued report is sent and shown only for the account that queued 
   expect(dueItems([a, b, legacy], 1, "acct-A").map((i) => i.idempotency_key)).toEqual(["k1", "k3"]);
   expect(dueItems([a, b, legacy], 1, null)).toEqual([]);           // signed out: nothing is sent
   expect(visibleTo([a, b, legacy], "acct-B").map((i) => i.idempotency_key)).toEqual(["k2", "k3"]);
+});
+
+describe("applyFlushResult (PR3-F1)", () => {
+  // The flush loop awaits a POST for up to 20 s. Whatever was written to the queue meanwhile is
+  // the truth; the result of the send is applied to THAT, never to the snapshot taken before.
+  const sent = queueReport({ species: "dog" }, "sent", 0, undefined, "acct-A");
+  const other = queueReport({ species: "cat" }, "other", 0, undefined, "acct-A");
+  const added = queueReport({ species: "dog" }, "added", 1, undefined, "acct-A");
+
+  it("keeps a report enqueued while the send was in flight", () => {
+    const latest = [sent, other, added];
+    expect(applyFlushResult(latest, sent, null).map((i) => i.idempotency_key)).toEqual(["other", "added"]);
+    const retried = applyResult(sent, { ok: false, status: 503 }, NOW)!;
+    expect(applyFlushResult(latest, sent, retried)).toEqual([retried, other, added]);
+  });
+
+  it("does not resurrect a report discarded while the send was in flight", () => {
+    const latest = [other];                                   // "sent" was discarded mid-flush
+    const retried = applyResult(sent, { ok: false, status: 0 }, NOW)!;
+    expect(applyFlushResult(latest, sent, retried)).toBe(latest);
+    expect(applyFlushResult(latest, sent, null)).toBe(latest);
+  });
+});
+
+test("PR3-F1 · the flush loop applies each result to the queue as it is after the send", () => {
+  const src = fs.readFileSync("src/outbox/OutboxProvider.tsx", "utf8");
+  expect(src).toMatch(/const latest = queueRef\.current;\s*const updated = applyFlushResult\(latest, item, next\)/);
+  expect(src).not.toMatch(/let current = queueRef\.current/);
 });

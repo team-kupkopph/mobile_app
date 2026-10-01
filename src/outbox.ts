@@ -101,6 +101,21 @@ export function applyResult(
   };
 }
 
+/**
+ * PR3-F1 · apply one send's outcome to the queue AS IT IS NOW, not to the snapshot the flush
+ * started from. A POST can take up to 20 s; in that time a new report may have been queued, or
+ * this one discarded (Log out → Discard, account deleted). If the item is gone, it stays gone —
+ * `latest` comes back unchanged. `next` is applyResult's answer: null = sent, leave the queue.
+ */
+export function applyFlushResult(
+  latest: QueuedReport[], item: QueuedReport, next: QueuedReport | null,
+): QueuedReport[] {
+  if (!latest.some((i) => i.idempotency_key === item.idempotency_key)) return latest;
+  return next
+    ? latest.map((i) => (i.idempotency_key === item.idempotency_key ? next : i))
+    : latest.filter((i) => i.idempotency_key !== item.idempotency_key);
+}
+
 /** C17 · what the report form hands to the outbox instead of showing an error: no answer at all,
  *  or a gateway saying the server is down (a deploy, an outage). A real answer (4xx, 500) is shown. */
 export function shouldQueue(status: number): boolean {
