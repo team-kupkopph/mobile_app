@@ -27,7 +27,7 @@ import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -64,8 +64,11 @@ export function InquiryScreen({ navigation, route }: Props) {
         : undefined;
       setInquiry(found ?? null);
       if (found) {
-        const current = found.stages.find((s) => s.state === "in_progress");
-        setOpen((prev) => prev ?? current?.stage_key ?? null);
+        // D15 · a closed inquiry has no current step to open.
+        if (!inquiryIsClosed(found.status)) {
+          const current = found.stages.find((s) => s.state === "in_progress");
+          setOpen((prev) => prev ?? current?.stage_key ?? null);
+        }
         api.get(`/listings/${found.listing.listing_id}`).then((lr) => {
           if (lr.ok) setListing(lr.data);
         });
@@ -118,13 +121,16 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
   const { step, of } = ladderStep(inquiry.stages);
   const byKey = new Map(inquiry.stages.map((s) => [s.stage_key, s]));
   const photo = listing?.photos?.[0];
+  // D15 · a withdrawn/declined inquiry is over: say so, drop the "Step N of 6" chrome.
+  const closed = inquiryIsClosed(inquiry.status);
+  const closedNote = inquiryClosedNote(inquiry.status);
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       {/* The pet. Pressable, as the artboard's `press rise` card is — and it is how the listing
           stays reachable now that the list row lands here instead of there. */}
       <PressScale scale={motion.pressScale} onPress={onListing} accessibilityRole="button"
-        accessibilityLabel={`View ${pet}'s listing`} testID="card.inquiry.pet">
+        accessibilityLabel={`View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status)}`} testID="card.inquiry.pet">
         <Card>
           <View style={styles.petRow}>
             <View style={styles.tile}>
@@ -140,13 +146,20 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
                 {poster ? `${poster.name}${poster.city ? ` · ${poster.city}` : ""}` : capitalize(inquiry.listing.species)}
               </Text>
             </View>
-            <Chip label={`Step ${step} of ${of}`} tone="info" dot={false} />
+            {closed ? (
+              <Chip label={inquiryStatusLabel(inquiry.status)} tone={inquiry.status === "declined" ? "danger" : "neutral"} dot={false} />
+            ) : (
+              <Chip label={`Step ${step} of ${of}`} tone="info" dot={false} />
+            )}
           </View>
-          <View style={styles.track} accessibilityRole="progressbar"
-            accessibilityValue={{ min: 0, max: of, now: step }}>
-            <LinearGradient colors={gradients.button} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-              style={[styles.fill, { width: `${Math.round((step / of) * 100)}%` }]} />
-          </View>
+          {closed ? null : (
+            <View style={styles.track} accessibilityRole="progressbar"
+              accessibilityValue={{ min: 0, max: of, now: step }}>
+              <LinearGradient colors={gradients.button} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                style={[styles.fill, { width: `${Math.round((step / of) * 100)}%` }]} />
+            </View>
+          )}
+          {closedNote ? <Text style={styles.closedNote} testID="text.inquiry.closedNote">{closedNote}</Text> : null}
         </Card>
       </PressScale>
 
@@ -156,14 +169,16 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
         {STAGE_ORDER.map((key, i) => {
           const stage = byKey.get(key);
           const st = stage?.state ?? "not_started";
-          const done = st === "done", skipped = st === "skipped", current = st === "in_progress";
+          // D15 · closed: an in_progress stage reads muted, no teal "In progress".
+          const tone = ladderStageTone(st, closed);
+          const done = st === "done", skipped = st === "skipped", current = tone === "active";
           const last = i === STAGE_ORDER.length - 1;
-          const meta = stageMeta(st, stage?.updated_at);
+          const meta = closed && st === "in_progress" ? "" : stageMeta(st, stage?.updated_at);
           const def = STAGE_STEP[key];
           // The poster's own note wins over the generic step text — it is what the artboard's
           // "PAWS Manila waived the home visit for this listing" actually is.
           const note = stage?.note || (skipped && def.skippedNote ? def.skippedNote({ pet, shelter }) : def.note({ pet, shelter }));
-          const chip = stageStateChip(st);
+          const chip = stageStateChip(closed && st === "in_progress" ? "not_started" : st);
           return (
             <PressScale key={key} scale={motion.pressScale} onPress={() => onToggle(key)}
               accessibilityRole="button" accessibilityState={{ expanded: open === key }}
@@ -224,7 +239,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
         </Card>
       ) : null}
 
-      <Text style={styles.hint}>Tap any step to see what it involves.</Text>
+      {!closed ? <Text style={styles.hint}>Tap any step to see what it involves.</Text> : null}
     </ScrollView>
   );
 }
@@ -288,5 +303,6 @@ const styles = StyleSheet.create({
   contactName: { ...typography.subtitle, fontWeight: "800", color: colors.ink, flexShrink: 1 },
   contactMeta: { marginTop: 3, ...typography.meta, color: colors.muted },
 
+  closedNote: { marginTop: 12, ...typography.meta, color: colors.muted },
   hint: { marginTop: 18, textAlign: "center", ...typography.meta, color: colors.muted }
 });

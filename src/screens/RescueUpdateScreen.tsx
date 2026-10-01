@@ -13,13 +13,14 @@ import MapView, { Marker } from "react-native-maps";
 import { ReportDetail, StrayStatus } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import { ReportRemovedCard } from "../components/sagip/ReportRemovedCard";
 import { loadState } from "../net";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
 import {
   RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, endedCaseLine,
-  handoffCancelMessage, sagipTitle, strayChip,
+  handoffCancelMessage, closeInquiriesPrompt, closedInquiriesDone, isReportRemoved, sagipTitle, strayChip,
 } from "../sagip";
 import { colors, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -49,6 +50,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   // on focus and after each successful update, and `setReport` only runs on success, so a
   // failed refetch leaves the form (and the note being typed into it) exactly where it was.
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  // P2 · the error code of a failed load — a 410 is "removed by moderation" only with this code.
+  const [resCode, setResCode] = useState<string | undefined>(undefined);
   const [target, setTarget] = useState<StrayStatus | null>(null);
   const [note, setNote] = useState("");
   const [outcomeNotes, setOutcomeNotes] = useState("");
@@ -61,6 +64,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
     setRes(null);
     api.get(`/reports/${reportId}`).then((r) => {
       setRes({ ok: r.ok, status: r.status });
+      setResCode(r.data?.error?.code);
       if (r.ok) setReport(r.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus
@@ -167,7 +171,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   }
 
   // C14 · take a handoff back: a draft listing or an unanswered placement. The server refuses
-  // once people have asked about the animal, or it is adopted (see handoffCancelMessage).
+  // once it is adopted (see handoffCancelMessage); if people have asked, D15 confirms first and
+  // resends with close_inquiries.
   const [cancelBusy, setCancelBusy] = useState(false);
   function confirmCancelHandoff() {
     if (cancelBusy) return;
@@ -176,15 +181,32 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
       [{ text: "Not now", style: "cancel" },
        { text: "Take back", onPress: () => { void cancelHandoff(); } }]);
   }
-  async function cancelHandoff() {
+  async function cancelHandoff(closeInquiries = false, confirmedN?: number) {
     if (cancelBusy) return; // busy guard — one cancel in flight at a time
     setCancelBusy(true);
     setError(undefined);
-    const res = await api.post(`/cases/${caseId}/handoff/cancel`, {});
+    const res = await api.post(`/cases/${caseId}/handoff/cancel`, closeInquiries ? { close_inquiries: true } : {});
     setCancelBusy(false);
     if (res.ok) {
-      Alert.alert("Taken back", "You can list or place them again.");
+      if (closeInquiries) {
+        // D15 · N can exceed what was confirmed (someone inquired in between): trust the server.
+        const closed = res.data?.closed_inquiries;
+        const done = closedInquiriesDone(typeof closed === "number" ? closed : confirmedN ?? 0);
+        Alert.alert(done.title, done.body);
+      } else {
+        Alert.alert("Taken back", "You can list or place them again.");
+      }
       load();
+      return;
+    }
+    // D15 · people have asked: not a refusal but a confirm. Without details.active_inquiries
+    // (an older server) fall through to the plain refusal below.
+    const active = res.data?.error?.details?.active_inquiries;
+    if (!closeInquiries && res.data?.error?.code === "has_active_inquiries" && typeof active === "number") {
+      const p = closeInquiriesPrompt(active);
+      Alert.alert(p.title, p.body,
+        [{ text: p.keep, style: "cancel" },
+         { text: p.confirm, style: "destructive", onPress: () => { void cancelHandoff(true, active); } }]);
       return;
     }
     // An Alert, not setError: the error line renders far below, inside the status form.
@@ -204,8 +226,11 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
       <ScreenHeader title="Update case" onBack={() => navigation.goBack()} />
 
       {!report ? (
+        // P2 · a removed report (410 report_removed) says so, rather than "gone".
+        isReportRemoved(res, resCode) ? <ReportRemovedCard onBack={() => navigation.goBack()} /> : (
         <LoadStateView state={loadState(res)} subject="case" onRetry={load}
           onBack={() => navigation.goBack()} />
+        )
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {holdsClaim && deadline ? (

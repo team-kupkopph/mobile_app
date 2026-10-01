@@ -57,6 +57,58 @@ test("A refused Take back is an Alert, not a line far down the form; the link sh
   expect(src).toContain("accessibilityState={{ disabled: cancelBusy, busy: cancelBusy }}");
 });
 
+test("Take back on a listing people asked about confirms, then resends close_inquiries (D15)", () => {
+  const src = read("src/screens/RescueUpdateScreen.tsx");
+  expect(src).toContain("has_active_inquiries");
+  expect(src).toContain("active_inquiries");
+  expect(src).toContain("closeInquiriesPrompt(");
+  expect(src).toContain("closedInquiriesDone(");
+  expect(src).toContain("close_inquiries: true");
+});
+
+test("The inquire POST shows the unavailable message and refetches the listing (D15)", () => {
+  const src = read("src/screens/ListingDetailScreen.tsx");
+  expect(src).toContain("inquireRefusalMessage(");
+  expect(src).toMatch(/inquireRefusalMessage\([\s\S]*?load\(\)/);
+});
+
+test("A withdrawn inquiry chip comes from inquiryStatusLabel, not a 'Withdrawn' literal (D15)", () => {
+  const src = read("src/components/InquiryList.tsx");
+  expect(src).toContain("inquiryStatusLabel(");
+  expect(src).not.toContain('"Withdrawn"');
+});
+
+test("The ladder says a closed inquiry is closed and drops the progress chrome (D15)", () => {
+  const src = read("src/screens/InquiryScreen.tsx");
+  expect(src).toContain("inquiryClosedNote(");
+  expect(src).toContain("inquiryStatusLabel(");
+  expect(src).toContain("inquiryIsClosed(");
+  expect(src).toMatch(/closed \? \([\s\S]*?\) : \([\s\S]*?Step \$\{step\} of/);
+  expect(src).toMatch(/!closed[\s\S]*?Tap any step to see what it involves\./);
+});
+
+test("A closed inquiry's ladder neither auto-opens nor marks a stage current; the pet card names the status (D15)", () => {
+  const src = read("src/screens/InquiryScreen.tsx");
+  expect(src).toContain("ladderStageTone(");
+  expect(src).toMatch(/!inquiryIsClosed\(found\.status\)[\s\S]*?setOpen\(/);
+  expect(src).toMatch(/current = tone === "active"/);
+  expect(src).toContain("View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status)}");
+});
+
+test("A closed inquiry card shows no stage progress, and chip labels are derived (D15)", () => {
+  const src = read("src/components/InquiryList.tsx");
+  expect(src).toContain("inquiryIsClosed(iq.status)");
+  expect(src).not.toMatch(/label: "(Active|Adopted|Declined|Withdrawn)"/);
+});
+
+test("Inquire shows only on an available listing; otherwise 'No longer available for adoption.' (D15)", () => {
+  const src = read("src/screens/ListingDetailScreen.tsx");
+  expect(src).toContain('listing.status !== "available"');
+  expect(src).toContain("No longer available for adoption.");
+  expect(src).toContain("DRAFT_STATUS");
+  expect(src).toContain('testID="btn.listingDetail.publish"');
+});
+
 test("Place confirm tells the person about the draft before opening it", () => {
   const src = read("src/screens/RescuePlaceConfirmScreen.tsx");
   expect(src).toContain('Alert.alert("You already started a listing"');

@@ -19,11 +19,12 @@ import { useAuth } from "../auth/AuthContext";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { LoadStateView } from "../components/LoadStateView";
+import { ReportRemovedCard } from "../components/sagip/ReportRemovedCard";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import {
   CloseReason, OFFER_TYPE_LABEL, claimDeadline, closeReasonsFor, escalationLines, historyNote,
-  offersShareContact, relTime, reportKindChip, reportTitle
+  isReportRemoved, offersShareContact, relTime, reporterDetailChip, reportTitle
 } from "../sagip";
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
 import { RescuePeople } from "../components/sagip/RescuePeople";
@@ -60,6 +61,8 @@ export function ReportDetailScreen({ navigation, route }: Props) {
   // is what actually means "not found" (404/403); everything else keeps its own words
   // and a retry that can work.
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  // P2 · the error code of a failed load — a 410 is "removed by moderation" only with this code.
+  const [resCode, setResCode] = useState<string | undefined>(undefined);
 
   const [claiming, setClaiming] = useState(false);
   // S11 · the reason list is shown inline (four choices is too many for a native alert on
@@ -72,6 +75,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
     setRes(null);
     api.get(`/reports/${route.params.reportId}`).then((r) => {
       setRes({ ok: r.ok, status: r.status });
+      setResCode(r.data?.error?.code);
       if (r.ok) setReport(r.data);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus
@@ -153,8 +157,10 @@ export function ReportDetailScreen({ navigation, route }: Props) {
     load();
   }
 
+  // P2 · on a removed report the chip is the grey "Removed by moderation" one and the ladder is
+  // hidden below — it would still say Claimed/Rescued for something no one can act on.
   // D6 · a lost pet is never "Reported / Claimed / Rescued" — nobody claims it.
-  const chip = report ? reportKindChip(report.report_type, report.status) : null;
+  const chip = report ? reporterDetailChip(report) : null;
   const isLost = report?.report_type === "lost";
   const activeIdx = report ? LADDER.indexOf(report.status === "safe" ? "rescued" : report.status) : -1;
   // Present only when the caller IS this report's reporter (US-O3) — the backend omits
@@ -182,7 +188,10 @@ export function ReportDetailScreen({ navigation, route }: Props) {
       />
 
       {!report ? (
+        // P2 · a removed report (410 report_removed) says so, rather than "gone".
+        isReportRemoved(res, resCode) ? <ReportRemovedCard onBack={() => navigation.goBack()} /> : (
         <LoadStateView state={loadState(res)} subject="report" onRetry={load} />
+        )
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {report.photos.length > 0 ? (
@@ -290,7 +299,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             </View>
           ) : null}
 
-          {isLost && !isReporterView ? null : (
+          {isLost && !isReporterView || report.hidden ? null : (
           <>
           <Text style={styles.sectionTitle}>Status</Text>
           {isReporterView && report.status_history && report.status_history.length > 0 ? (

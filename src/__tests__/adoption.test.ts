@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -107,5 +107,61 @@ describe("stageMeta", () => {
     expect(stageMeta("in_progress", "2026-07-12T03:21:00Z", now)).toBe("In progress");
     expect(stageMeta("skipped", null, now)).toBe("Skipped");
     expect(stageMeta("not_started", null, now)).toBe("");
+  });
+});
+
+describe("inquiryStatusLabel (D15)", () => {
+  it("a withdrawn inquiry is 'No longer available', never 'You withdrew'", () => {
+    expect(inquiryStatusLabel("withdrawn")).toBe("No longer available");
+    expect(inquiryStatusLabel("active")).toBe("Active");
+    expect(inquiryStatusLabel("adopted")).toBe("Adopted");
+    expect(inquiryStatusLabel("declined")).toBe("Declined");
+    expect(inquiryStatusLabel("withdrawn")).not.toMatch(/withdrew/i);
+  });
+  it("an unknown status falls back to Active", () => {
+    expect(inquiryStatusLabel("something_new")).toBe("Active");
+    expect(inquiryStatusLabel("")).toBe("Active");
+  });
+});
+
+describe("inquireRefusalMessage (D15)", () => {
+  it("shows the listing_unavailable message and leaves other codes to the screen", () => {
+    expect(inquireRefusalMessage("listing_unavailable")).toBe("This animal is no longer available for adoption.");
+    expect(inquireRefusalMessage("already_inquired")).toBeNull();
+    expect(inquireRefusalMessage(undefined)).toBeNull();
+  });
+});
+
+describe("inquiryClosedNote / inquiryIsClosed (D15)", () => {
+  it("withdrawn and declined inquiries are closed, with a one-line note", () => {
+    expect(inquiryClosedNote("withdrawn")).toBe("This animal is no longer available, so this inquiry is closed.");
+    expect(inquiryClosedNote("declined")).toBe("This inquiry was declined.");
+    expect(inquiryIsClosed("withdrawn")).toBe(true);
+    expect(inquiryIsClosed("declined")).toBe(true);
+  });
+  it("active and adopted inquiries are not closed", () => {
+    expect(inquiryClosedNote("active")).toBeNull();
+    expect(inquiryClosedNote("adopted")).toBeNull();
+    expect(inquiryClosedNote("something_new")).toBeNull();
+    expect(inquiryIsClosed("active")).toBe(false);
+    expect(inquiryIsClosed("adopted")).toBe(false);
+  });
+  it("the note never says 'You withdrew'", () => {
+    expect(inquiryClosedNote("withdrawn")).not.toMatch(/you withdrew/i);
+  });
+});
+
+describe("ladderStageTone (D15 · a closed inquiry shows no progress)", () => {
+  it("is unchanged while the inquiry is open", () => {
+    expect(ladderStageTone("in_progress", false)).toBe("active");
+    expect(ladderStageTone("done", false)).toBe("done");
+    expect(ladderStageTone("skipped", false)).toBe("skipped");
+    expect(ladderStageTone("not_started", false)).toBe("muted");
+  });
+  it("mutes an in_progress stage once the inquiry is closed, leaving the rest as they were", () => {
+    expect(ladderStageTone("in_progress", true)).toBe("muted");
+    expect(ladderStageTone("done", true)).toBe("done");
+    expect(ladderStageTone("skipped", true)).toBe("skipped");
+    expect(ladderStageTone("not_started", true)).toBe("muted");
   });
 });

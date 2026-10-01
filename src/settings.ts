@@ -116,6 +116,18 @@ export function exportFilename(now: Date = new Date()): string {
   return `kupkop-export-${now.toISOString().slice(0, 10)}.json`;
 }
 
+/** P1 · why the export failed. A timeout (status 0, code "timeout") is the build running long, not
+ *  the phone being offline — saying "offline" sent people to check a connection that was fine. */
+export function exportErrorMessage(res: { status: number; data?: any }): string {
+  if (res.status === 0) {
+    return res.data?.error?.code === "timeout"
+      ? "Your export is taking longer than expected. Try again in a few minutes."
+      : "You're offline — try again when you're connected.";
+  }
+  if (res.status === 429) return "You've exported a few times today. Try again tomorrow.";
+  return "Couldn't build your export. Try again.";
+}
+
 /** Human size for the export card. Bytes are meaningless to a person at any real size. */
 export function humanSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;

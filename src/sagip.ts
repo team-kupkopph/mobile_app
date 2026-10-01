@@ -26,6 +26,28 @@ export function myReportChip(r: Pick<MyReport, "status" | "hidden">): { label: s
   return r.hidden ? { label: "Removed by moderation", tone: "grey" } : strayChip(r.status);
 }
 
+// P2 · the load of a report that moderation removed answers its ex-claimer 410 report_removed
+// (strangers still get 404). It must read as "removed", not as LoadStateView's "gone".
+export function isReportRemoved(res: { ok: boolean; status: number } | null | undefined, code: string | undefined): boolean {
+  return !!res && !res.ok && res.status === 410 && code === "report_removed";
+}
+
+// P2 · a My-rescues row whose report was removed. `hidden` can be true on a case that is still
+// ACTIVE, so this is only the chip — the row stays tappable and the case actions stay.
+export function rescueRowChip(c: Pick<RescueCaseSummary, "hidden" | "expired_at" | "status">): { label: string; tone: StrayTone } {
+  if (c.hidden) return { label: "Removed", tone: "grey" };
+  if (c.expired_at) return { label: "Expired", tone: "grey" };
+  return strayChip(c.status);
+}
+
+// P2 · the reporter's detail shows the same grey chip as their list does (myReportChip) in place
+// of the kind/status chip — and the screen drops the ladder, which would still say "Claimed".
+export function reporterDetailChip(
+  r: { report_type: string | undefined; status: StrayStatus; hidden?: boolean }
+): { label: string; tone: StrayTone } {
+  return r.hidden ? myReportChip({ status: r.status, hidden: true }) : reportKindChip(r.report_type, r.status);
+}
+
 function cap(s: string): string {
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
@@ -299,11 +321,14 @@ export const RELEASE_REASONS: { key: ReleaseReason; label: string }[] = [
   { key: "something_came_up", label: "Something came up" }
 ];
 const RELEASE_NOTE_PREFIX = "released_by_claimer:";
+// P2 · written to a report's history when staff restore it after a moderation removal.
+const RESTORE_NOTE = "restored_by_moderation";
 
 /** A status-history note in the reporter's words: their own close named, a claimer's release
  *  explained (D3), others as written. */
 export function historyNote(note: string | undefined): string | null {
   if (!note) return null;
+  if (note === RESTORE_NOTE) return "Restored by moderation";
   if (note.startsWith(RELEASE_NOTE_PREFIX)) {
     const reason = RELEASE_REASONS.find((r) => r.key === note.slice(RELEASE_NOTE_PREFIX.length));
     return reason ? `The rescuer couldn't make it · ${reason.label}` : "The rescuer couldn't make it";
@@ -451,6 +476,25 @@ export function handoffCancelMessage(code: string | undefined): string {
     case "case_expired": return "This claim has lapsed — it's back on the map for someone else to claim.";
     default: return "Couldn't take that back. Try again.";
   }
+}
+
+// D15 · Take back on a listing people have asked about: the server answers 409
+// has_active_inquiries with details.active_inquiries = N, and the rescuer must confirm before
+// the listing comes down and those N people are told. Copy lives here so it is tested.
+const peopleHave = (n: number) => `${n} ${n === 1 ? "person has" : "people have"}`;
+const peopleWere = (n: number) => `${n} ${n === 1 ? "person was" : "people were"}`;
+
+export function closeInquiriesPrompt(n: number): { title: string; body: string; keep: string; confirm: string } {
+  return {
+    title: "People have asked about them",
+    body: `${peopleHave(n)} asked about this animal. Taking the listing down tells them it's no longer available.`,
+    keep: "Keep it listed",
+    confirm: "Take it down"
+  };
+}
+
+export function closedInquiriesDone(n: number): { title: string; body: string } {
+  return { title: "Taken back", body: `The listing is down, and ${peopleWere(n)} told.` };
 }
 
 // C14/C15 · what List and Place do with a 409. `already_handed_off` carries the existing

@@ -4,7 +4,7 @@ import { accountIdFromAccessToken } from "../auth/idToken";
 import { queueReport, withoutOwned } from "../outbox";
 
 // C16 · D14 — Log out with unsent reports asks "Keep for next time / Discard" first.
-test.each(["src/screens/SettingsScreen.tsx", "src/screens/ProfileScreen.tsx"])(
+test.each(["src/screens/SettingsScreen.tsx", "src/screens/ProfileScreen.tsx", "src/screens/ShelterProfileScreen.tsx"])(
   "%s asks about unsent reports before logging out", (file) => {
     expect(fs.readFileSync(file, "utf8")).toContain("confirmSignOutWithQueue(");
   });
@@ -61,4 +61,12 @@ test("PR3-F8 · Settings asks one question at Log out, never an alert inside an 
   const confirm = logout.slice(logout.indexOf('Alert.alert("Log out?"'));
   expect(confirm).toContain('Alert.alert("Log out?"');
   expect(confirm).not.toContain("confirmSignOutWithQueue(");
+});
+
+test("P1 · the shelter profile's Log out asks keep/discard, and discard clears this account's queue", () => {
+  const src = fs.readFileSync("src/screens/ShelterProfileScreen.tsx", "utf8");
+  expect(src).toMatch(/onPress=\{(?!signOut\})/);
+  expect(src).not.toMatch(/onPress=\{signOut\}/);
+  expect(src).toContain("confirmSignOutWithQueue(queue.length");
+  expect(src).toContain("discardAllFor(accountIdFromAccessToken(tokens?.access))");
 });

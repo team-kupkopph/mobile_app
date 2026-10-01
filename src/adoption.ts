@@ -14,6 +14,37 @@ export const STAGE_LABEL: Record<string, string> = {
   interview: "Interview", vet_clearance: "Vet clearance", finalization: "Finalization"
 };
 
+// D15 · a WITHDRAWN inquiry means the rescuer took the animal back or the placement was
+// withdrawn — never something the adopter did, so it never reads "You withdrew".
+export function inquiryStatusLabel(status: string): string {
+  switch (status) {
+    case "adopted": return "Adopted";
+    case "declined": return "Declined";
+    case "withdrawn": return "No longer available";
+    default: return "Active";
+  }
+}
+
+// D15 · withdrawn and declined inquiries are over: the ladder and the card say so instead of
+// showing stage progress. `null` = still open (or adopted), so the screen keeps its ladder.
+export function inquiryClosedNote(status: string): string | null {
+  switch (status) {
+    case "withdrawn": return "This animal is no longer available, so this inquiry is closed.";
+    case "declined": return "This inquiry was declined.";
+    default: return null;
+  }
+}
+
+export function inquiryIsClosed(status: string): boolean {
+  return inquiryClosedNote(status) !== null;
+}
+
+// D15 · the server's refusal to inquire on a listing that is no longer AVAILABLE. `null` = not
+// this refusal, so the screen keeps its own mapping.
+export function inquireRefusalMessage(code: string | undefined): string | null {
+  return code === "listing_unavailable" ? "This animal is no longer available for adoption." : null;
+}
+
 export type StageTone = "muted" | "active" | "done" | "skipped";
 
 // state -> label + tone. `not_started` is muted (nothing's happened), `in_progress`
@@ -30,6 +61,13 @@ export function stageStateChip(state: string): { label: string; tone: StageTone 
     default:
       return { label: "Not started", tone: "muted" };
   }
+}
+
+// D15 · a closed inquiry shows no progress: a stage the server left `in_progress` reads muted,
+// not teal "current" — the ladder would otherwise say the adoption is still moving.
+export function ladderStageTone(state: string, closed: boolean): StageTone {
+  const tone = stageStateChip(state).tone;
+  return closed && tone === "active" ? "muted" : tone;
 }
 
 // The adopter's one-line "where does this stand" summary: the furthest stage that's
