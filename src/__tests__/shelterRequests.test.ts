@@ -80,3 +80,33 @@ describe("ShelterRequestsScreen file guards", () => {
     expect(readScreen()).toMatch(/<Card\b/);
   });
 });
+
+
+describe("ShelterRequestsScreen · R2-F2 regression · dispatch handles placeRequest", () => {
+  // The pure routing decision (requestRoute above) returns `placeRequest` for a pending
+  // placement. The SCREEN's own navigation dispatch has to actually honour that name — if
+  // it collapses every non-volunteer route to the inquiry ladder, the shelter opens the
+  // placement in the read-only "Step 6 of 6, all Skipped" ladder (Sagip test plan Run 2
+  // R2-F2) and never sees Accept/Decline. The dispatch isn't easily unit-tested through a
+  // real render (RootStackParamList types fight back), so this is a source scan — same
+  // shape as the file guards below.
+  const src = readScreen();
+
+  it("dispatches route.name === \"placeRequest\" to navigation.navigate(\"placeRequest\")", () => {
+    expect(src).toMatch(/route\.name\s*===\s*"placeRequest"/);
+    expect(src).toMatch(/navigation\.navigate\(\s*"placeRequest"\s*,\s*\{\s*inquiryId:\s*route\.params\.inquiryId/);
+  });
+
+  it("does not silently fall-through placeRequest to the inquiry ladder", () => {
+    // The old `if (shelterVolunteerActivity) …; else navigate("inquiry", …);` shape dropped
+    // placeRequest into the else branch. Both route-name checks must be present AND the
+    // placeRequest check must appear before the final `else`-with-inquiry (otherwise the
+    // placeRequest branch could still be unreachable).
+    const volIdx = src.search(/route\.name\s*===\s*"shelterVolunteerActivity"/);
+    const prIdx = src.search(/route\.name\s*===\s*"placeRequest"/);
+    const inquiryNav = src.search(/navigation\.navigate\(\s*"inquiry"/);
+    expect(volIdx).toBeGreaterThan(-1);
+    expect(prIdx).toBeGreaterThan(-1);
+    expect(inquiryNav).toBeGreaterThan(prIdx);  // placeRequest decided before inquiry fallback
+  });
+});

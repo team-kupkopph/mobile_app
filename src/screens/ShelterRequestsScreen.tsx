@@ -98,8 +98,17 @@ export function ShelterRequestsScreen({ navigation }: Props) {
             // so each call stays fully typed against RootStackParamList instead of an `any`.
             const route = requestRoute(item);
             function onPress() {
+              // R2-F2 · dispatch on route.name directly rather than collapsing non-volunteer
+              // routes into the inquiry ladder. `requestRoute` returns `placeRequest` for a
+              // placement still awaiting this shelter's decision (shelterRequests.ts:71) —
+              // the ladder behind that case has every stage SKIPPED and no buttons, so a
+              // row that falls through to `inquiry` strands the shelter with no way to
+              // Accept/Decline from the inbox (Sagip test plan Run 2 R2-F2). Enumerated so
+              // adding a new route forces a decision rather than silently defaulting.
               if (route.name === "shelterVolunteerActivity") {
                 navigation.navigate("shelterVolunteerActivity", { shiftId: route.params.shiftId, section: "pending" });
+              } else if (route.name === "placeRequest") {
+                navigation.navigate("placeRequest", { inquiryId: route.params.inquiryId });
               } else {
                 navigation.navigate("inquiry", { inquiryId: route.params.inquiryId });
               }
