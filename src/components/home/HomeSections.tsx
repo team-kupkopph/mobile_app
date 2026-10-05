@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   cityText: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   cityChange: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   reportCard: {
-    height: 140,
+    minHeight: 140,
     marginTop: 14,
     // V3 radius scale: 26 hero / 24 card / 18 row. The fill is the three-stop brand gradient
     // rather than flat colors.teal — overflow hidden so it cannot bleed the corners.
