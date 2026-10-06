@@ -1,7 +1,7 @@
 // Track A display logic, unit-tested (like sagip.ts / notifications.ts). Kept in sync
 // with the backend's adoption_stage_key / stage_state enums by hand — US-N1 (a shared
 // type registry) would eventually remove the hand-mirroring, same as for notifications.
-import { InquiryStage } from "./api/types";
+import { InquiryStage, MyInquiry } from "./api/types";
 
 // The six stages, in the DDL's order — for rendering a full ladder even when a stage
 // row is (defensively) missing from the response.
@@ -158,4 +158,53 @@ export function stageMeta(state: string, updatedAt?: string | null, now = new Da
   if (Number.isNaN(d.getTime())) return "Done";
   const sameYear = d.getFullYear() === now.getFullYear();
   return d.toLocaleDateString(undefined, sameYear ? { month: "short", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" });
+}
+
+// AQ2 / AD13 · the two refusals the new inquiry gate adds. `listing_unavailable` keeps its own
+// path (inquireRefusalMessage + a refetch), so it is deliberately not here.
+export function inquireBlockedCopy(code: string | undefined): { title: string; body: string } | null {
+  if (code === "shelter_cannot_adopt") {
+    return { title: "Shelters can't adopt",
+             body: "Adopting is for pet owners. You can still list animals from your Animals tab." };
+  }
+  if (code === "own_listing") {
+    return { title: "This is your listing", body: "You can't inquire on your own listing." };
+  }
+  return null;
+}
+
+// AQ1 / AQ2 · what happens after Inquire, said plainly. The phones are shared only once the
+// poster accepts the adopter for screening. A non-member hears about the badge now, not at Reserve.
+// `verifiedMember` is undefined from a server older than PR A: then nothing is said about it.
+export function inquirySentCopy(posterName: string, verifiedMember: boolean | undefined): { title: string; body: string } {
+  let body = `${posterName} will review it. If they accept you for screening, you'll both see each other's phone numbers.`;
+  if (verifiedMember === false) {
+    body += " You'll also need a Verified Member badge before they can reserve this pet for you.";
+  }
+  return { title: "Inquiry sent", body };
+}
+
+// AQ2 · the ladder's reminder to a non-member that Reserve will need the badge. Only on an open,
+// public inquiry: a placement's recipient is already verified, and a closed one has nothing to reserve.
+export function adopterBadgeNote(inquiry: MyInquiry, shelter: string, pet: string): string | null {
+  if (inquiry.status !== "active" || inquiry.kind === "placement" || inquiry.verified_member !== false) {
+    return null;
+  }
+  return `You'll need a Verified Member badge before ${shelter} can reserve ${pet} for you.`;
+}
+
+// AQ1 · once the poster accepts for screening the server sends `poster_contact` on the adopter's
+// row. This is the screen's whole display decision: show exactly what it sent, nothing otherwise —
+// a null phone stays null (the poster has no verified number), and no contact is ever invented.
+export function contactLine(inquiry: MyInquiry): { name: string; phone: string | null } | null {
+  return inquiry.poster_contact ?? null;
+}
+
+// A public adoption completed by the poster leaves the earlier ladder steps as they were; only
+// finalization is done. "Step 2 of 6" on an adopted inquiry would be false, so the header says
+// Adopted and the track is full. Used on the screen's non-closed branch only.
+export function ladderHeader(inquiry: MyInquiry): { label: string; tone: "info" | "success"; percent: number } {
+  if (inquiry.status === "adopted") return { label: "Adopted", tone: "success", percent: 100 };
+  const { step, of } = ladderStep(inquiry.stages);
+  return { label: `Step ${step} of ${of}`, tone: "info", percent: Math.round((step / of) * 100) };
 }

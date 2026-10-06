@@ -5,8 +5,8 @@
  * ⚠️ WHAT THE ARTBOARD SHOWS THAT THE DATA CANNOT SUPPORT — asserted as ABSENT, on purpose.
  * Inquiry.dc.html carries three things with no source behind them: a date on each done step
  * (`/me/inquiries` serialises no timestamps), "Replies in about a day" (no such metric
- * exists), and a "Message PAWS Manila" CTA (there is no messaging feature and the poster
- * object carries no contact). Each was left out rather than approximated. This file pins
+ * exists), and a "Message PAWS Manila" CTA (there is no messaging feature, and a phone
+ * number exists only once the poster has accepted for screening, AQ1). Each was left out rather than approximated. This file pins
  * that, because the pressure to "just show something" there is real and recurring.
  *
  * What it DOES show is grounded: the badge reads "Verified Shelter" / "Verified Member" because
@@ -48,6 +48,16 @@ if (!canvasPath) {
 }
 
 describe("the inquiry ladder", () => {
+  it("shows the badge note with a way to get verified (AQ2)", () => {
+    expect(code).toMatch(/adopterBadgeNote\(inquiry, shelter, pet\)/);
+    expect(screen).toMatch(/testID="card\.inquiry\.badge"/);
+    expect(screen).toMatch(/navigation\.navigate\("memberUpgrade"\)/);
+  });
+
+  it("headers an adopted inquiry as Adopted, not as a step (ladderHeader)", () => {
+    expect(code).toMatch(/ladderHeader\(inquiry\)/);
+  });
+
   it("is a registered route, and is where an inquiry row lands", () => {
     expect(read("navigation/types.ts")).toMatch(/inquiry: \{ inquiryId: string \}/);
     expect(read("navigation/RootNavigator.tsx")).toMatch(/<Stack\.Screen name="inquiry" component=\{InquiryScreen\}/);
@@ -75,6 +85,17 @@ describe("the inquiry ladder", () => {
     // ...and the header comment still explains all three, so the reasoning travels with the code.
     expect(screen).toMatch(/Replies in about a day/);
     expect(screen).toMatch(/Message PAWS Manila/);
+  });
+
+  it("shows the poster's phone once screening shares it, from the inquiry alone (AQ1)", () => {
+    // The display decision is the pure helper's; the card must not need the listing fetch, which an
+    // AD16 404 would blank.
+    expect(code).toMatch(/contactLine\(inquiry\)/);
+    expect(code).toMatch(/Linking\.openURL\(`tel:/);
+    expect(screen).toMatch(/testID="btn\.inquiry\.call"/);
+    expect(screen).toMatch(/They'll share a number with you directly\./);
+    // A Call control is not a Message CTA: still no messaging feature behind it.
+    expect(code).not.toMatch(/Message \$\{|label=\{`Message/);
   });
 
   it("names the type on the verified badge, and derives it from a real predicate", () => {
@@ -132,7 +153,8 @@ describeParity("the inquiry ladder matches the artboard", () => {
       expect(screen).toContain(s);
     }
     expect(canvas).toMatch(/Step 4 of 6/);
-    expect(screen).toMatch(/`Step \$\{step\} of \$\{of\}`/);
+    // The chip text now comes from ladderHeader (an adopted inquiry reads "Adopted", not a step).
+    expect(read("adoption.ts")).toMatch(/`Step \$\{step\} of \$\{of\}`/);
   });
 
   it("uses the artboard's step titles", () => {
@@ -141,5 +163,16 @@ describeParity("the inquiry ladder matches the artboard", () => {
       expect(canvas.replace(/&amp;/g, "&")).toContain(title);
       expect(adoption).toContain(`"${title}"`);
     }
+  });
+});
+
+describe("listing detail (AQ2 / AD13)", () => {
+  const detail = read("screens/ListingDetailScreen.tsx");
+  it("hides Inquire on your own listing and explains the new refusals", () => {
+    expect(detail).toMatch(/accountIdFromAccessToken\(tokens\?\.access\)/);
+    expect(detail).toMatch(/testID="text\.listingDetail\.yours"/);
+    expect(detail).toMatch(/inquireBlockedCopy\(code\)/);
+    expect(detail).toMatch(/inquirySentCopy\(/);
+    expect(detail).not.toMatch(/The poster reaches you by phone/);
   });
 });

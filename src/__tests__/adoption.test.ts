@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, contactLine, inquireBlockedCopy, inquirySentCopy, ladderHeader, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -163,5 +163,78 @@ describe("ladderStageTone (D15 · a closed inquiry shows no progress)", () => {
     expect(ladderStageTone("done", true)).toBe("done");
     expect(ladderStageTone("skipped", true)).toBe("skipped");
     expect(ladderStageTone("not_started", true)).toBe("muted");
+  });
+});
+
+describe("inquireBlockedCopy (AQ2 / AD13)", () => {
+  it("explains the two new refusals and nothing else", () => {
+    expect(inquireBlockedCopy("shelter_cannot_adopt")).toEqual({
+      title: "Shelters can't adopt",
+      body: "Adopting is for pet owners. You can still list animals from your Animals tab."
+    });
+    expect(inquireBlockedCopy("own_listing")).toEqual({
+      title: "This is your listing", body: "You can't inquire on your own listing."
+    });
+    expect(inquireBlockedCopy("listing_unavailable")).toBeNull();   // D15 keeps its own path
+    expect(inquireBlockedCopy(undefined)).toBeNull();
+  });
+});
+
+describe("inquirySentCopy (AQ1 / AQ2)", () => {
+  it("says what happens next, and tells a non-member about the badge up front", () => {
+    expect(inquirySentCopy("Paws Marikina", true)).toEqual({
+      title: "Inquiry sent",
+      body: "Paws Marikina will review it. If they accept you for screening, you'll both see each other's phone numbers."
+    });
+    expect(inquirySentCopy("Paws Marikina", false).body).toBe(
+      "Paws Marikina will review it. If they accept you for screening, you'll both see each other's phone numbers. "
+      + "You'll also need a Verified Member badge before they can reserve this pet for you.");
+    // An older server sends no verified_member: say nothing about the badge rather than guess.
+    expect(inquirySentCopy("Paws Marikina", undefined).body).not.toMatch(/badge/);
+  });
+});
+
+describe("adopterBadgeNote (AQ2)", () => {
+  const base = { inquiry_id: "i1", listing: { listing_id: "l1", name: "Milo", species: "dog" },
+                 status: "active", stages: [], kind: "inquiry" as const };
+  it("shows only on an open public inquiry from a non-member", () => {
+    expect(adopterBadgeNote({ ...base, verified_member: false }, "Paws Marikina", "Milo"))
+      .toBe("You'll need a Verified Member badge before Paws Marikina can reserve Milo for you.");
+    expect(adopterBadgeNote({ ...base, verified_member: true }, "Paws Marikina", "Milo")).toBeNull();
+    expect(adopterBadgeNote({ ...base, verified_member: undefined }, "Paws Marikina", "Milo")).toBeNull();
+    expect(adopterBadgeNote({ ...base, verified_member: false, status: "declined" }, "P", "M")).toBeNull();
+    expect(adopterBadgeNote({ ...base, verified_member: false, kind: "placement" }, "P", "M")).toBeNull();
+  });
+});
+
+describe("ladderHeader (a public adoption completed by the poster)", () => {
+  const stage = (stage_key: string, state: string) => ({ stage_key, state });
+  const mostlyNotStarted = STAGE_ORDER.map((k) => stage(k, k === "inquiry" ? "done" : k === "finalization" ? "done" : "not_started"));
+  const mk = (status: string, stages = mostlyNotStarted) =>
+    ({ inquiry_id: "i1", listing: { listing_id: "l1", name: "Milo", species: "dog" }, status, stages });
+
+  it("reads Adopted at 100% even when the earlier steps were never worked", () => {
+    expect(ladderHeader(mk("adopted"))).toEqual({ label: "Adopted", tone: "success", percent: 100 });
+  });
+  it("reads the step for an active inquiry", () => {
+    const stages = STAGE_ORDER.map((k) => stage(k, k === "inquiry" || k === "application" ? "done" : "not_started"));
+    expect(ladderHeader(mk("active", stages))).toEqual({ label: "Step 3 of 6", tone: "info", percent: 50 });
+  });
+});
+
+describe("contactLine (AQ1 · the poster's phone, once screening shares it)", () => {
+  const base = { inquiry_id: "i1", listing: { listing_id: "l1", name: "Milo", species: "dog" },
+                 status: "active", stages: [], kind: "inquiry" as const };
+  it("is the poster_contact the server sent, name and phone", () => {
+    expect(contactLine({ ...base, poster_contact: { name: "Ana Cruz", phone: "+63281234567" } }))
+      .toEqual({ name: "Ana Cruz", phone: "+63281234567" });
+  });
+  it("is null before screening shares anything — never an invented contact", () => {
+    expect(contactLine(base)).toBeNull();
+    expect(contactLine({ ...base, poster_contact: undefined })).toBeNull();
+  });
+  it("keeps a null phone null (the poster has no verified number to share)", () => {
+    expect(contactLine({ ...base, poster_contact: { name: "Ana Cruz", phone: null } }))
+      .toEqual({ name: "Ana Cruz", phone: null });
   });
 });

@@ -13,8 +13,9 @@ import { ListingDetail } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { inquireRefusalMessage } from "../adoption";
+import { inquireBlockedCopy, inquireRefusalMessage, inquirySentCopy } from "../adoption";
 import { useAuth } from "../auth/AuthContext";
+import { accountIdFromAccessToken } from "../auth/idToken";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
@@ -30,6 +31,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
   const api = useApi();
   const { tokens } = useAuth();
   const isGuest = tokens === null;
+  const myAccountId = accountIdFromAccessToken(tokens?.access);
   const { listingId } = route.params;
   const [listing, setListing] = useState<ListingDetail | null>(null);
   // US-R4 · "{X} not found." was shown for EVERY failure, not just a missing row — so
@@ -93,16 +95,31 @@ export function ListingDetailScreen({ navigation, route }: Props) {
     setInquiring(false);
     if (res.ok) {
       setInquired(true);
-      Alert.alert("Inquiry sent", "The poster will see it and reach out. Track it under My inquiries.",
-        [{ text: "OK" }, { text: "See my inquiries", onPress: () => navigation.navigate("myInquiries") }]);
+      // AQ1/AQ2 · say what really happens next; a non-member hears about the badge now.
+      const copy = inquirySentCopy(listing?.poster.name ?? "The poster", res.data?.verified_member);
+      const buttons: Array<{ text: string; onPress?: () => void }> = [
+        { text: "OK" },
+        { text: "See my inquiries", onPress: () => navigation.navigate("myInquiries") }
+      ];
+      if (res.data?.verified_member === false) {
+        buttons.push({ text: "Get verified", onPress: () => navigation.navigate("memberUpgrade") });
+      }
+      Alert.alert(copy.title, copy.body, buttons);
       return;
     }
     const code = res.data?.error?.code;
+    // AQ2 / AD13 · the new gate's refusals. Before PR A a shelter fell into the pet-owner upgrade.
+    const blocked = inquireBlockedCopy(code);
+    if (blocked) {
+      Alert.alert(blocked.title, blocked.body);
+      return;
+    }
     if (code === "already_inquired") {
       setInquired(true);
       Alert.alert("Already inquired", "You've already inquired on this listing.");
       return;
     }
+    // A server older than AQ2 (2026-10-05) still asks for the badge at inquiry.
     if (code === "member_badge_required") {
       Alert.alert("Get verified to adopt",
         "Adopting needs a Verified Member badge — it takes a gov ID and one social link.",
@@ -112,7 +129,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
     }
     if (code === "phone_unverified") {
       Alert.alert("Verify your phone first",
-        "The poster reaches you by phone — verify a mobile number, then send your inquiry.",
+        "Verify a mobile number to inquire. It's shared with the poster only if they accept you for screening.",
         [{ text: "Not now", style: "cancel" },
          { text: "Verify phone", onPress: () => navigation.navigate("verifyPhone") }]);
       return;
@@ -229,10 +246,13 @@ export function ListingDetailScreen({ navigation, route }: Props) {
                 style={styles.inquireBtn}
               />
             </View>
+          ) : listing.poster.account_id === myAccountId ? (
+            // AD13 · the server refuses it (own_listing); the screen doesn't offer it.
+            <Text style={styles.inquiredNote} testID="text.listingDetail.yours">This is your listing.</Text>
           ) : inquired ? (
             <>
               {/* e2e 20-browse-and-inquire asserts this copy: it is the signal the POST was accepted. */}
-              <Text style={styles.inquiredNote}>Inquiry sent — the poster will reach out.</Text>
+              <Text style={styles.inquiredNote}>Inquiry sent — they'll review it and get back to you.</Text>
               <Button
                 label="See my inquiries"
                 onPress={() => navigation.navigate("myInquiries")}

@@ -12,9 +12,11 @@
 //   · "Replies in about a day." No response-time data exists anywhere. Omitted rather than
 //     invented — the same rule as the fake clock the status bar used to show.
 //   · "Message PAWS Manila." There is no messaging feature (reportContent notes the message
-//     target is "modeled backend-side but has no UI trigger yet"), and the poster object
-//     carries no contact. A CTA with nowhere to go is the dead control socialAuth.ts warns
-//     about, so there is no sticky footer here until there is somewhere for it to lead.
+//     target is "modeled backend-side but has no UI trigger yet"). A CTA with nowhere to go is
+//     the dead control socialAuth.ts warns about, so there is no sticky footer here until there
+//     is somewhere for it to lead. What there IS to reach them by is a phone, and only once the
+//     poster has accepted for screening (AQ1): the contact card shows `poster_contact` then,
+//     with a Call button, and never before.
 //
 // The badge is real. Public listings come only from a verified poster (listings/visibility.py
 // public_poster_q: Verified Member OR verified shelter), so an adopter cannot have inquired on
@@ -23,15 +25,15 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, contactLine, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { Avatar, Card, Chip, PressScale, ScreenHeader } from "../components/ui";
+import { Avatar, Button, Card, Chip, PressScale, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { colors, gradients, motion, pill, radii, spacing, squircle, typography } from "../theme";
@@ -100,6 +102,7 @@ export function InquiryScreen({ navigation, route }: Props) {
           open={open}
           onToggle={(key) => setOpen((prev) => (prev === key ? null : key))}
           onListing={() => navigation.navigate("listingDetail", { listingId: inquiry.listing.listing_id })}
+          onGetVerified={() => navigation.navigate("memberUpgrade")}
         />
       )}
     </View>
@@ -112,18 +115,23 @@ type BodyProps = {
   open: string | null;
   onToggle: (key: string) => void;
   onListing: () => void;
+  onGetVerified: () => void;
 };
 
-function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps) {
+function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerified }: BodyProps) {
   const pet = inquiry.listing.name;
   const poster = listing?.poster ?? null;
   const shelter = poster?.name ?? "the shelter";
-  const { step, of } = ladderStep(inquiry.stages);
+  const header = ladderHeader(inquiry);
   const byKey = new Map(inquiry.stages.map((s) => [s.stage_key, s]));
   const photo = listing?.photos?.[0];
   // D15 · a withdrawn/declined inquiry is over: say so, drop the "Step N of 6" chrome.
   const closed = inquiryIsClosed(inquiry.status);
   const closedNote = inquiryClosedNote(inquiry.status);
+  const badgeNote = adopterBadgeNote(inquiry, shelter, pet);
+  // AQ1 · the poster's number, from the inquiry alone: an AD16 404 on the listing fetch blanks
+  // `poster`, and the promise "you'll both see each other's phone numbers" still has to hold.
+  const contact = contactLine(inquiry);
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -149,19 +157,28 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
             {closed ? (
               <Chip label={inquiryStatusLabel(inquiry.status)} tone={inquiry.status === "declined" ? "danger" : "neutral"} dot={false} />
             ) : (
-              <Chip label={`Step ${step} of ${of}`} tone="info" dot={false} />
+              <Chip label={header.label} tone={header.tone} dot={false} />
             )}
           </View>
           {closed ? null : (
             <View style={styles.track} accessibilityRole="progressbar"
-              accessibilityValue={{ min: 0, max: of, now: step }}>
+              accessibilityValue={{ min: 0, max: 100, now: header.percent }}>
               <LinearGradient colors={gradients.button} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={[styles.fill, { width: `${Math.round((step / of) * 100)}%` }]} />
+                style={[styles.fill, { width: `${header.percent}%` }]} />
             </View>
           )}
           {closedNote ? <Text style={styles.closedNote} testID="text.inquiry.closedNote">{closedNote}</Text> : null}
         </Card>
       </PressScale>
+
+      {/* AQ2 · Reserve needs the Verified Member badge; say so while there is time to get it. */}
+      {badgeNote ? (
+        <Card style={styles.badgeCard} testID="card.inquiry.badge">
+          <Text style={styles.badgeText}>{badgeNote}</Text>
+          <Button label="Get verified" size="small" variant="secondary"
+            onPress={onGetVerified} testID="btn.inquiry.getVerified" />
+        </Card>
+      ) : null}
 
       {/* The ladder. */}
       <Card style={styles.ladder}>
@@ -223,19 +240,43 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
       </Card>
 
       {/* The shelter. */}
-      {poster ? (
+      {poster || contact ? (
         <Card style={styles.contact}>
-          <Text style={styles.sectionLabelTight}>{poster.is_shelter ? "Shelter contact" : "Rescuer contact"}</Text>
+          <Text style={styles.sectionLabelTight}>
+            {poster ? (poster.is_shelter ? "Shelter contact" : "Rescuer contact") : "Contact"}
+          </Text>
           <View style={styles.contactRow}>
-            <Avatar initials={initials(poster.name)} tinted size={46} />
+            <Avatar initials={initials(poster?.name ?? contact?.name ?? "")} tinted size={46} />
             <View style={styles.contactText}>
               <View style={styles.contactHead}>
-                <Text style={styles.contactName} numberOfLines={1}>{poster.name}</Text>
-                <Chip label={poster.is_shelter ? "Verified Shelter" : "Verified Member"} tone="success" dot={false} />
+                <Text style={styles.contactName} numberOfLines={1}>{poster?.name ?? contact?.name}</Text>
+                {poster ? (
+                  <Chip label={poster.is_shelter ? "Verified Shelter" : "Verified Member"} tone="success" dot={false} />
+                ) : null}
               </View>
-              {poster.city ? <Text style={styles.contactMeta}>{poster.city}</Text> : null}
+              {poster?.city ? <Text style={styles.contactMeta}>{poster.city}</Text> : null}
             </View>
           </View>
+          {contact ? (
+            <View style={styles.reach} testID="card.inquiry.contact">
+              {poster && contact.name !== poster.name ? (
+                <Text style={styles.contactMeta} testID="text.inquiry.contactName">{contact.name}</Text>
+              ) : null}
+              {contact.phone ? (
+                <View style={styles.phoneRow}>
+                  <Text style={styles.phone} testID="text.inquiry.phone">{contact.phone}</Text>
+                  <Button label="Call" size="small" variant="secondary"
+                    accessibilityLabel={`Call ${contact.name}`}
+                    onPress={() => { void Linking.openURL(`tel:${contact.phone}`); }}
+                    testID="btn.inquiry.call" />
+                </View>
+              ) : (
+                <Text style={styles.contactMeta} testID="text.inquiry.noPhone">
+                  They'll share a number with you directly.
+                </Text>
+              )}
+            </View>
+          ) : null}
         </Card>
       ) : null}
 
@@ -302,7 +343,12 @@ const styles = StyleSheet.create({
   contactHead: { flexDirection: "row", alignItems: "center", gap: 7, flexWrap: "wrap" },
   contactName: { ...typography.subtitle, fontWeight: "800", color: colors.ink, flexShrink: 1 },
   contactMeta: { marginTop: 3, ...typography.meta, color: colors.muted },
+  reach: { marginTop: 14 },
+  phoneRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 4 },
+  phone: { ...typography.subtitle, fontWeight: "800", color: colors.ink, flexShrink: 1 },
 
+  badgeCard: { marginTop: 14, gap: 12 },
+  badgeText: { color: colors.ink, ...typography.body },
   closedNote: { marginTop: 12, ...typography.meta, color: colors.muted },
   hint: { marginTop: 18, textAlign: "center", ...typography.meta, color: colors.muted }
 });

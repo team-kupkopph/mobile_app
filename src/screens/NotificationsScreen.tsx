@@ -106,6 +106,12 @@ export function NotificationsScreen({ navigation }: Props) {
       case "shelterNeeds":
         navigation.navigate("shelterNeeds");
         return;
+      case "shelterRequests":
+        navigation.navigate("shelterRequests");
+        return;
+      case "listingDetail":
+        navigation.navigate("listingDetail", { listingId: target.listingId });
+        return;
       default: {
         const unhandled: never = target;
         return unhandled;
