@@ -5,8 +5,8 @@
  * ⚠️ WHAT THE ARTBOARD SHOWS THAT THE DATA CANNOT SUPPORT — asserted as ABSENT, on purpose.
  * Inquiry.dc.html carries three things with no source behind them: a date on each done step
  * (`/me/inquiries` serialises no timestamps), "Replies in about a day" (no such metric
- * exists), and a "Message PAWS Manila" CTA (there is no messaging feature and the poster
- * object carries no contact). Each was left out rather than approximated. This file pins
+ * exists), and a "Message PAWS Manila" CTA (there is no messaging feature, and a phone
+ * number exists only once the poster has accepted for screening, AQ1). Each was left out rather than approximated. This file pins
  * that, because the pressure to "just show something" there is real and recurring.
  *
  * What it DOES show is grounded: the badge reads "Verified Shelter" / "Verified Member" because
@@ -85,6 +85,17 @@ describe("the inquiry ladder", () => {
     // ...and the header comment still explains all three, so the reasoning travels with the code.
     expect(screen).toMatch(/Replies in about a day/);
     expect(screen).toMatch(/Message PAWS Manila/);
+  });
+
+  it("shows the poster's phone once screening shares it, from the inquiry alone (AQ1)", () => {
+    // The display decision is the pure helper's; the card must not need the listing fetch, which an
+    // AD16 404 would blank.
+    expect(code).toMatch(/contactLine\(inquiry\)/);
+    expect(code).toMatch(/Linking\.openURL\(`tel:/);
+    expect(screen).toMatch(/testID="btn\.inquiry\.call"/);
+    expect(screen).toMatch(/They'll share a number with you directly\./);
+    // A Call control is not a Message CTA: still no messaging feature behind it.
+    expect(code).not.toMatch(/Message \$\{|label=\{`Message/);
   });
 
   it("names the type on the verified badge, and derives it from a real predicate", () => {

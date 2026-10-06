@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, inquireBlockedCopy, inquirySentCopy, ladderHeader, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, contactLine, inquireBlockedCopy, inquirySentCopy, ladderHeader, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -219,5 +219,22 @@ describe("ladderHeader (a public adoption completed by the poster)", () => {
   it("reads the step for an active inquiry", () => {
     const stages = STAGE_ORDER.map((k) => stage(k, k === "inquiry" || k === "application" ? "done" : "not_started"));
     expect(ladderHeader(mk("active", stages))).toEqual({ label: "Step 3 of 6", tone: "info", percent: 50 });
+  });
+});
+
+describe("contactLine (AQ1 · the poster's phone, once screening shares it)", () => {
+  const base = { inquiry_id: "i1", listing: { listing_id: "l1", name: "Milo", species: "dog" },
+                 status: "active", stages: [], kind: "inquiry" as const };
+  it("is the poster_contact the server sent, name and phone", () => {
+    expect(contactLine({ ...base, poster_contact: { name: "Ana Cruz", phone: "+63281234567" } }))
+      .toEqual({ name: "Ana Cruz", phone: "+63281234567" });
+  });
+  it("is null before screening shares anything — never an invented contact", () => {
+    expect(contactLine(base)).toBeNull();
+    expect(contactLine({ ...base, poster_contact: undefined })).toBeNull();
+  });
+  it("keeps a null phone null (the poster has no verified number to share)", () => {
+    expect(contactLine({ ...base, poster_contact: { name: "Ana Cruz", phone: null } }))
+      .toEqual({ name: "Ana Cruz", phone: null });
   });
 });

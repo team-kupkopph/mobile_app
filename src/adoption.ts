@@ -193,6 +193,13 @@ export function adopterBadgeNote(inquiry: MyInquiry, shelter: string, pet: strin
   return `You'll need a Verified Member badge before ${shelter} can reserve ${pet} for you.`;
 }
 
+// AQ1 · once the poster accepts for screening the server sends `poster_contact` on the adopter's
+// row. This is the screen's whole display decision: show exactly what it sent, nothing otherwise —
+// a null phone stays null (the poster has no verified number), and no contact is ever invented.
+export function contactLine(inquiry: MyInquiry): { name: string; phone: string | null } | null {
+  return inquiry.poster_contact ?? null;
+}
+
 // A public adoption completed by the poster leaves the earlier ladder steps as they were; only
 // finalization is done. "Step 2 of 6" on an adopted inquiry would be false, so the header says
 // Adopted and the track is full. Used on the screen's non-closed branch only.
