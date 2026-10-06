@@ -29,12 +29,32 @@ describe("notificationTarget", () => {
       .toEqual({ screen: "myInquiries" });
   });
 
-  it("routes inquiry_received to My inquiries — the only destination for either direction it fires in", () => {
-    // Same {listing_id, inquiry_id} payload shape for both a poster told someone inquired and
-    // a US-H3 placement recipient told they were offered an animal; myInquiries is a no-op
-    // landing for the former and the real destination for the latter (see notifications.ts).
-    expect(notificationTarget({ type: "inquiry_received", data: { listing_id: "l1", inquiry_id: "i1" } }))
-      .toEqual({ screen: "myInquiries" });
+  it("routes the poster's pushes: a shelter to Requests, an individual to the listing (interim)", () => {
+    for (const type of ["inquiry_received", "inquiry_withdrawn"]) {
+      expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1", poster_is_shelter: true } }))
+        .toEqual({ screen: "shelterRequests" });
+      expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1", poster_is_shelter: false } }))
+        .toEqual({ screen: "listingDetail", listingId: "l1" });
+      // A push from before poster_is_shelter existed still has a listing to open.
+      expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1" } }))
+        .toEqual({ screen: "listingDetail", listingId: "l1" });
+      expect(notificationTarget({ type, data: {} })).toBeNull();
+    }
+  });
+
+  it("routes the adopter's poster-loop types to My inquiries (adoption PR A)", () => {
+    for (const type of ["placement_offered", "inquiry_accepted", "inquiry_rejected",
+                        "adoption_badge_needed", "adoption_reserved", "reservation_released",
+                        "adoption_completed"]) {
+      expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1" } }))
+        .toEqual({ screen: "myInquiries" });
+    }
+  });
+
+  it("opens the two new destinations from the bell, not just from a push", () => {
+    const src = require("fs").readFileSync(require("path").join(__dirname, "../screens/NotificationsScreen.tsx"), "utf8");
+    expect(src).toMatch(/case "shelterRequests":\s*navigation\.navigate\("shelterRequests"\)/);
+    expect(src).toMatch(/case "listingDetail":\s*navigation\.navigate\("listingDetail", \{ listingId: target\.listingId \}\)/);
   });
 
   test("volunteer notifications open the hub on My shifts", () => {

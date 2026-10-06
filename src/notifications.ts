@@ -23,7 +23,10 @@ export type NotificationTarget =
   // dedicated matches screen lands; the wishlist/badge types land on their own screens.
   | { screen: "impact" }
   | { screen: "myDonations" }
-  | { screen: "shelterNeeds" };
+  | { screen: "shelterNeeds" }
+  // Adoption PR A · interim homes for the POSTER's pushes until the Applicant screen exists.
+  | { screen: "shelterRequests" }
+  | { screen: "listingDetail"; listingId: string };
 
 const REPORT_LINKED_TYPES = new Set([
   "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened",
@@ -37,23 +40,20 @@ const REPORT_LINKED_TYPES = new Set([
 const VERIFICATION_TYPES = new Set([
   "verification_approved", "verification_rejected", "verification_needs_info"
 ]);
-// stage_advanced is the adopter's own notification (a poster advanced their inquiry) —
-// their inquiry list is where to see it. inquiry_received fires in TWO directions with the
-// identical {listing_id, inquiry_id} payload shape, so the type alone can't tell them apart:
-// (a) a poster is told someone inquired on their listing — still no poster-side review
-// screen (US-A4's "poster advances stages" was built backend-only), so this is a no-op for
-// them, same as before; (b) US-H3 — a direct-placement recipient is told they were offered
-// an animal (CasePlaceView). (b) now HAS a destination: MyInquiriesScreen shows the
-// recipient's own inquiries (they're `adopter_account` on a placement) and flags a placement
-// row client-side (see MyInquiriesScreen's isPlacement — every stage SKIPPED) with a
-// tap-through to placeRequest. Routing both directions here to myInquiries is a deliberate
-// over-approximation: harmless for (a) (they land on their own — unrelated — inquiry list,
-// same as tapping the bell icon itself would), and correct for (b).
-// D15 · listing_withdrawn ({listing_id, inquiry_id}) is an adopter told the rescuer took the listing
-// down — it opens My inquiries, where the inquiry now reads "No longer available".
-// C14 · placement_withdrawn ({listing_id, inquiry_id}) is the recipient being told the rescuer took
-// an offer back — it lands where stage_advanced does, and the offer itself says it is closed.
-const MY_INQUIRIES_TYPES = new Set(["stage_advanced", "inquiry_received", "placement_withdrawn", "listing_withdrawn"]);
+// The ADOPTER's adoption pushes open My inquiries: the row carries the step, the reservation and
+// (once accepted) the poster's phone. stage_advanced, placement_withdrawn and listing_withdrawn
+// are the older ones; the rest came with adoption PR A (dev/adoption-build-review.md AD1–AD6).
+// placement_offered is the recipient's half of what used to be a two-way inquiry_received.
+const MY_INQUIRIES_TYPES = new Set([
+  "stage_advanced", "placement_withdrawn", "listing_withdrawn",
+  "placement_offered", "inquiry_accepted", "inquiry_rejected", "adoption_badge_needed",
+  "adoption_reserved", "reservation_released", "adoption_completed"
+]);
+// The POSTER's adoption pushes. Until the Applicant screen exists (the mobile adoption plan), a
+// shelter lands on Requests (the Adoption segment lists the applicant) and an individual poster
+// lands on the listing. The backend says which (`poster_is_shelter`), because the client holds no
+// account type. Before PR A, inquiry_received opened the poster's OWN My inquiries, an unrelated list.
+const POSTER_INQUIRY_TYPES = new Set(["inquiry_received", "inquiry_withdrawn"]);
 // US-V8 · the volunteer side of notify(): schedule and history folded onto one hub screen
 // (Task 5, K30/G9) — every volunteer notification now opens the hub on its "My shifts" tab,
 // whether it's "look at your upcoming shifts" (shift_confirmed/shift_reminder) or "see what
@@ -85,6 +85,11 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   // C13 · a takedown ended their claim: the claimer's list is where that shows.
   if (n.type === "placement_decided" || n.type === "report_removed") {
     return { screen: "myRescues" };
+  }
+  if (POSTER_INQUIRY_TYPES.has(n.type)) {
+    if (n.data?.poster_is_shelter === true) return { screen: "shelterRequests" };
+    if (n.data?.listing_id) return { screen: "listingDetail", listingId: n.data.listing_id };
+    return null;
   }
   if (MY_INQUIRIES_TYPES.has(n.type)) {
     return { screen: "myInquiries" };
