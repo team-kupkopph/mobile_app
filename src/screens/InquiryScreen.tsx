@@ -27,11 +27,11 @@ import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { Avatar, Card, Chip, PressScale, ScreenHeader } from "../components/ui";
+import { Avatar, Button, Card, Chip, PressScale, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { colors, gradients, motion, pill, radii, spacing, squircle, typography } from "../theme";
@@ -100,6 +100,7 @@ export function InquiryScreen({ navigation, route }: Props) {
           open={open}
           onToggle={(key) => setOpen((prev) => (prev === key ? null : key))}
           onListing={() => navigation.navigate("listingDetail", { listingId: inquiry.listing.listing_id })}
+          onGetVerified={() => navigation.navigate("memberUpgrade")}
         />
       )}
     </View>
@@ -112,18 +113,20 @@ type BodyProps = {
   open: string | null;
   onToggle: (key: string) => void;
   onListing: () => void;
+  onGetVerified: () => void;
 };
 
-function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps) {
+function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerified }: BodyProps) {
   const pet = inquiry.listing.name;
   const poster = listing?.poster ?? null;
   const shelter = poster?.name ?? "the shelter";
-  const { step, of } = ladderStep(inquiry.stages);
+  const header = ladderHeader(inquiry);
   const byKey = new Map(inquiry.stages.map((s) => [s.stage_key, s]));
   const photo = listing?.photos?.[0];
   // D15 · a withdrawn/declined inquiry is over: say so, drop the "Step N of 6" chrome.
   const closed = inquiryIsClosed(inquiry.status);
   const closedNote = inquiryClosedNote(inquiry.status);
+  const badgeNote = adopterBadgeNote(inquiry, shelter, pet);
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -149,19 +152,28 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing }: BodyProps)
             {closed ? (
               <Chip label={inquiryStatusLabel(inquiry.status)} tone={inquiry.status === "declined" ? "danger" : "neutral"} dot={false} />
             ) : (
-              <Chip label={`Step ${step} of ${of}`} tone="info" dot={false} />
+              <Chip label={header.label} tone={header.tone} dot={false} />
             )}
           </View>
           {closed ? null : (
             <View style={styles.track} accessibilityRole="progressbar"
-              accessibilityValue={{ min: 0, max: of, now: step }}>
+              accessibilityValue={{ min: 0, max: 100, now: header.percent }}>
               <LinearGradient colors={gradients.button} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-                style={[styles.fill, { width: `${Math.round((step / of) * 100)}%` }]} />
+                style={[styles.fill, { width: `${header.percent}%` }]} />
             </View>
           )}
           {closedNote ? <Text style={styles.closedNote} testID="text.inquiry.closedNote">{closedNote}</Text> : null}
         </Card>
       </PressScale>
+
+      {/* AQ2 · Reserve needs the Verified Member badge; say so while there is time to get it. */}
+      {badgeNote ? (
+        <Card style={styles.badgeCard} testID="card.inquiry.badge">
+          <Text style={styles.badgeText}>{badgeNote}</Text>
+          <Button label="Get verified" size="small" variant="secondary"
+            onPress={onGetVerified} testID="btn.inquiry.getVerified" />
+        </Card>
+      ) : null}
 
       {/* The ladder. */}
       <Card style={styles.ladder}>
@@ -303,6 +315,8 @@ const styles = StyleSheet.create({
   contactName: { ...typography.subtitle, fontWeight: "800", color: colors.ink, flexShrink: 1 },
   contactMeta: { marginTop: 3, ...typography.meta, color: colors.muted },
 
+  badgeCard: { marginTop: 14, gap: 12 },
+  badgeText: { color: colors.ink, ...typography.body },
   closedNote: { marginTop: 12, ...typography.meta, color: colors.muted },
   hint: { marginTop: 18, textAlign: "center", ...typography.meta, color: colors.muted }
 });

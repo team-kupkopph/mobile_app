@@ -163,9 +163,19 @@ export type ListingDetail = {
 export type InquiryStage = { stage_key: string; state: string; updated_at?: string | null; note?: string | null };
 export type MyInquiry = {
   inquiry_id: string;
-  listing: { listing_id: string; name: string; species: string };
+  listing: { listing_id: string; name: string; species: string; status?: string };
   status: string;
   stages: InquiryStage[];
+  // Adoption PR A (dev/adoption-build-review.md). Optional: an older server omits them.
+  viewer?: "adopter" | "poster";
+  kind?: "inquiry" | "placement";
+  accepted_at?: string | null;
+  reserved_at?: string | null;
+  end_reason?: string | null;
+  /** AQ2 · whether the adopter already holds the badge Reserve will need. */
+  verified_member?: boolean;
+  /** AQ1 · present once the poster has accepted the adopter for screening. */
+  poster_contact?: { name: string; phone: string | null };
 };
 // US-X1 — the bell. `type` is free-text on the backend (notifications/models.py); the
 // known values in use are enumerated in notifications.ts, but new ones need no migration.

@@ -48,6 +48,16 @@ if (!canvasPath) {
 }
 
 describe("the inquiry ladder", () => {
+  it("shows the badge note with a way to get verified (AQ2)", () => {
+    expect(code).toMatch(/adopterBadgeNote\(inquiry, shelter, pet\)/);
+    expect(screen).toMatch(/testID="card\.inquiry\.badge"/);
+    expect(screen).toMatch(/navigation\.navigate\("memberUpgrade"\)/);
+  });
+
+  it("headers an adopted inquiry as Adopted, not as a step (ladderHeader)", () => {
+    expect(code).toMatch(/ladderHeader\(inquiry\)/);
+  });
+
   it("is a registered route, and is where an inquiry row lands", () => {
     expect(read("navigation/types.ts")).toMatch(/inquiry: \{ inquiryId: string \}/);
     expect(read("navigation/RootNavigator.tsx")).toMatch(/<Stack\.Screen name="inquiry" component=\{InquiryScreen\}/);
@@ -132,7 +142,8 @@ describeParity("the inquiry ladder matches the artboard", () => {
       expect(screen).toContain(s);
     }
     expect(canvas).toMatch(/Step 4 of 6/);
-    expect(screen).toMatch(/`Step \$\{step\} of \$\{of\}`/);
+    // The chip text now comes from ladderHeader (an adopted inquiry reads "Adopted", not a step).
+    expect(read("adoption.ts")).toMatch(/`Step \$\{step\} of \$\{of\}`/);
   });
 
   it("uses the artboard's step titles", () => {
@@ -141,5 +152,16 @@ describeParity("the inquiry ladder matches the artboard", () => {
       expect(canvas.replace(/&amp;/g, "&")).toContain(title);
       expect(adoption).toContain(`"${title}"`);
     }
+  });
+});
+
+describe("listing detail (AQ2 / AD13)", () => {
+  const detail = read("screens/ListingDetailScreen.tsx");
+  it("hides Inquire on your own listing and explains the new refusals", () => {
+    expect(detail).toMatch(/accountIdFromAccessToken\(tokens\?\.access\)/);
+    expect(detail).toMatch(/testID="text\.listingDetail\.yours"/);
+    expect(detail).toMatch(/inquireBlockedCopy\(code\)/);
+    expect(detail).toMatch(/inquirySentCopy\(/);
+    expect(detail).not.toMatch(/The poster reaches you by phone/);
   });
 });

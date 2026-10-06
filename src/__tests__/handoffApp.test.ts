@@ -83,7 +83,7 @@ test("The ladder says a closed inquiry is closed and drops the progress chrome (
   expect(src).toContain("inquiryClosedNote(");
   expect(src).toContain("inquiryStatusLabel(");
   expect(src).toContain("inquiryIsClosed(");
-  expect(src).toMatch(/closed \? \([\s\S]*?\) : \([\s\S]*?Step \$\{step\} of/);
+  expect(src).toMatch(/closed \? \([\s\S]*?\) : \([\s\S]*?header\.label/);
   expect(src).toMatch(/!closed[\s\S]*?Tap any step to see what it involves\./);
 });
 
