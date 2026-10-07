@@ -106,7 +106,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
           <View style={styles.headRow}>
             {listing.photos[0] ? <Image source={{ uri: listing.photos[0] }} style={styles.photo} /> : <View style={styles.photo} />}
             <View style={styles.rowText}>
-              <Text style={styles.title} numberOfLines={1}>{listing.pet.name}</Text>
+              <Text style={styles.title} numberOfLines={1}>{pet}</Text>
               <Text style={styles.rowSub}>{sub}</Text>
             </View>
             <View testID="chip.posterListing.status">
@@ -126,7 +126,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
           ) : null}
         </Card>
 
-        <Text style={styles.section}>Applicants ({applicants.length})</Text>
+        <Text style={styles.section}>Applicants ({applicants.length}{next ? "+" : ""})</Text>
         {appsRes && !appsRes.ok ? (
           <LoadStateView state={loadState(appsRes)} subject="applicants" onRetry={() => loadApplicants(1)} />
         ) : applicants.length === 0 && appsRes ? (
@@ -137,7 +137,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
             {closedRows.length > 0 ? (
               <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.posterListing.showClosed"
                 style={styles.more} onPress={() => setShowClosed((v) => !v)}>
-                <Text style={styles.moreLabel}>{showClosed ? "Hide closed" : `Show ${closedRows.length} closed`}</Text>
+                <Text style={styles.moreLabel}>{showClosed ? "Hide closed" : `Show ${closedRows.length}${next ? "+" : ""} closed`}</Text>
               </TouchableOpacity>
             ) : null}
             {showClosed ? closedRows.map(rowFor) : null}
