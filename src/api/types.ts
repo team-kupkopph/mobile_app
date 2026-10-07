@@ -143,6 +143,8 @@ export type Listing = {
   photo_url?: string | null;
   /** On list cards since backend #18; optional so an older server still renders a deck. */
   poster?: ListingPoster;
+  /** On the poster's own cards (?mine=true) only. */
+  open_inquiries?: number;
 };
 export type ListingDetail = {
   listing_id: string;
@@ -176,6 +178,16 @@ export type MyInquiry = {
   verified_member?: boolean;
   /** AQ1 · present once the poster has accepted the adopter for screening. */
   poster_contact?: { name: string; phone: string | null };
+};
+// Adoption · the poster tier of GET /inquiries/{id} and GET /listings/{id}/inquiries rows
+// (backend#77 listings/representations.py::poster_inquiry_rows).
+export type PosterInquiry = MyInquiry & {
+  viewer: "poster";
+  message?: string | null;
+  created_at?: string;
+  adopter: { account_id: string; display_name: string; city: string | null; verified_member: boolean };
+  /** AQ1 · present once the poster has accepted the applicant for screening (phone null if unverified). */
+  adopter_contact?: { name: string; phone: string | null };
 };
 // US-X1 — the bell. `type` is free-text on the backend (notifications/models.py); the
 // known values in use are enumerated in notifications.ts, but new ones need no migration.
