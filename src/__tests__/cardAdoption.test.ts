@@ -65,7 +65,8 @@ describe("V3 screens adopt Card instead of a raw elevation spread", () => {
     // 35 -> 41: P5 Task 3 (K24/K26) moves the six KawangGawa*/WaiverScreen screens from
     // V3_EXCLUDED into scope, now that they're converted.
     // 41 -> 40: C15 deleted RescueListedScreen (List for adoption now continues into the form).
-    expect(V3_SCOPE.length).toBe(40);
+    // 40 -> 41: ApplicantScreen, the adoption poster loop's (plan 2026-10-06) first screen, born V3.
+    expect(V3_SCOPE.length).toBe(41);
   });
 
   it("every in-scope screen not in the holdout list no longer spreads ...elevation.*", () => {
