@@ -19,7 +19,7 @@ import { MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "./LoadStateView";
 import { loadState } from "../net";
-import { inquiryIsClosed, inquiryProgressLabel, inquiryStatusLabel } from "../adoption";
+import { closedChipTone, inquiryIsClosed, inquiryProgressLabel, inquiryStatusLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, pill, radii, typography } from "../theme";
@@ -82,7 +82,10 @@ export function InquiryList() {
           />
         ) : (
           inquiries.map((iq) => {
-            const tone = STATUS_TONE[iq.status] ?? STATUS_TONE.active;
+            const tone =
+              iq.status === "declined" || iq.status === "withdrawn"
+                ? closedChipTone(iq.status, iq.end_reason)
+                : STATUS_TONE[iq.status] ?? STATUS_TONE.active;
             const closed = inquiryIsClosed(iq.status);
             const placement = isPlacement(iq);
             const pendingPlacement = placement && iq.status === "active";

@@ -160,7 +160,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
       {/* The pet. Pressable, as the artboard's `press rise` card is — and it is how the listing
           stays reachable now that the list row lands here instead of there. */}
       <PressScale scale={motion.pressScale} onPress={onListing} accessibilityRole="button"
-        accessibilityLabel={`View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status)}`} testID="card.inquiry.pet">
+        accessibilityLabel={`View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status, inquiry.end_reason)}`} testID="card.inquiry.pet">
         <Card>
           <View style={styles.petRow}>
             <View style={styles.tile}>

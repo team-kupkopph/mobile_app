@@ -1,6 +1,6 @@
 // Spec §2 · the decline sheet — four reasons worded as the adopter reads them; the button stays
 // enabled and says what is missing (design system: never disable submit).
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "../ui";
 import { DECLINE_REASONS } from "../../applicant";
@@ -12,6 +12,12 @@ type Props = { visible: boolean; name: string; busy: boolean; onDecline: (reason
 export function DeclineSheet({ visible, name, busy, onDecline, onClose }: Props) {
   const [reason, setReason] = useState<string | null>(null);
   const [missing, setMissing] = useState(false);
+  useEffect(() => {
+    if (!visible) {
+      setReason(null);
+      setMissing(false);
+    }
+  }, [visible]);
   function submit() {
     if (!reason) { setMissing(true); return; }
     onDecline(reason);
