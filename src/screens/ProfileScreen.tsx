@@ -229,6 +229,15 @@ export function ProfileScreen({ navigation }: Props) {
           <TouchableOpacity
             activeOpacity={0.75}
             style={[styles.accountRow, styles.accountRowDivided]}
+            testID="row.profile.myListings"
+            onPress={() => navigation.navigate("myListings")}
+          >
+            <Text style={styles.accountRowLabel}>My listings</Text>
+            <Text style={styles.accountRowChevron}>›</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.75}
+            style={[styles.accountRow, styles.accountRowDivided]}
             onPress={() => navigation.navigate("impact")}
           >
             <Text style={styles.accountRowLabel}>My impact</Text>

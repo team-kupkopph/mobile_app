@@ -55,7 +55,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the forty-nine V3 screens on the backdrop (2 Applicant + PosterListing, the adoption poster loop, plan 2026-10-06) + 7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 11 Sagip rescuer (RescueListedScreen deleted by C15) + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root + 6 P5 Task 3 KawangGawa/Waiver)", () => {
+  it("found the fifty V3 screens on the backdrop (3 Applicant + PosterListing + MyListings, the adoption poster loop, plan 2026-10-06) + 7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 11 Sagip rescuer (RescueListedScreen deleted by C15) + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root + 6 P5 Task 3 KawangGawa/Waiver)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "ApplicantScreen",
@@ -77,6 +77,7 @@ describe("surface, re-derived", () => {
       "MemberVerifyScreen",
       "MyDonationsScreen",
       "MyInquiriesScreen",
+      "MyListingsScreen",
       "MyOffersScreen",
       "MyRescuesScreen",
       "PlaceAcceptedScreen",

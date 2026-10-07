@@ -56,7 +56,8 @@ describe("V3 screens sit on the backdrop", () => {
     // 41 -> 40: C15 deleted RescueListedScreen (List for adoption now continues into the form).
     // 40 -> 41: ApplicantScreen, the adoption poster loop's (plan 2026-10-06) first screen, born V3.
     // 41 -> 42: PosterListingScreen, the poster's own listing (spec §3), born V3.
-    expect(V3_SCOPE.length).toBe(42);
+    // 42 -> 43: MyListingsScreen, an individual poster's listings (spec §3), born V3.
+    expect(V3_SCOPE.length).toBe(43);
   });
 
   it("every in-scope screen not in the holdout list renders ScreenBackdrop", () => {

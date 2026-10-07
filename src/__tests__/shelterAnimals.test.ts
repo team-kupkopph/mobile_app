@@ -5,11 +5,13 @@ import { DRAFT_STATUS, SEGMENT_STATUS, STATUS_CHIP, acceptedPlacementParams, dra
 
 const SCREEN = join(__dirname, "..", "screens", "ShelterAnimalsScreen.tsx");
 const readScreen = () => readFileSync(SCREEN, "utf8");
+const BODY = join(__dirname, "..", "components", "ListingsByStatus.tsx");
+const readBody = () => readFileSync(BODY, "utf8");
 const DASHBOARD = join(__dirname, "..", "screens", "ShelterDashboardScreen.tsx");
 const readDashboard = () => readFileSync(DASHBOARD, "utf8");
 
 describe("SEGMENT_STATUS", () => {
-  it("maps SegmentedControl's index to the status B-be1 accepts, in Live/Pending/Adopted order", () => {
+  it("maps SegmentedControl's index to the status B-be1 accepts, in Live/Reserved/Adopted order", () => {
     expect(SEGMENT_STATUS).toEqual({ 0: "available", 1: "pending", 2: "adopted" });
   });
 });
@@ -33,8 +35,9 @@ describe("ShelterAnimalsScreen file guards", () => {
     expect(readScreen()).toMatch(/testID="screen\.shelterAnimals"/);
   });
 
-  it("renders SegmentedControl", () => {
-    expect(readScreen()).toMatch(/<SegmentedControl\b/);
+  it("renders the shared list body, which renders SegmentedControl", () => {
+    expect(readScreen()).toMatch(/<ListingsByStatus\b/);
+    expect(readBody()).toMatch(/<SegmentedControl\b/);
   });
 });
 
@@ -52,11 +55,11 @@ describe("the '+ List an animal' CTA moved here from the dashboard", () => {
 
 // D7 · a shelter that accepts a placement gets the animal as a DRAFT listing. Drafts sit in
 // their own strip above the three segments — the segments follow the canvas artboard
-// (Live / Pending / Adopted) and stay exactly as drawn.
+// (Live / Reserved / Adopted) and stay exactly as drawn.
 describe("drafts from accepted placements (D7)", () => {
   it("fetches drafts under their own wire status", () => {
     expect(DRAFT_STATUS).toBe("draft");
-    expect(readScreen()).toMatch(/status=\$\{DRAFT_STATUS\}/);
+    expect(readBody()).toMatch(/status=\$\{DRAFT_STATUS\}/);
   });
 
   it("leaves the artboard's three segments untouched", () => {

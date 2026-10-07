@@ -133,6 +133,8 @@ export type RootStackParamList = {
   applicant: { inquiryId: string };
   /** The poster's own listing: status, Publish/Edit, applicants — design/mobile-v3/PosterListing.dc.html. */
   posterListing: { listingId: string };
+  /** An individual poster's listings (Profile → My listings) — the shared ListingsByStatus body. */
+  myListings: undefined;
   // D7 · a shelter's accept lands the animal as a draft listing; a person's has no params.
   placeAccepted: { listingId?: string } | undefined;
   // Track H — the owner's own pets (US-H3): what a rescuer/shelter placed with them, or what

@@ -103,7 +103,7 @@ const KAWANG_GAWA_V3 = [
 ] as const;
 
 /** Adoption poster loop (plan 2026-10-06) — V3 from birth. */
-const ADOPTION_POSTER = ["ApplicantScreen", "PosterListingScreen"] as const;
+const ADOPTION_POSTER = ["ApplicantScreen", "PosterListingScreen", "MyListingsScreen"] as const;
 
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
