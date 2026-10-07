@@ -40,11 +40,12 @@ const STATUS_TONE: Record<string, ChipTone> = {
   withdrawn: "neutral"
 };
 
-// See the file header: every stage SKIPPED is the direct-placement bypass. `some` guards
-// against an inquiry with no stage rows at all (shouldn't happen, but "every" on an empty
-// array is vacuously true) reading as a false-positive placement.
+// AD22 · the server says which it is (`kind`). An older server omits it, so the old inference
+// stands as the fallback: every stage SKIPPED is the direct-placement bypass. The length guard
+// stops an inquiry with no stage rows at all ("every" on an empty array is vacuously true)
+// reading as a false-positive placement.
 function isPlacement(iq: MyInquiry): boolean {
-  return iq.stages.length > 0 && iq.stages.every((s) => s.state === "skipped");
+  return iq.kind ? iq.kind === "placement" : iq.stages.length > 0 && iq.stages.every((s) => s.state === "skipped");
 }
 
 function capitalize(s: string): string {
@@ -105,7 +106,7 @@ export function InquiryList() {
                     <Text style={styles.cardName}>{iq.listing.name}</Text>
                     <Text style={styles.cardMeta}>{capitalize(iq.listing.species)}</Text>
                   </View>
-                  <Chip label={inquiryStatusLabel(iq.status)} tone={tone} />
+                  <Chip label={inquiryStatusLabel(iq.status, iq.end_reason)} tone={tone} />
                 </View>
                 {pendingPlacement ? (
                   <Text style={styles.placementNote}>Placement offer — tap to accept or decline</Text>

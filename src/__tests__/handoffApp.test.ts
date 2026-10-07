@@ -105,6 +105,7 @@ test("Inquire shows only on an available listing; otherwise 'No longer available
   const src = read("src/screens/ListingDetailScreen.tsx");
   expect(src).toContain('listing.status !== "available"');
   expect(src).toContain("No longer available for adoption.");
+  expect(src).toContain("Reserved for an applicant.");
   expect(src).toContain("DRAFT_STATUS");
   expect(src).toContain('testID="btn.listingDetail.publish"');
 });

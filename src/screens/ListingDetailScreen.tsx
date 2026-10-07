@@ -264,7 +264,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             // D15 · the server still serves a withdrawn (or pending/adopted) listing at 200, so
             // Inquire is offered only while it is AVAILABLE.
             <Text style={styles.inquiredNote} testID="text.listingDetail.unavailable">
-              No longer available for adoption.
+              {listing.status === "pending" ? "Reserved for an applicant." : "No longer available for adoption."}
             </Text>
           ) : (
             <Button

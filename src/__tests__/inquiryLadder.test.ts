@@ -122,6 +122,13 @@ describe("the inquiry ladder", () => {
     expect(screen).toMatch(/line: \{[^}]*borderRadius: pill\(3\)/);
     expect(screen).toMatch(/dot: \{[^}]*borderRadius: pill\(DOT\)/);
   });
+
+  it("lets the adopter withdraw, with a confirm (spec §4)", () => {
+    expect(screen).toMatch(/canWithdraw\(inquiry\)/);
+    expect(screen).toMatch(/testID="btn\.inquiry\.withdraw"/);
+    expect(screen).toMatch(/\/withdraw`/);
+    expect(screen).toMatch(/<ConfirmModal/);
+  });
 });
 
 describeParity("the inquiry ladder matches the artboard", () => {

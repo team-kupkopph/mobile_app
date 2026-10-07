@@ -1,4 +1,4 @@
-import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, contactLine, inquireBlockedCopy, inquirySentCopy, ladderHeader, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, canWithdraw, closedChipTone, contactLine, inquireBlockedCopy, inquirySentCopy, ladderHeader, inquiryProgressLabel, inquiryStatusLabel, inquireRefusalMessage, inquiryClosedNote, inquiryIsClosed, ladderStageTone, ladderStep, stageMeta, stageStateChip } from "../adoption";
 
 describe("stageStateChip", () => {
   it("maps each stage state to a labelled tone; skipped is not a failure", () => {
@@ -236,5 +236,36 @@ describe("contactLine (AQ1 · the poster's phone, once screening shares it)", ()
   it("keeps a null phone null (the poster has no verified number to share)", () => {
     expect(contactLine({ ...base, poster_contact: { name: "Ana Cruz", phone: null } }))
       .toEqual({ name: "Ana Cruz", phone: null });
+  });
+});
+
+describe("closed wording by end_reason (spec §4)", () => {
+  const ctx = { pet: "Milo", poster: "Paws Marikina" };
+  it("labels", () => {
+    expect(inquiryStatusLabel("declined", "another_adopter_chosen")).toBe("Found a home");
+    expect(inquiryStatusLabel("withdrawn", "adopter_withdrew")).toBe("Withdrawn");
+    expect(inquiryStatusLabel("declined", "not_a_fit")).toBe("Declined");
+    expect(inquiryStatusLabel("withdrawn", "listing_withdrawn")).toBe("No longer available");
+    expect(inquiryStatusLabel("withdrawn")).toBe("No longer available");      // unchanged
+  });
+  it("notes", () => {
+    expect(inquiryClosedNote("declined", "another_adopter_chosen", ctx))
+      .toBe("Milo was adopted by someone else. Thank you for offering a home.");
+    expect(inquiryClosedNote("withdrawn", "adopter_withdrew", ctx)).toBe("You withdrew this inquiry.");
+    expect(inquiryClosedNote("declined", "requirements_not_met", ctx))
+      .toBe("Paws Marikina won't be going ahead: the adoption requirements aren't met.");
+    expect(inquiryClosedNote("declined")).toBe("This inquiry was declined.");   // unchanged
+  });
+  it("chip tone: a found home is not a red decline", () => {
+    expect(closedChipTone("declined", "another_adopter_chosen")).toBe("neutral");
+    expect(closedChipTone("declined", "other")).toBe("danger");
+    expect(closedChipTone("withdrawn", "adopter_withdrew")).toBe("neutral");
+  });
+  it("withdraw only an open, public inquiry", () => {
+    const base = { inquiry_id: "i", listing: { listing_id: "l", name: "Milo", species: "dog" }, stages: [] };
+    expect(canWithdraw({ ...base, status: "active", kind: "inquiry" })).toBe(true);
+    expect(canWithdraw({ ...base, status: "active" })).toBe(true);
+    expect(canWithdraw({ ...base, status: "active", kind: "placement" })).toBe(false);
+    expect(canWithdraw({ ...base, status: "declined", kind: "inquiry" })).toBe(false);
   });
 });
