@@ -102,6 +102,9 @@ const KAWANG_GAWA_V3 = [
   "WaiverScreen"
 ] as const;
 
+/** Adoption poster loop (plan 2026-10-06) — V3 from birth. */
+const ADOPTION_POSTER = ["ApplicantScreen", "PosterListingScreen", "MyListingsScreen"] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -110,7 +113,9 @@ export const V3_SCOPE: readonly string[] = [
   ...SHELTER_VOLUNTEER,
   ...VERIFIED_MEMBER,
   ...SAGIP_RESCUER,
-  ...KAWANG_GAWA_V3
+  ...KAWANG_GAWA_V3,
+  // Adoption poster loop (plan 2026-10-06) — V3 from birth.
+  ...ADOPTION_POSTER
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */

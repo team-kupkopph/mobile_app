@@ -21,12 +21,19 @@ export type ListingStatus = (typeof SEGMENT_STATUS)[keyof typeof SEGMENT_STATUS]
  * One status chip per segment. "available" and "adopted" both read as `success` — a live
  * listing and one that reached its goal are both a good state; only "pending" is waiting on
  * someone, so it alone takes the warning tone. Same vocabulary as Chip.tsx's own comment.
+ * The wire status `pending` reads "Reserved" on screen (spec 2026-10-06).
  */
 export const STATUS_CHIP: Record<ListingStatus, { label: string; tone: ChipTone }> = {
   available: { label: "Available", tone: "success" },
-  pending: { label: "Pending", tone: "warning" },
+  pending: { label: "Reserved", tone: "warning" },
   adopted: { label: "Adopted", tone: "success" }
 };
+
+/** Spec 2026-10-06 §3 · the poster's own rows say how many people are waiting on an answer. */
+export function applicantsChip(n: number | undefined): string | null {
+  if (!n) return null;
+  return n === 1 ? "1 applicant" : `${n} applicants`;
+}
 
 // D7 (dev/sagip-build-review.md) · a shelter that accepts a rescuer's placement gets the animal
 // as a private DRAFT listing (backend: listings/views.py::_shelter_draft_from). Drafts are not

@@ -109,6 +109,15 @@ export function NotificationsScreen({ navigation }: Props) {
       case "shelterRequests":
         navigation.navigate("shelterRequests");
         return;
+      case "applicant":
+        navigation.navigate("applicant", { inquiryId: target.inquiryId });
+        return;
+      case "inquiry":
+        navigation.navigate("inquiry", { inquiryId: target.inquiryId });
+        return;
+      case "memberUpgrade":
+        navigation.navigate("memberUpgrade");
+        return;
       case "listingDetail":
         navigation.navigate("listingDetail", { listingId: target.listingId });
         return;

@@ -26,6 +26,9 @@ export type NotificationTarget =
   | { screen: "shelterNeeds" }
   // Adoption PR A · interim homes for the POSTER's pushes until the Applicant screen exists.
   | { screen: "shelterRequests" }
+  | { screen: "applicant"; inquiryId: string }
+  | { screen: "inquiry"; inquiryId: string }
+  | { screen: "memberUpgrade" }
   | { screen: "listingDetail"; listingId: string };
 
 const REPORT_LINKED_TYPES = new Set([
@@ -40,19 +43,18 @@ const REPORT_LINKED_TYPES = new Set([
 const VERIFICATION_TYPES = new Set([
   "verification_approved", "verification_rejected", "verification_needs_info"
 ]);
-// The ADOPTER's adoption pushes open My inquiries: the row carries the step, the reservation and
-// (once accepted) the poster's phone. stage_advanced, placement_withdrawn and listing_withdrawn
-// are the older ones; the rest came with adoption PR A (dev/adoption-build-review.md AD1–AD6).
-// placement_offered is the recipient's half of what used to be a two-way inquiry_received.
-const MY_INQUIRIES_TYPES = new Set([
-  "stage_advanced", "placement_withdrawn", "listing_withdrawn",
-  "placement_offered", "inquiry_accepted", "inquiry_rejected", "adoption_badge_needed",
+// Spec 2026-10-06 §1 · the adopter's adoption pushes open THAT inquiry's ladder (data.inquiry_id),
+// falling back to My inquiries; the badge push opens the upgrade it asks for. Placement pushes
+// keep My inquiries — a placement is answered on placeRequest, reached from there.
+const ADOPTER_INQUIRY_TYPES = new Set([
+  "stage_advanced", "listing_withdrawn", "inquiry_accepted", "inquiry_rejected",
   "adoption_reserved", "reservation_released", "adoption_completed"
 ]);
-// The POSTER's adoption pushes. Until the Applicant screen exists (the mobile adoption plan), a
-// shelter lands on Requests (the Adoption segment lists the applicant) and an individual poster
-// lands on the listing. The backend says which (`poster_is_shelter`), because the client holds no
-// account type. Before PR A, inquiry_received opened the poster's OWN My inquiries, an unrelated list.
+const MY_INQUIRIES_TYPES = new Set(["placement_offered", "placement_withdrawn"]);
+// The POSTER's adoption pushes open the Applicant screen (data.inquiry_id). A push without an
+// inquiry_id (from before the Applicant screen) keeps PR A's interim routing: a shelter lands on
+// Requests, an individual poster on the listing. The backend says which (`poster_is_shelter`),
+// because the client holds no account type.
 const POSTER_INQUIRY_TYPES = new Set(["inquiry_received", "inquiry_withdrawn"]);
 // US-V8 · the volunteer side of notify(): schedule and history folded onto one hub screen
 // (Task 5, K30/G9) — every volunteer notification now opens the hub on its "My shifts" tab,
@@ -87,9 +89,14 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
     return { screen: "myRescues" };
   }
   if (POSTER_INQUIRY_TYPES.has(n.type)) {
+    if (n.data?.inquiry_id) return { screen: "applicant", inquiryId: n.data.inquiry_id };
     if (n.data?.poster_is_shelter === true) return { screen: "shelterRequests" };
     if (n.data?.listing_id) return { screen: "listingDetail", listingId: n.data.listing_id };
     return null;
+  }
+  if (n.type === "adoption_badge_needed") return { screen: "memberUpgrade" };
+  if (ADOPTER_INQUIRY_TYPES.has(n.type)) {
+    return n.data?.inquiry_id ? { screen: "inquiry", inquiryId: n.data.inquiry_id } : { screen: "myInquiries" };
   }
   if (MY_INQUIRIES_TYPES.has(n.type)) {
     return { screen: "myInquiries" };

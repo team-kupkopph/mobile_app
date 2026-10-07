@@ -122,6 +122,13 @@ describe("the inquiry ladder", () => {
     expect(screen).toMatch(/line: \{[^}]*borderRadius: pill\(3\)/);
     expect(screen).toMatch(/dot: \{[^}]*borderRadius: pill\(DOT\)/);
   });
+
+  it("lets the adopter withdraw, with a confirm (spec §4)", () => {
+    expect(screen).toMatch(/canWithdraw\(inquiry\)/);
+    expect(screen).toMatch(/testID="btn\.inquiry\.withdraw"/);
+    expect(screen).toMatch(/\/withdraw`/);
+    expect(screen).toMatch(/<ConfirmModal/);
+  });
 });
 
 describeParity("the inquiry ladder matches the artboard", () => {
@@ -170,7 +177,9 @@ describe("listing detail (AQ2 / AD13)", () => {
   const detail = read("screens/ListingDetailScreen.tsx");
   it("hides Inquire on your own listing and explains the new refusals", () => {
     expect(detail).toMatch(/accountIdFromAccessToken\(tokens\?\.access\)/);
-    expect(detail).toMatch(/testID="text\.listingDetail\.yours"/);
+    // Spec §3 · "This is your listing." became a redirect to the poster's own view.
+    expect(detail).toMatch(/navigation\.replace\("posterListing", \{ listingId \}\)/);
+    expect(detail).not.toMatch(/listingDetail\.yours/);
     expect(detail).toMatch(/inquireBlockedCopy\(code\)/);
     expect(detail).toMatch(/inquirySentCopy\(/);
     expect(detail).not.toMatch(/The poster reaches you by phone/);

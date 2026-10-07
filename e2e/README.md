@@ -13,6 +13,7 @@ every PR slow is a suite people learn to skip.
 | `30-volunteer-signup.yaml` | shift → waiver + contact consent → requested | ✅ |
 | `15-owner-profile.yaml` | "You" tab → the owner's profile | ✅ |
 | `50-shelter-shell.yaml` | shelter sign-in → dashboard ⇄ shelter profile | ✅ |
+| `25-poster-screens-an-applicant.yaml` | shelter screens an inquiry → reserves → completes the adoption | ✅ — needs the e2e seed (`dev/e2e_fixtures.py`); device walk pending |
 | `40-signup-needs-a-human.yaml` | signup → email code → home | ❌ — one value is typed by a person |
 
 ### Why the last two exist

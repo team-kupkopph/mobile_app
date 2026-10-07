@@ -25,17 +25,19 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, Linking, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, contactLine, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, canWithdraw, closedChipTone, contactLine, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
+import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Avatar, Button, Card, Chip, PressScale, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
+import { TAP_SLOP } from "../touch";
 import { colors, gradients, motion, pill, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "inquiry">;
@@ -56,6 +58,7 @@ export function InquiryScreen({ navigation, route }: Props) {
   const [listing, setListing] = useState<ListingDetail | null>(null);
   // The artboard opens the current step by default; tapping a step toggles it.
   const [open, setOpen] = useState<string | null>(null);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   const load = useCallback(() => {
     setRes(null);
@@ -83,6 +86,13 @@ export function InquiryScreen({ navigation, route }: Props) {
 
   const state = loadState(res);
 
+  async function withdraw() {
+    setWithdrawOpen(false);
+    const r = await api.post(`/inquiries/${inquiryId}/withdraw`, {});
+    if (!r.ok) Alert.alert("Couldn't withdraw", r.data?.error?.message ?? "Try again.");
+    load();
+  }
+
   return (
     <View style={styles.screen} testID="screen.inquiry">
       <ScreenBackdrop />
@@ -103,8 +113,19 @@ export function InquiryScreen({ navigation, route }: Props) {
           onToggle={(key) => setOpen((prev) => (prev === key ? null : key))}
           onListing={() => navigation.navigate("listingDetail", { listingId: inquiry.listing.listing_id })}
           onGetVerified={() => navigation.navigate("memberUpgrade")}
+          onWithdraw={() => setWithdrawOpen(true)}
         />
       )}
+
+      <ConfirmModal
+        visible={withdrawOpen}
+        title="Withdraw your inquiry?"
+        body={`${listing?.poster?.name ?? "The poster"} will be told you're no longer applying for ${inquiry?.listing.name || "this animal"}.`}
+        confirmLabel="Withdraw"
+        tone="danger"
+        onConfirm={withdraw}
+        onCancel={() => setWithdrawOpen(false)}
+      />
     </View>
   );
 }
@@ -116,9 +137,10 @@ type BodyProps = {
   onToggle: (key: string) => void;
   onListing: () => void;
   onGetVerified: () => void;
+  onWithdraw: () => void;
 };
 
-function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerified }: BodyProps) {
+function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerified, onWithdraw }: BodyProps) {
   const pet = inquiry.listing.name;
   const poster = listing?.poster ?? null;
   const shelter = poster?.name ?? "the shelter";
@@ -127,7 +149,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
   const photo = listing?.photos?.[0];
   // D15 · a withdrawn/declined inquiry is over: say so, drop the "Step N of 6" chrome.
   const closed = inquiryIsClosed(inquiry.status);
-  const closedNote = inquiryClosedNote(inquiry.status);
+  const closedNote = inquiryClosedNote(inquiry.status, inquiry.end_reason, { pet, poster: shelter });
   const badgeNote = adopterBadgeNote(inquiry, shelter, pet);
   // AQ1 · the poster's number, from the inquiry alone: an AD16 404 on the listing fetch blanks
   // `poster`, and the promise "you'll both see each other's phone numbers" still has to hold.
@@ -155,7 +177,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
               </Text>
             </View>
             {closed ? (
-              <Chip label={inquiryStatusLabel(inquiry.status)} tone={inquiry.status === "declined" ? "danger" : "neutral"} dot={false} />
+              <Chip label={inquiryStatusLabel(inquiry.status, inquiry.end_reason)} tone={closedChipTone(inquiry.status, inquiry.end_reason)} dot={false} />
             ) : (
               <Chip label={header.label} tone={header.tone} dot={false} />
             )}
@@ -280,6 +302,13 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
         </Card>
       ) : null}
 
+      {canWithdraw(inquiry) ? (
+        <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.inquiry.withdraw"
+          style={styles.withdraw} onPress={onWithdraw}>
+          <Text style={styles.withdrawLabel}>Withdraw inquiry</Text>
+        </TouchableOpacity>
+      ) : null}
+
       {!closed ? <Text style={styles.hint}>Tap any step to see what it involves.</Text> : null}
     </ScrollView>
   );
@@ -350,5 +379,7 @@ const styles = StyleSheet.create({
   badgeCard: { marginTop: 14, gap: 12 },
   badgeText: { color: colors.ink, ...typography.body },
   closedNote: { marginTop: 12, ...typography.meta, color: colors.muted },
+  withdraw: { alignSelf: "center", marginTop: 18, minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
+  withdrawLabel: { color: colors.danger, ...typography.strong, fontWeight: "700" },
   hint: { marginTop: 18, textAlign: "center", ...typography.meta, color: colors.muted }
 });

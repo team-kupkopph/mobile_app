@@ -15,8 +15,19 @@ export const STAGE_LABEL: Record<string, string> = {
 };
 
 // D15 · a WITHDRAWN inquiry means the rescuer took the animal back or the placement was
-// withdrawn — never something the adopter did, so it never reads "You withdrew".
-export function inquiryStatusLabel(status: string): string {
+// withdrawn — it reads "You withdrew" only when the adopter did it (end_reason adopter_withdrew).
+// Spec 2026-10-06 §4 · a closed inquiry says WHY it closed. Without an end_reason (an older
+// server) the D15 wording stands.
+const REJECT_TEXT: Record<string, string> = {
+  not_a_fit: "they don't think it's the right match",
+  requirements_not_met: "the adoption requirements aren't met",
+  no_response: "they couldn't reach you",
+  other: "they decided not to go ahead"
+};
+
+export function inquiryStatusLabel(status: string, endReason?: string | null): string {
+  if (status === "declined" && endReason === "another_adopter_chosen") return "Found a home";
+  if (status === "withdrawn" && endReason === "adopter_withdrew") return "Withdrawn";
   switch (status) {
     case "adopted": return "Adopted";
     case "declined": return "Declined";
@@ -27,12 +38,29 @@ export function inquiryStatusLabel(status: string): string {
 
 // D15 · withdrawn and declined inquiries are over: the ladder and the card say so instead of
 // showing stage progress. `null` = still open (or adopted), so the screen keeps its ladder.
-export function inquiryClosedNote(status: string): string | null {
+export function inquiryClosedNote(status: string, endReason?: string | null,
+                                  ctx?: { pet: string; poster: string }): string | null {
+  const pet = ctx?.pet || "This animal";
+  if (status === "declined" && endReason === "another_adopter_chosen") {
+    return `${pet} was adopted by someone else. Thank you for offering a home.`;
+  }
+  if (status === "withdrawn" && endReason === "adopter_withdrew") return "You withdrew this inquiry.";
+  if (status === "declined" && endReason && REJECT_TEXT[endReason] && ctx) {
+    return `${ctx.poster} won't be going ahead: ${REJECT_TEXT[endReason]}.`;
+  }
   switch (status) {
     case "withdrawn": return "This animal is no longer available, so this inquiry is closed.";
     case "declined": return "This inquiry was declined.";
     default: return null;
   }
+}
+
+export function closedChipTone(status: string, endReason?: string | null): "danger" | "neutral" {
+  return status === "declined" && endReason !== "another_adopter_chosen" ? "danger" : "neutral";
+}
+
+export function canWithdraw(inquiry: MyInquiry): boolean {
+  return inquiry.status === "active" && inquiry.kind !== "placement";
 }
 
 export function inquiryIsClosed(status: string): boolean {

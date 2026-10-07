@@ -7,7 +7,7 @@ import { V3_SCOPE, V3_EXCLUDED } from "./v3Scope";
 const SCREENS = join(__dirname, "..", "screens");
 
 describe("v3Scope", () => {
-  it("has 40 in-scope screens — 34 from spec §4.2's own table (see v3Scope.ts header) plus "
+  it("has 43 in-scope screens — 34 from spec §4.2's own table (see v3Scope.ts header) plus "
     + "ShelterDonateScreen (Task B1), ShelterAnimalsScreen (Task B2) and ShelterRequestsScreen "
     + "(Task B3), each added whole by its own shell-root task (spec §5), minus the two screen "
     + "files Task 9 (P4) deleted (ShelterVolunteerRequestsScreen, "
@@ -15,8 +15,9 @@ describe("v3Scope", () => {
     + "own timeline — 37 -> 35 — plus the 6 P5 Task 3 (K24/K26) KawangGawa*/WaiverScreen "
     + "screens, moved from V3_EXCLUDED into scope once converted — 35 -> 41 — minus "
     + "RescueListedScreen, deleted by C15 when List for adoption became a draft that continues "
-    + "into the listing form — 41 -> 40", () => {
-    expect(V3_SCOPE.length).toBe(40);
+    + "into the listing form — 41 -> 40 — plus ApplicantScreen, the adoption poster loop's "
+    + "(plan 2026-10-06) first screen, born V3 — 40 -> 41 — plus PosterListingScreen — 41 -> 42 — plus MyListingsScreen — 42 -> 43", () => {
+    expect(V3_SCOPE.length).toBe(43);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {
