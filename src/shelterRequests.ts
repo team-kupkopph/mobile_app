@@ -49,10 +49,9 @@ export const DEFAULT_STATUS_TONE = { label: "Unknown", tone: "neutral" as ChipTo
 /**
  * Where a row's tap goes, re-derived from `item.kind` rather than trusting the wire's own
  * `target.route` string directly — same defensive stance notifications.ts takes for its own
- * client-side routing. Adoption and placement are both an `AdoptionInquiry`; both land on
- * the SAME ladder (`inquiry`), the shelter is just on a different side of it (poster vs.
- * placement recipient) — the ladder itself already renders correctly either way (see
- * InquiryScreen). Volunteer opens that shift's activity timeline on the Pending section —
+ * client-side routing. Adoption and placement are both an `AdoptionInquiry`, but they land
+ * differently: an adoption row opens the Applicant screen (the poster's side; AD1 is closed),
+ * a placement row the ladder (`inquiry`) or, while awaiting this shelter's answer, placeRequest. Volunteer opens that shift's activity timeline on the Pending section —
  * Task 9 folded the old standalone requests queue into it.
  *
  * ⚠️ Reads the id from `item.target.id`, NOT `item.id`. For adoption/placement the two are
@@ -71,5 +70,8 @@ export function requestRoute(item: ShelterRequest): { name: string; params: Reco
   if (item.kind === "placement" && item.status === "active") {
     return { name: "placeRequest", params: { inquiryId: item.target.id } };
   }
+  // Spec 2026-10-06 §1 · an adoption row opens the Applicant screen (AD1 closed): the poster's view
+  // of one applicant, with Accept/Reject, the reservation and the stage ladder.
+  if (item.kind === "adoption") return { name: "applicant", params: { inquiryId: item.target.id } };
   return { name: "inquiry", params: { inquiryId: item.target.id } };
 }

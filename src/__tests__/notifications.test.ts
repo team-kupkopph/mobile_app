@@ -24,31 +24,38 @@ describe("notificationTarget", () => {
     expect(notificationTarget({ type: "something_new", data: { report_id: "r1" } })).toBeNull();
   });
 
-  it("routes stage_advanced (the adopter's own inquiry moved forward) to their inquiries list", () => {
+  it("routes stage_advanced (the adopter's own inquiry moved forward) to that inquiry's ladder (spec §1)", () => {
     expect(notificationTarget({ type: "stage_advanced", data: { inquiry_id: "i1", stage_key: "vet_check" } }))
-      .toEqual({ screen: "myInquiries" });
+      .toEqual({ screen: "inquiry", inquiryId: "i1" });
   });
 
-  it("routes the poster's pushes: a shelter to Requests, an individual to the listing (interim)", () => {
+  it("routes the poster's pushes to the Applicant screen (spec §1)", () => {
     for (const type of ["inquiry_received", "inquiry_withdrawn"]) {
       expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1", poster_is_shelter: true } }))
-        .toEqual({ screen: "shelterRequests" });
-      expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1", poster_is_shelter: false } }))
-        .toEqual({ screen: "listingDetail", listingId: "l1" });
-      // A push from before poster_is_shelter existed still has a listing to open.
-      expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1" } }))
-        .toEqual({ screen: "listingDetail", listingId: "l1" });
-      expect(notificationTarget({ type, data: {} })).toBeNull();
+        .toEqual({ screen: "applicant", inquiryId: "i1" });
+      // without an inquiry_id, PR A's interim routing still applies
+      expect(notificationTarget({ type, data: { listing_id: "l1", poster_is_shelter: true } })).toEqual({ screen: "shelterRequests" });
+      expect(notificationTarget({ type, data: { listing_id: "l1" } })).toEqual({ screen: "listingDetail", listingId: "l1" });
     }
   });
 
-  it("routes the adopter's poster-loop types to My inquiries (adoption PR A)", () => {
-    for (const type of ["placement_offered", "inquiry_accepted", "inquiry_rejected",
-                        "adoption_badge_needed", "adoption_reserved", "reservation_released",
-                        "adoption_completed"]) {
-      expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1" } }))
-        .toEqual({ screen: "myInquiries" });
+  it("routes the adopter's pushes to that inquiry's ladder, and the badge push to the upgrade", () => {
+    for (const type of ["inquiry_accepted", "inquiry_rejected", "adoption_reserved", "reservation_released",
+                        "adoption_completed", "stage_advanced", "listing_withdrawn"]) {
+      expect(notificationTarget({ type, data: { inquiry_id: "i1" } })).toEqual({ screen: "inquiry", inquiryId: "i1" });
+      expect(notificationTarget({ type, data: {} })).toEqual({ screen: "myInquiries" });
     }
+    expect(notificationTarget({ type: "adoption_badge_needed", data: { inquiry_id: "i1" } })).toEqual({ screen: "memberUpgrade" });
+    for (const type of ["placement_offered", "placement_withdrawn"]) {
+      expect(notificationTarget({ type, data: { inquiry_id: "i1" } })).toEqual({ screen: "myInquiries" });
+    }
+  });
+
+  it("opens the three new destinations from the bell", () => {
+    const src = require("fs").readFileSync(require("path").join(__dirname, "../screens/NotificationsScreen.tsx"), "utf8");
+    expect(src).toMatch(/case "applicant":\s*navigation\.navigate\("applicant", \{ inquiryId: target\.inquiryId \}\)/);
+    expect(src).toMatch(/case "inquiry":\s*navigation\.navigate\("inquiry", \{ inquiryId: target\.inquiryId \}\)/);
+    expect(src).toMatch(/case "memberUpgrade":\s*navigation\.navigate\("memberUpgrade"\)/);
   });
 
   it("opens the two new destinations from the bell, not just from a push", () => {
@@ -130,15 +137,14 @@ describe("Sagip loop-closure notifications", () => {
       .toEqual({ screen: "myRescues" });
   });
 
-  it("routes placement_withdrawn exactly like stage_advanced (C14)", () => {
+  it("routes placement_withdrawn to My inquiries (C14; placements stay there, spec §1)", () => {
     const withdrawn = notificationTarget({ type: "placement_withdrawn", data: { listing_id: "l1", inquiry_id: "i1" } });
     expect(withdrawn).toEqual({ screen: "myInquiries" });
-    expect(withdrawn).toEqual(notificationTarget({ type: "stage_advanced", data: { inquiry_id: "i1", stage_key: "vet_check" } }));
   });
 
   it("routes listing_withdrawn exactly like stage_advanced (D15)", () => {
     const withdrawn = notificationTarget({ type: "listing_withdrawn", data: { listing_id: "l1", inquiry_id: "i1" } });
-    expect(withdrawn).toEqual({ screen: "myInquiries" });
+    expect(withdrawn).toEqual({ screen: "inquiry", inquiryId: "i1" });
     expect(withdrawn).toEqual(notificationTarget({ type: "stage_advanced", data: { inquiry_id: "i1", stage_key: "vet_check" } }));
   });
 

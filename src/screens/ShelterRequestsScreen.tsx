@@ -109,6 +109,8 @@ export function ShelterRequestsScreen({ navigation }: Props) {
                 navigation.navigate("shelterVolunteerActivity", { shiftId: route.params.shiftId, section: "pending" });
               } else if (route.name === "placeRequest") {
                 navigation.navigate("placeRequest", { inquiryId: route.params.inquiryId });
+              } else if (route.name === "applicant") {
+                navigation.navigate("applicant", { inquiryId: route.params.inquiryId });
               } else {
                 navigation.navigate("inquiry", { inquiryId: route.params.inquiryId });
               }

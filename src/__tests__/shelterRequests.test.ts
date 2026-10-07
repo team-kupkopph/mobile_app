@@ -26,10 +26,10 @@ describe("SEGMENT_KIND", () => {
 });
 
 describe("requestRoute", () => {
-  it("routes an adoption item to the inquiry ladder", () => {
+  it("routes an adoption item to the Applicant screen (spec §1)", () => {
     expect(requestRoute(item({
       kind: "adoption", id: "iq-1", target: { route: "inquiry", id: "iq-1" }
-    }))).toEqual({ name: "inquiry", params: { inquiryId: "iq-1" } });
+    }))).toEqual({ name: "applicant", params: { inquiryId: "iq-1" } });
   });
 
   // The signup's own id (`item.id`) and the shift's id (`item.target.id`) are DIFFERENT
