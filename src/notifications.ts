@@ -24,7 +24,8 @@ export type NotificationTarget =
   | { screen: "impact" }
   | { screen: "myDonations" }
   | { screen: "shelterNeeds" }
-  // Adoption PR A · interim homes for the POSTER's pushes until the Applicant screen exists.
+  // Poster-push fallbacks when the push lacks an inquiry_id: shelter → their Requests tab,
+  // individual → the listing. Spec 2026-10-06 §1.
   | { screen: "shelterRequests" }
   | { screen: "applicant"; inquiryId: string }
   | { screen: "inquiry"; inquiryId: string }

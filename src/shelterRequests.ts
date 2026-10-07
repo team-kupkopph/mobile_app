@@ -51,8 +51,10 @@ export const DEFAULT_STATUS_TONE = { label: "Unknown", tone: "neutral" as ChipTo
  * `target.route` string directly — same defensive stance notifications.ts takes for its own
  * client-side routing. Adoption and placement are both an `AdoptionInquiry`, but they land
  * differently: an adoption row opens the Applicant screen (the poster's side; AD1 is closed),
- * a placement row the ladder (`inquiry`) or, while awaiting this shelter's answer, placeRequest. Volunteer opens that shift's activity timeline on the Pending section —
- * Task 9 folded the old standalone requests queue into it.
+ * a placement row the ladder (`inquiry`) or, while awaiting this shelter's answer,
+ * placeRequest.
+ * Volunteer opens that shift's activity timeline on the Pending section — Task 9 folded the
+ * old standalone requests queue into it.
  *
  * ⚠️ Reads the id from `item.target.id`, NOT `item.id`. For adoption/placement the two are
  * the same value (the inquiry's own pk either way), but for volunteer they are NOT: `id` is
