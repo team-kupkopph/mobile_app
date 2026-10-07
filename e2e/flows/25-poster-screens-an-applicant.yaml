@@ -1,0 +1,49 @@
+# MONEY PATH 6 · the poster loop (spec 2026-10-06): a shelter opens Requests → Adoption, screens
+# the e2e owner's inquiry, sees their phone, reserves and completes the adoption.
+# Requires dev/e2e_fixtures.py (backend PR "poster-screen follow-ups") — it seeds "E2E Milo" with
+# one fresh inquiry every run, because this flow completes it.
+appId: ph.kupkop.app
+---
+- runFlow:
+    file: 00-signin.yaml
+    env:
+      MAESTRO_EMAIL: ${MAESTRO_SHELTER_EMAIL}
+      MAESTRO_PASSWORD: ${MAESTRO_SHELTER_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterDashboard"
+    timeout: 30000
+- tapOn:
+    id: "tab.shelter.requests"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterRequests"
+    timeout: 15000
+- tapOn: "E2E Milo"
+- extendedWaitUntil:
+    visible:
+      id: "screen.applicant"
+    timeout: 15000
+- assertVisible:
+    id: "text.applicant.contactLocked"
+- tapOn:
+    id: "btn.applicant.primary"          # Accept for screening
+- tapOn: "Accept"
+- extendedWaitUntil:
+    visible:
+      id: "text.applicant.phone"
+    timeout: 15000
+- tapOn:
+    id: "btn.applicant.primary"          # Reserve E2E Milo for E2E
+- tapOn: "Reserve"
+- extendedWaitUntil:
+    visible: "Complete adoption"
+    timeout: 15000
+- tapOn:
+    id: "btn.applicant.primary"          # Complete adoption
+- tapOn: "Complete"
+- extendedWaitUntil:
+    visible:
+      id: "card.applicant.done"
+    timeout: 15000
+- assertVisible: ".*went home with.*"
