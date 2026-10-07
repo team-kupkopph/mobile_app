@@ -92,7 +92,7 @@ test("A closed inquiry's ladder neither auto-opens nor marks a stage current; th
   expect(src).toContain("ladderStageTone(");
   expect(src).toMatch(/!inquiryIsClosed\(found\.status\)[\s\S]*?setOpen\(/);
   expect(src).toMatch(/current = tone === "active"/);
-  expect(src).toContain("View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status)}");
+  expect(src).toContain("View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status, inquiry.end_reason)}");
 });
 
 test("A closed inquiry card shows no stage progress, and chip labels are derived (D15)", () => {
