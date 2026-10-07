@@ -58,6 +58,7 @@ import { ShelterVerifyScreen } from "../screens/ShelterVerifyScreen";
 import { SigninScreen } from "../screens/SigninScreen";
 import { InquiryScreen } from "../screens/InquiryScreen";
 import { ApplicantScreen } from "../screens/ApplicantScreen";
+import { PosterListingScreen } from "../screens/PosterListingScreen";
 import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
 import { MyReportsScreen } from "../screens/MyReportsScreen";
@@ -126,6 +127,7 @@ export function RootNavigator() {
       <Stack.Screen name="signin" component={SigninScreen} />
       <Stack.Screen name="inquiry" component={InquiryScreen} />
       <Stack.Screen name="applicant" component={ApplicantScreen} />
+      <Stack.Screen name="posterListing" component={PosterListingScreen} />
       <Stack.Screen name="forgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="resetOtp" component={ResetOtpScreen} />
       <Stack.Screen name="resetPassword" component={ResetPasswordScreen} />

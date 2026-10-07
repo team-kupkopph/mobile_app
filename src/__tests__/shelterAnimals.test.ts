@@ -74,8 +74,8 @@ describe("drafts from accepted placements (D7)", () => {
   });
 
   it("offers Publish, not Inquire, on a draft", () => {
-    const detail = readFileSync(join(__dirname, "..", "screens", "ListingDetailScreen.tsx"), "utf8");
-    expect(detail).toMatch(/btn\.listingDetail\.publish/);
-    expect(detail).toMatch(/listing\.status === DRAFT_STATUS/);
+    const screen = readFileSync(join(__dirname, "..", "screens", "PosterListingScreen.tsx"), "utf8");
+    expect(screen).toMatch(/btn\.posterListing\.publish/);
+    expect(screen).toMatch(/listing\.status === "draft"/);
   });
 });
