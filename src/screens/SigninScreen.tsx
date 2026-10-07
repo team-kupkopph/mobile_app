@@ -1,6 +1,7 @@
 // US-A5 — reference: screens/user/screen-signin.png
 // POST /auth/login { email, password } -> 401 invalid | 403 unverified | 200 { access, refresh }
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Constants from "expo-constants";
 import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -15,6 +16,10 @@ import { SocialSignIn } from "../components/ui/SocialSignIn";
 import { colors, gradients, radii, spacing, squircle, typography } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
+
+// Same gate as RootNavigator.tsx's IS_DEV_PROFILE / WelcomeScreen.tsx's triple-tap /
+// SignupWall.tsx's dev chip. In a production build the two chips below never render.
+const IS_DEV_PROFILE = Constants.expoConfig?.extra?.profile === "development";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -160,9 +165,61 @@ export function SigninScreen({ navigation }: Props) {
         <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("accountType")}>
           <Text style={styles.linkCentered}>New to Kupkop? Create account</Text>
         </TouchableOpacity>
+
+        {/*
+          R2-F2 · Maestro's inputText doesn't persist on iOS 26.5's secure field after a
+          clearKeychain + clearState cold start — flow 25 never posted the login because
+          the password cell was empty by the time Enter fired. These two chips give the
+          E2E suite a tap-only sign-in that doesn't go through the keyboard at all (same
+          /auth/dev/seed_tokens path DevMenuScreen uses). IS_DEV_PROFILE: production
+          builds don't render them.
+        */}
+        {IS_DEV_PROFILE ? (
+          <View style={styles.devRow}>
+            <TouchableOpacity
+              testID="btn.signin.devSeedOwner"
+              hitSlop={TAP_SLOP}
+              activeOpacity={0.75}
+              onPress={() => onDevSeed("e2e.owner@kupkop.invalid")}
+              style={styles.devPressable}
+            >
+              <Text style={styles.devLink}>Dev · Seed as e2e.owner</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              testID="btn.signin.devSeedShelter"
+              hitSlop={TAP_SLOP}
+              activeOpacity={0.75}
+              onPress={() => onDevSeed("e2e.shelter@kupkop.invalid")}
+              style={styles.devPressable}
+            >
+              <Text style={styles.devLink}>Dev · Seed as e2e.shelter</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </View>
     </View>
   );
+
+  async function onDevSeed(seedEmail: string) {
+    if (submitting) return;
+    setError(undefined);
+    setSubmitting(true);
+    try {
+      const res = await api.post("/auth/dev/seed_tokens", { email: seedEmail });
+      if (res.ok) {
+        await setTokens({ access: res.data.access, refresh: res.data.refresh });
+        navigation.reset({ index: 0, routes: [{ name: "home" }] });
+        return;
+      }
+      if (res.status === 0) {
+        setError("Couldn't reach the server. Check your connection and try again.");
+        return;
+      }
+      setError(res.data?.detail ?? "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 }
 
 const styles = StyleSheet.create({
@@ -234,5 +291,19 @@ const styles = StyleSheet.create({
     ...typography.meta,
     fontWeight: "800",
     textAlign: "center"
+  },
+  devRow: {
+    marginTop: 18,
+    alignItems: "center"
+  },
+  devPressable: {
+    marginTop: 10,
+    minHeight: 44,
+    justifyContent: "center"
+  },
+  devLink: {
+    color: authColors.muted,
+    ...typography.meta,
+    fontWeight: "700"
   }
 });

@@ -4,11 +4,39 @@
 # one fresh inquiry every run, because this flow completes it.
 appId: ph.kupkop.app
 ---
-- runFlow:
-    file: 00-signin.yaml
-    env:
-      MAESTRO_EMAIL: ${MAESTRO_SHELTER_EMAIL}
-      MAESTRO_PASSWORD: ${MAESTRO_SHELTER_PASSWORD}
+# R2-F2 fix · the SigninScreen Dev · Seed Shelter chip (`btn.signin.devSeedShelter`) is a
+# dev-only tap-only sign-in: it posts the shelter fixture email to /auth/dev/seed_tokens
+# and resets nav to home. Flow 25 uses it so it doesn't depend on Maestro's inputText
+# reaching the SignIn secure field (iOS 26.5 drops it after clearKeychain+clearState —
+# the Run 2 blocker). The real sign-in path is still exercised by the auth plan's
+# 00-signin.yaml. See SigninScreen.tsx R2-F2 fix. Maestro's tapOn: id does NOT interpolate
+# env vars, so the chip id is hardcoded here (one chip per e2e flow is cleanest anyway).
+- clearKeychain
+- launchApp:
+    clearState: true
+    permissions:
+      location: inuse
+- extendedWaitUntil:
+    visible:
+      id: "screen.welcome"
+    timeout: 60000
+- tapOn:
+    id: "btn.welcome.login"
+- assertVisible:
+    id: "screen.signin"
+# The chip sits below the Create account link; scroll so it's on-screen.
+- scroll
+- scroll
+- tapOn:
+    id: "btn.signin.devSeedShelter"
+# ⚠️ 60 s, not 15 s: `/auth/dev/seed_tokens` + `setTokens` (SecureStore write) + nav.reset
+# all happen in the chip's handler. On a cold-launched sim after `clearKeychain + clearState`,
+# the first fetch's TLS/connection handshake plus the SecureStore write can take 30–45 s —
+# Run 3's first attempt saw ~45 s before the backend logged the POST.
+- extendedWaitUntil:
+    notVisible:
+      id: "screen.signin"
+    timeout: 60000
 - extendedWaitUntil:
     visible:
       id: "screen.shelterDashboard"
