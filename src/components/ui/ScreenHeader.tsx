@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { colors, elevation, spacing, typography } from "../../theme";
@@ -77,6 +77,11 @@ type ScreenHeaderProps = {
  */
 export function ScreenHeader({ title, onBack, right, align = "left", children }: ScreenHeaderProps) {
   const insets = useSafeAreaInsets();
+  // R6-F9 · at a large font scale (AX3 and up) a two-word title cannot fit on one line beside the 44 pt back
+  // button and was cut to "Forgot…". Up to three lines then, not unlimited: a few titles are dynamic. At default
+  // size it stays one line, so no existing screen changes.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
 
   return (
     <View style={[styles.header, { paddingTop: insets.top }]}>
@@ -84,7 +89,7 @@ export function ScreenHeader({ title, onBack, right, align = "left", children }:
         {onBack ? <BackButton onPress={onBack} /> : null}
         {title ? (
           <Text
-            numberOfLines={1}
+            numberOfLines={large ? 3 : 1}
             accessibilityRole="header"
             style={[
               styles.title,
