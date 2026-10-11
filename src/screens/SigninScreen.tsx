@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
 import { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
@@ -104,7 +104,15 @@ export function SigninScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <SimpleHeader onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      {/* R6-F7 · the form scrolls. It was a plain flex:1 View, so at AX5 (and on a small phone with the
+          keyboard up) the Log in button and the social row were unreachable. `handled` keeps the first tap on
+          a button landing while the keyboard is open; the content grows to the screen, so the default layout
+          is unchanged. */}
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.logoMark}>
           <LinearGradient colors={[colors.teal, colors.tealDark]} style={styles.logoGradient}>
             <Image source={paw} resizeMode="contain" style={styles.logoIcon} />
@@ -196,7 +204,7 @@ export function SigninScreen({ navigation }: Props) {
             </TouchableOpacity>
           </View>
         ) : null}
-      </View>
+      </ScrollView>
     </View>
   );
 
@@ -227,9 +235,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent"
   },
+  // flexGrow, not flex: this is a ScrollView's contentContainerStyle (R6-F7): it fills the screen when the form
+  // is short, and scrolls when it is not. paddingBottom keeps the last control off the screen edge.
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
     alignItems: "center"
   },
   logoMark: {
