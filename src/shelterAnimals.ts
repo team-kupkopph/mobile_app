@@ -29,6 +29,17 @@ export const STATUS_CHIP: Record<ListingStatus, { label: string; tone: ChipTone 
   adopted: { label: "Adopted", tone: "success" }
 };
 
+/** R5-F6 / CP-1 · a listing with no name still needs something to call it in a list row. */
+export const UNNAMED = "Unnamed";
+export function listingTitle(name: string | null | undefined): string {
+  return (name ?? "").trim() || UNNAMED;
+}
+/** The letter on a photo-less tile; "?" when there is no name to take one from. */
+export function listingInitial(name: string | null | undefined): string {
+  const t = (name ?? "").trim();
+  return t ? t.charAt(0).toUpperCase() : "?";
+}
+
 /** Spec 2026-10-06 §3 · the poster's own rows say how many people are waiting on an answer. */
 export function applicantsChip(n: number | undefined): string | null {
   if (!n) return null;
