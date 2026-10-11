@@ -38,7 +38,7 @@ export function Chip({ label, tone = "neutral", dot = true, style }: ChipProps) 
   return (
     <View style={[styles.chip, { backgroundColor: bg }, style]}>
       {dot ? <View style={[styles.dot, { backgroundColor: fg }]} /> : null}
-      <Text style={[styles.label, { color: fg }]} numberOfLines={1}>{label}</Text>
+      <Text style={[styles.label, { color: fg }]}>{label}</Text>
     </View>
   );
 }
@@ -53,8 +53,12 @@ export function Chip({ label, tone = "neutral", dot = true, style }: ChipProps) 
 const HEIGHT = 30;
 
 const styles = StyleSheet.create({
+  // R6-F4 · `minHeight`, never `height`, and a label that may wrap: at AX5 a fixed 30 pt pill
+  // clipped its own text (the same shape as the Button's R6-F3). At default size the label
+  // plus padding is under 30, so the minHeight still sets the height.
   chip: {
-    height: HEIGHT,
+    minHeight: HEIGHT,
+    paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: pill(HEIGHT),
     flexDirection: "row",
