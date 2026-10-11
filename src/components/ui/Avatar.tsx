@@ -31,10 +31,12 @@ type AvatarProps = {
  * organisation the moment a list is sorted differently, which makes the colour a lie.
  */
 export function Avatar({ initials, children, tinted, size = 52, style }: AvatarProps) {
+  // R6-F5 · the letters sit in a fixed, `overflow: "hidden"` tile sized at 0.33 × the tile, so they must
+  // not scale with Dynamic Type: at AX5 they outgrew the tile and were cropped ("R/").
   const letters = (initials ?? "").trim().slice(0, 2).toUpperCase();
   const shape = { width: size, height: size, borderRadius: squircle(size) };
   const face = children ?? (
-    <Text style={[styles.initials, { fontSize: Math.round(size * 0.33) }]}>{letters}</Text>
+    <Text style={[styles.initials, { fontSize: Math.round(size * 0.33) }]} allowFontScaling={false}>{letters}</Text>
   );
 
   if (!tinted) {
@@ -56,7 +58,7 @@ export function Avatar({ initials, children, tinted, size = 52, style }: AvatarP
       style={[styles.base, shape, style]}
     >
       {children ?? (
-        <Text style={[styles.initials, { color: pick.ink, fontSize: Math.round(size * 0.33) }]}>
+        <Text style={[styles.initials, { color: pick.ink, fontSize: Math.round(size * 0.33) }]} allowFontScaling={false}>
           {letters}
         </Text>
       )}
