@@ -3,7 +3,7 @@
 // to shelter_profile). Never label tier 1 "Independent rescuer" (decision 3): it is "Community rescue".
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ShelterTier } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -72,7 +72,11 @@ export function ShelterTierScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen}>
       <AuthHeader title="Shelter type" activeStep={0} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>What kind of shelter?</Text>
         <Text style={styles.caption}>This sets which documents we'll ask for — you can start either way today.</Text>
 
@@ -94,14 +98,14 @@ export function ShelterTierScreen({ navigation, route }: Props) {
             <Text style={styles.chevron}>›</Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
-  content: { flex: 1, paddingHorizontal: spacing.lg },
+  content: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
   title: { color: authColors.ink, ...typography.hero, lineHeight: 30 },
   caption: { marginTop: 6, color: authColors.muted, ...typography.meta, lineHeight: 20 },
   card: {

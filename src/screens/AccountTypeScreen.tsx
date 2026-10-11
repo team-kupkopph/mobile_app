@@ -5,7 +5,10 @@
 // and the user lands straight on signup-success.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator, Alert, Image, ImageSourcePropType, ScrollView, StyleSheet, Text,
+  TouchableOpacity, View
+} from "react-native";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
@@ -68,7 +71,11 @@ export function AccountTypeScreen({ navigation, route }: Props) {
     <View style={styles.screen} testID="screen.accountType">
       <AuthHeader title="Choose account type" activeStep={0} onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>How will you join?</Text>
         <Text style={styles.caption}>This sets up the right account — you can get verified anytime.</Text>
 
@@ -105,7 +112,7 @@ export function AccountTypeScreen({ navigation, route }: Props) {
           </View>
           <Text style={styles.chevron}>›</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -116,8 +123,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg
   },
   title: {
     color: authColors.ink,

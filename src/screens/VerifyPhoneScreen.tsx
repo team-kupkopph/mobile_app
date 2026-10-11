@@ -8,7 +8,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator, Alert, NativeSyntheticEvent, StyleSheet, Text, TextInput,
+  ActivityIndicator, Alert, NativeSyntheticEvent, ScrollView, StyleSheet, Text, TextInput,
   TextInputKeyPressEventData, TouchableOpacity, View
 } from "react-native";
 
@@ -138,7 +138,11 @@ export function VerifyPhoneScreen({ navigation }: Props) {
         title="Verify your number"
         onBack={() => (step === "code" ? setStep("enter") : navigation.goBack())}
       />
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {step === "enter" ? (
           <>
             <Text style={styles.title}>Add your mobile number</Text>
@@ -205,14 +209,14 @@ export function VerifyPhoneScreen({ navigation }: Props) {
             />
           </>
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
-  content: { flex: 1, paddingHorizontal: spacing.lg },
+  content: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
   title: { color: authColors.ink, ...typography.hero, lineHeight: 30 },
   caption: { marginTop: 8, color: authColors.muted, ...typography.meta, lineHeight: 20 },
   phoneText: { marginTop: 3, color: authColors.ink, ...typography.strong, fontWeight: "800" },

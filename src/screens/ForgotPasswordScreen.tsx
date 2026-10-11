@@ -3,7 +3,7 @@
 // never reveal whether the email is registered.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
@@ -47,7 +47,11 @@ export function ForgotPasswordScreen({ navigation }: Props) {
     <View style={styles.screen}>
       <SimpleHeader title="Forgot password" onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.iconCircle}>
           <View style={styles.lockShackle} />
           <View style={styles.lockBody} />
@@ -71,7 +75,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
         <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("signin")}>
           <Text style={styles.linkCentered}>Remembered it? Log in</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -82,8 +86,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
     alignItems: "center"
   },
   iconCircle: {

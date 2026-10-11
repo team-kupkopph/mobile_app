@@ -2,7 +2,7 @@
 // POST /auth/password/reset { email, code, new_password } -> 400 invalid code | 410 expired code | 200 ok
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
@@ -87,7 +87,11 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <SimpleHeader title="Reset password" onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Create a new password</Text>
         <Text style={styles.caption}>Make it something you'll remember.</Text>
 
@@ -133,7 +137,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
         <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("signin")}>
           <Text style={styles.linkCentered}>Back to log in</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -155,8 +159,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg
   },
   title: {
     color: authColors.ink,

@@ -2,7 +2,7 @@
 // Informational recap of what the account unlocks; NOT an action menu — "Start exploring" is the only exit.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AdoptIcon, VolunteerIcon } from "../components/AppIcons";
 import { TopStatus } from "../components/TopStatus";
@@ -55,7 +55,11 @@ export function SignupSuccessScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.signupSuccess">
       <TopStatus />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.checkCircle}>
           <View style={styles.checkMarkStem} />
           <View style={styles.checkMarkKick} />
@@ -92,7 +96,7 @@ export function SignupSuccessScreen({ navigation }: Props) {
         </View>
 
         <PrimaryButton testID="btn.signupSuccess.continue" label="Start exploring" onPress={onStartExploring} style={styles.startButton} />
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -120,8 +124,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
     alignItems: "center"
   },
   checkCircle: {

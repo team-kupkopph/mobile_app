@@ -2,7 +2,7 @@
 // Terminal success screen for the recovery chain. No API call — /auth/password/reset already
 // completed the change (and, per the backend, invalidated other sessions) one screen back.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
@@ -20,7 +20,11 @@ export function PasswordChangedScreen({ navigation }: Props) {
     <View style={styles.screen}>
       <SimpleHeader />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.checkCircle}>
           <View style={styles.checkMarkStem} />
           <View style={styles.checkMarkKick} />
@@ -45,7 +49,7 @@ export function PasswordChangedScreen({ navigation }: Props) {
         <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("support")}>
           <Text style={styles.linkCentered}>Need help? Contact support</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -56,8 +60,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
     alignItems: "center"
   },
   checkCircle: {
