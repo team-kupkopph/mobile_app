@@ -126,7 +126,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
           ) : null}
         </Card>
 
-        <Text style={styles.section}>{applicantsHeading(applicants, !!next)}</Text>
+        <Text style={styles.section}>{applicantsHeading(applicants, !!next, !!appsRes?.ok)}</Text>
         {appsRes && !appsRes.ok ? (
           <LoadStateView state={loadState(appsRes)} subject="list of applicants" onRetry={() => loadApplicants(1)} />
         ) : applicants.length === 0 && appsRes ? (

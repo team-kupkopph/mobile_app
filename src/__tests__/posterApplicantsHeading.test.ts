@@ -31,6 +31,30 @@ describe("applicantsHeading — the count is the open applicants only", () => {
   });
 });
 
+describe("applicantsHeading — no number while the count is unknown (O6-7)", () => {
+  // Seen on the device in Run 6 part 6 (PL-9): with the applicants fetch failing, the heading still
+  // read "Applicants (3)", the count from an earlier load, over the error state. On a first load it
+  // read "Applicants (0)" before any response. Both state a number the screen does not know.
+  const rows = [row("active"), row("active"), row("active")];
+  it("is just 'Applicants' when the last fetch did not succeed, whatever rows are held", () => {
+    expect(applicantsHeading(rows, false, false)).toBe("Applicants");
+    expect(applicantsHeading(rows, true, false)).toBe("Applicants");
+    expect(applicantsHeading([], false, false)).toBe("Applicants");
+  });
+  it("is unchanged when the count is known (the default, and an explicit true)", () => {
+    expect(applicantsHeading(rows, false)).toBe("Applicants (3)");
+    expect(applicantsHeading(rows, false, true)).toBe("Applicants (3)");
+    expect(applicantsHeading([], false, true)).toBe("Applicants (0)");
+    expect(applicantsHeading(rows, true, true)).toBe("Applicants (3+)");
+  });
+});
+
+describe("Your listing passes whether the fetch succeeded (O6-7)", () => {
+  it("the heading is told whether the applicants response was ok", () => {
+    expect(screen).toContain("applicantsHeading(applicants, !!next, !!appsRes?.ok)");
+  });
+});
+
 describe("closedToggleLabel — says how many closed rows it shows or hides", () => {
   it("Show N closed while collapsed", () => {
     expect(closedToggleLabel(1, false, false)).toBe("Show 1 closed");
@@ -52,7 +76,7 @@ describe("Your listing goes through the helpers (R5-F3)", () => {
     expect(screen).toContain("btn.posterListing.showClosed");
   });
   it("the heading and the toggle come from the helpers, not from raw counts or literals", () => {
-    expect(screen).toContain("applicantsHeading(applicants, !!next)");
+    expect(screen).toContain("applicantsHeading(applicants, !!next");
     expect(screen).toContain("closedToggleLabel(closedRows.length, !!next, showClosed)");
     expect(screen).not.toMatch(/Applicants \(\{applicants\.length/);
     expect(screen).not.toContain('"Hide closed"');
