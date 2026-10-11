@@ -3,7 +3,7 @@ import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
 import { setStatusBarStyle } from "expo-status-bar";
 import { useCallback, useRef } from "react";
-import { Image, ImageSourcePropType, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ImageSourcePropType, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { SocialProvider } from "./auth/socialAuth";
@@ -142,6 +142,11 @@ export function WelcomeScreen({
 }: WelcomeScreenProps) {
   const copy = mergeCopy(copyInput);
   const insets = useSafeAreaInsets();
+  // R6-F6 · at a large font scale (AX3 and up) the sheet is taller than the screen: the hero is `flex: 1`
+  // and shrinks to nothing and the sheet cannot scroll, so "Get started" went under the status bar. Large
+  // scrolls the whole page; default size keeps the tree it always had.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
 
   /**
    * ⚠️ SET ON FOCUS, NOT RENDERED AS <StatusBar style="light" />.
@@ -194,9 +199,9 @@ export function WelcomeScreen({
     }, TRIPLE_TAP_WINDOW_MS);
   }, [onDevMenu]);
 
-  return (
-    <View style={styles.root} testID="screen.welcome">
-      <LinearGradient colors={[c.teal, c.forest]} style={styles.hero}>
+  const body = (
+    <>
+      <LinearGradient colors={[c.teal, c.forest]} style={[styles.hero, large && styles.heroLarge]}>
         {/* Decoration only — hidden from screen readers, which would otherwise announce
             three unnamed images before the person reaches anything they can act on. */}
         <Image
@@ -216,7 +221,7 @@ export function WelcomeScreen({
           style={[styles.decorPaw, styles.decorPawB]}
         />
 
-        <View style={[styles.heroInner, { paddingTop: insets.top + 28 }]}>
+        <View style={[styles.heroInner, large && styles.heroInnerLarge, { paddingTop: insets.top + 28 }]}>
           <Pressable
             onPress={handleLogoPress}
             style={styles.logoCard}
@@ -237,16 +242,16 @@ export function WelcomeScreen({
 
           {/* accessibilityRole="header" gives a screen reader a landmark to jump to — US-W1
               is about navigability, and a hero with no header is a wall of flat text. */}
-          <Text style={styles.tagline} accessibilityRole="header">
+          <Text style={styles.tagline} accessibilityRole="header" maxFontSizeMultiplier={1.3}>
             {copy.tagline}
           </Text>
-          <Text style={styles.subtitle}>{copy.subtitle}</Text>
+          <Text style={styles.subtitle} maxFontSizeMultiplier={1.3}>{copy.subtitle}</Text>
 
           <View style={styles.pillarRow}>
             {copy.pillars.map((label, i) => (
               <View key={label} style={styles.pillarItem}>
                 {i > 0 ? <View style={styles.pillarDot} /> : null}
-                <Text style={styles.pillarText}>{label}</Text>
+                <Text style={styles.pillarText} maxFontSizeMultiplier={1.3}>{label}</Text>
               </View>
             ))}
           </View>
@@ -301,6 +306,16 @@ export function WelcomeScreen({
           <Text style={styles.termsText}>{copy.terms}</Text>
         </TouchableOpacity>
       </View>
+    </>
+  );
+
+  return (
+    <View style={styles.root} testID="screen.welcome">
+      {large ? (
+        <ScrollView style={styles.root} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {body}
+        </ScrollView>
+      ) : body}
     </View>
   );
 }
@@ -316,6 +331,11 @@ const styles = StyleSheet.create({
   // content, and the hero takes what is left. On a small phone the hero gives way; on a
   // tall one it grows. Neither case needs a new constant.
   hero: { flex: 1, overflow: "hidden" },
+  // large only: inside a ScrollView `flex: 1` stretches instead of shrinking, so the hero and its inner view
+  // size to their content (no screen-high gap between the tagline and the subtitle)
+  heroLarge: { flexGrow: 0, flexBasis: "auto" },
+  heroInnerLarge: { flexGrow: 0, flexBasis: "auto" },
+  scrollContent: { flexGrow: 1 },
   heroInner: {
     flex: 1,
     alignItems: "center",
