@@ -8,7 +8,7 @@
 // re-enters at signin after verifying anyway, so a fresh code from here is equivalent either way.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
@@ -39,7 +39,11 @@ export function OtpLockedScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <SimpleHeader title="Verify your email" onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Enter the code</Text>
         <Text style={styles.caption}>We emailed a 6-digit code to</Text>
         <Text style={styles.emailText}>{email}</Text>
@@ -65,7 +69,7 @@ export function OtpLockedScreen({ navigation, route }: Props) {
         <PrimaryButton label="Send a new code" onPress={onSendNewCode} loading={sending} style={styles.sendButton} />
 
         <Text style={styles.capHint}>You can request 5 codes an hour.</Text>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -76,8 +80,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg
   },
   title: {
     color: authColors.ink,

@@ -4,13 +4,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
-  NativeSyntheticEvent,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputKeyPressEventData,
-  TouchableOpacity,
-  View
+  NativeSyntheticEvent, ScrollView, StyleSheet, Text, TextInput, TextInputKeyPressEventData,
+  TouchableOpacity, View
 } from "react-native";
 
 import { useApi } from "../api/useApi";
@@ -114,7 +109,11 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen}>
       <AuthHeader title="Verify your number" activeStep={2} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Enter the code</Text>
         <Text style={styles.caption}>We texted a 6-digit code to</Text>
         <Text style={styles.phoneText}>{phone}</Text>
@@ -149,14 +148,14 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
         {!!resendNotice && <Text style={styles.resendNotice}>{resendNotice}</Text>}
 
         <PrimaryButton label="Verify" onPress={onVerify} loading={submitting} style={styles.verifyButton} />
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: authColors.page },
-  content: { flex: 1, paddingHorizontal: spacing.lg },
+  content: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
   title: { color: authColors.ink, ...typography.hero, lineHeight: 30 },
   caption: { marginTop: 5, color: authColors.muted, ...typography.meta, lineHeight: 20 },
   phoneText: { marginTop: 3, color: authColors.ink, ...typography.strong, fontWeight: "800" },

@@ -2,7 +2,7 @@
 // POST /auth/signup { account_type, display_name, email, password } -> 201 { account_id, email, next }
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { TERMS_VERSION } from "../consent";
@@ -104,7 +104,11 @@ export function SignupScreen({ navigation, route }: Props) {
         onBack={() => navigation.goBack()}
       />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Let's get you set up</Text>
         <Text style={styles.caption}>{isShelter ? "Use your organisation's email." : "A few details and you're in."}</Text>
 
@@ -160,7 +164,7 @@ export function SignupScreen({ navigation, route }: Props) {
         </TouchableOpacity>
 
         <Text style={styles.terms}>By creating an account you agree to our Terms & Privacy Policy.</Text>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -171,8 +175,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg
   },
   title: {
     color: authColors.ink,

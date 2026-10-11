@@ -9,13 +9,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
-  NativeSyntheticEvent,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputKeyPressEventData,
-  TouchableOpacity,
-  View
+  NativeSyntheticEvent, ScrollView, StyleSheet, Text, TextInput, TextInputKeyPressEventData,
+  TouchableOpacity, View
 } from "react-native";
 
 import { useApi } from "../api/useApi";
@@ -126,7 +121,11 @@ export function ResetOtpScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <SimpleHeader title="Reset password" onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.title}>Enter the code</Text>
         <Text style={styles.caption}>We emailed a 6-digit code to</Text>
         <Text style={styles.emailText}>{email}</Text>
@@ -169,7 +168,7 @@ export function ResetOtpScreen({ navigation, route }: Props) {
         <TouchableOpacity testID="btn.back" hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.goBack()}>
           <Text style={styles.changeEmail}>Wrong email? Change it</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -180,8 +179,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg
   },
   title: {
     color: authColors.ink,

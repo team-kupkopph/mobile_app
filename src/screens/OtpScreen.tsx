@@ -8,13 +8,8 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
-  NativeSyntheticEvent,
-  StyleSheet,
-  Text,
-  TextInput,
-  TextInputKeyPressEventData,
-  TouchableOpacity,
-  View
+  NativeSyntheticEvent, ScrollView, StyleSheet, Text, TextInput, TextInputKeyPressEventData,
+  TouchableOpacity, View
 } from "react-native";
 
 import { useApi } from "../api/useApi";
@@ -160,7 +155,11 @@ export function OtpScreen({ navigation, route }: Props) {
         onBack={() => navigation.goBack()}
       />
 
-      <View style={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         {isUnverifiedResume && (
           <View style={styles.unverifiedBanner}>
             <Text style={styles.unverifiedIcon}>!</Text>
@@ -212,7 +211,7 @@ export function OtpScreen({ navigation, route }: Props) {
         <TouchableOpacity testID="btn.back" hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.goBack()}>
           <Text style={styles.changeEmail}>Wrong email? Change it</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -223,8 +222,9 @@ const styles = StyleSheet.create({
     backgroundColor: authColors.page
   },
   content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg
   },
   unverifiedBanner: {
     marginBottom: 18,
