@@ -29,13 +29,14 @@ import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, 
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, canWithdraw, closedChipTone, contactLine, inquiryClosedNote, inquiryIsClosed, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, canWithdraw, closedChipTone, contactLine, inquiryClosedNote, inquiryIsClosed, inquiryPetName, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Avatar, Button, Card, Chip, PressScale, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
+import { listingTitle } from "../shelterAnimals";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, gradients, motion, pill, radii, spacing, squircle, typography } from "../theme";
@@ -141,7 +142,7 @@ type BodyProps = {
 };
 
 function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerified, onWithdraw }: BodyProps) {
-  const pet = inquiry.listing.name;
+  const pet = inquiryPetName(inquiry.listing.name);
   const poster = listing?.poster ?? null;
   const shelter = poster?.name ?? "the shelter";
   const header = ladderHeader(inquiry);
@@ -171,7 +172,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
               )}
             </View>
             <View style={styles.petText}>
-              <Text style={styles.petName} numberOfLines={1}>{pet}</Text>
+              <Text style={styles.petName} numberOfLines={1}>{listingTitle(inquiry.listing.name)}</Text>
               <Text style={styles.petMeta} numberOfLines={1}>
                 {poster ? `${poster.name}${poster.city ? ` · ${poster.city}` : ""}` : capitalize(inquiry.listing.species)}
               </Text>

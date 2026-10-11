@@ -36,11 +36,20 @@ export function inquiryStatusLabel(status: string, endReason?: string | null): s
   }
 }
 
+/** R6-F1 · the animal's name inside a sentence. A blank name reads "this animal" (as the server's
+ *  notices do); a title uses `listingTitle`'s "Unnamed" instead. */
+export const THIS_ANIMAL = "this animal";
+export function inquiryPetName(name: string | null | undefined): string {
+  return (name ?? "").trim() || THIS_ANIMAL;
+}
+/** For the start of a sentence: only the fallback is capitalised, a real name is left as typed. */
+const lead = (pet: string): string => (pet === THIS_ANIMAL ? "This animal" : pet);
+
 // D15 · withdrawn and declined inquiries are over: the ladder and the card say so instead of
 // showing stage progress. `null` = still open (or adopted), so the screen keeps its ladder.
 export function inquiryClosedNote(status: string, endReason?: string | null,
                                   ctx?: { pet: string; poster: string }): string | null {
-  const pet = ctx?.pet || "This animal";
+  const pet = lead(ctx?.pet || THIS_ANIMAL);
   if (status === "declined" && endReason === "another_adopter_chosen") {
     return `${pet} was adopted by someone else. Thank you for offering a home.`;
   }
@@ -148,7 +157,7 @@ export const STAGE_STEP: Record<StageKey, {
   },
   vet_clearance: {
     title: "Vet clearance",
-    note: ({ pet }) => `${pet}'s vaccination and neuter records are finalised before handover.`
+    note: ({ pet }) => `${lead(pet)}'s vaccination and neuter records are finalised before handover.`
   },
   finalization: {
     title: "Finalization",

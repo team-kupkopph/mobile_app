@@ -24,6 +24,7 @@ import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, pill, radii, typography } from "../theme";
 import { Chip, type ChipTone } from "./ui";
+import { listingTitle } from "../shelterAnimals";
 
 // inquiry_status (not stage state): active/adopted/declined/withdrawn.
 // Mapped onto the SHARED status vocabulary (chipTones) rather than carrying its own colours.
@@ -106,7 +107,7 @@ export function InquiryList() {
               >
                 <View style={styles.cardTop}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.cardName}>{iq.listing.name}</Text>
+                    <Text style={styles.cardName}>{listingTitle(iq.listing.name)}</Text>
                     <Text style={styles.cardMeta}>{capitalize(iq.listing.species)}</Text>
                   </View>
                   <Chip label={inquiryStatusLabel(iq.status, iq.end_reason)} tone={tone} />
