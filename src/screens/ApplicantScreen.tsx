@@ -11,7 +11,7 @@ import { PosterInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
 import {
   ApplicantFooter, CHANGED_NOTE, FooterAction, actionPath, applicantFooter, applicantRefusal, askedAgo,
-  confirmCopy, firstName, petName, posterLadderHeader
+  confirmCopy, firstName, petName, posterLadderHeader, showStepsCard
 } from "../applicant";
 import { STAGE_ORDER, STAGE_STEP, ladderStageTone, stageMeta } from "../adoption";
 import { CheckIcon } from "../components/AppIcons";
@@ -158,32 +158,34 @@ export function ApplicantScreen({ navigation, route }: Props) {
           </Card>
         ) : null}
 
-        <Card style={styles.card}>
-          <View style={[styles.stepsHead, large && styles.stepsHeadLarge]}>
-            <Text style={styles.label}>Steps</Text>
-            {header ? <Chip label={header.label} tone={header.tone} dot={false} /> : null}
-          </View>
-          {STAGE_ORDER.map((key) => {
-            const stage = byKey.get(key);
-            const st = stage?.state ?? "not_started";
-            const tappable = canMove && key !== "inquiry";
-            const tone = ladderStageTone(st, !open);
-            return (
-              <TouchableOpacity key={key} hitSlop={TAP_SLOP} accessibilityRole="button"
-                accessibilityState={{ disabled: !tappable }} testID={`row.applicant.${key}`}
-                style={styles.stepRow} onPress={tappable ? () => setStepKey(key) : undefined}>
-                <View style={[styles.stepDot, tone === "done" && styles.stepDone, tone === "active" && styles.stepActive]} />
-                <View style={[styles.stepText, large && styles.stepTextLarge]}>
-                  <Text style={[styles.stepTitle, large && styles.stepTitleLarge]}>{STAGE_STEP[key].title}</Text>
-                  <Text style={styles.stepMeta}>{stageMeta(st, stage?.updated_at)}</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-          {open && row.kind !== "placement" && !row.accepted_at ? (
-            <Text style={styles.hint} testID="text.applicant.stepsHint">Accept them for screening to start the steps.</Text>
-          ) : null}
-        </Card>
+        {showStepsCard(row) ? (
+          <Card style={styles.card}>
+            <View style={[styles.stepsHead, large && styles.stepsHeadLarge]}>
+              <Text style={styles.label}>Steps</Text>
+              {header ? <Chip label={header.label} tone={header.tone} dot={false} /> : null}
+            </View>
+            {STAGE_ORDER.map((key) => {
+              const stage = byKey.get(key);
+              const st = stage?.state ?? "not_started";
+              const tappable = canMove && key !== "inquiry";
+              const tone = ladderStageTone(st, !open);
+              return (
+                <TouchableOpacity key={key} hitSlop={TAP_SLOP} accessibilityRole="button"
+                  accessibilityState={{ disabled: !tappable }} testID={`row.applicant.${key}`}
+                  style={styles.stepRow} onPress={tappable ? () => setStepKey(key) : undefined}>
+                  <View style={[styles.stepDot, tone === "done" && styles.stepDone, tone === "active" && styles.stepActive]} />
+                  <View style={[styles.stepText, large && styles.stepTextLarge]}>
+                    <Text style={[styles.stepTitle, large && styles.stepTitleLarge]}>{STAGE_STEP[key].title}</Text>
+                    <Text style={styles.stepMeta}>{stageMeta(st, stage?.updated_at)}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+            {open && row.kind !== "placement" && !row.accepted_at ? (
+              <Text style={styles.hint} testID="text.applicant.stepsHint">Accept them for screening to start the steps.</Text>
+            ) : null}
+          </Card>
+        ) : null}
 
         {footer.doneNote ? (
           <Card

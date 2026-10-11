@@ -110,6 +110,13 @@ export function applicantStatusLine(row: PosterInquiry): string {
   return `Screening · ${inquiryProgressLabel(row.stages)}`;
 }
 
+/** R5-F5 · the Steps card is hidden for a declined applicant, as on the merged artboard: the
+ *  inquiry is over, its rows can't be moved, and the footer already says "You declined: <reason>."
+ *  Active, adopted and withdrawn applicants keep it. */
+export function showStepsCard(row: PosterInquiry): boolean {
+  return row.status !== "declined";
+}
+
 /** R5-F3 · Your listing's "Applicants (N)" is the number still waiting on an answer (the artboard's
  *  "Applicants (3)" beside a separate "Show 1 closed"). `hasMore` adds a "+" while pages remain. */
 export function applicantsHeading(rows: PosterInquiry[], hasMore: boolean): string {
