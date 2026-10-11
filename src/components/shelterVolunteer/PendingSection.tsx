@@ -87,7 +87,7 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }:
       )}
 
       {state.kind !== "ready" ? (
-        <LoadStateView state={state} subject="requests" onRetry={loadRequests} />
+        <LoadStateView state={state} subject="list of requests" onRetry={loadRequests} />
       ) : requests.length === 0 ? (
         <Text style={styles.empty}>No pending requests right now.</Text>
       ) : (

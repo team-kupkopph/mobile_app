@@ -210,7 +210,7 @@ export function KawangGawaScreen({ navigation, route }: Props) {
               onCancel={(item) => navigation.navigate("kawanggawaCancel", { signupId: item.signup_id })}
             />
           ) : (
-            <LoadStateView state={loadState(mineRes)} subject="shifts" onRetry={loadMine} />
+            <LoadStateView state={loadState(mineRes)} subject="list of shifts" onRetry={loadMine} />
           )
         ) : (
           <>

@@ -128,7 +128,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
 
         <Text style={styles.section}>{applicantsHeading(applicants, !!next)}</Text>
         {appsRes && !appsRes.ok ? (
-          <LoadStateView state={loadState(appsRes)} subject="applicants" onRetry={() => loadApplicants(1)} />
+          <LoadStateView state={loadState(appsRes)} subject="list of applicants" onRetry={() => loadApplicants(1)} />
         ) : applicants.length === 0 && appsRes ? (
           <Text style={styles.hint} testID="text.posterListing.empty">No one has asked about {pet} yet.</Text>
         ) : (

@@ -273,7 +273,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           <View style={styles.petState}>
             <LoadStateView
               state={loadState(petsRes, pets.length)}
-              subject="your pets"
+              subject="list of pets"
               emptyTitle="No pets on your profile yet."
               emptyBody="Describe them below instead."
               onRetry={loadPets}
