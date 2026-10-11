@@ -48,7 +48,10 @@ appId: ph.kupkop.app
     visible:
       id: "screen.shelterRequests"
     timeout: 15000
-- tapOn: "E2E Milo"
+# The row is ONE accessible element whose text is "E2E Milo, E2E owner, 1 min ago, Active"
+# (title, subtitle, age, status), and tapOn matches the whole text as a regex, so a bare
+# "E2E Milo" never matched. Found on the first device run.
+- tapOn: "E2E Milo.*"
 - extendedWaitUntil:
     visible:
       id: "screen.applicant"
