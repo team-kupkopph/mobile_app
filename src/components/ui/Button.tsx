@@ -49,6 +49,7 @@ const SMALL_HEIGHT = 38;
 export function Button({ label, onPress, variant = "primary", size = "regular", loading, style, accessibilityLabel, accessibilityHint, testID }: ButtonProps) {
   const small = size === "small";
   const labelStyle = [
+    styles.label,
     variant === "destructive" ? styles.destructiveLabel
     : variant === "primary" ? styles.primaryLabel
     : styles.plainLabel,
@@ -57,7 +58,7 @@ export function Button({ label, onPress, variant = "primary", size = "regular", 
 
   const body = loading
     ? <ActivityIndicator size={small ? "small" : undefined} color={variant === "primary" ? colors.white : colors.tealDark} />
-    : <Text style={labelStyle} numberOfLines={1}>{label}</Text>;
+    : <Text style={labelStyle}>{label}</Text>;
 
   return (
     // `.cta:active` from the canvas: a full-width button dips 1px and shrinks only slightly,
@@ -93,8 +94,13 @@ const styles = StyleSheet.create({
     // fill clips itself instead.
     borderRadius: pill(HEIGHT)
   },
+  // R6-F3 · `minHeight`, never `height`: at AX5 a label wraps to several lines, and a fixed
+  // height clipped it (with `numberOfLines={1}` before that). The padding keeps a wrapped
+  // label off the pill's edge; at default size the minHeight is what sets the 54 pt.
   fill: {
-    height: HEIGHT,
+    minHeight: HEIGHT,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: pill(HEIGHT),
@@ -109,7 +115,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.34)"
   },
   smallWrap: { alignSelf: "flex-start", borderRadius: pill(SMALL_HEIGHT) },
-  smallFill: { height: SMALL_HEIGHT, paddingHorizontal: 16, borderRadius: pill(SMALL_HEIGHT) },
+  smallFill: { minHeight: SMALL_HEIGHT, paddingHorizontal: 16, paddingVertical: 6, borderRadius: pill(SMALL_HEIGHT) },
+  label: { textAlign: "center" },
   smallLabel: { ...typography.strong, fontWeight: "700" },
   primaryLabel: { ...typography.subtitle, fontWeight: "800", color: colors.white },
   plainLabel: { ...typography.subtitle, fontWeight: "800", color: colors.ink },
