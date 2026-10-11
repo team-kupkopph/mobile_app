@@ -7,7 +7,7 @@ import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } fr
 
 import { ListingDetail, PosterInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { applicantStatusLine, listingStatusChip } from "../applicant";
+import { applicantStatusLine, applicantsHeading, closedToggleLabel, listingStatusChip } from "../applicant";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Avatar, Button, Card, Chip, ScreenHeader } from "../components/ui";
@@ -126,7 +126,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
           ) : null}
         </Card>
 
-        <Text style={styles.section}>Applicants ({applicants.length}{next ? "+" : ""})</Text>
+        <Text style={styles.section}>{applicantsHeading(applicants, !!next)}</Text>
         {appsRes && !appsRes.ok ? (
           <LoadStateView state={loadState(appsRes)} subject="applicants" onRetry={() => loadApplicants(1)} />
         ) : applicants.length === 0 && appsRes ? (
@@ -137,7 +137,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
             {closedRows.length > 0 ? (
               <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.posterListing.showClosed"
                 style={styles.more} onPress={() => setShowClosed((v) => !v)}>
-                <Text style={styles.moreLabel}>{showClosed ? "Hide closed" : `Show ${closedRows.length}${next ? "+" : ""} closed`}</Text>
+                <Text style={styles.moreLabel}>{closedToggleLabel(closedRows.length, !!next, showClosed)}</Text>
               </TouchableOpacity>
             ) : null}
             {showClosed ? closedRows.map(rowFor) : null}
