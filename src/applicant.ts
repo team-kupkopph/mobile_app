@@ -119,7 +119,10 @@ export function showStepsCard(row: PosterInquiry): boolean {
 
 /** R5-F3 · Your listing's "Applicants (N)" is the number still waiting on an answer (the artboard's
  *  "Applicants (3)" beside a separate "Show 1 closed"). `hasMore` adds a "+" while pages remain. */
-export function applicantsHeading(rows: PosterInquiry[], hasMore: boolean): string {
+export function applicantsHeading(rows: PosterInquiry[], hasMore: boolean, known = true): string {
+  // O6-7 · no number while the last fetch has not succeeded: a held count from an earlier load is stale,
+  // and before the first response "(0)" is a claim the screen cannot make.
+  if (!known) return "Applicants";
   const open = rows.filter((r) => r.status === "active").length;
   return `Applicants (${open}${hasMore ? "+" : ""})`;
 }
