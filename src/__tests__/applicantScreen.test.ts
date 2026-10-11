@@ -26,6 +26,15 @@ describe("the Applicant screen (spec §2)", () => {
     expect(screen).toMatch(/testID="text\.applicant\.contactLocked"/);
     expect(screen).toMatch(/Linking\.openURL\(`tel:/);
   });
+  it("shows the contact's name above the phone, as spec §2.3 says (R5-F1)", () => {
+    expect(screen).toMatch(/testID="text\.applicant\.contactName"/);
+    expect(screen).toMatch(/row\.adopter_contact\.name/);
+  });
+  it("tints the closing card from the footer: success when adopted, grey otherwise (R5-F2)", () => {
+    expect(screen).toMatch(/footer\.doneTone === "success"/);
+    expect(screen).toContain("colors.successBg");
+    expect(screen).toContain("colors.greyPill");
+  });
   it("never disables the footer buttons", () => {
     expect(screen).not.toMatch(/disabled=\{/);
   });

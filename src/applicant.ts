@@ -12,6 +12,8 @@ export type ApplicantFooter = {
   secondary: SecondaryAction[];
   note: string | null;
   doneNote: string | null;
+  /** Spec §2: the closing line is a success card once adopted and a grey card for every other close. */
+  doneTone: "success" | "neutral" | null;
 };
 
 export const CHANGED_NOTE = "This changed while you were looking. Here's where it stands now.";
@@ -39,25 +41,25 @@ export function applicantFooter(row: PosterInquiry): ApplicantFooter {
   const pet = petName(row);
   const none = { primary: null, secondary: [] as SecondaryAction[], note: null };
   if (row.kind === "placement" && row.status === "active") {
-    return { ...none, doneNote: `Placement offer, waiting for ${row.adopter.display_name} to answer.` };
+    return { ...none, doneNote: `Placement offer, waiting for ${row.adopter.display_name} to answer.`, doneTone: "neutral" };
   }
-  if (row.status === "adopted") return { ...none, doneNote: `${cap(pet)} went home with ${first}.` };
-  if (row.status !== "active") return { ...none, doneNote: closedLine(row, first, pet) };
+  if (row.status === "adopted") return { ...none, doneNote: `${cap(pet)} went home with ${first}.`, doneTone: "success" };
+  if (row.status !== "active") return { ...none, doneNote: closedLine(row, first, pet), doneTone: "neutral" };
   if (!row.accepted_at) {
-    return { primary: { action: "screen", label: "Accept for screening" }, secondary: ["decline"], note: null, doneNote: null };
+    return { primary: { action: "screen", label: "Accept for screening" }, secondary: ["decline"], note: null, doneNote: null, doneTone: null };
   }
   if (row.reserved_at) {
     return { primary: { action: "complete", label: "Complete adoption" }, secondary: ["release", "decline"],
-             note: `${cap(pet)} is reserved for ${first}.`, doneNote: null };
+             note: `${cap(pet)} is reserved for ${first}.`, doneNote: null, doneTone: null };
   }
   if (row.listing.status === "pending") {
-    return { primary: null, secondary: ["decline"], note: `${cap(pet)} is reserved for another applicant.`, doneNote: null };
+    return { primary: null, secondary: ["decline"], note: `${cap(pet)} is reserved for another applicant.`, doneNote: null, doneTone: null };
   }
   if (!row.adopter.verified_member) {
     return { primary: { action: "askVerify", label: `Ask ${first} to get verified` }, secondary: ["decline"],
-             note: `${first} needs a Verified Member badge before you can reserve ${pet}.`, doneNote: null };
+             note: `${first} needs a Verified Member badge before you can reserve ${pet}.`, doneNote: null, doneTone: null };
   }
-  return { primary: { action: "reserve", label: `Reserve ${pet} for ${first}` }, secondary: ["decline"], note: null, doneNote: null };
+  return { primary: { action: "reserve", label: `Reserve ${pet} for ${first}` }, secondary: ["decline"], note: null, doneNote: null, doneTone: null };
 }
 
 function closedLine(row: PosterInquiry, first: string, pet: string): string {
