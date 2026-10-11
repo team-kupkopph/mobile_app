@@ -38,7 +38,8 @@ export function BackButton({ onPress, style }: { onPress: () => void; style?: St
       accessibilityRole="button"
       accessibilityLabel="Go back"
     >
-      <Text style={styles.backGlyph}>‹</Text>
+      {/* R6-F5 · a glyph in a fixed 44 pt circle: it must not scale, or at AX5 it leaves the circle. */}
+      <Text style={styles.backGlyph} allowFontScaling={false}>‹</Text>
     </PressScale>
   );
 }
