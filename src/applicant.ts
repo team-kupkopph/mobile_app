@@ -117,6 +117,18 @@ export function showStepsCard(row: PosterInquiry): boolean {
   return row.status !== "declined";
 }
 
+/** R5-F3 · Your listing's "Applicants (N)" is the number still waiting on an answer (the artboard's
+ *  "Applicants (3)" beside a separate "Show 1 closed"). `hasMore` adds a "+" while pages remain. */
+export function applicantsHeading(rows: PosterInquiry[], hasMore: boolean): string {
+  const open = rows.filter((r) => r.status === "active").length;
+  return `Applicants (${open}${hasMore ? "+" : ""})`;
+}
+
+/** R5-F3 · the closed-rows toggle says how many it shows or hides, as the artboard does. */
+export function closedToggleLabel(closedCount: number, hasMore: boolean, expanded: boolean): string {
+  return `${expanded ? "Hide" : "Show"} ${closedCount}${hasMore ? "+" : ""} closed`;
+}
+
 const STEP_LABEL: Record<string, string> = { in_progress: "Start", done: "Mark done", skipped: "Skip" };
 export function stepActions(stageKey: string, state: string): Array<{ state: string; label: string }> {
   return ["in_progress", "done", "skipped"]
