@@ -9,7 +9,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
 import { loadState } from "../net";
-import { DRAFT_STATUS, ListingStatus, SEGMENT_STATUS, STATUS_CHIP, applicantsChip } from "../shelterAnimals";
+import { DRAFT_STATUS, ListingStatus, SEGMENT_STATUS, STATUS_CHIP, applicantsChip, listingInitial, listingTitle } from "../shelterAnimals";
 import { colors, spacing, squircle, typography } from "../theme";
 import { LoadStateView } from "./LoadStateView";
 import { Card, Chip, SegmentedControl } from "./ui";
@@ -73,7 +73,7 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
               accessibilityLabel={`Finish the listing for ${d.pet.name || "this animal"}`}
               onPress={() => onOpenDraft(d.listing_id)}
             >
-              <Text style={styles.draftName} numberOfLines={1}>{d.pet.name || "Unnamed"}</Text>
+              <Text style={styles.draftName} numberOfLines={1}>{listingTitle(d.pet.name)}</Text>
               <Chip tone="warning" dot={false} label="Draft" />
             </TouchableOpacity>
           ))}
@@ -109,15 +109,19 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
                   <Image source={{ uri: l.photo_url }} style={styles.photo} />
                 ) : (
                   <View style={styles.photoPlaceholder}>
-                    <Text style={styles.photoGlyph}>{l.pet.name.charAt(0).toUpperCase()}</Text>
+                    <Text style={styles.photoGlyph}>{listingInitial(l.pet.name)}</Text>
                   </View>
                 )}
                 <View style={styles.rowCopy}>
-                  <Text style={styles.rowTitle} numberOfLines={1}>{l.pet.name}</Text>
+                  <Text style={styles.rowTitle} numberOfLines={1}>{listingTitle(l.pet.name)}</Text>
                   <Text style={styles.rowSub} numberOfLines={1}>{subtitle}</Text>
+                  {applicants ? (
+                    <View style={styles.rowApplicants}>
+                      <Chip tone="info" dot={false} label={applicants} />
+                    </View>
+                  ) : null}
                 </View>
                 <Chip tone={chip.tone} dot={false} label={chip.label} />
-                {applicants ? <Chip tone="info" dot={false} label={applicants} /> : null}
               </Card>
             </TouchableOpacity>
           );
@@ -143,5 +147,6 @@ const styles = StyleSheet.create({
   photoGlyph: { color: "#FFFFFF", ...typography.subtitle, fontWeight: "800" },
   rowCopy: { flex: 1 },
   rowTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  rowSub: { marginTop: 4, color: colors.muted, ...typography.meta }
+  rowSub: { marginTop: 4, color: colors.muted, ...typography.meta },
+  rowApplicants: { marginTop: 8, alignSelf: "flex-start" }
 });

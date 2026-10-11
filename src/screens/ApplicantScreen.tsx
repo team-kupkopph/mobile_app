@@ -14,6 +14,7 @@ import {
   confirmCopy, firstName, petName, posterLadderHeader
 } from "../applicant";
 import { STAGE_ORDER, STAGE_STEP, ladderStageTone, stageMeta } from "../adoption";
+import { CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -132,7 +133,12 @@ export function ApplicantScreen({ navigation, route }: Props) {
             {row.adopter_contact ? (
               row.adopter_contact.phone ? (
                 <View style={styles.contactRow}>
-                  <Text style={styles.phone} testID="text.applicant.phone">{row.adopter_contact.phone}</Text>
+                  <View style={styles.contactText}>
+                    <Text style={styles.contactName} numberOfLines={1} testID="text.applicant.contactName">
+                      {row.adopter_contact.name || name}
+                    </Text>
+                    <Text style={styles.phone} testID="text.applicant.phone">{row.adopter_contact.phone}</Text>
+                  </View>
                   <Button label="Call" size="small" variant="secondary" testID="btn.applicant.call"
                     accessibilityLabel={`Call ${name}`}
                     onPress={() => { void Linking.openURL(`tel:${row.adopter_contact?.phone ?? ""}`); }} />
@@ -174,8 +180,18 @@ export function ApplicantScreen({ navigation, route }: Props) {
         </Card>
 
         {footer.doneNote ? (
-          <Card style={styles.card} testID="card.applicant.done">
-            <Text style={styles.body}>{footer.doneNote}</Text>
+          <Card
+            style={[styles.card, footer.doneTone === "success" ? styles.doneSuccess : styles.doneNeutral]}
+            testID="card.applicant.done"
+          >
+            {footer.doneTone === "success" ? (
+              <View style={styles.doneRow}>
+                <CheckIcon color={colors.success} size={18} />
+                <Text style={[styles.body, styles.doneSuccessText]}>{footer.doneNote}</Text>
+              </View>
+            ) : (
+              <Text style={styles.body}>{footer.doneNote}</Text>
+            )}
           </Card>
         ) : null}
         {notice || footer.note ? (
@@ -224,8 +240,14 @@ const styles = StyleSheet.create({
   forLine: { marginTop: 12, color: colors.muted, ...typography.meta, fontWeight: "700" },
   body: { color: colors.ink, ...typography.body },
   label: { color: colors.muted, ...typography.label },
-  contactRow: { marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  phone: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  contactRow: { marginTop: 8, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  contactText: { flex: 1 },
+  contactName: { color: colors.ink, ...typography.body, fontWeight: "800" },
+  phone: { marginTop: 2, color: colors.teal, ...typography.body, fontWeight: "700" },
+  doneSuccess: { backgroundColor: colors.successBg },
+  doneNeutral: { backgroundColor: colors.greyPill },
+  doneRow: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  doneSuccessText: { flex: 1, color: colors.success, fontWeight: "700" },
   stepsHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 },
   stepRow: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 12 },
   stepDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.border },

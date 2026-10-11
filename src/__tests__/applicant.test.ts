@@ -21,7 +21,7 @@ const ACCEPTED = "2026-10-05T08:00:00Z";
 describe("applicantFooter (spec §2)", () => {
   it("new → Accept for screening + Decline", () => {
     expect(applicantFooter(row())).toEqual({
-      primary: { action: "screen", label: "Accept for screening" }, secondary: ["decline"], note: null, doneNote: null
+      primary: { action: "screen", label: "Accept for screening" }, secondary: ["decline"], note: null, doneNote: null, doneTone: null
     });
   });
   it("screening, a Verified Member, listing available → Reserve {pet} for {first}", () => {
@@ -54,6 +54,22 @@ describe("applicantFooter (spec §2)", () => {
       .toBe("Milo went home with another applicant.");
     expect(applicantFooter(row({ status: "withdrawn", end_reason: "listing_withdrawn" })).doneNote).toBe("You took Milo down.");
     expect(applicantFooter(row({ status: "declined" })).primary).toBeNull();
+  });
+  it("tones the closing line: success once adopted, grey for every other close (spec §2, R5-F2)", () => {
+    expect(applicantFooter(row({ status: "adopted" })).doneTone).toBe("success");
+    const greyCloses: Partial<PosterInquiry>[] = [
+      { status: "declined", end_reason: "requirements_not_met" },
+      { status: "withdrawn", end_reason: "adopter_withdrew" },
+      { status: "declined", end_reason: "another_adopter_chosen" },
+      { status: "withdrawn", end_reason: "listing_withdrawn" },
+      { status: "declined" }
+    ];
+    for (const over of greyCloses) expect(applicantFooter(row(over)).doneTone).toBe("neutral");
+    expect(applicantFooter(row({ kind: "placement" })).doneTone).toBe("neutral");
+  });
+  it("has no closing tone while the inquiry is still open", () => {
+    expect(applicantFooter(row()).doneTone).toBeNull();
+    expect(applicantFooter(row({ accepted_at: ACCEPTED })).doneTone).toBeNull();
   });
   it("an open placement is read-only", () => {
     const f = applicantFooter(row({ kind: "placement" }));
