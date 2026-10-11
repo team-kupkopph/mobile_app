@@ -1,10 +1,11 @@
-// Spec §2 · the step sheet — Start / Mark done / Skip (current state hidden; finalization is
-// finished by Complete) with an optional note the adopter sees on their ladder.
+// Spec §2 · the step sheet — the title and current state, then Start / Mark done / Skip (the action
+// for the current state is hidden; finalization is finished by Complete) with an optional note the
+// adopter sees on their ladder.
 import { useEffect, useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { Button } from "../ui";
+import { Button, Chip } from "../ui";
 import { STAGE_STEP, StageKey } from "../../adoption";
-import { stepActions } from "../../applicant";
+import { stepActions, stepSheetState } from "../../applicant";
 import { colors, radii, spacing, typography } from "../../theme";
 
 type Props = {
@@ -26,6 +27,9 @@ export function StepSheet({ stageKey, state, name, pet, busy, onMove, onClose }:
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close" />
       <View style={styles.sheet} testID="sheet.applicant.step">
         <Text style={styles.title}>{title}</Text>
+        <View style={styles.stateRow} testID="chip.step.state">
+          <Chip label={stepSheetState(state).label} tone={stepSheetState(state).tone} dot={false} />
+        </View>
         {stageKey === "finalization" ? (
           <Text style={styles.hint}>Use Complete adoption when {pet} goes home.</Text>
         ) : null}
@@ -48,6 +52,7 @@ const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: "rgba(18,33,58,0.32)" },
   sheet: { padding: spacing.lg, paddingBottom: 36, borderTopLeftRadius: radii.card, borderTopRightRadius: radii.card, backgroundColor: colors.white },
   title: { color: colors.ink, ...typography.section },
+  stateRow: { marginTop: 8, flexDirection: "row" },
   hint: { marginTop: 6, color: colors.muted, ...typography.meta },
   input: { marginTop: 14, minHeight: 72, padding: 14, borderRadius: radii.field, backgroundColor: colors.soft, color: colors.ink, ...typography.body },
   actions: { marginTop: 16, flexDirection: "row", flexWrap: "wrap", gap: 10 }
