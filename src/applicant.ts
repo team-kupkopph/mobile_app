@@ -3,7 +3,7 @@
 // applicant-screen-design.md §2–§3). Wording mirrors backend listings/notices.py.
 import { PosterInquiry } from "./api/types";
 import { ChipTone } from "./components/ui";
-import { inquiryProgressLabel, ladderStep } from "./adoption";
+import { inquiryProgressLabel, ladderStep, stageStateChip } from "./adoption";
 
 export type FooterAction = "screen" | "reserve" | "askVerify" | "complete";
 export type SecondaryAction = "release" | "decline";
@@ -120,6 +120,14 @@ export function applicantsHeading(rows: PosterInquiry[], hasMore: boolean): stri
 /** R5-F3 · the closed-rows toggle says how many it shows or hides, as the artboard does. */
 export function closedToggleLabel(closedCount: number, hasMore: boolean, expanded: boolean): string {
   return `${expanded ? "Hide" : "Show"} ${closedCount}${hasMore ? "+" : ""} closed`;
+}
+
+/** R5-F7b · the step sheet shows the step's current state beside its title (spec §2: "the title and
+ *  current state"). Same words as the ladder; tones come from the shared chip vocabulary. */
+const STATE_TONE: Record<string, ChipTone> = { active: "info", done: "success", skipped: "neutral", muted: "neutral" };
+export function stepSheetState(state: string): { label: string; tone: ChipTone } {
+  const { label, tone } = stageStateChip(state);
+  return { label, tone: STATE_TONE[tone] ?? "neutral" };
 }
 
 const STEP_LABEL: Record<string, string> = { in_progress: "Start", done: "Mark done", skipped: "Skip" };
