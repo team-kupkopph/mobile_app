@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import type { SocialProvider } from "../../auth/socialAuth";
 import { AppleIcon, GoogleIcon } from "../AppIcons";
@@ -40,6 +40,10 @@ const PROVIDERS: ReadonlyArray<{ id: SocialProvider; label: string }> = [
 ];
 
 export function SocialSignIn({ onPress, testIDPrefix, caption = "or continue with" }: SocialSignInProps) {
+  // R6-F6 · at a large font scale (AX3 and up) two half-width pills cannot hold a label beside its mark
+  // (it broke as "Googl / e"), so they stack and each takes the full width. Default size is untouched.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
   return (
     <View style={styles.wrap}>
       <View style={styles.divider}>
@@ -47,7 +51,7 @@ export function SocialSignIn({ onPress, testIDPrefix, caption = "or continue wit
         <Text style={styles.caption}>{caption}</Text>
         <View style={styles.rule} />
       </View>
-      <View style={styles.row}>
+      <View style={[styles.row, large && styles.rowLarge]}>
         {PROVIDERS.map(({ id, label }) => (
           <PressScale
             key={id}
@@ -55,7 +59,7 @@ export function SocialSignIn({ onPress, testIDPrefix, caption = "or continue wit
             accessibilityRole="button"
             accessibilityLabel={`Continue with ${label}`}
             testID={`btn.${testIDPrefix}.${id}`}
-            style={styles.pill}
+            style={[styles.pill, large && styles.pillLarge]}
           >
             {id === "google" ? (
               <GoogleIcon color={colors.ink} size={MARK} />
@@ -101,10 +105,18 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 18
   },
+  // R6-F6 · `minHeight`, never `height`: at AX5 the label scales past 52 pt and a fixed pill cut it
+  // (the same shape as the Button's R6-F3 and the Chip's R6-F4). At default size the label plus
+  // padding is under 52, so the minHeight still sets the height; the radius stays half of it.
+  rowLarge: { flexDirection: "column" },
+  // in a column `flexBasis: 0` would collapse the pill to its minHeight; size to the content instead
+  pillLarge: { flexGrow: 0, flexBasis: "auto" },
   pill: {
     flexGrow: 1,
     flexBasis: 0,
-    height: HEIGHT,
+    minHeight: HEIGHT,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
