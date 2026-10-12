@@ -21,7 +21,8 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { Card, Chip, SegmentedControl } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { DEFAULT_STATUS_TONE, REQUEST_STATUS_TONE, SEGMENT_KIND, requestRoute } from "../shelterRequests";
-import { colors, spacing, typography } from "../theme";
+import { colors, maxFontScale, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 
 /** The canvas's Requests artboard: ["Adoption", "Volunteer", "Placement"] — see
  * shelterRequests.ts's SEGMENT_KIND for the kind each maps onto on the wire. */
@@ -41,6 +42,9 @@ function timeAgo(iso: string, nowMs: number = Date.now()): string {
 type Props = NativeStackScreenProps<RootStackParamList, "shelterRequests">;
 
 export function ShelterRequestsScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up a row's title and status chip cannot share a line (the animal's name truncated to "R5 N…"),
+  // so the row stacks and its text may wrap.
+  const large = useLargeText();
   const insets = useSafeAreaInsets();
   const api = useApi();
   const [segment, setSegment] = useState(0);
@@ -72,7 +76,7 @@ export function ShelterRequestsScreen({ navigation }: Props) {
             as the "replaces the whole screen" shape offlineEscape.test.ts /
             safeAreaOnFailure.test.ts scan for; this one genuinely groups the title. */}
         <View style={styles.header}>
-          <Text style={styles.pageTitle}>Requests</Text>
+          <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Requests</Text>
         </View>
 
         <SegmentedControl
@@ -121,10 +125,10 @@ export function ShelterRequestsScreen({ navigation }: Props) {
                 activeOpacity={0.85}
                 onPress={onPress}
               >
-                <Card style={styles.row}>
-                  <View style={styles.rowCopy}>
-                    <Text style={styles.rowTitle} numberOfLines={1}>{item.title}</Text>
-                    <Text style={styles.rowSub} numberOfLines={1}>{item.subtitle}</Text>
+                <Card style={[styles.row, large && styles.rowLarge]}>
+                  <View style={[styles.rowCopy, large && styles.rowCopyLarge]}>
+                    <Text style={styles.rowTitle} numberOfLines={large ? 3 : 1}>{item.title}</Text>
+                    <Text style={styles.rowSub} numberOfLines={large ? 3 : 1}>{item.subtitle}</Text>
                     <Text style={styles.rowTime}>{timeAgo(item.created_at)}</Text>
                   </View>
                   <Chip tone={chip.tone} dot={false} label={chip.label} />
@@ -156,6 +160,9 @@ const styles = StyleSheet.create({
   segmented: { marginTop: 18 },
   row: { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 14, padding: 14 },
   rowCopy: { flex: 1 },
+  // large: stacked. The base `rowCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  rowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  rowCopyLarge: { marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   rowTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   rowSub: { marginTop: 4, color: colors.muted, ...typography.meta },
   rowTime: { marginTop: 4, color: colors.muted, ...typography.meta }

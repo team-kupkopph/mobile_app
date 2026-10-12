@@ -39,7 +39,7 @@ export function ShelterTabs({ active, onTabPress }: ShelterTabsProps) {
       icon: (c, s) => <Image source={paw} resizeMode="contain" style={[styles.pawIcon, { width: s - 2, height: s - 2, tintColor: c }]} />,
       onPress: press("animals")
     },
-    { key: "donate", label: "Donate", testID: "tab.shelter.donate", icon: (c) => <Text style={[styles.symbolIcon, { color: c }]}>₱</Text>, onPress: press("donate") },
+    { key: "donate", label: "Donate", testID: "tab.shelter.donate", icon: (c) => <Text style={[styles.symbolIcon, { color: c }]} allowFontScaling={false}>₱</Text>, onPress: press("donate") },
     { key: "requests", label: "Requests", testID: "tab.shelter.requests", icon: (c, s) => <MailIcon color={c} size={s} />, onPress: press("requests") },
     { key: "profile", label: "You", testID: "tab.shelter.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: press("profile") }
   ];

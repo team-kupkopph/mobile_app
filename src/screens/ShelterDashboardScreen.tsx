@@ -20,7 +20,8 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterBannerState, rescueSummary, shelterBannerState, volunteerSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, Card } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
@@ -41,6 +42,9 @@ const BANNER: Record<"pending" | "incomplete", { title: string; l1: string; l2: 
 };
 
 export function ShelterDashboardScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the dashboard's rows of icon | text | action cannot share a line (the stat tiles, the
+  // verified hero, the header with its pill and bell), so they stack. Default size is untouched.
+  const large = useLargeText();
   // The status bar is real now (App.tsx), so the first thing on screen has to start below
   // it. This block used to pad 24pt, which was right while the bar was hidden and
   // put the dashboard heading under the clock once it was not.
@@ -129,8 +133,8 @@ export function ShelterDashboardScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.shelterDashboard">
       <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <Text style={styles.orgName}>{me?.display_name ?? "Your shelter"}</Text>
+        <View style={[styles.headerRow, large && styles.headerRowLarge]}>
+          <Text style={[styles.orgName, large && styles.orgNameLarge]} maxFontSizeMultiplier={maxFontScale.title}>{me?.display_name ?? "Your shelter"}</Text>
           {verified ? (
             <View style={styles.verifiedPill}>
               <View style={styles.verifiedPillDot}>
@@ -156,23 +160,23 @@ export function ShelterDashboardScreen({ navigation }: Props) {
 
         {verified ? (
           // US-V5 · the "you're verified" hero replaces the amber under-review banner.
-          <View style={styles.verifiedHero}>
+          <View style={[styles.verifiedHero, large && styles.stackLarge]}>
             <View style={styles.verifiedHeroIcon}>
               <CheckIcon color="#FFFFFF" size={20} />
             </View>
-            <View style={styles.bannerCopy}>
-              <Text style={styles.verifiedHeroTitle}>You're verified</Text>
+            <View style={[styles.bannerCopy, large && styles.bannerCopyLarge]}>
+              <Text style={styles.verifiedHeroTitle} maxFontSizeMultiplier={maxFontScale.title}>You're verified</Text>
               <Text style={styles.verifiedHeroBody}>Your listings are live and donations are on.</Text>
             </View>
           </View>
         ) : banner ? (
           <TouchableOpacity activeOpacity={0.85} onPress={onBannerPress}>
-            <Card tone="hero" accent={colors.warningStrong} style={styles.banner}>
+            <Card tone="hero" accent={colors.warningStrong} style={[styles.banner, large && styles.stackLarge]}>
               <View style={styles.bannerIcon}>
                 {state === "pending" ? <ClockIcon color="#633806" size={34} /> : <AlertIcon color="#633806" size={34} />}
               </View>
-              <View style={styles.bannerCopy}>
-                <Text style={styles.bannerTitle}>{banner.title}</Text>
+              <View style={[styles.bannerCopy, large && styles.bannerCopyLarge]}>
+                <Text style={styles.bannerTitle} maxFontSizeMultiplier={maxFontScale.title}>{banner.title}</Text>
                 <Text style={styles.bannerBody}>{banner.l1}</Text>
                 <Text style={styles.bannerBody}>{banner.l2}</Text>
               </View>
@@ -181,10 +185,10 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           </TouchableOpacity>
         ) : null}
 
-        <View style={styles.statRow}>
-          <Stat n={counts.draft_listings} label="Drafts" />
-          <Stat n={counts.adopted} label="Adopted" />
-          <Stat n={counts.donations} label="Donations" />
+        <View style={[styles.statRow, large && styles.statRowLarge]}>
+          <Stat n={counts.draft_listings} label="Drafts" large={large} />
+          <Stat n={counts.adopted} label="Adopted" large={large} />
+          <Stat n={counts.donations} label="Donations" large={large} />
         </View>
 
         {/* Task 10 (K8/G12) · the Volunteers card — only once `dash` has actually loaded, so a
@@ -197,7 +201,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
                 <View style={styles.volunteerIcon}>
                   <VolunteerIcon color={colors.teal} size={20} />
                 </View>
-                <Text style={styles.volunteerTitle}>Volunteers</Text>
+                <Text style={styles.volunteerTitle} maxFontSizeMultiplier={maxFontScale.title}>Volunteers</Text>
               </View>
               {(() => {
                 const summary = volunteerSummary(dash.volunteer);
@@ -224,7 +228,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
                 <View style={styles.volunteerIcon}>
                   <LocationPinIcon color={colors.teal} size={20} />
                 </View>
-                <Text style={styles.volunteerTitle}>Rescue</Text>
+                <Text style={styles.volunteerTitle} maxFontSizeMultiplier={maxFontScale.title}>Rescue</Text>
               </View>
               <Text style={styles.volunteerLine}>{rescue.line1}</Text>
               <Text style={styles.volunteerLine}>{rescue.line2}</Text>
@@ -251,8 +255,8 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         })() : null}
 
         {!verified ? (
-          <Card accent={colors.teal} style={styles.footCard}>
-            <View style={styles.footCopy}>
+          <Card accent={colors.teal} style={[styles.footCard, large && styles.stackLarge]}>
+            <View style={[styles.footCopy, large && styles.footCopyLarge]}>
               <Text style={styles.footTitle}>{state === "pending" ? "Draft your listings while you wait" : "Finish verifying to go live"}</Text>
               <Text style={styles.footBody}>
                 {state === "pending" ? "They go live the moment you're approved." : "Upload your documents to get approved."}
@@ -278,9 +282,9 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   );
 }
 
-function Stat({ n, label }: { n: number; label: string }) {
+function Stat({ n, label, large }: { n: number; label: string; large: boolean }) {
   return (
-    <Card style={styles.statCard}>
+    <Card style={[styles.statCard, large && styles.statCardLarge]}>
       <Text style={styles.statNum}>{n}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </Card>
@@ -294,19 +298,28 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
 
   orgName: { flex: 1, color: colors.ink, ...typography.hero },
+  // large: stacked. The base `orgName` / `bannerCopy` / `footCopy` are `flex: 1`, which survives in a style array and would
+  // collapse the text in a column, so the large styles cancel it.
+  headerRowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  orgNameLarge: { alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  stackLarge: { flexDirection: "column", alignItems: "flex-start" },
+  bannerCopyLarge: { marginLeft: 0, marginTop: 12, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  footCopyLarge: { marginLeft: 0, marginTop: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  statRowLarge: { flexDirection: "column" },
   unverifiedPill: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 14,
-    height: 34,
+    paddingVertical: 6,
+    minHeight: 34,
     borderRadius: 17,
     backgroundColor: colors.greyPill
   },
   pillDot: { width: 9, height: 9, borderRadius: 5, backgroundColor: colors.muted },
   pillText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   verifiedPill: {
-    flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 14, height: 34,
+    flexDirection: "row", alignItems: "center", gap: 7, paddingHorizontal: 14, paddingVertical: 6, minHeight: 34,
     borderRadius: 17, backgroundColor: colors.soft
   },
   verifiedPillDot: {
@@ -348,11 +361,13 @@ const styles = StyleSheet.create({
   statRow: { marginTop: 22, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
     width: "31%",
-    height: 104,
+    minHeight: 104,
+    paddingVertical: 12,
     alignItems: "flex-start",
     justifyContent: "center",
     paddingHorizontal: 18
   },
+  statCardLarge: { width: "100%", marginTop: 12 },
   statNum: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
   volunteerCard: { marginTop: 16, padding: 18 },
