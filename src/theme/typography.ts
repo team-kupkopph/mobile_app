@@ -84,9 +84,11 @@ export const typography = {
 export type TypeToken = keyof typeof typography;
 
 /**
- * R6-F10 · how far a TITLE may scale with the user's text size. Hero (25) and section (19) headings scale about 3x
- * at AX5, so one word ("password?", "Registered") can exceed the width of the screen and break mid-word. Titles
- * stop growing here; the copy under them keeps scaling fully. Welcome's brand text uses 1.3 and the
- * SegmentedControl 1.5 for their own reasons.
+ * How far text in a fixed-size shape may scale with the user's text size.
+ * - `title` (R6-F10): hero (25) and section (19) headings scale about 3x at AX5, so one word ("password?",
+ *   "Registered") can exceed the width of the screen and break mid-word. Titles stop growing here; the copy under
+ *   them keeps scaling fully. Welcome's brand text uses 1.3 and the SegmentedControl 1.5 for their own reasons.
+ * - `code` (R6-F11): the six code boxes are a fixed 46 x 56 pt around a 22 pt digit; at AX5 the digit was as tall as
+ *   the box and spilled over its edges. 1.5 keeps a 33 pt digit inside the box.
  */
-export const maxFontScale = { title: 2.2 } as const;
+export const maxFontScale = { title: 2.2, code: 1.5 } as const;
