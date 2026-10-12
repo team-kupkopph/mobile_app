@@ -5,7 +5,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -22,7 +22,7 @@ import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "profile">;
 
@@ -34,6 +34,9 @@ function initialsOf(name: string): string {
 }
 
 export function ProfileScreen({ navigation }: Props) {
+  // O6-17: at Dynamic Type AX5 the verify card's icon | text | chip row left the text a sliver, so it stacks instead.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
   // The status bar is real now (App.tsx), so the first thing on screen has to start below
   // it. This block used to pad 20pt, which was right while the bar was hidden and
   // put the screen title under the clock once it was not.
@@ -138,14 +141,14 @@ export function ProfileScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.profile">
       <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
-        <Text style={styles.pageTitle}>Profile</Text>
+        <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Profile</Text>
 
         <View style={styles.card}>
           <View style={styles.avatar}>
             {me?.photo_url ? (
               <Image source={{ uri: me.photo_url } as ImageSourcePropType} style={styles.avatarImage} />
             ) : (
-              <Text style={styles.avatarInitials}>{initialsOf(me?.display_name ?? "")}</Text>
+              <Text style={styles.avatarInitials} allowFontScaling={false}>{initialsOf(me?.display_name ?? "")}</Text>
             )}
           </View>
 
@@ -191,14 +194,14 @@ export function ProfileScreen({ navigation }: Props) {
 
         <TouchableOpacity
           activeOpacity={pendingMember || approvedMember ? 1 : 0.85}
-          style={styles.verifyCard}
+          style={[styles.verifyCard, large && styles.verifyCardLarge]}
           onPress={pendingMember || approvedMember ? undefined : () => navigation.navigate("memberUpgrade")}
           disabled={pendingMember || approvedMember}
         >
           <View style={styles.verifyIcon}>
             <UserBadgeIcon color={colors.teal} />
           </View>
-          <View style={styles.verifyCopy}>
+          <View style={[styles.verifyCopy, large && styles.verifyCopyLarge]}>
             <Text style={styles.verifyTitle}>
               {approvedMember ? "Verified Member" : pendingMember ? "Verified Member" : "Get Verified"}
             </Text>
@@ -211,7 +214,7 @@ export function ProfileScreen({ navigation }: Props) {
             </Text>
           </View>
           {!approvedMember && !pendingMember && (
-            <View style={styles.verifyButton}>
+            <View style={[styles.verifyButton, large && styles.verifyButtonLarge]}>
               <Text style={styles.verifyButtonText}>Start</Text>
             </View>
           )}
@@ -224,7 +227,7 @@ export function ProfileScreen({ navigation }: Props) {
             onPress={() => navigation.navigate("myPets")}
           >
             <Text style={styles.accountRowLabel}>My pets</Text>
-            <Text style={styles.accountRowChevron}>›</Text>
+            <Text style={styles.accountRowChevron} allowFontScaling={false}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.75}
@@ -233,7 +236,7 @@ export function ProfileScreen({ navigation }: Props) {
             onPress={() => navigation.navigate("myListings")}
           >
             <Text style={styles.accountRowLabel}>My listings</Text>
-            <Text style={styles.accountRowChevron}>›</Text>
+            <Text style={styles.accountRowChevron} allowFontScaling={false}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.75}
@@ -241,7 +244,7 @@ export function ProfileScreen({ navigation }: Props) {
             onPress={() => navigation.navigate("impact")}
           >
             <Text style={styles.accountRowLabel}>My impact</Text>
-            <Text style={styles.accountRowChevron}>›</Text>
+            <Text style={styles.accountRowChevron} allowFontScaling={false}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity
             activeOpacity={0.75}
@@ -252,11 +255,11 @@ export function ProfileScreen({ navigation }: Props) {
             {/* US-N5 · the only route to Settings — and through it to the §12.6 data
                 rights. Before Sprint 7 the designed screen had no entry point at all. */}
             <Text style={styles.accountRowLabel}>Settings</Text>
-            <Text style={styles.accountRowChevron}>›</Text>
+            <Text style={styles.accountRowChevron} allowFontScaling={false}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.75} style={styles.accountRow} onPress={handleLogout}>
             <Text style={styles.accountRowLabel}>Log out</Text>
-            <Text style={styles.accountRowChevron}>›</Text>
+            <Text style={styles.accountRowChevron} allowFontScaling={false}>›</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -367,7 +370,8 @@ const styles = StyleSheet.create({
   },
   cityChip: {
     marginTop: 18,
-    height: 40,
+    minHeight: 40,
+    paddingVertical: 6,
     borderRadius: 20,
     flexDirection: "row",
     alignItems: "center",
@@ -396,6 +400,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: colors.soft
   },
+  // large: stacked (icon, text, chip). The base `verifyCopy` is `flex: 1`, which survives in a style array and would
+  // collapse the text in a column, so the large style cancels it.
+  verifyCardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  verifyCopyLarge: { marginLeft: 0, marginTop: 12, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  verifyButtonLarge: { marginTop: 12 },
   verifyIcon: {
     width: 48,
     height: 48,
@@ -419,7 +428,8 @@ const styles = StyleSheet.create({
     ...typography.meta
   },
   verifyButton: {
-    height: 38,
+    minHeight: 38,
+    paddingVertical: 6,
     minWidth: 68,
     borderRadius: 19,
     alignItems: "center",
@@ -440,7 +450,8 @@ const styles = StyleSheet.create({
     ...elevation.soft
   },
   accountRow: {
-    height: 56,
+    minHeight: 56,
+    paddingVertical: 12,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between"

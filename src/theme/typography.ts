@@ -90,5 +90,7 @@ export type TypeToken = keyof typeof typography;
  *   them keeps scaling fully. Welcome's brand text uses 1.3 and the SegmentedControl 1.5 for their own reasons.
  * - `code` (R6-F11): the six code boxes are a fixed 46 x 56 pt around a 22 pt digit; at AX5 the digit was as tall as
  *   the box and spilled over its edges. 1.5 keeps a 33 pt digit inside the box.
+ * - `tabLabel` (O6-17): the tab bar is a fixed 68 pt, so its labels cannot grow the way a row can; uncapped they
+ *   truncated to "Ho… / Ado… / Vol…" at AX5. 1.2 keeps an 11 pt label at 13 pt, which "Requests" still fits in a 69 pt slot.
  */
-export const maxFontScale = { title: 2.2, code: 1.5 } as const;
+export const maxFontScale = { title: 2.2, code: 1.5, tabLabel: 1.2 } as const;
