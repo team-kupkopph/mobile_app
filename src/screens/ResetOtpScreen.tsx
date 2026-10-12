@@ -144,6 +144,7 @@ export function ResetOtpScreen({ navigation, route }: Props) {
               maxLength={1}
               selectTextOnFocus
               style={styles.otpBox}
+              maxFontSizeMultiplier={maxFontScale.code}
               textAlign="center"
             />
           ))}

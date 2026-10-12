@@ -132,6 +132,7 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
               maxLength={1}
               selectTextOnFocus
               style={[styles.otpBox, !!error && styles.otpBoxError]}
+              maxFontSizeMultiplier={maxFontScale.code}
               textAlign="center"
             />
           ))}

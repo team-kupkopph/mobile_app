@@ -186,6 +186,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
                   maxLength={1}
                   selectTextOnFocus
                   style={[styles.otpBox, !!codeError && styles.otpBoxError]}
+                  maxFontSizeMultiplier={maxFontScale.code}
                   textAlign="center"
                 />
               ))}

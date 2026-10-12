@@ -51,7 +51,7 @@ export function OtpLockedScreen({ navigation, route }: Props) {
         <View style={styles.otpRow}>
           {Array.from({ length: CODE_LENGTH }).map((_, index) => (
             <View key={index} style={styles.otpBox}>
-              <Text style={styles.otpDigit}>•</Text>
+              <Text style={styles.otpDigit} maxFontSizeMultiplier={maxFontScale.code}>•</Text>
             </View>
           ))}
         </View>
