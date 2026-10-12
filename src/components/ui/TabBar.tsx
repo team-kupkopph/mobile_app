@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 import { Animated, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { colors, gradients, motion, radii, typography } from "../../theme";
+import { colors, gradients, maxFontScale, motion, radii, typography } from "../../theme";
 import { GlassSurface } from "../GlassSurface";
 import { PressScale } from "./PressScale";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -131,7 +131,7 @@ export function TabBar({ items, active }: { items: TabBarItem[]; active: string 
               {/* numberOfLines guards the five-tab shelter bar on the narrowest supported
                   screen: 375 - 32 gutters = 343, and 343/5 = 68.6 pt per item. "Requests" fits,
                   but it is the longest label in the app and has the least room. */}
-              <Text numberOfLines={1} style={[styles.tabText, isActive && styles.activeTabText]}>
+              <Text numberOfLines={1} maxFontSizeMultiplier={maxFontScale.tabLabel} style={[styles.tabText, isActive && styles.activeTabText]}>
                 {item.label}
               </Text>
             </PressScale>
