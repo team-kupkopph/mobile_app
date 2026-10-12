@@ -96,7 +96,7 @@ export function ShelterSetupScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen}>
       <AuthHeader title="Set up your shelter" activeStep={1} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Tell us about your org</Text>
         <Text style={styles.caption}>This is what adopters and donors will see.</Text>
 

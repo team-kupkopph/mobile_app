@@ -103,7 +103,7 @@ export function ShelterContactScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen}>
       <AuthHeader title="Contact details" activeStep={1} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>How can people reach you?</Text>
         <Text style={styles.caption}>Adopters see this — and our reviewers check it. We'll text a code to verify the number.</Text>
 

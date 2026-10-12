@@ -130,7 +130,7 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
     <View style={styles.screen} testID="screen.shelterVerify">
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>{isNgo ? "Base checks" : "Prove you're real"}</Text>
         <Text style={styles.subheading}>{isNgo ? "Step 1 of 2 — the base documents every shelter shares." : "A few documents and our team takes it from here."}</Text>
 

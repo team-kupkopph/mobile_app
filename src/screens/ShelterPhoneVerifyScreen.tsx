@@ -112,6 +112,7 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Enter the code</Text>
