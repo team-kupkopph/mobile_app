@@ -119,3 +119,18 @@ describe("the shared header's title is capped too (R6-F10)", () => {
     expect(tag).toMatch(/maxFontSizeMultiplier=\{maxFontScale\.title\}/);
   });
 });
+
+describe("the card icon glyphs do not outgrow their 60 pt circle (R6-F10)", () => {
+  // Found re-opening the shelter tier at AX5: the heart in "Community rescue" was cut to half a shape, and the
+  // grid glyph overflowed its circle. Same cause as the avatar's initials (R6-F5): text in fixed geometry.
+  const glyphTag = (f: string, style: string) => {
+    const m = new RegExp(`<Text\\b[^>]*style=\\{styles\\.${style}\\}[^>]*>`, "s").exec(read(f));
+    return m ? m[0] : null;
+  };
+  it("the shelter tier's glyph does not scale", () => {
+    expect(glyphTag("ShelterTierScreen.tsx", "glyph")).toMatch(/allowFontScaling=\{false\}/);
+  });
+  it("the account-type screen's org glyph does not scale", () => {
+    expect(glyphTag("AccountTypeScreen.tsx", "orgGlyph")).toMatch(/allowFontScaling=\{false\}/);
+  });
+});
