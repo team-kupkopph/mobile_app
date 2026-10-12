@@ -50,6 +50,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.iconCircle}>

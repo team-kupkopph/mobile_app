@@ -158,6 +158,7 @@ export function OtpScreen({ navigation, route }: Props) {
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
         {isUnverifiedResume && (

@@ -141,6 +141,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
         {step === "enter" ? (

@@ -138,7 +138,7 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
     <View style={styles.screen} testID="screen.shelterVerifyNgo">
       <ScreenHeader title="NGO papers" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>NGO papers</Text>
         <Text style={styles.subheading}>
           {upgrade
