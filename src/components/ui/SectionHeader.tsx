@@ -1,7 +1,8 @@
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 
-import { colors, spacing, typography } from "../../theme";
+import { colors, maxFontScale, spacing, typography } from "../../theme";
 import { TAP_SLOP } from "../../touch";
+import { useLargeText } from "../../useLargeText";
 import { PressScale } from "./PressScale";
 
 type SectionHeaderProps = {
@@ -32,6 +33,9 @@ type SectionHeaderProps = {
 };
 
 export function SectionHeader({ title, actionLabel, onAction, onPress, testID, style }: SectionHeaderProps) {
+  // At Dynamic Type AX3 and up the title and "See all ›" cannot share a row (the action was pushed off the screen):
+  // the row stacks, and the title is capped like every other title.
+  const large = useLargeText();
   const Row = onPress ? PressScale : View;
   const rowProps = onPress
     ? { onPress, testID, accessibilityRole: "button" as const, accessibilityLabel: `${title}${actionLabel ? ", " + actionLabel : ""}` }
@@ -43,8 +47,8 @@ export function SectionHeader({ title, actionLabel, onAction, onPress, testID, s
     // thing that does something. Only the flow could.
     : {};
   return (
-    <Row style={[styles.row, style]} {...rowProps}>
-      <Text style={styles.title}>{title}</Text>
+    <Row style={[styles.row, large && styles.rowLarge, style]} {...rowProps}>
+      <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>{title}</Text>
       {actionLabel && onAction && !onPress ? (
         <PressScale
           testID={testID}
@@ -74,6 +78,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.sm
   },
+  rowLarge: { flexDirection: "column", alignItems: "flex-start" },
   title: { ...typography.section, color: colors.ink },
   action: { ...typography.meta, fontWeight: "700", color: colors.teal }
 });

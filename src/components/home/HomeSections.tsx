@@ -20,9 +20,10 @@ import { Image, ImageSourcePropType, StyleSheet, Text, TouchableOpacity, View } 
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Listing } from "../../api/types";
-import { colors, elevation, radii, spacing, typography } from "../../theme";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../../theme";
 import { gradients, heroDirection } from "../../theme/v3";
 import { TAP_SLOP } from "../../touch";
+import { useLargeText } from "../../useLargeText";
 import { Avatar } from "../ui";
 
 const paw = require("../../../assets/paw-white.png") as ImageSourcePropType;
@@ -50,10 +51,13 @@ type HomeHeaderProps = {
 };
 
 export function HomeHeader({ greeting, roleLine, city, onChangeCity, right }: HomeHeaderProps) {
+  // At Dynamic Type AX3 and up the greeting and the bell / "Log in" pill cannot share a row: the greeting broke as
+  // "Welc / ome!" and the pill was clipped. The row stacks, and the greeting is capped like every other title.
+  const large = useLargeText();
   return (
-    <View style={styles.headerRow}>
-      <View style={styles.headerCopy}>
-        <Text style={styles.greeting}>{greeting}</Text>
+    <View style={[styles.headerRow, large && styles.headerRowLarge]}>
+      <View style={[styles.headerCopy, large && styles.headerCopyLarge]}>
+        <Text style={styles.greeting} maxFontSizeMultiplier={maxFontScale.title}>{greeting}</Text>
         {roleLine ? (
           <Text style={styles.role}>{roleLine}</Text>
         ) : (
@@ -74,15 +78,16 @@ export function HomeHeader({ greeting, roleLine, city, onChangeCity, right }: Ho
 
 /** "Saw a stray?" — the three-stop brand gradient with the paw, on both Homes. */
 export function ReportStrayCard({ onPress, testID }: { onPress: () => void; testID?: string }) {
+  const large = useLargeText();
   return (
     <LinearGradient
       colors={gradients.hero}
       start={heroDirection.start}
       end={heroDirection.end}
-      style={styles.reportCard}
+      style={[styles.reportCard, large && styles.reportCardLarge]}
     >
       <View>
-        <Text style={styles.reportTitle}>Saw a stray?</Text>
+        <Text style={styles.reportTitle} maxFontSizeMultiplier={maxFontScale.title}>Saw a stray?</Text>
         <Text style={styles.reportText}>Report it in seconds — help is near.</Text>
         <TouchableOpacity
           testID={testID}
@@ -94,27 +99,28 @@ export function ReportStrayCard({ onPress, testID }: { onPress: () => void; test
           <Text style={styles.reportButtonText}>Report now</Text>
         </TouchableOpacity>
       </View>
-      <Image source={paw} resizeMode="contain" style={styles.reportPaw} />
+      <Image source={paw} resizeMode="contain" style={[styles.reportPaw, large && styles.reportPawLarge]} />
     </LinearGradient>
   );
 }
 
 export function ListingRow({ listing, onPress, testID }: { listing: Listing; onPress: () => void; testID?: string }) {
+  const large = useLargeText();
   return (
-    <TouchableOpacity testID={testID} activeOpacity={0.75} style={styles.row} onPress={onPress}>
+    <TouchableOpacity testID={testID} activeOpacity={0.75} style={[styles.row, large && styles.rowLarge]} onPress={onPress}>
       {/* ⚠️ SQUIRCLE, NOT A CIRCLE. The design system calls the rounded square "a deliberate
           V2 replacement for the old circular avatar". The guest Home kept a circle here for
           two sprints after the signed-in Home lost its last one. */}
       <Avatar size={52}>
         <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
       </Avatar>
-      <View style={styles.copy}>
+      <View style={[styles.copy, large && styles.copyLarge]}>
         <Text style={styles.name}>{listing.pet.name}</Text>
         <Text style={styles.details}>
           {[listing.pet.species, listing.pet.breed, listing.city].filter(Boolean).join(" · ")}
         </Text>
       </View>
-      <View style={styles.availableBadge}>
+      <View style={[styles.availableBadge, large && styles.badgeLarge]}>
         <Text style={styles.availableText}>Available</Text>
       </View>
     </TouchableOpacity>
@@ -122,14 +128,15 @@ export function ListingRow({ listing, onPress, testID }: { listing: Listing; onP
 }
 
 export function StoryRow({ story, onPress }: { story: StoryRowData; onPress: () => void }) {
+  const large = useLargeText();
   return (
-    <TouchableOpacity activeOpacity={0.75} style={[styles.row, styles.rowSpaced]} onPress={onPress}>
+    <TouchableOpacity activeOpacity={0.75} style={[styles.row, styles.rowSpaced, large && styles.rowLarge]} onPress={onPress}>
       {/* Tinted: a story's author is shown as an organisation-style tile, so the same person
           keeps the same colour across Home, Stories and a story's detail. */}
       <Avatar initials={storyInitials(story.author.name)} tinted size={44} />
-      <View style={styles.copy}>
-        <Text style={styles.name} numberOfLines={1}>{story.caption}</Text>
-        <Text style={styles.details} numberOfLines={1}>
+      <View style={[styles.copy, large && styles.copyLarge]}>
+        <Text style={styles.name} numberOfLines={large ? 3 : 1}>{story.caption}</Text>
+        <Text style={styles.details} numberOfLines={large ? 3 : 1}>
           {story.author.name}{story.author.city ? ` · ${story.author.city}` : ""}
         </Text>
       </View>
@@ -138,16 +145,17 @@ export function StoryRow({ story, onPress }: { story: StoryRowData; onPress: () 
 }
 
 export function StrayRow({ report, onPress }: { report: MapReport; onPress: () => void }) {
+  const large = useLargeText();
   return (
-    <TouchableOpacity activeOpacity={0.75} style={[styles.row, styles.rowSpaced]} onPress={onPress}>
+    <TouchableOpacity activeOpacity={0.75} style={[styles.row, styles.rowSpaced, large && styles.rowLarge]} onPress={onPress}>
       <Avatar size={52}>
         <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
       </Avatar>
-      <View style={styles.copy}>
+      <View style={[styles.copy, large && styles.copyLarge]}>
         <Text style={styles.name}>{report.species} · {report.city ?? "Nearby"}</Text>
         <Text style={styles.details}>{report.condition} · needs pickup</Text>
       </View>
-      <View style={conditionBadgeStyle(report.condition)}>
+      <View style={[conditionBadgeStyle(report.condition), large && styles.badgeLarge]}>
         <Text style={conditionTextStyle(report.condition)}>{conditionLabel(report.condition)}</Text>
       </View>
     </TouchableOpacity>
@@ -184,9 +192,12 @@ function conditionTextStyle(condition: string) {
 const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" },
   headerCopy: { flex: 1, marginRight: spacing.sm },
+  // large: stacked. The base `headerCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  headerRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  headerCopyLarge: { marginRight: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", marginBottom: spacing.sm },
   greeting: { color: colors.ink, ...typography.title, lineHeight: 28 },
   role: { marginTop: 6, color: colors.muted, ...typography.meta },
-  cityRow: { marginTop: 6, flexDirection: "row", alignItems: "center", gap: 8 },
+  cityRow: { marginTop: 6, flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 },
   cityText: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   cityChange: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   reportCard: {
@@ -202,6 +213,7 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     paddingTop: 15
   },
+  reportCardLarge: { flexDirection: "column", paddingBottom: 16 },
   reportTitle: { color: colors.white, ...typography.title, lineHeight: 28 },
   reportText: { marginTop: 9, color: "#D5ECE8", ...typography.meta },
   reportButton: {
@@ -209,19 +221,22 @@ const styles = StyleSheet.create({
     // target without repainting the design, and TAP_SLOP on the element covers the rest.
     // This is the control someone uses in a hurry, standing over an animal — the last one
     // that should be fiddly to press.
-    width: 136,
-    height: 38,
+    minWidth: 136,
     minHeight: 44,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
     marginTop: 14,
-    borderRadius: 19,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.white
   },
   reportButtonText: { color: "#126B69", ...typography.meta, fontWeight: "800" },
   reportPaw: { width: 72, height: 72, marginTop: 4 },
+  reportPawLarge: { alignSelf: "flex-end", marginTop: 0 },
   row: {
-    height: 68,
+    minHeight: 68,
+    paddingVertical: 10,
     marginTop: 10,
     borderRadius: radii.tile,
     alignItems: "center",
@@ -232,17 +247,21 @@ const styles = StyleSheet.create({
   },
   /** Story and stray rows sit a little further apart than the adopt rows do. */
   rowSpaced: { marginTop: 16 },
+  // large: stacked (avatar, text, badge). The base `copy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  rowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  copyLarge: { marginLeft: 0, marginTop: 10, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  badgeLarge: { marginTop: 10 },
   avatarPaw: { width: 24, height: 24, tintColor: colors.teal },
   copy: { flex: 1, marginLeft: 14 },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   details: { marginTop: 5, color: colors.muted, ...typography.caption, fontWeight: "600" },
-  availableBadge: { minWidth: 92, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#E1F2D3" },
+  availableBadge: { minWidth: 92, minHeight: 28, paddingVertical: 4, paddingHorizontal: 12, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#E1F2D3" },
   availableText: { color: "#356A24", ...typography.meta, fontWeight: "800" },
-  urgentBadge: { width: 68, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.warningBg },
+  urgentBadge: { minWidth: 68, minHeight: 28, paddingVertical: 4, paddingHorizontal: 12, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.warningBg },
   urgentText: { color: colors.warningStrong, ...typography.meta, fontWeight: "800" },
-  specialBadge: { minWidth: 68, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
+  specialBadge: { minWidth: 68, minHeight: 28, paddingVertical: 4, paddingHorizontal: 12, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   specialText: { color: colors.teal, ...typography.meta, fontWeight: "800" },
-  stableBadge: { minWidth: 68, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#E1F2D3" },
+  stableBadge: { minWidth: 68, minHeight: 28, paddingVertical: 4, paddingHorizontal: 12, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#E1F2D3" },
   stableText: { color: "#356A24", ...typography.meta, fontWeight: "800" },
   emptyNote: { marginTop: 12, color: colors.muted, ...typography.meta, textAlign: "center" }
 });
