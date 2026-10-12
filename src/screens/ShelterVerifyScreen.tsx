@@ -6,7 +6,7 @@
 // The social link is validated here for both tiers (F9 — socialLink.ts); step 2 only forwards it.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { pickAndUpload } from "../media/pickAndUpload";
@@ -199,26 +199,29 @@ function DocSlot({
   actionLabel?: string;
   testID?: string;
 }) {
+  // R6-F14: at Dynamic Type AX5 the icon | text | action row left the text a sliver, so the row stacks instead.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
   return (
-    <TouchableOpacity testID={testID} activeOpacity={0.8} style={styles.docCard} onPress={onPress} disabled={busy}>
+    <TouchableOpacity testID={testID} activeOpacity={0.8} style={[styles.docCard, large && styles.docCardLarge]} onPress={onPress} disabled={busy}>
       <Avatar size={48}>
         <DocumentIcon color={authColors.teal} />
       </Avatar>
-      <View style={styles.docCopy}>
+      <View style={[styles.docCopy, large && styles.docCopyLarge]}>
         <Text style={styles.docTitle}>{label}</Text>
         <Text style={styles.docSubtitle}>{hint}</Text>
       </View>
       {busy ? (
         <ActivityIndicator color={authColors.teal} />
       ) : done ? (
-        <View style={styles.docDone}>
+        <View style={[styles.docDone, large && styles.docActionLarge]}>
           <View style={styles.docCheck}>
             <CheckIcon color="#FFFFFF" size={12} />
           </View>
           <Text style={styles.docDoneText}>{actionLabel === "Add more" ? "Add more" : "Done"}</Text>
         </View>
       ) : (
-        <Text style={styles.docUploadLink}>{actionLabel}</Text>
+        <Text style={[styles.docUploadLink, large && styles.docActionLarge]}>{actionLabel}</Text>
       )}
     </TouchableOpacity>
   );
@@ -253,6 +256,10 @@ const styles = StyleSheet.create({
     ...elevation.soft
   },
   docCopy: { flex: 1, marginLeft: 14 },
+  // large: stacked. The base `docCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  docCardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  docCopyLarge: { marginLeft: 0, marginTop: 12, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  docActionLarge: { marginTop: 12 },
   docTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   docSubtitle: { marginTop: 5, color: colors.muted, ...typography.caption, fontWeight: "600" },
   docUploadLink: { color: authColors.teal, ...typography.meta, fontWeight: "800" },
