@@ -31,6 +31,7 @@ import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, StoryRow
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
+import { useLargeText } from "../useLargeText";
 import { colors, elevation, pill, radii, spacing, squircle, typography } from "../theme";
 
 
@@ -41,6 +42,8 @@ const GUEST_CITY = "Marikina";
 type WallState = { action: SignupWallAction; subject?: string } | null;
 
 export function HomeGuestScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the guest card's icon | text | "Sign up ›" row left the text a sliver, so it stacks instead.
+  const large = useLargeText();
   // The status bar is real now (App.tsx), so the first thing on screen has to start below
   // it. This block used to pad 20pt, which was right while the bar was hidden and put
   // "Welcome!" directly under the clock once it was not.
@@ -125,7 +128,7 @@ export function HomeGuestScreen({ navigation }: Props) {
             surface. */}
         <TouchableOpacity
           activeOpacity={0.85}
-          style={styles.guestCard}
+          style={[styles.guestCard, large && styles.guestCardLarge]}
           onPress={() => openWall("account")}
           accessibilityRole="button"
           accessibilityLabel="Sign up"
@@ -133,11 +136,11 @@ export function HomeGuestScreen({ navigation }: Props) {
           <View style={styles.guestIcon}>
             <ProfileIcon color={colors.teal} size={22} />
           </View>
-          <View style={styles.guestCopy}>
+          <View style={[styles.guestCopy, large && styles.guestCopyLarge]}>
             <Text style={styles.guestTitle}>You're browsing as a guest</Text>
             <Text style={styles.guestBody}>Sign up to adopt, save pets & help strays.</Text>
           </View>
-          <Text style={styles.guestLink}>Sign up ›</Text>
+          <Text style={[styles.guestLink, large && styles.guestLinkLarge]}>Sign up ›</Text>
         </TouchableOpacity>
 
         <ReportStrayCard testID="btn.homeGuest.report" onPress={() => openWall("report")} />
@@ -222,7 +225,8 @@ const styles = StyleSheet.create({
     paddingBottom: 156
   },
   loginPill: {
-    height: 40,
+    minHeight: 40,
+    paddingVertical: 6,
     paddingHorizontal: 20,
     borderRadius: pill(40),
     alignItems: "center",
@@ -247,6 +251,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: colors.soft
   },
+  // large: stacked. The base `guestCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  guestCardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  guestCopyLarge: { marginLeft: 0, marginTop: 12, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  guestLinkLarge: { marginLeft: 0, marginTop: 12 },
   guestIcon: {
     width: 46,
     height: 46,
