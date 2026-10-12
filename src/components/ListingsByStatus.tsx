@@ -11,6 +11,7 @@ import { useApi } from "../api/useApi";
 import { loadState } from "../net";
 import { DRAFT_STATUS, ListingStatus, SEGMENT_STATUS, STATUS_CHIP, applicantsChip, listingInitial, listingTitle } from "../shelterAnimals";
 import { colors, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 import { LoadStateView } from "./LoadStateView";
 import { Card, Chip, SegmentedControl } from "./ui";
 
@@ -27,6 +28,9 @@ type Props = {
 };
 
 export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }: Props) {
+  // At Dynamic Type AX3 and up a row's photo, text and chip cannot share a line (the name truncated to "R1 Dr…"), so the row
+  // stacks and its text may wrap.
+  const large = useLargeText();
   const api = useApi();
   const [segment, setSegment] = useState(0);
   const [listings, setListings] = useState<Listing[] | null>(null);
@@ -68,12 +72,12 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
           {drafts.map((d) => (
             <TouchableOpacity
               key={d.listing_id}
-              style={styles.draftRow}
+              style={[styles.draftRow, large && styles.draftRowLarge]}
               accessibilityRole="button"
               accessibilityLabel={`Finish the listing for ${d.pet.name || "this animal"}`}
               onPress={() => onOpenDraft(d.listing_id)}
             >
-              <Text style={styles.draftName} numberOfLines={1}>{listingTitle(d.pet.name)}</Text>
+              <Text style={[styles.draftName, large && styles.draftNameLarge]} numberOfLines={large ? 3 : 1}>{listingTitle(d.pet.name)}</Text>
               <Chip tone="warning" dot={false} label="Draft" />
             </TouchableOpacity>
           ))}
@@ -104,7 +108,7 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
           const subtitle = [l.pet.breed ?? l.pet.species, l.city].filter(Boolean).join(" · ");
           return (
             <TouchableOpacity key={l.listing_id} activeOpacity={0.85} onPress={() => onOpen(l.listing_id)}>
-              <Card style={styles.row}>
+              <Card style={[styles.row, large && styles.rowLarge]}>
                 {l.photo_url ? (
                   <Image source={{ uri: l.photo_url }} style={styles.photo} />
                 ) : (
@@ -112,9 +116,9 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
                     <Text style={styles.photoGlyph}>{listingInitial(l.pet.name)}</Text>
                   </View>
                 )}
-                <View style={styles.rowCopy}>
-                  <Text style={styles.rowTitle} numberOfLines={1}>{listingTitle(l.pet.name)}</Text>
-                  <Text style={styles.rowSub} numberOfLines={1}>{subtitle}</Text>
+                <View style={[styles.rowCopy, large && styles.rowCopyLarge]}>
+                  <Text style={styles.rowTitle} numberOfLines={large ? 3 : 1}>{listingTitle(l.pet.name)}</Text>
+                  <Text style={styles.rowSub} numberOfLines={large ? 3 : 1}>{subtitle}</Text>
                   {applicants ? (
                     <View style={styles.rowApplicants}>
                       <Chip tone="info" dot={false} label={applicants} />
@@ -138,6 +142,8 @@ const styles = StyleSheet.create({
   draftsTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   draftsSub: { marginTop: 4, marginBottom: 6, color: colors.muted, ...typography.meta, lineHeight: 17 },
   draftRow: { minHeight: 48, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, borderTopWidth: 1, borderTopColor: colors.border },
+  draftRowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 6, paddingVertical: 10 },
+  draftNameLarge: { alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   draftName: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   photo: { width: 56, height: 56, borderRadius: squircle(56), backgroundColor: colors.border },
   photoPlaceholder: {
@@ -146,6 +152,9 @@ const styles = StyleSheet.create({
   },
   photoGlyph: { color: "#FFFFFF", ...typography.subtitle, fontWeight: "800" },
   rowCopy: { flex: 1 },
+  // large: stacked. The base `rowCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  rowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  rowCopyLarge: { marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   rowTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   rowSub: { marginTop: 4, color: colors.muted, ...typography.meta },
   rowApplicants: { marginTop: 8, alignSelf: "flex-start" }

@@ -14,7 +14,7 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { Button } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { draftRoute } from "../shelterAnimals";
-import { colors, spacing, typography } from "../theme";
+import { colors, maxFontScale, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterAnimals">;
 
@@ -29,7 +29,7 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
             the body so offlineEscape.test.ts / safeAreaOnFailure.test.ts never read the screen
             as the "replaces the whole screen" shape; this one genuinely groups the title. */}
         <View style={styles.header}>
-          <Text style={styles.pageTitle}>Animals</Text>
+          <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Animals</Text>
         </View>
 
         <ListingsByStatus
