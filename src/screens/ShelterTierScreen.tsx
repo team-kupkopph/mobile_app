@@ -102,7 +102,7 @@ export function ShelterTierScreen({ navigation, route }: Props) {
             style={[styles.card, i > 0 && styles.secondCard, large && styles.cardLarge]}
           >
             <View style={styles.iconCircle}>
-              <Text style={styles.glyph}>{opt.glyph}</Text>
+              <Text style={styles.glyph} allowFontScaling={false}>{opt.glyph}</Text>
             </View>
             <View style={[styles.copy, large && styles.copyLarge]}>
               <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{opt.title}</Text>

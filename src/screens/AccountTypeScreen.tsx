@@ -117,7 +117,7 @@ export function AccountTypeScreen({ navigation, route }: Props) {
 
         <TouchableOpacity testID="btn.accountType.shelter" activeOpacity={0.85} onPress={onShelter} disabled={busy} style={[styles.card, styles.secondCard, large && styles.cardLarge]}>
           <View style={[styles.iconCircle, styles.orgIconCircle]}>
-            <Text style={styles.orgGlyph}>▦</Text>
+            <Text style={styles.orgGlyph} allowFontScaling={false}>▦</Text>
           </View>
           <View style={[styles.copy, large && styles.copyLarge]}>
             <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>Shelter / Organization</Text>
