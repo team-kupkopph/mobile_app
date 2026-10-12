@@ -29,7 +29,8 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { Card, Chip } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { ShelterVerificationCard, shelterVerificationCard } from "../shelterDashboard";
-import { colors, radii, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 
@@ -44,6 +45,8 @@ const CARD: Record<ShelterVerificationCard, { title: string; body: string }> = {
 };
 
 export function ShelterProfileScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the three stat tiles cannot share a row, so they stack. Default size is untouched.
+  const large = useLargeText();
   // The status bar is real now (App.tsx), so the first thing on screen has to start below
   // it. This block used to pad 24pt, which was right while the bar was hidden and
   // put the profile heading under the clock once it was not.
@@ -159,13 +162,13 @@ export function ShelterProfileScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.shelterProfile">
       <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
-        <Text style={styles.pageTitle}>Profile</Text>
+        <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Profile</Text>
 
         <Card tone="hero" style={styles.identityCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarGlyph}>{isTier1 ? "♥" : "▦"}</Text>
+            <Text style={styles.avatarGlyph} allowFontScaling={false}>{isTier1 ? "♥" : "▦"}</Text>
           </View>
-          <Text style={styles.orgName}>{me?.display_name ?? "Your shelter"}</Text>
+          <Text style={styles.orgName} maxFontSizeMultiplier={maxFontScale.title}>{me?.display_name ?? "Your shelter"}</Text>
 
           {gated ? (
             // F13 · the chip told the card's lie too: "Under review" with nothing sent.
@@ -182,13 +185,13 @@ export function ShelterProfileScreen({ navigation }: Props) {
           <Text style={styles.orgSub}>{sub}</Text>
         </Card>
 
-        <View style={styles.statRow}>
-          <Stat n={counts.draft_listings} label={gated ? (isTier1 ? "Draft" : "Drafts") : "Listings"} />
-          <Stat n={counts.adopted} label="Adopted" />
-          <Stat n={0} label="Volunteers" />
+        <View style={[styles.statRow, large && styles.statRowLarge]}>
+          <Stat n={counts.draft_listings} label={gated ? (isTier1 ? "Draft" : "Drafts") : "Listings"} large={large} />
+          <Stat n={counts.adopted} label="Adopted" large={large} />
+          <Stat n={0} label="Volunteers" large={large} />
         </View>
 
-        <Text style={styles.groupTitle}>Organization</Text>
+        <Text style={styles.groupTitle} maxFontSizeMultiplier={maxFontScale.title}>Organization</Text>
         <Card style={styles.group}>
           {/* F-R3-4 · "Organization details" was a row here with a chevron and no onPress.
               There is no screen to edit an existing org (ShelterSetup is POST-only and 409s
@@ -231,7 +234,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
                 <Text style={styles.accentWarnTitle}>{CARD[card].title}</Text>
                 <Text style={styles.accentWarnBody}>{CARD[card].body}</Text>
               </View>
-              <Text style={styles.accentWarnChev}>›</Text>
+              <Text style={styles.accentWarnChev} allowFontScaling={false}>›</Text>
             </TouchableOpacity>
           ) : isTier1 ? (
             // Was a View with a chevron and no onPress. The approved base is on file, so the
@@ -253,7 +256,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
                   {upgradeInReview ? "Track your documents" : "Unlock uncapped fees & escalation"}
                 </Text>
               </View>
-              <Text style={styles.accentTealChev}>›</Text>
+              <Text style={styles.accentTealChev} allowFontScaling={false}>›</Text>
             </TouchableOpacity>
           ) : (
             // F-R3-4 · same dead-chevron shape as the rows the finding named; the approved
@@ -264,7 +267,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
           )}
         </Card>
 
-        <Text style={styles.groupTitle}>Account</Text>
+        <Text style={styles.groupTitle} maxFontSizeMultiplier={maxFontScale.title}>Account</Text>
         <Card style={styles.group}>
           {/* F-R3-4 · was a chevron with no onPress — and with it, the shelter's only route to
               the §12.6 / RA 10173 data rights (export, delete) and privacy controls.
@@ -293,9 +296,9 @@ export function ShelterProfileScreen({ navigation }: Props) {
   );
 }
 
-function Stat({ n, label }: { n: number; label: string }) {
+function Stat({ n, label, large }: { n: number; label: string; large: boolean }) {
   return (
-    <Card style={styles.statCard}>
+    <Card style={[styles.statCard, large && styles.statCardLarge]}>
       <Text style={styles.statNum}>{n}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </Card>
@@ -313,8 +316,11 @@ function Row({
   locked?: boolean;
   last?: boolean;
 }) {
+  // large: the label and its value / chevron stack, so a long label or value ("Verified Rescue", "20+ active") wraps
+  // inside the card instead of squeezing the label.
+  const large = useLargeText();
   return (
-    <View style={[styles.row, !last && styles.rowRule]}>
+    <View style={[styles.row, !last && styles.rowRule, large && styles.rowLarge]}>
       <Text style={[styles.rowLabel, locked && styles.rowLabelLocked]}>{label}</Text>
       {locked ? (
         // Locked, not hidden: a row that vanishes can't tell the shelter *why* it's unavailable.
@@ -322,7 +328,7 @@ function Row({
       ) : (
         <View style={styles.rowRight}>
           {!!value && <Text style={styles.rowValue}>{value}</Text>}
-          <Text style={styles.chev}>›</Text>
+          <Text style={styles.chev} allowFontScaling={false}>›</Text>
         </View>
       )}
     </View>
@@ -356,10 +362,13 @@ const styles = StyleSheet.create({
   statRow: { marginTop: 20, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
     width: "31%",
-    height: 100,
+    minHeight: 100,
+    paddingVertical: 12,
     justifyContent: "center",
     paddingHorizontal: 18
   },
+  statRowLarge: { flexDirection: "column" },
+  statCardLarge: { width: "100%", marginTop: 12 },
   statNum: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 6, color: colors.muted, ...typography.meta },
   groupTitle: { marginTop: 26, marginBottom: 12, color: colors.ink, ...typography.section },
@@ -374,6 +383,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: spacing.lg
   },
+  rowLarge: { flexDirection: "column", alignItems: "flex-start", paddingVertical: 12, gap: 4 },
   rowRule: { borderBottomWidth: 1.5, borderBottomColor: colors.border },
   rowLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "600" },
   rowLabelLocked: { color: colors.muted },
