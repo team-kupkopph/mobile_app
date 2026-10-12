@@ -18,7 +18,7 @@ import { codeCheckOutcome } from "../passwordReset";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { radii, spacing, typography } from "../theme";
+import { maxFontScale, radii, spacing, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -126,7 +126,7 @@ export function ResetOtpScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Enter the code</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Enter the code</Text>
         <Text style={styles.caption}>We emailed a 6-digit code to</Text>
         <Text style={styles.emailText}>{email}</Text>
 

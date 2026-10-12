@@ -17,7 +17,7 @@ import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { radii, spacing, typography } from "../theme";
+import { maxFontScale, radii, spacing, typography } from "../theme";
 import { formatCountdown, resendOutcome } from "../otpResend";
 
 const CODE_LENGTH = 6;
@@ -170,7 +170,7 @@ export function OtpScreen({ navigation, route }: Props) {
           </View>
         )}
 
-        <Text style={styles.title}>Enter the code</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Enter the code</Text>
         <Text style={styles.caption}>We emailed a 6-digit code to</Text>
         <Text style={styles.emailText}>{email}</Text>
 

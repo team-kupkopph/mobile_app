@@ -13,7 +13,7 @@ import { RootStackParamList } from "../navigation/types";
 import { SimpleHeader, authColors } from "./AuthFormKit";
 import { Button, Field } from "../components/ui";
 import { SocialSignIn } from "../components/ui/SocialSignIn";
-import { colors, gradients, radii, spacing, squircle, typography } from "../theme";
+import { colors, gradients, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 
@@ -119,7 +119,7 @@ export function SigninScreen({ navigation }: Props) {
           </LinearGradient>
         </View>
 
-        <Text style={styles.title}>Welcome back</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Welcome back</Text>
         <Text style={styles.caption}>Log in to keep helping.</Text>
 
         <Field

@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { normalizePhMobile, phoneError } from "../phone";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
-import { spacing, typography } from "../theme";
+import { maxFontScale, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterContact">;
 
@@ -104,7 +104,7 @@ export function ShelterContactScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <AuthHeader title="Contact details" activeStep={1} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>How can people reach you?</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>How can people reach you?</Text>
         <Text style={styles.caption}>Adopters see this — and our reviewers check it. We'll text a code to verify the number.</Text>
 
         <FormField

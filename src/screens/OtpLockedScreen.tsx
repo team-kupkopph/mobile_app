@@ -13,7 +13,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
-import { radii, spacing, typography } from "../theme";
+import { maxFontScale, radii, spacing, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 
@@ -44,7 +44,7 @@ export function OtpLockedScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Enter the code</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Enter the code</Text>
         <Text style={styles.caption}>We emailed a 6-digit code to</Text>
         <Text style={styles.emailText}>{email}</Text>
 

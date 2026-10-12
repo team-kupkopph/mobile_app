@@ -10,7 +10,7 @@ import { PASSWORD_RULE, passwordError } from "../passwordRules";
 import { codeCheckOutcome } from "../passwordReset";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { spacing, typography } from "../theme";
+import { maxFontScale, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "resetPassword">;
 
@@ -92,7 +92,7 @@ export function ResetPasswordScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Create a new password</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Create a new password</Text>
         <Text style={styles.caption}>Make it something you'll remember.</Text>
 
         <FormField
