@@ -2,7 +2,7 @@
 // Informational recap of what the account unlocks; NOT an action menu — "Start exploring" is the only exit.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
 import { AdoptIcon, VolunteerIcon } from "../components/AppIcons";
 import { TopStatus } from "../components/TopStatus";
@@ -21,6 +21,9 @@ type NextStep = {
 };
 
 export function SignupSuccessScreen({ navigation }: Props) {
+  // R6-F12: at Dynamic Type AX5 the icon | text | chip row left the text a sliver, so the row stacks instead.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
   const steps: NextStep[] = [
     {
       key: "adopt",
@@ -71,14 +74,14 @@ export function SignupSuccessScreen({ navigation }: Props) {
         <Text style={styles.sectionTitle}>Here's what you can do</Text>
 
         {steps.map((step) => (
-          <View key={step.key} style={styles.stepCard}>
+          <View key={step.key} style={[styles.stepCard, large && styles.stepCardLarge]}>
             <View style={styles.iconTile}>{step.icon}</View>
-            <View style={styles.stepCopy}>
+            <View style={[styles.stepCopy, large && styles.stepCopyLarge]}>
               <Text style={styles.stepTitle}>{step.title}</Text>
               <Text style={styles.stepBody}>{step.body}</Text>
             </View>
             {step.needsVerify && (
-              <View style={styles.verifyBadge}>
+              <View style={[styles.verifyBadge, large && styles.verifyBadgeLarge]}>
                 <Text style={styles.verifyText}>Verify</Text>
               </View>
             )}
@@ -182,6 +185,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     ...elevation.soft
   },
+  stepCardLarge: { flexDirection: "column", alignItems: "flex-start" },
   iconTile: {
     width: 46,
     height: 46,
@@ -199,6 +203,8 @@ const styles = StyleSheet.create({
     ...typography.strong,
     fontWeight: "800"
   },
+  // the base `stepCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column
+  stepCopyLarge: { marginLeft: 0, marginTop: 12, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   stepBody: {
     marginTop: 3,
     color: authColors.muted,
@@ -206,12 +212,14 @@ const styles = StyleSheet.create({
   },
   verifyBadge: {
     marginLeft: 8,
-    height: 28,
+    minHeight: 28,
     paddingHorizontal: 12,
+    paddingVertical: 4,
     justifyContent: "center",
     borderRadius: pill(28),
     backgroundColor: "#F3DFB0"
   },
+  verifyBadgeLarge: { marginLeft: 0, marginTop: 12 },
   verifyText: {
     color: "#7A5310",
     ...typography.meta,
