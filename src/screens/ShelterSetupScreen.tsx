@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { radii, spacing, typography } from "../theme";
+import { maxFontScale, radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterSetup">;
 
@@ -97,7 +97,7 @@ export function ShelterSetupScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <AuthHeader title="Set up your shelter" activeStep={1} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Tell us about your org</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Tell us about your org</Text>
         <Text style={styles.caption}>This is what adopters and donors will see.</Text>
 
         <FormField label="Organization name" value={orgName} error={orgNameError}

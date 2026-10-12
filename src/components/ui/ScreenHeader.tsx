@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { StyleProp, StyleSheet, Text, useWindowDimensions, View, ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { colors, elevation, spacing, typography } from "../../theme";
+import { colors, elevation, maxFontScale, spacing, typography } from "../../theme";
 import { TAP_SLOP } from "../../touch";
 import { PressScale } from "./PressScale";
 
@@ -90,6 +90,7 @@ export function ScreenHeader({ title, onBack, right, align = "left", children }:
         {title ? (
           <Text
             numberOfLines={large ? 3 : 1}
+            maxFontSizeMultiplier={maxFontScale.title}
             accessibilityRole="header"
             style={[
               styles.title,

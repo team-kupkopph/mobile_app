@@ -82,3 +82,11 @@ export const typography = {
 } as const satisfies Record<string, Style>;
 
 export type TypeToken = keyof typeof typography;
+
+/**
+ * R6-F10 · how far a TITLE may scale with the user's text size. Hero (25) and section (19) headings scale about 3x
+ * at AX5, so one word ("password?", "Registered") can exceed the width of the screen and break mid-word. Titles
+ * stop growing here; the copy under them keeps scaling fully. Welcome's brand text uses 1.3 and the
+ * SegmentedControl 1.5 for their own reasons.
+ */
+export const maxFontScale = { title: 2.2 } as const;

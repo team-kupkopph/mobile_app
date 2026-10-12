@@ -7,7 +7,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { elevation, radii, spacing, typography } from "../theme";
+import { elevation, maxFontScale, radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "passwordChanged">;
 
@@ -30,7 +30,7 @@ export function PasswordChangedScreen({ navigation }: Props) {
           <View style={styles.checkMarkKick} />
         </View>
 
-        <Text style={styles.heading}>Password changed</Text>
+        <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>Password changed</Text>
         <Text style={styles.subheading}>Log in with your new password.</Text>
 
         <View style={styles.noticeBar}>

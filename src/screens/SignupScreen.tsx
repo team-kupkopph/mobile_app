@@ -11,7 +11,7 @@ import { emailError as emailFormatError, nameError as nameFormatError } from "..
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { spacing, typography } from "../theme";
+import { maxFontScale, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signup">;
 
@@ -109,7 +109,7 @@ export function SignupScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Let's get you set up</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Let's get you set up</Text>
         <Text style={styles.caption}>{isShelter ? "Use your organisation's email." : "A few details and you're in."}</Text>
 
         <FormField

@@ -6,8 +6,16 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
 import {
-  ActivityIndicator, Alert, Image, ImageSourcePropType, ScrollView, StyleSheet, Text,
-  TouchableOpacity, View
+  ActivityIndicator,
+  Alert,
+  Image,
+  ImageSourcePropType,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions
 } from "react-native";
 
 import { useApi } from "../api/useApi";
@@ -15,7 +23,7 @@ import { useAuth } from "../auth/AuthContext";
 import { isReturningSocialAccount } from "../auth/socialRouting";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, authColors } from "./AuthFormKit";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -26,6 +34,11 @@ export function AccountTypeScreen({ navigation, route }: Props) {
   const { setTokens } = useAuth();
   const social = route.params?.social;
   const [busy, setBusy] = useState(false);
+  // R6-F10 · at a large font scale (AX3 and up) the icon, the text and the chevron cannot share a row: the text
+  // column is too narrow for a title word ("Organization" broke as "Organi / zation"). The card stacks, so the
+  // title gets the card's full width. Default size is untouched.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
 
   async function onPetOwner() {
     if (!social) {
@@ -76,7 +89,7 @@ export function AccountTypeScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>How will you join?</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>How will you join?</Text>
         <Text style={styles.caption}>This sets up the right account — you can get verified anytime.</Text>
 
         {!!social && (
@@ -91,23 +104,23 @@ export function AccountTypeScreen({ navigation, route }: Props) {
           </View>
         )}
 
-        <TouchableOpacity testID="btn.accountType.personal" activeOpacity={0.85} onPress={onPetOwner} disabled={busy} style={styles.card}>
+        <TouchableOpacity testID="btn.accountType.personal" activeOpacity={0.85} onPress={onPetOwner} disabled={busy} style={[styles.card, large && styles.cardLarge]}>
           <View style={styles.iconCircle}>
             <Image source={paw} resizeMode="contain" style={styles.pawIcon} />
           </View>
-          <View style={styles.copy}>
-            <Text style={styles.cardTitle}>Pet Owner</Text>
+          <View style={[styles.copy, large && styles.copyLarge]}>
+            <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>Pet Owner</Text>
             <Text style={styles.cardBody}>Adopt, report strays, and rehome animals you rescue yourself.</Text>
           </View>
           {busy ? <ActivityIndicator color={authColors.teal} /> : <Text style={styles.chevron}>›</Text>}
         </TouchableOpacity>
 
-        <TouchableOpacity testID="btn.accountType.shelter" activeOpacity={0.85} onPress={onShelter} disabled={busy} style={[styles.card, styles.secondCard]}>
+        <TouchableOpacity testID="btn.accountType.shelter" activeOpacity={0.85} onPress={onShelter} disabled={busy} style={[styles.card, styles.secondCard, large && styles.cardLarge]}>
           <View style={[styles.iconCircle, styles.orgIconCircle]}>
             <Text style={styles.orgGlyph}>▦</Text>
           </View>
-          <View style={styles.copy}>
-            <Text style={styles.cardTitle}>Shelter / Organization</Text>
+          <View style={[styles.copy, large && styles.copyLarge]}>
+            <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>Shelter / Organization</Text>
             <Text style={styles.cardBody}>List animals, receive donations, and host volunteers.</Text>
           </View>
           <Text style={styles.chevron}>›</Text>
@@ -177,6 +190,8 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 18
   },
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  copyLarge: { marginLeft: 0, marginTop: 14, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardTitle: {
     color: authColors.ink,
     ...typography.section

@@ -16,7 +16,7 @@ import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { normalizeSocialLink, socialLinkError, socialLinkNote } from "../socialLink";
 import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { Avatar, Button, Field, ScreenHeader } from "../components/ui";
 
 const MIN_PHOTOS = 3;
@@ -131,7 +131,7 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.heading}>{isNgo ? "Base checks" : "Prove you're real"}</Text>
+        <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>{isNgo ? "Base checks" : "Prove you're real"}</Text>
         <Text style={styles.subheading}>{isNgo ? "Step 1 of 2 — the base documents every shelter shares." : "A few documents and our team takes it from here."}</Text>
 
         <DocSlot testID="btn.shelterVerify.uploadGovId" label="Government ID" hint="A clear photo of your ID · Required" done={!!govId} busy={busy === "gov"} onPress={() => uploadInto("gov", setGovId)} />

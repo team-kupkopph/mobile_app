@@ -8,7 +8,7 @@ import { AdoptIcon, VolunteerIcon } from "../components/AppIcons";
 import { TopStatus } from "../components/TopStatus";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, authColors } from "./AuthFormKit";
-import { elevation, pill, radii, spacing, squircle, typography } from "../theme";
+import { elevation, maxFontScale, pill, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signupSuccess">;
 
@@ -65,7 +65,7 @@ export function SignupSuccessScreen({ navigation }: Props) {
           <View style={styles.checkMarkKick} />
         </View>
 
-        <Text style={styles.heading}>You're in!</Text>
+        <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>You're in!</Text>
         <Text style={styles.subheading}>Your email is verified.</Text>
 
         <Text style={styles.sectionTitle}>Here's what you can do</Text>

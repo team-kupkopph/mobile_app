@@ -15,7 +15,7 @@ import { CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { Avatar, Button, Field, ScreenHeader } from "../components/ui";
 
 const PRC_RE = /^\d{6,8}$/;
@@ -139,7 +139,7 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
       <ScreenHeader title="NGO papers" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.heading}>NGO papers</Text>
+        <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>NGO papers</Text>
         <Text style={styles.subheading}>
           {upgrade
             ? "Your base documents are already approved — add the registration and vet details for a Verified Shelter."

@@ -11,7 +11,7 @@ import {
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
-import { radii, spacing, typography } from "../theme";
+import { maxFontScale, radii, spacing, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -114,7 +114,7 @@ export function ShelterPhoneVerifyScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Enter the code</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Enter the code</Text>
         <Text style={styles.caption}>We texted a 6-digit code to</Text>
         <Text style={styles.phoneText}>{phone}</Text>
 

@@ -3,7 +3,15 @@
 // to shelter_profile). Never label tier 1 "Independent rescuer" (decision 3): it is "Community rescue".
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View
+} from "react-native";
 
 import { ShelterTier } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -11,7 +19,7 @@ import { useAuth } from "../auth/AuthContext";
 import { isReturningSocialAccount } from "../auth/socialRouting";
 import { RootStackParamList } from "../navigation/types";
 import { AuthHeader, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
-import { elevation, radii, spacing, typography } from "../theme";
+import { elevation, maxFontScale, radii, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterTier">;
 
@@ -35,6 +43,11 @@ export function ShelterTierScreen({ navigation, route }: Props) {
   const { setTokens } = useAuth();
   const social = route.params?.social;
   const [busy, setBusy] = useState(false);
+  // R6-F10 · at a large font scale (AX3 and up) the icon, the text and the chevron cannot share a row: the text
+  // column is too narrow for a title word ("Organization" broke as "Organi / zation"). The card stacks, so the
+  // title gets the card's full width. Default size is untouched.
+  const { fontScale } = useWindowDimensions();
+  const large = fontScale > 1.5;
 
   async function onPick(tier: ShelterTier) {
     if (!social) {
@@ -77,7 +90,7 @@ export function ShelterTierScreen({ navigation, route }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>What kind of shelter?</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>What kind of shelter?</Text>
         <Text style={styles.caption}>This sets which documents we'll ask for — you can start either way today.</Text>
 
         {options.map((opt, i) => (
@@ -86,13 +99,13 @@ export function ShelterTierScreen({ navigation, route }: Props) {
             activeOpacity={0.85}
             disabled={busy}
             onPress={() => onPick(opt.tier)}
-            style={[styles.card, i > 0 && styles.secondCard]}
+            style={[styles.card, i > 0 && styles.secondCard, large && styles.cardLarge]}
           >
             <View style={styles.iconCircle}>
               <Text style={styles.glyph}>{opt.glyph}</Text>
             </View>
-            <View style={styles.copy}>
-              <Text style={styles.cardTitle}>{opt.title}</Text>
+            <View style={[styles.copy, large && styles.copyLarge]}>
+              <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{opt.title}</Text>
               <Text style={styles.cardBody}>{opt.body}</Text>
             </View>
             <Text style={styles.chevron}>›</Text>
@@ -131,6 +144,8 @@ const styles = StyleSheet.create({
   },
   glyph: { color: authColors.teal, fontSize: 26, fontWeight: "900" },
   copy: { flex: 1, marginLeft: 18 },
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  copyLarge: { marginLeft: 0, marginTop: 14, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardTitle: { color: authColors.ink, ...typography.section },
   cardBody: { marginTop: 6, color: authColors.muted, ...typography.meta, lineHeight: 17 },
   chevron: { color: authColors.muted, fontSize: 19, fontWeight: "700", marginLeft: 8 }

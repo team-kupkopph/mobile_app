@@ -16,7 +16,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { normalizePhMobile, phoneError } from "../phone";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
-import { radii, spacing, typography } from "../theme";
+import { maxFontScale, radii, spacing, typography } from "../theme";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -145,7 +145,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
       >
         {step === "enter" ? (
           <>
-            <Text style={styles.title}>Add your mobile number</Text>
+            <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Add your mobile number</Text>
             <Text style={styles.caption}>
               We'll text a code to confirm it. It's how a shelter or poster reaches you about an
               adoption — your number stays private until you inquire.
@@ -170,7 +170,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
           </>
         ) : (
           <>
-            <Text style={styles.title}>Enter the code</Text>
+            <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Enter the code</Text>
             <Text style={styles.caption}>We texted a 6-digit code to</Text>
             <Text style={styles.phoneText}>{e164}</Text>
 

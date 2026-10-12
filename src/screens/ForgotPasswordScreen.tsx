@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
-import { spacing, typography } from "../theme";
+import { maxFontScale, spacing, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "forgotPassword">;
 
@@ -57,7 +57,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
           <View style={styles.lockBody} />
         </View>
 
-        <Text style={styles.title}>Forgot your password?</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Forgot your password?</Text>
         <Text style={styles.caption}>No worries — we'll email you a code to reset it.</Text>
 
         <FormField

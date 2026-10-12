@@ -8,7 +8,7 @@
 export { colors, type ColorToken } from "./colors";
 export { radii, pill, squircle } from "./radii";
 export { spacing, tabBarClearance } from "./spacing";
-export { typography, type TypeToken } from "./typography";
+export { typography, maxFontScale, type TypeToken } from "./typography";
 export { elevation } from "./elevation";
 export { gradients, heroDirection } from "./gradients";
 export { motion } from "./motion";
