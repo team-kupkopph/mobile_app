@@ -36,7 +36,7 @@ export function RescuePlaceScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Place with someone" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.draftNote}>
           Hand this animal off directly to someone you already know — a verified member or
           shelter — instead of listing it publicly for adoption.

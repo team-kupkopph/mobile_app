@@ -50,7 +50,7 @@ export function StoryComposeScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen}>
       <ScreenHeader title="Share a story" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.h1}>A photo makes the story</Text>
         <TouchableOpacity style={[styles.photoTile, photoUrl ? styles.photoTileSet : null]}
           onPress={addPhoto} activeOpacity={0.85}>

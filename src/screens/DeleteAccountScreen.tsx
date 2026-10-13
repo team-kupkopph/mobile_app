@@ -77,7 +77,7 @@ export function DeleteAccountScreen({ navigation }: Props) {
   return (
     <View style={styles.screen} testID="screen.deleteAccount">
       <Header title="Delete account" navigation={navigation} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.h1} accessibilityRole="header">This can't be undone</Text>
         <Text style={styles.lede}>
           You have 30 days to change your mind. After that, your personal details are erased
@@ -140,7 +140,7 @@ function Blocked({
   return (
       <View style={styles.screen} testID="state.deleteAccount.blocked">
       <Header title="Delete account" navigation={navigation} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.warnCard} accessible accessibilityRole="alert">
           <Text style={styles.warnTitle}>{blockerHeadline(blockers.length)}</Text>
           <Text style={styles.warnBody}>

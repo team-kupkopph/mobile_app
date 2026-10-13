@@ -172,7 +172,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title={isEdit ? "Edit listing" : "List an animal"} onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Rule 1: ABOVE the fields, on load. Learning the form can't save only after
             filling it in has already cost the person their time. */}
         {prefillFailed ? (

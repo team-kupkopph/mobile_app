@@ -82,7 +82,7 @@ export function LocationPickerScreen({ navigation }: Props) {
     <View style={styles.screen}>
       <ScreenHeader title="Your location" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>⌕</Text>
           <TextInput

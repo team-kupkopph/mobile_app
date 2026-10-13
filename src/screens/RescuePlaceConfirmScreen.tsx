@@ -67,7 +67,7 @@ export function RescuePlaceConfirmScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Review placement" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.recipientCard}>
           <Text style={styles.recipientLabel}>Placing with</Text>
           <Text style={styles.recipientEmail}>{recipientEmail}</Text>

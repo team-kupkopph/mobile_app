@@ -232,7 +232,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
           onBack={() => navigation.goBack()} />
         )
       ) : (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {holdsClaim && deadline ? (
             <Card accent={deadline.urgent ? colors.warningStrong : colors.tealDark} style={styles.deadlineCard}>
               <Text style={[styles.deadlineText, deadline.urgent && styles.deadlineUrgent]}>{deadline.text}</Text>

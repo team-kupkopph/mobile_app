@@ -75,7 +75,7 @@ export function NeedFormScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen}>
       <ScreenHeader title={editing ? "Edit need" : "Add a need"} onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* US-R5 · moved ABOVE the first field. It was rendered under it, which is rule 1
             only by half — someone scanning down starts typing before they reach the notice
             that nothing they type can be saved. */}

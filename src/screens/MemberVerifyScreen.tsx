@@ -112,7 +112,7 @@ export function MemberVerifyScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.heading}>Quick verification</Text>
         <Text style={styles.subheading}>Two things and you're set.</Text>
 
