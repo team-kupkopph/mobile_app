@@ -11,13 +11,13 @@
 // double-submit.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { TAP_SLOP } from "../touch";
-import { colors, spacing, typography } from "../theme";
+import { colors, maxFontScale, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaRequested">;
@@ -35,12 +35,13 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Request sent" onBack={() => navigation.navigate("kawanggawa", { tab: "browse" })} />
 
-      <View style={styles.content}>
+      {/* At AX5 the outcome outgrows the screen (the buttons were unreachable); a short one still sits where it did. */}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.iconCircle}>
           <ClockIcon color={colors.teal} size={44} />
         </View>
 
-        <Text style={styles.heading}>Request sent!</Text>
+        <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>Request sent!</Text>
         <Text style={styles.subheading}>
           The shelter will review your request and confirm the shift shortly.
         </Text>
@@ -62,7 +63,7 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
         >
           <Text style={styles.secondaryText}>Browse more opportunities</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -70,7 +71,7 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "transparent" },
-  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 100, alignItems: "center" },
+  content: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 100, paddingBottom: 60, alignItems: "center" },
   iconCircle: {
     width: 108, height: 108, borderRadius: 54, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.soft
