@@ -21,12 +21,15 @@ import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
 
 export function ListingDetailScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the fee card's label | value row cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { tokens } = useAuth();
   const isGuest = tokens === null;
@@ -161,7 +164,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             <Image source={{ uri: listing.photos[0] }} style={styles.photo} resizeMode="cover" />
           ) : null}
 
-          <Text style={styles.name}>{listing.pet.name}</Text>
+          <Text style={styles.name} maxFontSizeMultiplier={maxFontScale.title}>{listing.pet.name}</Text>
           <Text style={styles.sub}>
             {[capitalize(listing.pet.species), listing.pet.breed,
               listing.pet.sex ? capitalize(listing.pet.sex) : null, listing.city]
@@ -174,7 +177,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             {listing.pet.walkable ? <Tag text="Walkable" /> : null}
           </View>
 
-          <Card style={styles.feeCard}>
+          <Card style={[styles.feeCard, large && styles.feeCardLarge]}>
             <Text style={styles.feeLabel}>Adoption fee</Text>
             <Text style={styles.feeValue}>
               {Number(listing.adoption_fee) > 0 ? `₱${Number(listing.adoption_fee).toLocaleString()}` : "Free"}
@@ -273,10 +276,12 @@ const styles = StyleSheet.create({
   donateLink: { marginTop: 10 },
   donateLinkText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
-  tag: { backgroundColor: colors.soft, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
+  tag: { backgroundColor: colors.soft, paddingHorizontal: 12, minHeight: 30, paddingVertical: 4, borderRadius: 15, justifyContent: "center" },
   tagText: { color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   feeCard: { marginTop: 18, padding: 18, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between" },
+  // large: label above value (a longer fee or label would not share the line).
+  feeCardLarge: { flexDirection: "column", alignItems: "flex-start" },
   feeLabel: { color: colors.muted, ...typography.strong, fontWeight: "700" },
   feeValue: { color: colors.ink, ...typography.section },
   sectionTitle: { marginTop: 24, marginBottom: 8, color: colors.ink, ...typography.section },
