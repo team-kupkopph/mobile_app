@@ -154,7 +154,8 @@ const styles = StyleSheet.create({
     paddingBottom: 60
   },
   searchBar: {
-    height: 50,
+    minHeight: 50,
+    paddingVertical: 6,
     marginTop: 6,
     borderRadius: 25,
     flexDirection: "row",
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    height: "100%",
+    minHeight: 38,
     color: colors.ink,
     ...typography.meta,
     fontWeight: "600"
@@ -196,7 +197,8 @@ const styles = StyleSheet.create({
     ...elevation.soft
   },
   cityRow: {
-    height: 58,
+    minHeight: 58,
+    paddingVertical: 10,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,

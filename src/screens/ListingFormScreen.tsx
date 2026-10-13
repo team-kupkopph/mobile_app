@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
   visibilityTitle: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   visibilityBody: { marginTop: 4, color: colors.muted, ...typography.meta, lineHeight: 19 },
   visibilityLink: { marginTop: 8, color: colors.tealDark, ...typography.meta, fontWeight: "800" },
-  photoBtn: { height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoBtn: { minHeight: 90, paddingVertical: 12, paddingHorizontal: 12, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }
