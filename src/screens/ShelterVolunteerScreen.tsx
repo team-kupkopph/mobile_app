@@ -19,7 +19,8 @@ import { ShelterShiftRow, shiftStatusChip } from "../shelterVolunteer";
 import { shiftHeadline } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, spacing, typography } from "../theme";
+import { colors, maxFontScale, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 import { Card, Chip, ScreenHeader, SegmentedControl } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
@@ -43,6 +44,8 @@ const SEGMENTS: Array<"upcoming" | "past"> = ["upcoming", "past"];
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteer">;
 
 export function ShelterVolunteerScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the heading / Calendar link and each activity's icon | text | chip cannot share a row, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const [segment, setSegment] = useState(0);
   const when = SEGMENTS[segment];
@@ -102,9 +105,9 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.sectionHeader}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.sectionTitle}>Your volunteer activities</Text>
+        <View style={[styles.sectionHeader, large && styles.sectionHeaderLarge]}>
+          <View style={[styles.sectionCopy, large && styles.sectionCopyLarge]}>
+            <Text style={styles.sectionTitle} maxFontSizeMultiplier={maxFontScale.title}>Your volunteer activities</Text>
             <Text style={styles.sectionSub}>Posted shifts and their sign-ups.</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate("shelterVolunteerCalendar")} hitSlop={TAP_SLOP}>
@@ -139,12 +142,12 @@ export function ShelterVolunteerScreen({ navigation }: Props) {
                   activeOpacity={0.85}
                   onPress={() => navigation.navigate("shelterVolunteerActivity", { shiftId: s.shift_id })}
                 >
-                  <Card style={styles.card}>
+                  <Card style={[styles.card, large && styles.cardLarge]}>
                     <View style={styles.cardIcon}>
                       <VolunteerIcon color={colors.teal} size={22} />
                     </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.cardTitle} numberOfLines={2}>{shiftHeadline(s)}</Text>
+                    <View style={[styles.cardCopy, large && styles.cardCopyLarge]}>
+                      <Text style={styles.cardTitle} numberOfLines={large ? 4 : 2}>{shiftHeadline(s)}</Text>
                       <Text style={styles.cardMeta}>{shiftWhenLabel(s.starts_at, s.ends_at)}</Text>
                       <Text style={styles.cardSignedUp}>{signedUp} / {s.capacity} signed up</Text>
                       {needsAttendance && (
@@ -194,10 +197,17 @@ const styles = StyleSheet.create({
     paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 10,
     flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8
   },
-  newBtn: { paddingHorizontal: 16, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
+  newBtn: { paddingHorizontal: 16, paddingVertical: 8, minHeight: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   newBtnText: { color: colors.white, ...typography.meta, fontWeight: "800" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   sectionHeader: { flexDirection: "row", alignItems: "flex-start", marginBottom: 20 },
+  // large: stacked. The base copy views are `flex: 1`, which survives in a style array and would collapse the text in a column.
+  sectionHeaderLarge: { flexDirection: "column" },
+  sectionCopy: { flex: 1 },
+  sectionCopyLarge: { alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   sectionTitle: { color: colors.ink, ...typography.hero },
   sectionSub: { marginTop: 6, color: colors.muted, ...typography.meta },
   calendarLink: { color: colors.teal, ...typography.strong, fontWeight: "800", marginTop: 4 },

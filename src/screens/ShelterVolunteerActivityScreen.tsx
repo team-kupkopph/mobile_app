@@ -23,6 +23,7 @@ import { PendingSection } from "../components/shelterVolunteer/PendingSection";
 import { ConfirmedSection } from "../components/shelterVolunteer/ConfirmedSection";
 import { AttendanceSection } from "../components/shelterVolunteer/AttendanceSection";
 import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 import { Button, ScreenHeader, SegmentedControl } from "../components/ui";
 
 const SECTION_ORDER: ActivitySection[] = ["pending", "confirmed", "attendance"];
@@ -43,6 +44,7 @@ function hasEnded(shift: ShelterShift, nowMs: number = Date.now()): boolean {
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerActivity">;
 
 export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
+  const large = useLargeText();
   const api = useApi();
   const { shiftId } = route.params;
 
@@ -94,6 +96,37 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
   const segments = [pendingLabel, confirmedLabel, "Attendance"];
 
   const footerHidden = !shift || shift.status === "closed" || hasEnded(shift);
+
+  // At Dynamic Type AX3 and up three stacked buttons in a fixed footer would eat the screen, so the footer scrolls with the
+  // content instead, and Edit / Duplicate stack.
+  const footer = (
+    <>
+      {!footerHidden && (
+        <View style={styles.footer}>
+          <View style={[styles.footerRow, large && styles.footerRowLarge]}>
+            <Button
+              label="Edit"
+              variant="secondary"
+              onPress={() => navigation.navigate("shelterVolunteerEdit", { shiftId })}
+              style={[styles.footerHalf, large && styles.footerHalfLarge]}
+            />
+            <Button
+              label="Duplicate"
+              variant="secondary"
+              onPress={() => navigation.navigate("shelterVolunteerCreate", { copyFrom: shiftId })}
+              style={[styles.footerHalf, large && styles.footerHalfLarge]}
+            />
+          </View>
+          <Button
+            label="Cancel activity"
+            onPress={() => navigation.navigate("shelterVolunteerCancel", { shiftId })}
+            variant="destructive"
+            style={styles.cancelButton}
+          />
+        </View>
+      )}
+    </>
+  );
 
   return (
     <View style={styles.screen}>
@@ -148,32 +181,10 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
                 onOpenDetail={(signupId) => navigation.navigate("shelterVolunteerDetail", { signupId })}
               />
             </View>
+            {large && footer}
           </ScrollView>
 
-          {!footerHidden && (
-            <View style={styles.footer}>
-              <View style={styles.footerRow}>
-                <Button
-                  label="Edit"
-                  variant="secondary"
-                  onPress={() => navigation.navigate("shelterVolunteerEdit", { shiftId })}
-                  style={styles.footerHalf}
-                />
-                <Button
-                  label="Duplicate"
-                  variant="secondary"
-                  onPress={() => navigation.navigate("shelterVolunteerCreate", { copyFrom: shiftId })}
-                  style={styles.footerHalf}
-                />
-              </View>
-              <Button
-                label="Cancel activity"
-                onPress={() => navigation.navigate("shelterVolunteerCancel", { shiftId })}
-                variant="destructive"
-                style={styles.cancelButton}
-              />
-            </View>
-          )}
+          {!large && footer}
         </>
       )}
     </View>
@@ -192,5 +203,8 @@ const styles = StyleSheet.create({
   footer: { paddingHorizontal: spacing.lg, paddingTop: 10, paddingBottom: 24 },
   footerRow: { flexDirection: "row", gap: 10 },
   footerHalf: { flex: 1 },
+  // large: stacked. The base `footerHalf` is `flex: 1`, which survives in a style array and would collapse the button in a column.
+  footerRowLarge: { flexDirection: "column" },
+  footerHalfLarge: { alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cancelButton: { marginTop: 10 }
 });

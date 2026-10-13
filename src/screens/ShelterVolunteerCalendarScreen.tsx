@@ -17,6 +17,7 @@ import { shiftHeadline } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 import { Card, Chip, ScreenHeader } from "../components/ui";
 
 function dateHeading(startsAt: string): string {
@@ -54,6 +55,8 @@ function groupByDate(shifts: ShelterShift[]): { key: string; heading: string; sh
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerCalendar">;
 
 export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up an activity's icon | text | chip cannot share a row, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const [shifts, setShifts] = useState<ShelterShift[]>([]);
   // F-R2-5 · the backend pages 20 at a time and returns `next` as a page number; this screen
@@ -124,15 +127,15 @@ export function ShelterVolunteerCalendarScreen({ navigation }: Props) {
                   return (
                     <TouchableOpacity
                       key={s.shift_id}
-                      style={styles.card}
+                      style={[styles.card, large && styles.cardLarge]}
                       activeOpacity={0.85}
                       onPress={() => navigation.navigate("shelterVolunteerActivity", { shiftId: s.shift_id })}
                     >
                       <View style={styles.cardIcon}>
                         <VolunteerIcon color={colors.teal} size={22} />
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.cardTitle} numberOfLines={2}>{shiftHeadline(s)}</Text>
+                      <View style={[styles.cardCopy, large && styles.cardCopyLarge]}>
+                        <Text style={styles.cardTitle} numberOfLines={large ? 4 : 2}>{shiftHeadline(s)}</Text>
                         <Text style={styles.cardMeta}>
                           {timeRangeLabel(s.starts_at, s.ends_at)} · {signedUp} / {s.capacity} signed up
                         </Text>
@@ -176,6 +179,10 @@ const styles = StyleSheet.create({
   sectionHeading: { marginBottom: 12, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   grid: { padding: spacing.sm },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, marginBottom: 10 },
+  // large: stacked. The base `cardCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
