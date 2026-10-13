@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, pill, spacing, typography } from "../theme";
+import { colors, elevation, maxFontScale, pill, spacing, typography } from "../theme";
 import { Button, Field, ScreenHeader } from "../components/ui";
 
 const card = {
@@ -111,11 +111,11 @@ export function NeedFormScreen({ navigation, route }: Props) {
         <View style={styles.stepper}>
           <TouchableOpacity style={styles.stepBtn} onPress={() => setQty((q) => Math.max(1, q - 1))} hitSlop={TAP_SLOP}
             accessibilityRole="button" accessibilityLabel="Decrease quantity needed"
-            accessibilityValue={{ now: qty }}><Text style={styles.stepGlyph}>–</Text></TouchableOpacity>
-          <Text style={styles.qty}>{qty}</Text>
+            accessibilityValue={{ now: qty }}><Text style={styles.stepGlyph} allowFontScaling={false}>–</Text></TouchableOpacity>
+          <Text style={styles.qty} maxFontSizeMultiplier={maxFontScale.code}>{qty}</Text>
           <TouchableOpacity style={styles.stepBtn} onPress={() => setQty((q) => q + 1)} hitSlop={TAP_SLOP}
             accessibilityRole="button" accessibilityLabel="Increase quantity needed"
-            accessibilityValue={{ now: qty }}><Text style={styles.stepGlyph}>+</Text></TouchableOpacity>
+            accessibilityValue={{ now: qty }}><Text style={styles.stepGlyph} allowFontScaling={false}>+</Text></TouchableOpacity>
         </View>
 
         <Field
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
   groupLabel: { marginTop: 22, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   segments: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   // Five options wrap: a filter row of pills, not a segmented control (the primitive takes two or three).
-  segment: { height: 38, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), ...card },
+  segment: { minHeight: 38, paddingVertical: 6, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), ...card },
   segmentOn: { backgroundColor: colors.teal },
   segmentText: { color: colors.ink, ...typography.meta, fontWeight: "700", textTransform: "capitalize" },
   segmentTextOn: { color: colors.white },
   // A control track is a pill of its height, as SegmentedControl's is: 8 + 52 + 8.
-  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", height: 68, padding: 8, borderRadius: pill(68), ...card },
+  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", minHeight: 68, padding: 8, borderRadius: pill(68), ...card },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },
   qty: { color: colors.ink, fontSize: 30, fontWeight: "800", minWidth: 40, textAlign: "center" },
