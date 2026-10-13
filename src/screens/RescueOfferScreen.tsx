@@ -9,7 +9,7 @@ import { OfferType } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_HINT, OFFER_TYPE_LABEL, OFFER_TYPES } from "../sagip";
-import { colors, spacing, typography } from "../theme";
+import { colors, maxFontScale, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
@@ -58,7 +58,7 @@ export function RescueOfferScreen({ navigation, route }: Props) {
 
       <ScrollView automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1}>Can't claim it? Chip in instead.</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={maxFontScale.title}>Can't claim it? Chip in instead.</Text>
         <Text style={styles.sub}>
           An offer doesn't commit you to the whole case — pick one thing you can do. If you
           allow it below, whoever claims this report can contact you.

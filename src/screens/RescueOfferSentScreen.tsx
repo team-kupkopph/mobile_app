@@ -1,13 +1,13 @@
 // US-O1 · confirmation after sending an offer. Reference: screens/user/screen-rescue-offer-sent.png.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { OfferType } from "../api/types";
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card } from "../components/ui";
 
@@ -21,10 +21,11 @@ export function RescueOfferSentScreen({ navigation, route }: Props) {
   return (
     <View style={styles.screen}>
       <ScreenBackdrop />
-      <View style={styles.content}>
+      {/* At AX5 the card outgrows the screen; a short card still centres, a tall one scrolls. */}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card tone="hero" style={styles.doneCard}>
           <View style={styles.heroIcon}><CheckIcon color={colors.white} size={30} /></View>
-          <Text style={styles.heroTitle}>Offer sent</Text>
+          <Text style={styles.heroTitle} maxFontSizeMultiplier={maxFontScale.title}>Offer sent</Text>
           <Text style={styles.heroBody}>
             You offered {label.toLowerCase()}. If someone claims this case, they'll get your
             contact — no other action needed from you until then.
@@ -39,14 +40,14 @@ export function RescueOfferSentScreen({ navigation, route }: Props) {
             <Text style={styles.secondary}>See my offers</Text>
           </TouchableOpacity>
         </Card>
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.lg },
+  content: { flexGrow: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.lg, paddingVertical: 24 },
   doneCard: { width: "100%", alignItems: "center" },
   heroIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   heroTitle: { marginTop: 18, color: colors.ink, ...typography.hero },
