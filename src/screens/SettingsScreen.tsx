@@ -13,6 +13,7 @@ import { useOutbox } from "../outbox/OutboxProvider";
 import { confirmSignOutWithQueue } from "../outbox/signOutGuard";
 import { RootStackParamList } from "../navigation/types";
 import { privacySummary } from "../settings";
+import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, typography } from "../theme";
 
 const card = {
@@ -23,6 +24,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "settings">;
 type Row = { label: string; value?: string; danger?: boolean; onPress?: () => void };
 
 export function SettingsScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up a row's label and its value + chevron cannot share a line, so the value drops below the label.
+  const large = useLargeText();
   const { signOut, tokens } = useAuth();
   const { queue, discardAllFor } = useOutbox();
   // F-R3-4 · reached from ShelterProfileScreen. See the param's note in navigation/types.ts.
@@ -94,12 +97,12 @@ export function SettingsScreen({ navigation, route }: Props) {
                   onPress={row.onPress}
                   accessibilityRole="button"
                   accessibilityLabel={row.value ? `${row.label}, ${row.value}` : row.label}
-                  style={[styles.row, i < group.rows.length - 1 && styles.rowDivided]}
+                  style={[styles.row, large && styles.rowLarge, i < group.rows.length - 1 && styles.rowDivided]}
                 >
                   <Text style={[styles.rowLabel, row.danger && styles.rowLabelDanger]}>
                     {row.label}
                   </Text>
-                  <View style={styles.rowRight}>
+                  <View style={[styles.rowRight, large && styles.rowRightLarge]}>
                     {row.value ? <Text style={styles.rowValue}>{row.value}</Text> : null}
                     <Text style={styles.chevron}>›</Text>
                   </View>
@@ -135,7 +138,9 @@ const styles = StyleSheet.create({
   rowLabel: { ...typography.subtitle, fontWeight: "600", color: colors.ink },
   rowLabelDanger: { color: colors.danger },
   rowRight: { flexDirection: "row", alignItems: "center" },
-  rowValue: { ...typography.meta, color: colors.muted, marginRight: 8 },
+  rowLarge: { flexDirection: "column", alignItems: "flex-start", paddingVertical: 12 },
+  rowRightLarge: { alignSelf: "stretch", justifyContent: "space-between" },
+  rowValue: { flexShrink: 1, ...typography.meta, color: colors.muted, marginRight: 8 },
   chevron: { fontSize: 19, fontWeight: "700", color: colors.muted },
   logoutCard: { marginTop: 28, minHeight: 56, alignItems: "center", justifyContent: "center" },
   logoutLabel: { ...typography.subtitle, fontWeight: "700", color: colors.danger },

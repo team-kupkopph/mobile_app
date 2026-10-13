@@ -18,7 +18,7 @@ import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { exportErrorMessage, exportFilename, humanSize } from "../settings";
 import { Button, ScreenHeader } from "../components/ui";
-import { colors, elevation, radii, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -110,7 +110,7 @@ export function ExportDataScreen({ navigation }: Props) {
       <ScreenHeader title="Export my data" onBack={() => navigation.goBack()} align="center" />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1} accessibilityRole="header">
+        <Text style={styles.h1} accessibilityRole="header" maxFontSizeMultiplier={maxFontScale.title}>
           {ready ? "Your data is ready" : "Take your data with you"}
         </Text>
         <Text style={styles.lede}>
