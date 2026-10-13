@@ -22,7 +22,8 @@ import { loadState } from "../net";
 import { closedChipTone, inquiryIsClosed, inquiryProgressLabel, inquiryStatusLabel } from "../adoption";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, pill, radii, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, pill, radii, typography } from "../theme";
 import { Chip, type ChipTone } from "./ui";
 import { listingTitle } from "../shelterAnimals";
 
@@ -59,6 +60,8 @@ export function InquiryList() {
   // generic one (setParams is invariant), so a prop would have forced every host to cast.
   // OwnerTabs already does it this way.
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  // At Dynamic Type AX3 and up a card's name | status chip row cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const [inquiries, setInquiries] = useState<MyInquiry[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -105,9 +108,9 @@ export function InquiryList() {
                 activeOpacity={0.85}
                 onPress={onPress}
               >
-                <View style={styles.cardTop}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardName}>{listingTitle(iq.listing.name)}</Text>
+                <View style={[styles.cardTop, large && styles.cardTopLarge]}>
+                  <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+                    <Text style={styles.cardName} maxFontSizeMultiplier={maxFontScale.title}>{listingTitle(iq.listing.name)}</Text>
                     <Text style={styles.cardMeta}>{capitalize(iq.listing.species)}</Text>
                   </View>
                   <Chip label={inquiryStatusLabel(iq.status, iq.end_reason)} tone={tone} />
@@ -144,10 +147,14 @@ const card = {
 const styles = StyleSheet.create({
   card: { padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
   cardTop: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardTopLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardName: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 4, color: colors.muted, ...typography.meta },
   progress: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "700" },
   placementNote: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "800" },
-  shareStory: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.successBg },
+  shareStory: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.successBg },
   shareStoryLabel: { color: colors.success, ...typography.strong, fontWeight: "700" }
 });

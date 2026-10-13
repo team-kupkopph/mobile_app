@@ -8,7 +8,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import { AdoptDeck } from "../components/AdoptDeck";
 import { InquiryList } from "../components/InquiryList";
 import { Button, PressScale, SegmentedControl } from "../components/ui";
-import { motion, spacing, tabBarClearance, typography } from "../theme";
+import { maxFontScale, motion, spacing, tabBarClearance, typography } from "../theme";
 
 import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
@@ -64,7 +64,7 @@ export function AdoptScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.adopt">
       <ScreenBackdrop />
       <View style={styles.header}>
-        <Text style={styles.title}>Adopt</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Adopt</Text>
         {/* The canvas puts a 44 pt control in this slot. A text link read as a caption and
             was missed; the small primary Button is the panel's "small button", and reads as
             the action it is. Everyone signed in may draft a listing (decision 2); the form
@@ -140,12 +140,12 @@ export function AdoptScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "transparent" },
-  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4, flexDirection: "row",
+  header: { paddingTop: 58, paddingHorizontal: spacing.lg, paddingBottom: 4, flexDirection: "row", flexWrap: "wrap", gap: 8,
             alignItems: "center", justifyContent: "space-between" },
   title: { color: colors.ink, ...typography.hero },
   segmented: { marginHorizontal: 26, marginTop: 14 },
-  filterRow: { flexDirection: "row", gap: 8, paddingHorizontal: spacing.lg, paddingTop: 14, paddingBottom: 4 },
-  filterChip: { paddingHorizontal: 16, height: 36, borderRadius: 18, alignItems: "center",
+  filterRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingHorizontal: spacing.lg, paddingTop: 14, paddingBottom: 4 },
+  filterChip: { paddingHorizontal: 16, minHeight: 36, paddingVertical: 6, borderRadius: 18, alignItems: "center",
                justifyContent: "center", backgroundColor: colors.white },
   filterChipActive: { backgroundColor: colors.teal },
   filterText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
