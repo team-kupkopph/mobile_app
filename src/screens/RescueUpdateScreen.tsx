@@ -22,7 +22,8 @@ import {
   RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, endedCaseLine,
   handoffCancelMessage, closeInquiriesPrompt, closedInquiriesDone, isReportRemoved, sagipTitle, strayChip,
 } from "../sagip";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
@@ -39,6 +40,8 @@ const STATUS_LABEL: Record<StrayStatus, string> = {
 type Props = NativeStackScreenProps<RootStackParamList, "rescueUpdate">;
 
 export function RescueUpdateScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the two hand-off buttons cannot share a line, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const { caseId, reportId } = route.params;
   const [report, setReport] = useState<ReportDetail | null>(null);
@@ -243,7 +246,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
               <Image source={{ uri: report.photos[0] }} style={styles.photo} resizeMode="cover"
                 accessibilityLabel="Photo from the report" />
             ) : null}
-            <Text style={styles.h1}>{sagipTitle(report.species, report.condition)}</Text>
+            <Text style={styles.h1} maxFontSizeMultiplier={maxFontScale.title}>{sagipTitle(report.species, report.condition)}</Text>
             {report.city ? <Text style={styles.sub}>{report.city}</Text> : null}
             {state !== "ended" && chip && tone ? (
               <View style={[styles.currentChip, { backgroundColor: tone.bg }]}>
@@ -318,7 +321,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                   moved on to resolved), not instead of them. */}
               {canHandOff ? (
                 <>
-                  <View style={styles.handoffRow}>
+                  <View style={[styles.handoffRow, large && styles.handoffRowLarge]}>
                     <Button
                       label="List for adoption"
                       onPress={() => navigation.navigate("rescueList", { caseId })}
@@ -440,7 +443,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 6, color: colors.muted, ...typography.subtitle },
-  currentChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
+  currentChip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, minHeight: 30, paddingVertical: 4, borderRadius: 15, justifyContent: "center" },
   mapWrap: { marginTop: 18, height: 150, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
   currentChipText: { ...typography.meta, fontWeight: "800" },
@@ -455,6 +458,7 @@ const styles = StyleSheet.create({
   endedTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   endedBody: { marginTop: 6, marginBottom: 14, color: colors.muted, ...typography.body },
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
+  handoffRowLarge: { flexDirection: "column" },
   handoffBtn: { flex: 1 },
   resolvedNote: { marginTop: 24, color: colors.muted, ...typography.body },
   releaseLink: { marginTop: 8, minHeight: 44, alignItems: "center", justifyContent: "center" },
@@ -474,7 +478,7 @@ const styles = StyleSheet.create({
   radioActive: { borderColor: colors.teal },
   radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.teal },
   radioLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
-  photoBtn: { marginTop: 14, height: 64, borderRadius: radii.tile, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoBtn: { marginTop: 14, minHeight: 64, paddingVertical: 12, paddingHorizontal: 12, borderRadius: radii.tile, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }
