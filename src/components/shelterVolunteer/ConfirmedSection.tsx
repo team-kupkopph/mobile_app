@@ -15,6 +15,7 @@ import { TAP_SLOP } from "../../touch";
 import { colors, radii, squircle, typography } from "../../theme";
 import { useLargeText } from "../../useLargeText";
 import { Avatar, Card, Chip } from "../ui";
+import { RosterSync, useReloadOnRosterChange } from "./rosterSync";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -33,9 +34,13 @@ type Props = {
   /** Reported every time the roster fetch settles, over just the approved rows — the screen
    * needs it for the "Confirmed · N" segment label. */
   onCountSettled?: (count: number | null) => void;
+  /** Another section changed the roster (an approve, an attendance mark): refetch. */
+  sync?: RosterSync;
+  /** This section changed the roster (a remove, a re-assign): tell the screen so the other sections refetch. */
+  onRosterChanged?: (from: "confirmed") => void;
 };
 
-export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled }: Props) {
+export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled, sync, onRosterChanged }: Props) {
   // At Dynamic Type AX3 and up a sign-up card's avatar | text | chip row and its side-by-side buttons cannot share a line, so they stack.
   const large = useLargeText();
   const api = useApi();
@@ -68,6 +73,7 @@ export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled 
   }, [shiftId]);
 
   useFocusEffect(useCallback(() => { loadRoster(); }, [loadRoster]));
+  useReloadOnRosterChange("confirmed", sync, loadRoster);
 
   function loadListingsIfNeeded() {
     if (listingsLoaded) return;
@@ -97,6 +103,7 @@ export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled 
     setBusySignupId(null);
     if (res.ok) {
       loadRoster();
+      onRosterChanged?.("confirmed");
     } else {
       setBanner(res.data?.error?.message ?? "Couldn't change the assigned animal. Try again.");
     }
@@ -112,6 +119,7 @@ export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled 
     setBusySignupId(null);
     if (res.ok) {
       loadRoster();
+      onRosterChanged?.("confirmed");
     } else {
       setBanner(res.data?.error?.message ?? "Couldn't remove this volunteer. Try again.");
     }

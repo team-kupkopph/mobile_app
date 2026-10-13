@@ -21,6 +21,7 @@ import { shiftHeadline } from "../volunteer";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { PendingSection } from "../components/shelterVolunteer/PendingSection";
 import { ConfirmedSection } from "../components/shelterVolunteer/ConfirmedSection";
+import { NO_ROSTER_SYNC, RosterSection, RosterSync } from "../components/shelterVolunteer/rosterSync";
 import { AttendanceSection } from "../components/shelterVolunteer/AttendanceSection";
 import { colors, radii, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
@@ -72,6 +73,14 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
   }, [shiftId]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  // The three sections stay mounted and fetch on focus only, so a change in one (an approve, a remove, an attendance mark) left the others and the
+  // header's "spots filled" stale. A section reports itself here; the others refetch when the counter moves, and the shift is fetched again.
+  const [rosterSync, setRosterSync] = useState<RosterSync>(NO_ROSTER_SYNC);
+  function onRosterChanged(from: RosterSection) {
+    setRosterSync((s) => ({ n: s.n + 1, from }));
+    load();
+  }
 
   useEffect(() => {
     if (autoPicked.current || !shift || pendingCount === null) return;
@@ -165,6 +174,8 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
                 shift={shift}
                 onOpenDetail={(signupId) => navigation.navigate("shelterVolunteerDetail", { signupId })}
                 onCountSettled={setPendingCount}
+                sync={rosterSync}
+                onRosterChanged={onRosterChanged}
               />
             </View>
             <View style={index === 1 ? undefined : styles.hidden}>
@@ -173,12 +184,16 @@ export function ShelterVolunteerActivityScreen({ navigation, route }: Props) {
                 shift={shift}
                 onOpenDetail={(signupId) => navigation.navigate("shelterVolunteerDetail", { signupId })}
                 onCountSettled={setConfirmedCount}
+                sync={rosterSync}
+                onRosterChanged={onRosterChanged}
               />
             </View>
             <View style={index === 2 ? undefined : styles.hidden}>
               <AttendanceSection
                 shiftId={shiftId}
                 onOpenDetail={(signupId) => navigation.navigate("shelterVolunteerDetail", { signupId })}
+                sync={rosterSync}
+                onRosterChanged={onRosterChanged}
               />
             </View>
             {large && footer}
