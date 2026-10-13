@@ -28,6 +28,7 @@ import { pickSpotlight } from "../sagip";
 import { MySignupItem, shiftHeadline, shiftTimeRange, todayShift } from "../volunteer";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
+import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 
 
@@ -51,6 +52,8 @@ const TONE = {
 
 
 export function HomeScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up this screen's icon | text | link rows and its three-pill row cannot share a line, so they stack.
+  const large = useLargeText();
   // The status bar is real now (App.tsx), so the first thing on screen has to start below
   // it. This block used to pad 20pt, which was right while the bar was hidden and
   // put the greeting under the clock once it was not.
@@ -294,11 +297,11 @@ export function HomeScreen({ navigation, route }: Props) {
           // no handler, a pending Member had no way to learn anything from Home.
           <TouchableOpacity
             activeOpacity={0.85}
-            style={styles.reviewCard}
+            style={[styles.reviewCard, large && styles.reviewCardLarge]}
             onPress={() => navigation.navigate("verifyDocuments")}
           >
             <ClockIcon color="#8A5A12" size={38} />
-            <View style={styles.reviewCopy}>
+            <View style={large ? styles.reviewCopyLarge : styles.reviewCopy}>
               <Text style={styles.reviewTitle}>Verified Member in review</Text>
               <Text style={styles.reviewText}>We'll notify you within a day.</Text>
             </View>
@@ -310,11 +313,11 @@ export function HomeScreen({ navigation, route }: Props) {
           // US-G1 · mirrors ShelterDashboardScreen's verifiedHero (solid teal card + white check
           // tile) — the app uses solid fills, not gradients, so this matches the sibling exactly.
           // Names the type ("Verified Member"), never a bare "Verified".
-          <View style={styles.verifiedHero}>
+          <View style={[styles.verifiedHero, large && styles.verifiedHeroLarge]}>
             <View style={styles.verifiedHeroIcon}>
               <CheckIcon color="#FFFFFF" size={20} />
             </View>
-            <View style={styles.verifiedHeroCopy}>
+            <View style={large ? styles.verifiedHeroCopyLarge : styles.verifiedHeroCopy}>
               <Text style={styles.verifiedHeroTitle}>You're a Verified Member</Text>
               <Text style={styles.verifiedHeroBody}>You can now claim rescues and help strays find safety.</Text>
             </View>
@@ -341,7 +344,7 @@ export function HomeScreen({ navigation, route }: Props) {
             }
           >
             <Card accent={TONE[spotlight.chip.tone].fg} style={styles.spotCardInner}>
-            <View style={styles.spotTop}>
+            <View style={[styles.spotTop, large && styles.spotTopLarge]}>
               <Text style={styles.spotEyebrow}>{spotlight.eyebrow}</Text>
               <View style={[styles.spotChip, { backgroundColor: TONE[spotlight.chip.tone].bg }]}>
                 <Text style={[styles.spotChipText, { color: TONE[spotlight.chip.tone].fg }]}>
@@ -365,10 +368,10 @@ export function HomeScreen({ navigation, route }: Props) {
             offline, where the spotlight has nothing and draws nothing, so parking the selector
             inside it would break the suite on exactly the branch it was written to test.
             It is also the only route in the app to myRescues and myOffers. */}
-        <View style={styles.trailRow}>
+        <View style={[styles.trailRow, large && styles.trailRowLarge]}>
           <TouchableOpacity
             testID="btn.home.myReports"
-            style={styles.trailPill}
+            style={[styles.trailPill, large && styles.trailPillLarge]}
             activeOpacity={0.75}
             accessibilityRole="button"
             onPress={() => navigation.navigate("myReports")}
@@ -376,7 +379,7 @@ export function HomeScreen({ navigation, route }: Props) {
             <Text style={styles.trailPillText}>My reports</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.trailPill}
+            style={[styles.trailPill, large && styles.trailPillLarge]}
             activeOpacity={0.75}
             accessibilityRole="button"
             onPress={() => navigation.navigate("myRescues")}
@@ -384,7 +387,7 @@ export function HomeScreen({ navigation, route }: Props) {
             <Text style={styles.trailPillText}>My rescues</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.trailPill}
+            style={[styles.trailPill, large && styles.trailPillLarge]}
             activeOpacity={0.75}
             accessibilityRole="button"
             onPress={() => navigation.navigate("myOffers")}
@@ -514,6 +517,9 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 14
   },
+  // large: icon, copy and link stack. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  reviewCardLarge: { flexDirection: "column", alignItems: "flex-start", gap: 8 },
+  reviewCopyLarge: { flex: 0, marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   reviewTitle: {
     color: colors.warningStrong,
     ...typography.meta,
@@ -549,6 +555,8 @@ const styles = StyleSheet.create({
   verifiedHeroCopy: {
     flex: 1
   },
+  verifiedHeroLarge: { flexDirection: "column", alignItems: "flex-start", gap: 12 },
+  verifiedHeroCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   verifiedHeroTitle: {
     color: "#FFFFFF",
     ...typography.title
@@ -571,8 +579,10 @@ const styles = StyleSheet.create({
     ...typography.label,
     textTransform: "uppercase"
   },
+  spotTopLarge: { flexDirection: "column", alignItems: "flex-start", gap: 8 },
   spotChip: {
-    height: 26,
+    minHeight: 26,
+    paddingVertical: 4,
     borderRadius: 13,
     alignItems: "center",
     justifyContent: "center",
@@ -618,6 +628,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10
   },
+  trailRowLarge: { flexDirection: "column" },
+  trailPillLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   trailPill: {
     // The V2 secondary-button recipe: white fill + soft shadow, NO stroke — the design
     // system is explicit that the shadow alone signals "raised/tappable" and that a border
@@ -629,7 +641,9 @@ const styles = StyleSheet.create({
     // a row 10 pt apart are exactly the case where the first sibling would win every
     // contested tap.
     flex: 1,
-    height: 46,
+    minHeight: 46,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     borderRadius: 23,
     alignItems: "center",
     justifyContent: "center",
