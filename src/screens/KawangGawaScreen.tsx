@@ -47,7 +47,8 @@ import {
   monthLabel, nextBookedShift, selectedDayHeading, shiftDurationLabel, shiftHeadline,
   shiftSlotsChip, shiftTimeRange, shiftTypeLabel, volunteerTotals, volunteerTotalsLabel
 } from "../volunteer";
-import { colors, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, spacing, typography } from "../theme";
 import { Card, Chip, SegmentedControl } from "../components/ui";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
@@ -59,6 +60,8 @@ const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawa">;
 
 export function KawangGawaScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up a shift card's icon | copy row and its title | slots chip row cannot share a line, so they stack and wrap.
+  const large = useLargeText();
   const api = useApi();
   const { tokens, city, isReady } = useAuth();
   // G13 · guests may browse the hub read-only: no /me/signups call, no impact strip, no
@@ -147,7 +150,7 @@ export function KawangGawaScreen({ navigation, route }: Props) {
           shrink, so "Kawang-Gawa" ran straight into "My schedule ›" at 402 pt. It gets its
           own line now, and the two destinations folded into one segmented control below. */}
       <View style={styles.header}>
-        <Text style={styles.title}>Kawang-Gawa</Text>
+        <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Kawang-Gawa</Text>
         {/* G13 · a guest has no My shifts to switch to — Browse is the only segment, so the
             control that would let them switch away from it is not mounted at all. */}
         {!isGuest && (
@@ -330,7 +333,7 @@ export function KawangGawaScreen({ navigation, route }: Props) {
                     accessibilityLabel={`${shiftTypeLabel(s.type)} at ${s.org_name}, ${shiftTimeRange(s.starts_at, s.ends_at)}, ${chip.label}`}
                     onPress={() => navigation.navigate("kawanggawaDetail", { shiftId: s.shift_id })}
                   >
-                    <Card style={styles.card}>
+                    <Card style={[styles.card, large && styles.cardLarge]}>
                       <View style={[styles.cardIcon, full && styles.cardIconFull]}>
                         <VolunteerIcon color={full ? colors.muted : colors.teal} size={22} />
                       </View>
@@ -340,9 +343,9 @@ export function KawangGawaScreen({ navigation, route }: Props) {
                           F-R3-8: the title yields and the chip never does. With neither set,
                           "Dog walking — tomorrow" held its full width and pushed the chip past
                           the card edge ("• 2 slot…" on a 375 pt SE, worse at XXXL). */}
-                      <View style={styles.cardCopy}>
+                      <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
                         <View style={styles.cardTop}>
-                          <Text style={styles.cardTitle} numberOfLines={1}>{shiftHeadline(s)}</Text>
+                          <Text style={styles.cardTitle} numberOfLines={large ? undefined : 1}>{shiftHeadline(s)}</Text>
                           <Chip label={chip.label} tone={chip.tone} style={styles.cardChip} />
                         </View>
                         <Text style={styles.cardOrg}>
@@ -398,15 +401,15 @@ const styles = StyleSheet.create({
   impactNextLabel: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   impactNextWhen: { marginTop: 3, color: colors.muted, ...typography.meta },
   impactChevron: { marginLeft: 10, color: colors.teal, fontSize: 19, fontWeight: "700" },
-  scopeRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+  scopeRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", columnGap: 12, rowGap: 4,
               marginBottom: 14 },
   scopeText: { color: colors.ink, ...typography.meta, fontWeight: "800" },
   scopeAction: { color: colors.teal, ...typography.meta, fontWeight: "800" },
-  emptyAction: { alignSelf: "center", marginTop: 4, height: 44, justifyContent: "center",
+  emptyAction: { alignSelf: "center", marginTop: 4, minHeight: 44, justifyContent: "center",
                  paddingHorizontal: 18 },
   emptyActionText: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   filterRow: { gap: 8, paddingRight: 26, marginBottom: 18 },
-  filterChip: { paddingHorizontal: 16, height: 44, borderRadius: 22, alignItems: "center",
+  filterChip: { paddingHorizontal: 16, minHeight: 44, paddingVertical: 8, borderRadius: 22, alignItems: "center",
                 justifyContent: "center", backgroundColor: colors.white },
   filterChipActive: { backgroundColor: colors.teal },
   filterText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
@@ -418,7 +421,10 @@ const styles = StyleSheet.create({
               alignItems: "center", justifyContent: "center" },
   cardIconFull: { backgroundColor: "#ECEAE3" },
   cardCopy: { flex: 1 },
-  cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+  // large: icon above copy. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  cardTop: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10 },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800", flexShrink: 1 },
   cardChip: { flexShrink: 0 },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
@@ -442,6 +448,7 @@ type BrowseCalendarProps = {
 };
 
 function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSelect, onOpenShift }: BrowseCalendarProps) {
+  const large = useLargeText();
   const byDate = binShiftsByLocalDate(shifts);
   const cells = monthCells(year, month, byDate);
   const dayShifts = selectedIso ? (byDate.get(selectedIso) ?? []) : [];
@@ -499,6 +506,7 @@ function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSe
                       calStyles.dayText,
                       c.hasShifts ? calStyles.dayTextOn : calStyles.dayTextOff,
                     ]}
+                    allowFontScaling={false}
                   >
                     {c.day}
                   </Text>
@@ -507,7 +515,7 @@ function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSe
               {c.hasShifts && (
                 <View style={calStyles.dotRow}>
                   <View style={calStyles.dot} />
-                  <Text style={calStyles.count}>{c.count}</Text>
+                  <Text style={calStyles.count} maxFontSizeMultiplier={maxFontScale.code}>{c.count}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -531,13 +539,13 @@ function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSe
                   accessibilityLabel={`${shiftTypeLabel(s.type)} at ${s.org_name}, ${shiftTimeRange(s.starts_at, s.ends_at)}, ${chip.label}`}
                   onPress={() => onOpenShift(s.shift_id)}
                 >
-                  <Card style={calStyles.card}>
+                  <Card style={[calStyles.card, large && calStyles.cardLarge]}>
                     <View style={[calStyles.cardIcon, full && calStyles.cardIconFull]}>
                       <VolunteerIcon color={full ? colors.muted : colors.teal} size={22} />
                     </View>
-                    <View style={calStyles.cardCopy}>
+                    <View style={large ? calStyles.cardCopyLarge : calStyles.cardCopy}>
                       <View style={calStyles.cardTop}>
-                        <Text style={calStyles.cardTitle} numberOfLines={1}>{shiftHeadline(s)}</Text>
+                        <Text style={calStyles.cardTitle} numberOfLines={large ? undefined : 1}>{shiftHeadline(s)}</Text>
                         <Chip label={chip.label} tone={chip.tone} style={calStyles.cardChip} />
                       </View>
                       <Text style={calStyles.cardOrg}>
@@ -571,7 +579,7 @@ const calStyles = StyleSheet.create({
   weekday: { flex: 1, textAlign: "center", color: colors.muted,
              ...typography.meta, fontWeight: "700" },
   grid: { flexDirection: "row", flexWrap: "wrap", marginTop: 8 },
-  cell: { width: `${100 / 7}%`, height: 52, alignItems: "center", justifyContent: "flex-start",
+  cell: { width: `${100 / 7}%`, minHeight: 52, alignItems: "center", justifyContent: "flex-start",
           paddingTop: 4 },
   dayBubble: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
   dayBubbleSelected: { backgroundColor: colors.soft },
@@ -588,7 +596,10 @@ const calStyles = StyleSheet.create({
               alignItems: "center", justifyContent: "center" },
   cardIconFull: { backgroundColor: colors.greyPill },
   cardCopy: { flex: 1 },
-  cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
+  // large: icon above copy. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  cardTop: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10 },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800", flexShrink: 1 },
   cardChip: { flexShrink: 0 },
   cardOrg: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
