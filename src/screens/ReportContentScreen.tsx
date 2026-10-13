@@ -2,7 +2,7 @@
 // every flaggable target type (route.params.targetType) — POST /moderation/flags.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
@@ -39,7 +39,7 @@ export function ReportContentScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <ScreenHeader title="Report this" onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Field
           label="What's wrong?"
           value={reason}
@@ -49,13 +49,13 @@ export function ReportContentScreen({ navigation, route }: Props) {
           error={error ? error : undefined}
         />
         <Button label="Send report" onPress={submit} loading={submitting} style={styles.submit} />
-      </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { paddingHorizontal: spacing.lg, paddingTop: 20 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60 },
   submit: { marginTop: 26 }
 });

@@ -12,7 +12,7 @@ import MapView, { Region } from "react-native-maps";
 
 import { LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 
@@ -61,8 +61,8 @@ export function AdjustPinScreen({ navigation, route }: Props) {
       <ScreenHeader title="Adjust the pin" onBack={() => navigation.goBack()} />
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Move the map so the pin sits exactly where the animal is.</Text>
-        <Text style={styles.cardSub}>This precise spot is shared only with rescuers on this report.</Text>
+        <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.code}>Move the map so the pin sits exactly where the animal is.</Text>
+        <Text style={styles.cardSub} maxFontSizeMultiplier={maxFontScale.code}>This precise spot is shared only with rescuers on this report.</Text>
         {/* No gate on the map settling: saving before it does keeps the pin where it started,
             which is a valid answer, and a greyed button says nothing about why. */}
         <Button label="Save this spot" onPress={save} style={styles.save} />
