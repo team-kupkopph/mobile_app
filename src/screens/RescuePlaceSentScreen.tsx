@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card } from "../components/ui";
 
@@ -20,7 +20,7 @@ export function RescuePlaceSentScreen({ navigation }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card tone="hero" style={styles.hero}>
           <View style={styles.heroIcon}><CheckIcon color={colors.white} size={30} /></View>
-          <Text style={styles.heroTitle}>Placement sent</Text>
+          <Text style={styles.heroTitle} maxFontSizeMultiplier={maxFontScale.title}>Placement sent</Text>
           <Text style={styles.heroBody}>
             The recipient's been notified. They'll take it from here once they accept.
           </Text>
