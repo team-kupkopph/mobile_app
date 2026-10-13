@@ -14,7 +14,8 @@ import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
 import { myReportChip, relTime, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 
 const TONE = {
   amber: { bg: colors.warningBg, fg: colors.warningStrong }, teal: { bg: colors.infoBg, fg: colors.tealDark },
@@ -29,6 +30,8 @@ const FILTERS: Array<{ key: "all" | StrayStatus; label: string }> = [
 type Props = NativeStackScreenProps<RootStackParamList, "myReports">;
 
 export function MyReportsScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up a card's title | status chip row cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { queue, retry, discard } = useOutbox();
   const [reports, setReports] = useState<MyReport[]>([]);
@@ -80,9 +83,9 @@ export function MyReportsScreen({ navigation }: Props) {
           const label = sagipTitle(String(item.body.species), String(item.body.condition));
           const stuck = isStuck(item);
           return (
-            <View key={item.idempotency_key} style={[styles.card, styles.pendingCard]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>{label}</Text>
+            <View key={item.idempotency_key} style={[styles.card, styles.pendingCard, large && styles.cardLarge]}>
+              <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+                <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{label}</Text>
                 <Text style={styles.cardMeta}>
                   {stuck ? "Couldn't send — tap to try again" : "On this device until you're back online"}
                 </Text>
@@ -138,12 +141,12 @@ export function MyReportsScreen({ navigation }: Props) {
                 // assertions are reserved for plain ASCII.
                 testID={`card.myReports.${i}`}
                 key={r.report_id}
-                style={styles.card}
+                style={[styles.card, large && styles.cardLarge]}
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate("reportDetail", { reportId: r.report_id })}
               >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.cardTitle}>{sagipTitle(r.species, r.condition)}</Text>
+                <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+                  <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{sagipTitle(r.species, r.condition)}</Text>
                   <Text style={styles.cardMeta}>
                     {(r.city ? r.city + " · " : "") + relTime(r.created_at)}
                   </Text>
@@ -166,20 +169,24 @@ const card = {
 
 const styles = StyleSheet.create({
   pendingCard: { borderWidth: 1, borderColor: colors.warningBg },
-  pendingActions: { flexDirection: "row", marginTop: 8 },
+  pendingActions: { flexDirection: "row", flexWrap: "wrap", rowGap: 6, marginTop: 8 },
   pendingAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginRight: 18 },
   pendingDiscard: { color: colors.danger },
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   filterRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 },
-  filterChip: { paddingHorizontal: 16, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
+  filterChip: { paddingHorizontal: 16, minHeight: 38, paddingVertical: 6, borderRadius: 19, alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
   filterChipActive: { backgroundColor: colors.teal },
   filterText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   filterTextActive: { color: colors.white },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, borderRadius: radii.field, marginBottom: 12, ...card },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
-  chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
+  chip: { paddingHorizontal: 12, minHeight: 28, paddingVertical: 4, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });
