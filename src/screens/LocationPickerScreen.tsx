@@ -11,7 +11,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { CheckIcon, LocationPinIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "locationPicker">;
@@ -112,7 +112,7 @@ export function LocationPickerScreen({ navigation }: Props) {
                     disabled={!!saving}
                   >
                     <LocationPinIcon color={selected ? colors.teal : colors.muted} size={18} />
-                    <Text style={[styles.cityName, selected && styles.cityNameSelected]}>{city}</Text>
+                    <Text style={[styles.cityName, selected && styles.cityNameSelected]} maxFontSizeMultiplier={maxFontScale.title}>{city}</Text>
                     <View style={[styles.radio, selected && styles.radioSelected]}>
                       {selected && <CheckIcon color={colors.white} size={12} />}
                     </View>
