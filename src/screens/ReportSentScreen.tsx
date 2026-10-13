@@ -6,7 +6,7 @@ import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { queuedReportLine } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { Button } from "../components/ui";
 
 
@@ -28,7 +28,7 @@ export function ReportSentScreen({ navigation, route }: Props) {
           {/* US-O3 · a queued report has NOT reached anyone yet. Saying "rescuers have been
               alerted" would be the exact false reassurance §13.3's outbox exists to avoid —
               the person would stop worrying about an animal nobody has been told about. */}
-          <Text style={styles.heroTitle}>{queued ? "Saved — we'll send it" : "Report sent"}</Text>
+          <Text style={styles.heroTitle} maxFontSizeMultiplier={maxFontScale.title}>{queued ? "Saved — we'll send it" : "Report sent"}</Text>
           <Text style={styles.heroBody}>
             {queued
               ? queuedReportLine(queuedReason)   // PR3-F2 · offline, or Kupkop not answering
@@ -47,7 +47,7 @@ export function ReportSentScreen({ navigation, route }: Props) {
         <Text style={styles.sectionTitle}>What happens next</Text>
         {NEXT.map((line, i) => (
           <View key={i} style={styles.nextRow}>
-            <View style={styles.nextDot}><Text style={styles.nextNum}>{i + 1}</Text></View>
+            <View style={styles.nextDot}><Text style={styles.nextNum} allowFontScaling={false}>{i + 1}</Text></View>
             <Text style={styles.nextText}>{line}</Text>
           </View>
         ))}
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   card: { marginTop: 28, padding: 20, borderRadius: radii.card, ...card },
   cardTitle: { color: colors.ink, ...typography.section },
   cardCity: { marginTop: 6, color: colors.muted, ...typography.body },
-  chip: { marginTop: 12, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center", backgroundColor: colors.warningBg },
+  chip: { marginTop: 12, alignSelf: "flex-start", paddingHorizontal: 14, minHeight: 30, paddingVertical: 4, borderRadius: 15, justifyContent: "center", backgroundColor: colors.warningBg },
   chipText: { color: colors.warningStrong, ...typography.meta, fontWeight: "800" },
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, ...typography.section },
   nextRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 14 },
