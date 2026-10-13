@@ -174,7 +174,8 @@ describeParity("the Adopt deck matches the artboard", () => {
     expect(canvas).toMatch(/width: 58px; height: 58px; border-radius: 29px/);
     expect(deck).toMatch(/round: \{ width: 58, height: 58, borderRadius: pill\(58\)/);
     expect(canvas).toMatch(/height: 50px; padding: 0 22px/);
-    expect(deck).toMatch(/details: \{ height: 50, paddingHorizontal: 22, borderRadius: pill\(50\)/);
+    // the artboard's 50 is the pill's minimum (a fixed `height` clipped "Details" at AX5, adoptDeckAx5.test.ts); at default size it renders the same 50.
+    expect(deck).toMatch(/details: \{ minHeight: 50, paddingVertical: 10, paddingHorizontal: 22, borderRadius: pill\(50\)/);
   });
 
   it("uses the artboard's copy", () => {
