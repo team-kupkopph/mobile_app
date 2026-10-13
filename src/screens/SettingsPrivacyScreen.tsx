@@ -19,7 +19,8 @@ import { RootStackParamList } from "../navigation/types";
 import { privacyRows, Settings } from "../settings";
 import { TAP_SLOP } from "../touch";
 import { ScreenHeader } from "../components/ui";
-import { colors, elevation, radii, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, radii, typography } from "../theme";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -136,10 +137,12 @@ function ToggleRow({
   divided: boolean;
   onChange: (v: boolean) => void;
 }) {
+  // At Dynamic Type AX3 and up the label cannot share a line with its Switch (it broke mid-word), so the Switch drops below the text.
+  const large = useLargeText();
   return (
-    <View style={[styles.toggleRow, divided && styles.divided]}>
-      <View style={styles.toggleText}>
-        <Text style={styles.toggleLabel}>{row.label}</Text>
+    <View style={[styles.toggleRow, large && styles.toggleRowLarge, divided && styles.divided]}>
+      <View style={large ? styles.toggleTextLarge : styles.toggleText}>
+        <Text style={styles.toggleLabel} maxFontSizeMultiplier={maxFontScale.title}>{row.label}</Text>
         <Text style={styles.note}>{row.note}</Text>
       </View>
       <Switch
@@ -191,10 +194,13 @@ const styles = StyleSheet.create({
   card: { borderRadius: radii.tile, ...card },
   toggleRow: { paddingHorizontal: 18, paddingVertical: 16, flexDirection: "row", alignItems: "center" },
   toggleText: { flex: 1, paddingRight: 14 },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  toggleRowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  toggleTextLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", paddingRight: 0 },
   toggleLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
   policyRow: { paddingHorizontal: 18, paddingVertical: 16, minHeight: 44,
                flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  policyLabel: { ...typography.subtitle, fontWeight: "700", color: colors.ink },
+  policyLabel: { flexShrink: 1, ...typography.subtitle, fontWeight: "700", color: colors.ink },
   policyChev: { fontSize: 19, fontWeight: "700", color: colors.teal },
   factRow: { paddingHorizontal: 18, paddingVertical: 16 },
   factLabel: { ...typography.strong, fontWeight: "700", color: colors.ink },

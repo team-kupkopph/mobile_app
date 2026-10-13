@@ -23,7 +23,8 @@ import { accountIdFromAccessToken } from "../auth/idToken";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
 import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
-import { colors, elevation, radii, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, radii, typography } from "../theme";
 import { Button, Field, ScreenHeader } from "../components/ui";
 
 const card = {
@@ -36,6 +37,8 @@ const KEPT = ["Rescues you resolved", "Adoptions completed", "Shifts you volunte
 type Props = NativeStackScreenProps<RootStackParamList, "deleteAccount">;
 
 export function DeleteAccountScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the two side-by-side cards are about 150 pt wide each, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const { signOut, tokens } = useAuth();
   const { discardAllFor } = useOutbox();
@@ -78,15 +81,15 @@ export function DeleteAccountScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.deleteAccount">
       <Header title="Delete account" navigation={navigation} />
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1} accessibilityRole="header">This can't be undone</Text>
+        <Text style={styles.h1} accessibilityRole="header" maxFontSizeMultiplier={maxFontScale.title}>This can't be undone</Text>
         <Text style={styles.lede}>
           You have 30 days to change your mind. After that, your personal details are erased
           for good.
         </Text>
 
-        <View style={styles.columns}>
-          <Column heading="REMOVED" headingColor={colors.danger} dot={colors.danger} items={REMOVED} />
-          <Column heading="KEPT, ANONYMOUS" headingColor={colors.success} dot={colors.success} items={KEPT} />
+        <View style={[styles.columns, large && styles.columnsLarge]}>
+          <Column heading="REMOVED" headingColor={colors.danger} dot={colors.danger} items={REMOVED} large={large} />
+          <Column heading="KEPT, ANONYMOUS" headingColor={colors.success} dot={colors.success} items={KEPT} large={large} />
         </View>
 
         <Text style={styles.reason}>
@@ -169,12 +172,12 @@ function Blocked({
 }
 
 function Column({
-  heading, headingColor, dot, items,
+  heading, headingColor, dot, items, large,
 }: {
-  heading: string; headingColor: string; dot: string; items: string[];
+  heading: string; headingColor: string; dot: string; items: string[]; large: boolean;
 }) {
   return (
-    <View style={styles.column}>
+    <View style={large ? styles.columnLarge : styles.column}>
       <Text style={[styles.columnHeading, { color: headingColor }]}>{heading}</Text>
       {items.map((item) => (
         <View key={item} style={styles.bulletRow}>
@@ -198,6 +201,9 @@ const styles = StyleSheet.create({
   h1: { ...typography.hero, color: colors.ink },
   lede: { ...typography.body, color: colors.muted, marginTop: 8 },
   columns: { flexDirection: "row", gap: 12, marginTop: 20 },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the card in a column (`flex: 0` is what works, #189).
+  columnsLarge: { flexDirection: "column" },
+  columnLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", borderRadius: radii.tile, padding: 16, ...card },
   column: { flex: 1, borderRadius: radii.tile, padding: 16, ...card },
   columnHeading: { ...typography.meta, fontWeight: "800", letterSpacing: 0.6, marginBottom: 12 },
   bulletRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 10 },
