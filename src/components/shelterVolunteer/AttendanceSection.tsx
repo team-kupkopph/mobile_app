@@ -11,6 +11,7 @@ import { loadState } from "../../net";
 import { ConfirmModal } from "../ConfirmModal";
 import { RosterRow, attendanceSuggestion } from "../../shelterVolunteer";
 import { colors, radii, typography } from "../../theme";
+import { useLargeText } from "../../useLargeText";
 import { Avatar, Button, Card, Chip, ChipTone } from "../ui";
 
 function initials(name: string): string {
@@ -39,6 +40,8 @@ type Props = {
 };
 
 export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
+  // At Dynamic Type AX3 and up a sign-up card's avatar | text | chip row and its side-by-side buttons cannot share a line, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -117,9 +120,9 @@ export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
           return (
             <TouchableOpacity key={row.signup_id} activeOpacity={0.85} onPress={() => onOpenDetail(row.signup_id)} disabled={busy}>
               <Card style={styles.card}>
-                <View style={styles.cardTop}>
+                <View style={[styles.cardTop, large && styles.cardTopLarge]}>
                   <Avatar initials={initials(row.volunteer.display_name)} size={44} />
-                  <View style={{ flex: 1 }}>
+                  <View style={[styles.cardCopy, large && styles.cardCopyLarge]}>
                     <Text style={styles.name}>{row.volunteer.display_name}</Text>
                     {row.status === "approved" && <Text style={styles.times}>{checkTimes(row)}</Text>}
                   </View>
@@ -129,7 +132,7 @@ export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
                 </View>
 
                 {row.status === "approved" ? (
-                  <View style={styles.actionsRow}>
+                  <View style={[styles.actionsRow, large && styles.actionsRowLarge]}>
                     <Button
                       size="small"
                       variant={suggestion === "completed" ? "secondary" : "primary"}
@@ -137,7 +140,7 @@ export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
                       accessibilityLabel={`No-show ${row.volunteer.display_name}`}
                       onPress={() => setNoShowSignupId(row.signup_id)}
                       loading={busy}
-                      style={styles.half}
+                      style={[styles.half, large && styles.halfLarge]}
                     />
                     <Button
                       size="small"
@@ -146,7 +149,7 @@ export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
                       accessibilityLabel={`Attended ${row.volunteer.display_name}`}
                       onPress={() => markAttendance(row.signup_id, "completed")}
                       loading={busy}
-                      style={styles.half}
+                      style={[styles.half, large && styles.halfLarge]}
                     />
                   </View>
                 ) : row.can_undo ? (
@@ -179,10 +182,16 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { padding: 16, marginBottom: 14 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
+  // large: stacked. The base `cardCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardTopLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopyLarge: { flex: 0, marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  cardCopy: { flex: 1 },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   times: { marginTop: 2, color: colors.muted, ...typography.meta },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
   half: { flex: 1, alignSelf: "stretch" },
-  undoBtn: { marginTop: 14, alignSelf: "flex-start", height: 44, justifyContent: "center" },
+  actionsRowLarge: { flexDirection: "column" },
+  halfLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  undoBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 44, paddingVertical: 8, justifyContent: "center" },
   undoText: { color: colors.teal, ...typography.meta, fontWeight: "800" }
 });
