@@ -15,7 +15,8 @@ import { loadState } from "../net";
 import { AlertIcon, CheckIcon, DocumentIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docChip, docLabel, groupAttention, splitDocs } from "../verifications";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 
@@ -28,6 +29,8 @@ const CHIP_STYLE = {
 } as const;
 
 export function VerifyDocumentsScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the doc rows and banners (icon | copy) cannot share a line, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const [verification, setVerification] = useState<MeVerification | null>(null);
   // US-R4 · a failed fetch fell through to "No documents to track yet." — shown to a shelter
@@ -65,7 +68,7 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
       <ScreenHeader title="My documents" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1}>Document status</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={maxFontScale.title}>Document status</Text>
         <Text style={styles.sub}>Each file is reviewed on its own.</Text>
 
         {!verification ? (
@@ -85,9 +88,9 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
           <>
             {verification.status === "rejected" ? (
               // US-V4 · a rejection always shows the reason and a next step.
-              <View style={[styles.noteBanner, styles.noteBannerDanger]}>
+              <View style={[styles.noteBanner, styles.noteBannerDanger, large && styles.noteBannerLarge]}>
                 <AlertIcon color={colors.danger} size={30} />
-                <View style={{ flex: 1 }}>
+                <View style={large ? styles.noteBannerTextLarge : styles.noteBannerCopy}>
                   <Text style={styles.noteBannerTitle}>Not verified</Text>
                   {verification.notes ? (
                     <Text style={styles.noteBannerBody}>{verification.notes}</Text>
@@ -98,9 +101,9 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
                 </View>
               </View>
             ) : verification.status === "needs_info" && verification.notes ? (
-              <View style={styles.noteBanner}>
+              <View style={[styles.noteBanner, large && styles.noteBannerLarge]}>
                 <AlertIcon color={colors.warningStrong} size={30} />
-                <Text style={styles.noteBannerText}>{verification.notes}</Text>
+                <Text style={large ? styles.noteBannerTextLarge : styles.noteBannerText}>{verification.notes}</Text>
               </View>
             ) : null}
 
@@ -116,11 +119,11 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
                     : null;
                   return (
                     <View key={group.key} style={styles.docCard}>
-                      <View style={styles.docRow}>
+                      <View style={[styles.docRow, large && styles.docRowLarge]}>
                         <View style={styles.docIconTile}>
                           <DocumentIcon color={colors.teal} />
                         </View>
-                        <View style={styles.docMeta}>
+                        <View style={large ? styles.docMetaLarge : styles.docMeta}>
                           <Text style={styles.docName}>{docLabel(group.docType)}</Text>
                           {countLabel ? <Text style={styles.docCount}>{countLabel}</Text> : null}
                           <View style={[styles.chip, { backgroundColor: tone.bg }]}>
@@ -147,11 +150,11 @@ export function VerifyDocumentsScreen({ navigation }: Props) {
             ) : null}
 
             {approved.length > 0 ? (
-              <View style={styles.approvedCard}>
+              <View style={[styles.approvedCard, large && styles.approvedCardLarge]}>
                 <View style={styles.approvedDot}>
                   <CheckIcon color="#FFFFFF" size={13} />
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={large ? styles.approvedCopyLarge : styles.approvedCopy}>
                   <Text style={styles.approvedTitle}>
                     {approved.length} item{approved.length > 1 ? "s" : ""} approved
                   </Text>
@@ -212,6 +215,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.field,
     backgroundColor: colors.warningBg
   },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  noteBannerLarge: { flexDirection: "column", alignItems: "flex-start" },
+  noteBannerCopy: { flex: 1 },
+  noteBannerTextLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", color: colors.warningStrong, ...typography.strong, fontWeight: "700", lineHeight: 21 },
   noteBannerText: { flex: 1, color: colors.warningStrong, ...typography.strong, fontWeight: "700", lineHeight: 21 },
   noteBannerDanger: { backgroundColor: colors.dangerBg },
   noteBannerTitle: { color: colors.danger, ...typography.subtitle, fontWeight: "800" },
@@ -234,15 +241,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.infoBg
   },
+  docRowLarge: { flexDirection: "column", alignItems: "flex-start" },
   docMeta: { flex: 1, gap: 8 },
+  docMetaLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", gap: 8 },
   docName: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   docCount: { color: colors.muted, ...typography.meta, fontWeight: "600", marginTop: -4 },
-  chip: { alignSelf: "flex-start", paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
+  chip: { alignSelf: "flex-start", paddingHorizontal: 12, minHeight: 28, paddingVertical: 4, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   reviewNote: { marginTop: 12, color: colors.danger, ...typography.body },
   replaceBtn: {
     marginTop: 14,
-    height: 46,
+    minHeight: 46,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 23,
     alignItems: "center",
     justifyContent: "center",
@@ -258,6 +269,9 @@ const styles = StyleSheet.create({
     borderRadius: radii.card,
     backgroundColor: colors.successBg
   },
+  approvedCardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  approvedCopy: { flex: 1 },
+  approvedCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   approvedDot: {
     width: 26,
     height: 26,

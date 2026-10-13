@@ -16,12 +16,15 @@ import { DOC_CONSENT_VERSION } from "../consent";
 import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { normalizeSocialLink, socialLinkError, socialLinkNote } from "../socialLink";
-import { colors, radii, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberVerify">;
 
 export function MemberVerifyScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the ID card's icon | copy | action row and the consent row cannot share a line, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -113,15 +116,15 @@ export function MemberVerifyScreen({ navigation }: Props) {
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
       <ScrollView automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.heading}>Quick verification</Text>
+        <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>Quick verification</Text>
         <Text style={styles.subheading}>Two things and you're set.</Text>
 
         <TouchableOpacity activeOpacity={0.8} onPress={handleUpload} disabled={uploading}>
-          <Card style={styles.docCard}>
+          <Card style={[styles.docCard, large && styles.docCardLarge]}>
             <View style={styles.docIcon}>
               <DocumentIcon color={colors.teal} />
             </View>
-            <View style={styles.docCopy}>
+            <View style={large ? styles.docCopyLarge : styles.docCopy}>
               <Text style={styles.docTitle}>Valid government ID</Text>
               <Text style={styles.docSubtitle}>A clear photo of your ID · Required</Text>
             </View>
@@ -154,13 +157,13 @@ export function MemberVerifyScreen({ navigation }: Props) {
 
         <TouchableOpacity
           activeOpacity={0.85}
-          style={styles.consentRow}
+          style={[styles.consentRow, large && styles.consentRowLarge]}
           onPress={() => setConsent((v) => !v)}
         >
           <View style={[styles.consentBox, consent && styles.consentBoxChecked]}>
             {consent && <CheckIcon color={colors.white} size={13} />}
           </View>
-          <Text style={styles.consentText}>
+          <Text style={large ? styles.consentTextLarge : styles.consentText}>
             I consent to Kupkop PH collecting these documents solely to verify my identity.
           </Text>
         </TouchableOpacity>
@@ -207,6 +210,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14
   },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  docCardLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  docCopyLarge: { flex: 0, marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   docIcon: {
     width: 48,
     height: 48,
@@ -261,6 +267,8 @@ const styles = StyleSheet.create({
     gap: 14,
     backgroundColor: colors.soft
   },
+  consentRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  consentTextLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", color: colors.tealDark, ...typography.meta, fontWeight: "700", lineHeight: 19 },
   consentBox: {
     width: 26,
     height: 26,
