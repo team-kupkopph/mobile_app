@@ -11,7 +11,8 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { impactTiles, Impact } from "../community";
 import { BadgeShape, RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
 
 const card = {
@@ -22,6 +23,8 @@ type Badge = BadgeShape;
 type Props = NativeStackScreenProps<RootStackParamList, "impact">;
 
 export function ImpactScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up three stat tiles and a two-column badge grid cannot share a line, so they stack to one column.
+  const large = useLargeText();
   const api = useApi();
   const [impact, setImpact] = useState<Impact | null>(null);
   const [badges, setBadges] = useState<Badge[] | null>(null);
@@ -45,10 +48,10 @@ export function ImpactScreen({ navigation }: Props) {
       <ScreenHeader title="My impact" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {impact ? (
-          <View style={styles.statRow}>
+          <View style={[styles.statRow, large && styles.statRowLarge]}>
             {impactTiles(impact).map((t) => (
-              <View key={t.label} style={styles.statTile}>
-                <Text style={styles.statValue}>{t.value}</Text>
+              <View key={t.label} style={[styles.statTile, large && styles.statTileLarge]}>
+                <Text style={styles.statValue} maxFontSizeMultiplier={maxFontScale.title}>{t.value}</Text>
                 <Text style={styles.statLabel}>{t.label}</Text>
               </View>
             ))}
@@ -67,16 +70,16 @@ export function ImpactScreen({ navigation }: Props) {
           <View style={styles.grid}>
             {(badges ?? []).map((b) => (
               <TouchableOpacity key={b.badge_code} activeOpacity={0.8}
-                style={[styles.badgeTile, b.earned ? null : styles.badgeTileDim]}
+                style={[styles.badgeTile, large && styles.badgeTileLarge, b.earned ? null : styles.badgeTileDim]}
                 onPress={() => navigation.navigate("badgeComparison", { badge: b })}>
                 <View style={[styles.medal, b.earned ? styles.medalOn : styles.medalOff]}>
                   {/* One glyph, dimmed when unearned — no emoji (design rule); dimming, not a
                       lock icon, signals "not yet earned". */}
-                  <Text style={[styles.medalGlyph, b.earned ? null : styles.medalGlyphOff]}>★</Text>
+                  <Text style={[styles.medalGlyph, b.earned ? null : styles.medalGlyphOff]} allowFontScaling={false}>★</Text>
                 </View>
                 <Text style={[styles.badgeName, b.earned ? null : styles.dimText]}
-                  numberOfLines={2}>{b.name}</Text>
-                <Text style={styles.badgeCriteria} numberOfLines={2}>{b.criteria}</Text>
+                  numberOfLines={large ? undefined : 2}>{b.name}</Text>
+                <Text style={styles.badgeCriteria} numberOfLines={large ? undefined : 2}>{b.criteria}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -91,11 +94,15 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   statRow: { flexDirection: "row", gap: 10 },
   statTile: { flex: 1, paddingVertical: 16, borderRadius: radii.tile, alignItems: "center", ...card },
+  // large: one tile per line. The base `flex: 1` survives in a style array and would collapse the tile in a column (`flex: 0` is what works, #189).
+  statRowLarge: { flexDirection: "column" },
+  statTileLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   statValue: { color: colors.teal, ...typography.hero },
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "600" },
   sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, ...typography.section },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   badgeTile: { width: "48%", marginBottom: 14, padding: 16, borderRadius: radii.card, alignItems: "center", ...card },
+  badgeTileLarge: { width: "100%" },
   badgeTileDim: { backgroundColor: colors.greyPill, shadowOpacity: 0 },
   medal: { width: 56, height: 56, borderRadius: squircle(56), alignItems: "center", justifyContent: "center" },
   medalOn: { backgroundColor: colors.soft },
