@@ -11,6 +11,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { matchReasons, matchStrength } from "../community";
 import { MatchShape, RootStackParamList } from "../navigation/types";
+import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
 import { Avatar, ScreenHeader } from "../components/ui";
 
@@ -21,6 +22,8 @@ const card = {
 type Props = NativeStackScreenProps<RootStackParamList, "reportMatches">;
 
 export function ReportMatchesScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the 96 pt avatar leaves too little width beside the text, so the card stacks.
+  const large = useLargeText();
   const api = useApi();
   const { reportId } = route.params;
   const [matches, setMatches] = useState<MatchShape[] | null>(null);
@@ -66,10 +69,10 @@ export function ReportMatchesScreen({ navigation, route }: Props) {
             return (
               <TouchableOpacity key={m.match_id} style={styles.matchCard} activeOpacity={0.85}
                 onPress={() => navigation.navigate("matchDetail", { reportId, match: m })}>
-                <View style={styles.row}>
+                <View style={[styles.row, large && styles.rowLarge]}>
                   {/* No photo on the match payload yet; the tile is the placeholder the canvas draws. */}
                   <Avatar size={96} />
-                  <View style={{ flex: 1 }}>
+                  <View style={large ? styles.copyLarge : styles.copy}>
                     <View style={styles.topRow}>
                       <Text style={styles.type}>
                         {m.report.report_type === "found" ? "Found report" : "Lost report"}
@@ -78,7 +81,7 @@ export function ReportMatchesScreen({ navigation, route }: Props) {
                         <Text style={[styles.chipText, { color: tone.fg }]}>{strength.label}</Text>
                       </View>
                     </View>
-                    <Text style={styles.reasons} numberOfLines={2}>{reasons.join(" · ")}</Text>
+                    <Text style={styles.reasons} numberOfLines={large ? undefined : 2}>{reasons.join(" · ")}</Text>
                     <Text style={styles.review}>Review match ›</Text>
                   </View>
                 </View>
@@ -101,7 +104,11 @@ const styles = StyleSheet.create({
   empty: { marginTop: 40, color: colors.muted, ...typography.body, textAlign: "center" },
   matchCard: { marginBottom: 14, padding: 16, borderRadius: radii.card, ...card },
   row: { flexDirection: "row", gap: 14 },
-  topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  rowLarge: { flexDirection: "column" },
+  copy: { flex: 1 },
+  copyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  topRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 },
   type: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 11, paddingVertical: 4, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },

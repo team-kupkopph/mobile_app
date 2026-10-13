@@ -8,6 +8,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useApi } from "../api/useApi";
 import { matchReasons } from "../community";
 import { RootStackParamList } from "../navigation/types";
+import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 import { RescuePeople } from "../components/sagip/RescuePeople";
@@ -19,6 +20,8 @@ const card = {
 type Props = NativeStackScreenProps<RootStackParamList, "matchDetail">;
 
 export function MatchDetailScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up a fact row's key and value cannot share a line, so the key sits above the value.
+  const large = useLargeText();
   const { reportId, match } = route.params;
   const api = useApi();
   const [busy, setBusy] = useState(false);
@@ -53,9 +56,9 @@ export function MatchDetailScreen({ navigation, route }: Props) {
   }
 
   const fact = (k: string, v: string | null) => (
-    <View style={styles.factRow} key={k}>
+    <View style={[styles.factRow, large && styles.factRowLarge]} key={k}>
       <Text style={styles.factKey}>{k}</Text>
-      <Text style={styles.factVal}>{v || "—"}</Text>
+      <Text style={[styles.factVal, large && styles.factValLarge]}>{v || "—"}</Text>
     </View>
   );
 
@@ -116,6 +119,8 @@ const styles = StyleSheet.create({
   chipText: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   photo: { height: 180, borderRadius: radii.card, backgroundColor: colors.soft, marginTop: 14, marginBottom: 6 },
   factRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, gap: 16 },
+  factRowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 2 },
+  factValLarge: { textAlign: "left" },
   factKey: { color: colors.muted, ...typography.meta },
   factVal: { color: colors.ink, ...typography.strong, fontWeight: "700", flexShrink: 1, textAlign: "right" },
   reasonsCard: { marginTop: 16, padding: 16, borderRadius: radii.tile, backgroundColor: colors.soft },
