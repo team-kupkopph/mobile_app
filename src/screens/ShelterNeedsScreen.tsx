@@ -35,10 +35,16 @@ export function ShelterNeedsScreen({ navigation }: Props) {
 
   const load = useCallback(() => {
     let alive = true;
+    setRes(null);
     api.get("/me").then((me) => {
-      if (!me.ok || !alive) return;
-      api.get(`/shelters/${me.data.account_id}/needs`)
-        .then((r) => alive && setNeeds(r.ok ? r.data.results : []));
+      if (!alive) return;
+      // A failed /me is the screen's failure too: without this the screen stayed on its spinner for ever.
+      if (!me.ok) { setRes({ ok: false, status: me.status }); return; }
+      api.get(`/shelters/${me.data.account_id}/needs`).then((r) => {
+        if (!alive) return;
+        setRes({ ok: r.ok, status: r.status });
+        if (r.ok) setNeeds(r.data.results);
+      });
     });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
