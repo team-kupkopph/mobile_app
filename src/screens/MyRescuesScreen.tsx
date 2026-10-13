@@ -11,7 +11,8 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { claimDeadline, relTime, rescueRowChip, sagipTitle } from "../sagip";
-import { colors, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Card, ScreenHeader } from "../components/ui";
 
@@ -23,6 +24,8 @@ const TONE = {
 type Props = NativeStackScreenProps<RootStackParamList, "myRescues">;
 
 export function MyRescuesScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up a card's title | status chip row cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const [cases, setCases] = useState<RescueCaseSummary[]>([]);
   // US-R3 · `loaded` tracked that a response ARRIVED, never that it succeeded — so
@@ -68,9 +71,9 @@ export function MyRescuesScreen({ navigation }: Props) {
                   caseId: c.case_id, reportId: c.report.report_id
                 })}
               >
-                <Card style={styles.card}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{sagipTitle(c.report.species, c.report.condition)}</Text>
+                <Card style={[styles.card, large && styles.cardLarge]}>
+                  <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+                    <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{sagipTitle(c.report.species, c.report.condition)}</Text>
                     <Text style={styles.cardMeta}>
                       {(c.report.city ? c.report.city + " · " : "") + "claimed " + relTime(c.claimed_at)}
                     </Text>
@@ -96,11 +99,15 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   deadline: { marginTop: 4, color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   deadlineUrgent: { color: colors.warningStrong, fontWeight: "800" },
-  chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
+  chip: { paddingHorizontal: 12, minHeight: 28, paddingVertical: 4, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });
