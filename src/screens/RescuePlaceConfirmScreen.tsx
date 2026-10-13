@@ -10,7 +10,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { RootStackParamList } from "../navigation/types";
 import { handoffConflictAction } from "../sagip";
-import { colors, radii, spacing, typography } from "../theme";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Field, ScreenHeader } from "../components/ui";
 
@@ -70,7 +70,7 @@ export function RescuePlaceConfirmScreen({ navigation, route }: Props) {
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.recipientCard}>
           <Text style={styles.recipientLabel}>Placing with</Text>
-          <Text style={styles.recipientEmail}>{recipientEmail}</Text>
+          <Text style={styles.recipientEmail} maxFontSizeMultiplier={maxFontScale.title}>{recipientEmail}</Text>
         </View>
 
         <Field label="City" value={city} onChangeText={setCity} placeholder="Marikina" />
