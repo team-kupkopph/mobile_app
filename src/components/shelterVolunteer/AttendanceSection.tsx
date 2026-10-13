@@ -13,6 +13,7 @@ import { RosterRow, attendanceSuggestion } from "../../shelterVolunteer";
 import { colors, radii, typography } from "../../theme";
 import { useLargeText } from "../../useLargeText";
 import { Avatar, Button, Card, Chip, ChipTone } from "../ui";
+import { RosterSync, useReloadOnRosterChange } from "./rosterSync";
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -37,9 +38,13 @@ type Props = {
   shiftId: string;
   // F-R2-10 · same as Pending/Confirmed — a roster row opens the volunteer's detail.
   onOpenDetail: (signupId: string) => void;
+  /** Another section changed the roster (an approve, a remove): refetch. */
+  sync?: RosterSync;
+  /** This section changed the roster (attended / no-show / undo): tell the screen so the other sections refetch. */
+  onRosterChanged?: (from: "attendance") => void;
 };
 
-export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
+export function AttendanceSection({ shiftId, onOpenDetail, sync, onRosterChanged }: Props) {
   // At Dynamic Type AX3 and up a sign-up card's avatar | text | chip row and its side-by-side buttons cannot share a line, so they stack.
   const large = useLargeText();
   const api = useApi();
@@ -60,6 +65,7 @@ export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
   }, [shiftId]);
 
   useFocusEffect(useCallback(() => { loadRoster(); }, [loadRoster]));
+  useReloadOnRosterChange("attendance", sync, loadRoster);
 
   async function markAttendance(signupId: string, outcome: "completed" | "no_show") {
     if (busySignupId) return; // one row at a time; the buttons show `loading` for that row
@@ -69,6 +75,7 @@ export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
     setBusySignupId(null);
     if (res.ok) {
       loadRoster();
+      onRosterChanged?.("attendance");
       return;
     }
     const code = res.data?.error?.code;
@@ -93,6 +100,7 @@ export function AttendanceSection({ shiftId, onOpenDetail }: Props) {
     setBusySignupId(null);
     if (res.ok) {
       loadRoster();
+      onRosterChanged?.("attendance");
     } else {
       setBanner(res.data?.error?.message ?? "Couldn't undo that. Try again.");
     }

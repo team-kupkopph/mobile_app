@@ -16,6 +16,7 @@ import { colors, radii, squircle, typography } from "../../theme";
 import { useLargeText } from "../../useLargeText";
 import { Avatar, Button, Card, ChipTone, chipTones } from "../ui";
 import { useRequestActions } from "./useRequestActions";
+import { RosterSync, useReloadOnRosterChange } from "./rosterSync";
 
 function timeAgo(iso: string, nowMs: number = Date.now()): string {
   const mins = Math.max(0, Math.floor((nowMs - new Date(iso).getTime()) / 60000));
@@ -45,9 +46,13 @@ type Props = {
   /** Reported every time the fetch settles — the screen needs the count to pick the initial
    * SegmentedControl tab and to label it "Pending · N". */
   onCountSettled?: (count: number | null) => void;
+  /** Another section changed the roster: refetch. */
+  sync?: RosterSync;
+  /** This section changed the roster (an approve or decline): tell the screen so the other sections refetch. */
+  onRosterChanged?: (from: "pending") => void;
 };
 
-export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }: Props) {
+export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled, sync, onRosterChanged }: Props) {
   // At Dynamic Type AX3 and up a sign-up card's avatar | text | chip row and its side-by-side buttons cannot share a line, so they stack.
   const large = useLargeText();
   const api = useApi();
@@ -72,7 +77,12 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }:
 
   useFocusEffect(useCallback(() => { loadRequests(); }, [loadRequests]));
 
-  const actions = useRequestActions(shiftId, shift, loadRequests);
+  useReloadOnRosterChange("pending", sync, loadRequests);
+
+  const actions = useRequestActions(shiftId, shift, () => {
+    loadRequests();
+    onRosterChanged?.("pending");
+  });
   const reapproveRow = actions.reapprove
     ? requests.find((r) => r.signup_id === actions.reapprove!.signupId)
     : undefined;
