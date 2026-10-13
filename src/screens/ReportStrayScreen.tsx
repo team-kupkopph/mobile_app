@@ -27,7 +27,8 @@ import {
 import { uploadErrorMessage } from "../upload";
 import { MyPet } from "../api/types";
 import { TAP_SLOP } from "../touch";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 
 const SPECIES = ["dog", "cat", "other"] as const;
 const CONDITIONS = ["injured", "sick", "healthy", "pregnant"] as const;
@@ -38,6 +39,8 @@ const MODE_LABELS = ["Stray", "Lost my pet", "Found a pet"];
 type Props = NativeStackScreenProps<RootStackParamList, "reportStray">;
 
 export function ReportStrayScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the anonymous label cannot share a line with its Switch, so the Switch drops below it.
+  const large = useLargeText();
   const api = useApi();
   const { city: savedCity } = useAuth();
   const { enqueue } = useOutbox();
@@ -258,7 +261,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
           </>
         ) : null}
 
-        <Text style={styles.h1}>
+        <Text style={styles.h1} maxFontSizeMultiplier={maxFontScale.title}>
           {sightingOf ? `Where did you see ${route.params?.sightingName ?? "them"}?`
             : mode === "lost" ? "Who's missing?"
             : mode === "found" ? "What did you find?" : "What did you see?"}
@@ -386,8 +389,8 @@ export function ReportStrayScreen({ navigation, route }: Props) {
 
         {/* D6 · an owner looking for their pet must be findable, so a lost report isn't anonymous. */}
         {mode !== "lost" ? (
-        <View style={styles.anonRow}>
-          <Text style={styles.anonLabel}>Report anonymously</Text>
+        <View style={[styles.anonRow, large && styles.anonRowLarge]}>
+          <Text style={[styles.anonLabel, large && styles.anonLabelLarge]} maxFontSizeMultiplier={maxFontScale.title}>Report anonymously</Text>
           <Switch
             value={anonymous}
             onValueChange={(v) => { setAnonymous(v); if (v) setShareContact(false); }}
@@ -455,14 +458,14 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
-  photoBtn: { marginTop: 18, height: 90, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  photoBtn: { marginTop: 18, minHeight: 90, paddingVertical: 12, paddingHorizontal: 12, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   label: { marginTop: 24, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   locCard: { marginTop: 24, padding: 18, borderRadius: radii.tile, ...card },
   locRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   locText: { color: colors.muted, ...typography.body },
   locAddr: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
-  locFooter: { marginTop: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  locFooter: { marginTop: 6, flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 },
   locFrom: { color: colors.muted, ...typography.meta, fontWeight: "600" },
   adjust: { color: colors.teal, ...typography.strong, fontWeight: "800" },
   locDenied: { color: colors.warningStrong, ...typography.strong, fontWeight: "700" },
@@ -475,7 +478,9 @@ const styles = StyleSheet.create({
   petChipText: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   petChipTextOn: { color: colors.tealDark },
   anonRow: { marginTop: 24, flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 18, borderRadius: radii.tile, ...card },
-  anonLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
+  anonRowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 12 },
+  anonLabelLarge: { flex: 0, marginRight: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  anonLabel: { flex: 1, marginRight: 12, color: colors.ink, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 16, color: colors.danger, ...typography.strong, fontWeight: "700" },
   photoError: { marginTop: 10, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }
