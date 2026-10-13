@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
   rowLarge: { flexDirection: "column", alignItems: "flex-start" },
-  needTitleLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  needTitleLarge: { flex: 0, flexGrow: 0, flexBasis: "auto" },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   meta: { marginTop: 8, color: colors.muted, ...typography.body },
   cancelBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: "#FBEEEC" },
