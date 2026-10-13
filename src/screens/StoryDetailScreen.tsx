@@ -15,6 +15,7 @@ import { Avatar, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
+import { useLargeText } from "../useLargeText";
 import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 
 const card = {
@@ -38,6 +39,8 @@ function initials(name: string) {
 }
 
 export function StoryDetailScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the author row (avatar | name | chip) cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { tokens } = useAuth();
   const isGuest = tokens === null;
@@ -135,9 +138,9 @@ export function StoryDetailScreen({ navigation, route }: Props) {
         {story.photos[0]
           ? <Image source={{ uri: story.photos[0].url }} style={styles.photo} resizeMode="cover" />
           : <View style={styles.photo} />}
-        <View style={styles.authorRow}>
+        <View style={[styles.authorRow, large && styles.authorRowLarge]}>
           <Avatar initials={initials(story.author.name)} tinted size={50} />
-          <View style={{ flex: 1 }}>
+          <View style={large ? styles.authorCopyLarge : styles.authorCopy}>
             <Text style={styles.authorName}>{story.author.name}</Text>
             {story.author.city ? <Text style={styles.city}>{story.author.city}</Text> : null}
           </View>
@@ -179,16 +182,20 @@ const styles = StyleSheet.create({
   hiddenText: { color: "#8A5A12", ...typography.meta, fontWeight: "600" },
   photo: { height: 280, borderRadius: radii.field, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  authorRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  authorCopy: { flex: 1 },
+  authorCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   authorName: { color: colors.ink, ...typography.section },
   city: { color: colors.muted, ...typography.meta, marginTop: 2 },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   caption: { marginTop: 18, color: colors.ink, ...typography.body },
-  actionRow: { flexDirection: "row", gap: 12, marginTop: 26 },
-  reactBtn: { flexDirection: "row", alignItems: "center", gap: 10, height: 44, paddingHorizontal: 22, borderRadius: pill(44), ...card },
+  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 26 },
+  reactBtn: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44, paddingVertical: 8, paddingHorizontal: 22, borderRadius: pill(44), ...card },
   heart: { fontSize: 22, color: "#C9D3CF" },
   heartOn: { color: colors.teal },
   reactLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
-  flagBtn: { height: 44, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(44), ...card },
+  flagBtn: { minHeight: 44, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(44), ...card },
   flagLabel: { color: colors.muted, ...typography.subtitle, fontWeight: "700" }
 });
