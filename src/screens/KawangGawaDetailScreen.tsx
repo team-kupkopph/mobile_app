@@ -22,7 +22,8 @@ import {
   ShiftDetail, detailSignupState, locationLine, shiftDurationLabel, shiftHeadline,
   shiftSlotsChip, shiftTimeRange
 } from "../volunteer";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 
 /** The full date. The hub's section heads say "Today"/"Friday" because the list groups by
  *  day; a detail screen is the one place that should state which Friday. */
@@ -51,6 +52,8 @@ const statusNoteStyles = StyleSheet.create({
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaDetail">;
 
 export function KawangGawaDetailScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the avatar | title row cannot share a line (the title broke mid-word), so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { tokens } = useAuth();
   // G13 · a guest may view this screen read-only; Request is the gated action — it raises
@@ -172,11 +175,11 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Card tone="hero" style={styles.heroCard}>
-            <View style={styles.heroRow}>
+            <View style={[styles.heroRow, large && styles.heroRowLarge]}>
               <Avatar size={52}>
                 <VolunteerIcon color={colors.teal} size={26} />
               </Avatar>
-              <Text style={styles.heroTitle}>{shiftHeadline(shift)}</Text>
+              <Text style={[styles.heroTitle, large && styles.heroTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{shiftHeadline(shift)}</Text>
             </View>
             <Text style={styles.orgName}>{shift.org_name}</Text>
           </Card>
@@ -400,6 +403,9 @@ const styles = StyleSheet.create({
   heroRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   // Squircle, matching the hub card's tile — V2 replaced round tiles with rounded squares.
   heroTitle: { flex: 1, color: colors.ink, ...typography.hero },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  heroRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  heroTitleLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   orgName: { marginTop: 14, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   infoCard: { marginTop: 14, paddingHorizontal: 18, paddingVertical: 16 },
   infoDate: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
