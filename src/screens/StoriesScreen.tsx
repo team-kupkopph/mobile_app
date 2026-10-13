@@ -17,6 +17,7 @@ import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { feedState, useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
+import { useLargeText } from "../useLargeText";
 import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 
 const card = {
@@ -40,6 +41,8 @@ function initials(name: string) {
 }
 
 export function StoriesScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the author row (avatar | name | chip) cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { rows: stories, res, stale, load: loadFeed } =
     useCachedFeed<StoryCard>(api, (d) => d?.results ?? []);
@@ -87,9 +90,9 @@ export function StoriesScreen({ navigation }: Props) {
                 {s.photos[0]
                   ? <Image source={{ uri: s.photos[0].url }} style={styles.photo} resizeMode="cover" />
                   : <View style={styles.photo} />}
-                <View style={styles.authorRow}>
+                <View style={[styles.authorRow, large && styles.authorRowLarge]}>
                   <Avatar initials={initials(s.author.name)} tinted size={46} />
-                  <View style={{ flex: 1 }}>
+                  <View style={large ? styles.authorCopyLarge : styles.authorCopy}>
                     <Text style={styles.authorName}>{s.author.name}</Text>
                     {s.author.city ? <Text style={styles.city}>{s.author.city}</Text> : null}
                   </View>
@@ -97,7 +100,7 @@ export function StoriesScreen({ navigation }: Props) {
                     <Text style={[styles.chipText, { color: CHIP[chip.tone].fg }]}>{chip.label}</Text>
                   </View>
                 </View>
-                {s.caption ? <Text style={styles.caption} numberOfLines={2}>{s.caption}</Text> : null}
+                {s.caption ? <Text style={styles.caption} numberOfLines={large ? undefined : 2}>{s.caption}</Text> : null}
                 <View style={styles.reactRow}>
                   <Text style={[styles.heart, s.my_reaction ? styles.heartOn : null]}>♥</Text>
                   <Text style={styles.reactCount}>{s.reaction_count}</Text>
@@ -114,13 +117,17 @@ export function StoriesScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  share: { height: 38, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
+  share: { minHeight: 38, paddingVertical: 8, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   shareLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   storyCard: { marginBottom: 16, padding: 16, borderRadius: radii.card, ...card },
   photo: { height: 150, borderRadius: radii.card, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 14 },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  authorRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  authorCopy: { flex: 1 },
+  authorCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   authorName: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   city: { color: colors.muted, ...typography.meta, marginTop: 2 },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
