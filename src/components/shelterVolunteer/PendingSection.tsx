@@ -12,7 +12,7 @@ import { AlertIcon } from "../AppIcons";
 import { ConfirmModal } from "../ConfirmModal";
 import { PendingRequest, ShelterShift, reapprovalCopy, reliabilityChip } from "../../shelterVolunteer";
 import { TAP_SLOP } from "../../touch";
-import { colors, radii, squircle, typography } from "../../theme";
+import { colors, maxFontScale, radii, squircle, typography } from "../../theme";
 import { useLargeText } from "../../useLargeText";
 import { Avatar, Button, Card, ChipTone, chipTones } from "../ui";
 import { useRequestActions } from "./useRequestActions";
@@ -91,6 +91,13 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled, s
 
   const state = loadState(res);
 
+  // The pinned skip / clear button; at large text it moves inside the list's ScrollView (see the picker sheet).
+  const skip = (
+    <TouchableOpacity style={styles.skipBtn} activeOpacity={0.85} onPress={() => actions.onPickListing(null)}>
+      <Text style={styles.skipText}>Skip — approve without assigning an animal</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View>
       {!!actions.banner && (
@@ -164,9 +171,9 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled, s
       {/* D-S5-3 — the walking-shift animal picker. Non-walking shifts never open this. */}
       <Modal visible={actions.pickerSignupId !== null} transparent animationType="slide" onRequestClose={actions.dismissPicker}>
         <View style={styles.pickerOverlay}>
-          <View style={styles.pickerSheet}>
+          <View style={[styles.pickerSheet, large && styles.pickerSheetLarge]}>
             <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>Assign an animal</Text>
+              <Text style={styles.pickerTitle} maxFontSizeMultiplier={maxFontScale.title}>Assign an animal</Text>
               <TouchableOpacity onPress={actions.dismissPicker} hitSlop={TAP_SLOP}>
                 <Text style={styles.pickerClose}>Close</Text>
               </TouchableOpacity>
@@ -201,11 +208,10 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled, s
                   </TouchableOpacity>
                 ))
               )}
+              {large ? skip : null}
             </ScrollView>
 
-            <TouchableOpacity style={styles.skipBtn} activeOpacity={0.85} onPress={() => actions.onPickListing(null)}>
-              <Text style={styles.skipText}>Skip — approve without assigning an animal</Text>
-            </TouchableOpacity>
+            {large ? null : skip}
           </View>
         </View>
       </Modal>
@@ -271,6 +277,7 @@ const styles = StyleSheet.create({
   actionsRowLarge: { flexDirection: "column" },
   halfLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   pickerOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(18, 33, 58, 0.45)" },
+  pickerSheetLarge: { maxHeight: "92%" },
   pickerSheet: { maxHeight: "78%", borderTopLeftRadius: 26, borderTopRightRadius: 26, backgroundColor: colors.page, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 28 },
   pickerHeader: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 },
   pickerTitle: { color: colors.ink, ...typography.section },

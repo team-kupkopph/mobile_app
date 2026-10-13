@@ -12,7 +12,7 @@ import { loadState } from "../../net";
 import { ConfirmModal } from "../ConfirmModal";
 import { ListingCard, RosterRow, ShelterShift } from "../../shelterVolunteer";
 import { TAP_SLOP } from "../../touch";
-import { colors, radii, squircle, typography } from "../../theme";
+import { colors, maxFontScale, radii, squircle, typography } from "../../theme";
 import { useLargeText } from "../../useLargeText";
 import { Avatar, Card, Chip } from "../ui";
 import { RosterSync, useReloadOnRosterChange } from "./rosterSync";
@@ -129,6 +129,13 @@ export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled,
   const removeRow = removeSignupId ? approved.find((r) => r.signup_id === removeSignupId) : undefined;
   const state = loadState(res);
 
+  // The pinned skip / clear button; at large text it moves inside the list's ScrollView (see the picker sheet).
+  const skip = (
+    <TouchableOpacity style={styles.skipBtn} activeOpacity={0.85} onPress={() => reassign(null)}>
+      <Text style={styles.skipText}>Clear — no animal assigned</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View>
       {!!banner && (
@@ -182,9 +189,9 @@ export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled,
       {/* The re-assign-animal picker — walking shifts only; opened from a row's "Change". */}
       <Modal visible={pickerSignupId !== null} transparent animationType="slide" onRequestClose={() => setPickerSignupId(null)}>
         <View style={styles.pickerOverlay}>
-          <View style={styles.pickerSheet}>
+          <View style={[styles.pickerSheet, large && styles.pickerSheetLarge]}>
             <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>Change the assigned animal</Text>
+              <Text style={styles.pickerTitle} maxFontSizeMultiplier={maxFontScale.title}>Change the assigned animal</Text>
               <TouchableOpacity onPress={() => setPickerSignupId(null)} hitSlop={TAP_SLOP}>
                 <Text style={styles.pickerClose}>Close</Text>
               </TouchableOpacity>
@@ -214,11 +221,10 @@ export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled,
                   </TouchableOpacity>
                 ))
               )}
+              {large ? skip : null}
             </ScrollView>
 
-            <TouchableOpacity style={styles.skipBtn} activeOpacity={0.85} onPress={() => reassign(null)}>
-              <Text style={styles.skipText}>Clear — no animal assigned</Text>
-            </TouchableOpacity>
+            {large ? null : skip}
           </View>
         </View>
       </Modal>
@@ -253,6 +259,7 @@ const styles = StyleSheet.create({
   removeBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 44, paddingVertical: 8, justifyContent: "center" },
   removeText: { color: colors.danger, ...typography.meta, fontWeight: "800" },
   pickerOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(18, 33, 58, 0.45)" },
+  pickerSheetLarge: { maxHeight: "92%" },
   pickerSheet: { maxHeight: "78%", borderTopLeftRadius: 26, borderTopRightRadius: 26, backgroundColor: colors.page, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 28 },
   pickerHeader: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 },
   pickerTitle: { color: colors.ink, ...typography.section },
