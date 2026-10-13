@@ -66,15 +66,22 @@ export function InquiryList() {
   const [inquiries, setInquiries] = useState<MyInquiry[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 
-  const load = useCallback(() => {
-    setRes(null);
-    api.get("/me/inquiries").then((r) => {
-      setRes({ ok: r.ok, status: r.status });
-      if (r.ok) setInquiries(r.data?.results ?? []);
+  const [next, setNext] = useState<number | null>(null);
+
+  // The server pages this list (`{results, next}`, newest first, `?page=N`), so one fetch is only the newest page: an older
+  // pending placement offer could sit beyond it with no way to reach it. Page 1 replaces; later pages append. A failed
+  // "Load more" leaves the list and the button in place (only page 1 drives the load state) so it can be tapped again.
+  const load = useCallback((page: number) => {
+    if (page === 1) setRes(null);
+    api.get(`/me/inquiries?page=${page}`).then((r) => {
+      if (page === 1) setRes({ ok: r.ok, status: r.status });
+      if (!r.ok) return;
+      setInquiries((prev) => (page === 1 ? r.data?.results ?? [] : [...prev, ...(r.data?.results ?? [])]));
+      setNext(r.data?.next ?? null);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus
   }, []);
-  useFocusEffect(load);
+  useFocusEffect(useCallback(() => { load(1); }, [load]));
 
   return (
     <>
@@ -82,7 +89,7 @@ export function InquiryList() {
           <LoadStateView
             state={loadState(res, inquiries.length)}
             emptyTitle="You haven't inquired on any pets yet."
-            onRetry={load}
+            onRetry={() => load(1)}
           />
         ) : (
           inquiries.map((iq) => {
@@ -136,6 +143,12 @@ export function InquiryList() {
             );
           })
         )}
+      {next && loadState(res, inquiries.length).kind === "ready" ? (
+        <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.inquiryList.loadMore"
+          style={styles.more} onPress={() => load(next)}>
+          <Text style={styles.moreLabel}>Load more</Text>
+        </TouchableOpacity>
+      ) : null}
     </>
   );
 }
@@ -156,5 +169,7 @@ const styles = StyleSheet.create({
   progress: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "700" },
   placementNote: { marginTop: 12, color: colors.teal, ...typography.meta, fontWeight: "800" },
   shareStory: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.successBg },
+  more: { alignSelf: "center", marginTop: 4, minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
+  moreLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   shareStoryLabel: { color: colors.success, ...typography.strong, fontWeight: "700" }
 });
