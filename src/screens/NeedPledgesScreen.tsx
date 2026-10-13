@@ -16,6 +16,7 @@ import { ChipTone, needProgressLabel, pledgeStatusChip, PledgeStatus } from "../
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, pill, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 import { ScreenHeader } from "../components/ui";
 
 const card = {
@@ -31,6 +32,8 @@ type Pledge = { pledge_id: string; quantity: number; status: PledgeStatus; pledg
 type Props = NativeStackScreenProps<RootStackParamList, "needPledges">;
 
 export function NeedPledgesScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up a pledge's name and status chip cannot share a row, so the card stacks.
+  const large = useLargeText();
   const api = useApi();
   const { need } = route.params;
   const [pledges, setPledges] = useState<Pledge[] | null>(null);
@@ -109,8 +112,8 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
             const chip = pledgeStatusChip(p.status);
             return (
               <View key={p.pledge_id} style={styles.pledgeCard}>
-                <View style={styles.row}>
-                  <Text style={styles.pledger}>{p.pledger_name}</Text>
+                <View style={[styles.row, large && styles.rowLarge]}>
+                  <Text style={[styles.pledger, large && styles.pledgerLarge]}>{p.pledger_name}</Text>
                   <View style={[styles.chip, { backgroundColor: CHIP[chip.tone].bg }]}>
                     <Text style={[styles.chipText, { color: CHIP[chip.tone].fg }]}>{chip.label}</Text>
                   </View>
@@ -137,17 +140,20 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   progress: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
-  actionRow: { flexDirection: "row", gap: 12, marginTop: 14 },
-  secondaryBtn: { height: 38, paddingHorizontal: 20, justifyContent: "center", borderRadius: pill(38), ...card },
+  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 14 },
+  secondaryBtn: { minHeight: 38, paddingVertical: 8, paddingHorizontal: 20, justifyContent: "center", borderRadius: pill(38), ...card },
   secondaryLabel: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.section },
   empty: { marginTop: 20, color: colors.muted, ...typography.body },
   pledgeCard: { marginBottom: 12, padding: 18, borderRadius: radii.card, ...card },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  // large: stacked. The base `pledger` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  rowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  pledgerLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   pledger: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
   chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, ...typography.body },
-  receiveBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.soft },
+  receiveBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.soft },
   receiveLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" }
 });

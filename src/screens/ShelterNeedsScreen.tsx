@@ -12,6 +12,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ChipTone, needProgressLabel, needStatusChip, NeedStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
@@ -28,6 +29,8 @@ type Need = {
 type Props = NativeStackScreenProps<RootStackParamList, "shelterNeeds">;
 
 export function ShelterNeedsScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up a need's title and status chip cannot share a row (the title broke over four lines), so the row stacks.
+  const large = useLargeText();
   const api = useApi();
   const [needs, setNeeds] = useState<Need[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -78,8 +81,8 @@ export function ShelterNeedsScreen({ navigation }: Props) {
               <TouchableOpacity key={need.need_id} activeOpacity={0.8}
                 onPress={() => navigation.navigate("needPledges", { need })}>
                 <Card style={styles.needCard}>
-                  <View style={styles.row}>
-                    <Text style={styles.needTitle}>{need.title}</Text>
+                  <View style={[styles.row, large && styles.rowLarge]}>
+                    <Text style={[styles.needTitle, large && styles.needTitleLarge]}>{need.title}</Text>
                     <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
                   </View>
                   <Text style={styles.meta}>
@@ -103,6 +106,10 @@ const styles = StyleSheet.create({
   empty: { marginTop: 30, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   needCard: { marginBottom: 12, padding: 18 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  // large: stacked. The base `needTitle` is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is
+  // what works: grow / basis alone left it at zero height on the Cancel screen, #189).
+  rowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
+  needTitleLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   meta: { marginTop: 8, color: colors.muted, ...typography.meta, textTransform: "capitalize" }
 });
