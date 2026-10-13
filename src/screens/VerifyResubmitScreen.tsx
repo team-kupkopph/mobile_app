@@ -10,13 +10,16 @@ import { pickAndUpload } from "../media/pickAndUpload";
 import { CheckIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { docLabel } from "../verifications";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "verifyResubmit">;
 
 export function VerifyResubmitScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the file name cannot share a line with its Replace button, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const { verificationId, documentId, docType, reviewNote } = route.params;
   const [fileUrl, setFileUrl] = useState<string | null>(null);
@@ -58,7 +61,7 @@ export function VerifyResubmitScreen({ navigation, route }: Props) {
       <ScreenHeader title="Resubmit documents" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1}>One document needs a fix</Text>
+        <Text style={styles.h1} maxFontSizeMultiplier={maxFontScale.title}>One document needs a fix</Text>
         <Text style={styles.sub}>Replace it and resubmit — the rest are fine.</Text>
 
         {reviewNote ? (
@@ -68,8 +71,8 @@ export function VerifyResubmitScreen({ navigation, route }: Props) {
           </View>
         ) : null}
 
-        <View style={styles.fileCard}>
-          <Text style={styles.fileName}>{docLabel(docType)}</Text>
+        <View style={[styles.fileCard, large && styles.fileCardLarge]}>
+          <Text style={[styles.fileName, large && styles.fileNameLarge]}>{docLabel(docType)}</Text>
           {fileUrl ? (
             <View style={styles.readyRow}>
               <View style={styles.readyDot}>
@@ -127,9 +130,12 @@ const styles = StyleSheet.create({
     flexDirection: "row", alignItems: "center", justifyContent: "space-between",
     ...elevation.soft
   },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  fileCardLarge: { flexDirection: "column", alignItems: "flex-start", gap: 12 },
+  fileNameLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   fileName: { color: colors.ink, ...typography.subtitle, fontWeight: "700", flex: 1 },
   replaceBtn: {
-    paddingHorizontal: 22, height: 44, borderRadius: 22, alignItems: "center",
+    paddingHorizontal: 22, minHeight: 44, paddingVertical: 8, borderRadius: 22, alignItems: "center",
     justifyContent: "center", backgroundColor: colors.infoBg
   },
   replaceText: { color: colors.tealDark, ...typography.subtitle, fontWeight: "800" },
