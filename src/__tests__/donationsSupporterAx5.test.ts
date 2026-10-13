@@ -51,7 +51,10 @@ test("My donations' pledge row stacks at large text and cancels the surviving fl
   expect(body(mine, "rowLarge")).toMatch(/alignItems\s*:\s*"flex-start"/);
   const c = body(mine, "needTitleLarge") as string;
   expect(c).toMatch(/\bflex\s*:\s*0\b/);
-  expect(c).toMatch(/alignSelf\s*:\s*"stretch"/);
+  // Seen on a device (Run 6 part 18): with `alignSelf: "stretch"` AND `maxFontSizeMultiplier` on the title, iOS reserves the frame for the
+  // UNCAPPED size, so a three-line title sat above ~100 pt of empty card. The column container's `alignItems: "flex-start"` already gives
+  // the text its natural width, so the stretch is dropped here (the other `*Large` copy styles carry no font cap and keep it).
+  expect(c).not.toMatch(/alignSelf/);
   expect(c).toMatch(/flexGrow\s*:\s*0/);
   expect(c).toMatch(/flexBasis\s*:\s*"auto"/);
   expect(mine).toMatch(/styles\.row, large && styles\.rowLarge/);
