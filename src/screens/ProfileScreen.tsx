@@ -140,7 +140,7 @@ export function ProfileScreen({ navigation }: Props) {
   return (
     <View style={styles.screen} testID="screen.profile">
       <ScreenBackdrop />
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Profile</Text>
 
         <View style={styles.card}>

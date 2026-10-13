@@ -146,7 +146,7 @@ export function ShelterVolunteerEditScreen({ navigation, route }: Props) {
         <LoadStateView state={loadState(res)} subject="activity" onRetry={load}
           onBack={() => navigation.goBack()} />
       ) : (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {banner ? <Text style={styles.banner}>{banner}</Text> : null}
 
           <ShiftFormFields value={form} onChange={setForm} errors={errors} lockShelterAddress />

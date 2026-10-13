@@ -56,7 +56,7 @@ export function RescueOfferScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Offer help" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled"
+      <ScrollView automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         <Text style={styles.h1}>Can't claim it? Chip in instead.</Text>
         <Text style={styles.sub}>

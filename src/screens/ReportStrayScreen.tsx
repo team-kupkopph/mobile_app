@@ -245,7 +245,7 @@ export function ReportStrayScreen({ navigation, route }: Props) {
         onBack={() => navigation.goBack()}
       />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {!sightingOf ? (
           <>
             <Text style={styles.label}>What happened?</Text>

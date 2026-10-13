@@ -59,7 +59,7 @@ export function DonationQrScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Donation QR" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.draftNote}>
           Reviewed before donations go live. Replacing the QR image sends it back for review.
         </Text>

@@ -64,7 +64,7 @@ export function RescueListScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="List for adoption" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.draftNote}>
           This saves a private draft with the report's photos — only you can see it. Next you add their story and publish it.
         </Text>
