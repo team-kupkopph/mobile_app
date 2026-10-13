@@ -13,7 +13,8 @@ import {
   signupStatusCard
 } from "../../volunteer";
 import { TAP_SLOP } from "../../touch";
-import { colors, squircle, typography } from "../../theme";
+import { useLargeText } from "../../useLargeText";
+import { colors, maxFontScale, squircle, typography } from "../../theme";
 import { Card, Chip } from "../ui";
 
 function shiftDateLabel(iso: string): string {
@@ -84,13 +85,15 @@ function CalendarLink({ item }: { item: MySignupItem }) {
 }
 
 function ShiftCardBody({ item }: { item: MySignupItem }) {
+  // At Dynamic Type AX3 and up icon | copy | chip cannot share a line, so the card stacks.
+  const large = useLargeText();
   return (
     <>
       <View style={styles.cardIcon}>
         <VolunteerIcon color={colors.teal} size={22} />
       </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.cardTitle}>{shiftHeadline(item.shift)}</Text>
+      <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+        <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{shiftHeadline(item.shift)}</Text>
         <Text style={styles.cardOrg}>{item.shift.org_name}</Text>
         <Text style={styles.cardMeta}>{shiftWhenLabel(item.shift.starts_at, item.shift.ends_at)}</Text>
         {/* G2 · once the shelter approves, `location` shows up on the embedded shift — the
@@ -110,16 +113,17 @@ function ShiftCardBody({ item }: { item: MySignupItem }) {
 }
 
 function HistoryRow({ item }: { item: MySignupItem }) {
+  const large = useLargeText();
   const hours = item.status === "completed" ? historyHours(item) : null;
   const lateNote = historyLateNote(item);
   return (
     <Card style={styles.card}>
-      <View style={styles.cardRow}>
+      <View style={[styles.cardRow, large && styles.cardRowLarge]}>
         <View style={styles.cardIcon}>
           <VolunteerIcon color={colors.teal} size={22} />
         </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.cardTitle}>{shiftTypeLabel(item.shift.type)}</Text>
+        <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+          <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{shiftTypeLabel(item.shift.type)}</Text>
           <Text style={styles.cardOrg}>
             {item.shift.org_name} · {shiftDateLabel(item.shift.starts_at)}
             {hours ? ` · ${hours}` : ""}
@@ -141,6 +145,7 @@ export function MyShifts({
 }) {
   const { requested, upcoming, history, reliability } = data;
   const isEmpty = requested.length === 0 && upcoming.length === 0 && history.length === 0;
+  const large = useLargeText();
 
   // F-R2-3 · the stats card renders for a brand-new account too — zeroes and all — so My shifts
   // has the same shape on day one as on day ninety, with the empty copy beneath it rather than
@@ -148,19 +153,19 @@ export function MyShifts({
   // volunteerTotalsLabel.)
   return (
     <View>
-      <Card style={styles.statsCard}>
-        <View style={styles.statCol}>
-          <Text style={styles.statValue}>{reliability.shifts_completed}</Text>
+      <Card style={[styles.statsCard, large && styles.statsCardLarge]}>
+        <View style={large ? styles.statColLarge : styles.statCol}>
+          <Text style={styles.statValue} maxFontSizeMultiplier={maxFontScale.title}>{reliability.shifts_completed}</Text>
           <Text style={styles.statLabel}>Completed</Text>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statCol}>
-          <Text style={styles.statValue}>{hoursLabel(totalCompletedHours(history))}</Text>
+        <View style={large ? styles.statDividerLarge : styles.statDivider} />
+        <View style={large ? styles.statColLarge : styles.statCol}>
+          <Text style={styles.statValue} maxFontSizeMultiplier={maxFontScale.title}>{hoursLabel(totalCompletedHours(history))}</Text>
           <Text style={styles.statLabel}>Hours</Text>
         </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statCol}>
-          <Text style={styles.statValue}>{reliability.no_shows}</Text>
+        <View style={large ? styles.statDividerLarge : styles.statDivider} />
+        <View style={large ? styles.statColLarge : styles.statCol}>
+          <Text style={styles.statValue} maxFontSizeMultiplier={maxFontScale.title}>{reliability.no_shows}</Text>
           <Text style={styles.statLabel}>No-shows</Text>
         </View>
       </Card>
@@ -170,7 +175,7 @@ export function MyShifts({
           <Text style={styles.sectionLabel}>Awaiting approval</Text>
           {requested.map((item) => (
             <Card key={item.signup_id} style={[styles.card, styles.cardColumn]}>
-              <View style={styles.cardRow}>
+              <View style={[styles.cardRow, large && styles.cardRowLarge]}>
                 <ShiftCardBody item={item} />
               </View>
               <View style={styles.cancelOnlyRow}>
@@ -201,7 +206,7 @@ export function MyShifts({
               }}
             >
               <Card style={styles.cardColumn}>
-                <View style={styles.cardRow}>
+                <View style={[styles.cardRow, large && styles.cardRowLarge]}>
                   <ShiftCardBody item={item} />
                 </View>
                 <View style={styles.cardLinkRow}>
@@ -235,6 +240,10 @@ const styles = StyleSheet.create({
   empty: { color: colors.muted, ...typography.body, textAlign: "center" },
   statsCard: { flexDirection: "row", alignItems: "center", paddingVertical: 20, marginBottom: 18 },
   statCol: { flex: 1, alignItems: "center" },
+  // large: one stat per line. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  statsCardLarge: { flexDirection: "column", alignItems: "stretch" },
+  statColLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", alignItems: "center" },
+  statDividerLarge: { width: "100%", height: 1, marginVertical: 12, backgroundColor: colors.border },
   statDivider: { width: 1, height: 40, backgroundColor: colors.border },
   statValue: { color: colors.ink, ...typography.hero },
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "700" },
@@ -242,7 +251,10 @@ const styles = StyleSheet.create({
   card: { marginBottom: 12 },
   cardColumn: { marginBottom: 12 },
   cardRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  cardLinkRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 10 },
+  cardRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  cardLinkRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", columnGap: 12, marginTop: 10 },
   cancelOnlyRow: { alignItems: "flex-end", marginTop: 10 },
   cancelLink: { paddingVertical: 4, paddingHorizontal: 4 },
   cancelLinkText: { color: colors.danger, ...typography.meta, fontWeight: "800" },
