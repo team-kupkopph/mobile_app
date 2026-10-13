@@ -20,7 +20,8 @@ import { loadState } from "../net";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { acceptedPlacementParams } from "../shelterAnimals";
 import { RootStackParamList } from "../navigation/types";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, Card, ScreenHeader } from "../components/ui";
 
 
@@ -29,6 +30,8 @@ type Decision = "accept" | "decline";
 type Props = NativeStackScreenProps<RootStackParamList, "placeRequest">;
 
 export function PlaceRequestScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the fee card's label | value row cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { inquiryId } = route.params;
 
@@ -122,12 +125,12 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
             <Image source={{ uri: listing.photos[0] }} style={styles.photo} resizeMode="cover" />
           ) : null}
 
-          <Text style={styles.name}>{inquiry.listing.name || "This pet"}</Text>
+          <Text style={styles.name} maxFontSizeMultiplier={maxFontScale.title}>{inquiry.listing.name || "This pet"}</Text>
           <Text style={styles.sub}>{capitalize(inquiry.listing.species)}{listing?.city ? ` · ${listing.city}` : ""}</Text>
 
           {listing?.description ? <Text style={styles.body}>{listing.description}</Text> : null}
 
-          <Card style={styles.feeCard}>
+          <Card style={[styles.feeCard, large && styles.feeCardLarge]}>
             <Text style={styles.feeLabel}>Adoption fee</Text>
             <Text style={styles.feeValue}>
               {listing && Number(listing.adoption_fee) > 0
@@ -179,6 +182,8 @@ const styles = StyleSheet.create({
   body: { marginTop: 14, color: colors.ink, ...typography.body },
   feeCard: { marginTop: 18, padding: 18, flexDirection: "row",
              alignItems: "center", justifyContent: "space-between" },
+  // large: label above value (a longer fee or label would not share the line).
+  feeCardLarge: { flexDirection: "column", alignItems: "flex-start" },
   feeLabel: { color: colors.muted, ...typography.strong, fontWeight: "700" },
   feeValue: { color: colors.ink, ...typography.section },
   posterLine: { marginTop: 14, color: colors.muted, ...typography.meta },
