@@ -14,7 +14,8 @@ import { Avatar, Button, Card, Chip, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "posterListing">;
 
@@ -23,6 +24,8 @@ function initials(name: string): string {
 }
 
 export function PosterListingScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the head card's photo | name | chip row and an applicant's avatar | name row cannot share a line, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const { listingId } = route.params;
   const [listing, setListing] = useState<ListingDetail | null>(null);
@@ -84,11 +87,11 @@ export function PosterListingScreen({ navigation, route }: Props) {
       <TouchableOpacity key={a.inquiry_id} activeOpacity={0.85} accessibilityRole="button"
         testID={`row.posterListing.applicant.${a.inquiry_id}`}
         onPress={() => navigation.navigate("applicant", { inquiryId: a.inquiry_id })}>
-        <Card style={styles.row}>
+        <Card style={[styles.row, large && styles.rowLarge]}>
           <Avatar initials={initials(a.adopter.display_name)} size={44} />
-          <View style={styles.rowText}>
-            <Text style={styles.rowTitle} numberOfLines={1}>{a.adopter.display_name}</Text>
-            <Text style={styles.rowSub} numberOfLines={1}>
+          <View style={large ? styles.rowTextLarge : styles.rowText}>
+            <Text style={styles.rowTitle} numberOfLines={large ? undefined : 1}>{a.adopter.display_name}</Text>
+            <Text style={styles.rowSub} numberOfLines={large ? undefined : 1}>
               {[a.adopter.city, applicantStatusLine(a)].filter(Boolean).join(" · ")}
             </Text>
           </View>
@@ -103,10 +106,10 @@ export function PosterListingScreen({ navigation, route }: Props) {
       <ScreenHeader title="Your listing" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card style={styles.card}>
-          <View style={styles.headRow}>
+          <View style={[styles.headRow, large && styles.headRowLarge]}>
             {listing.photos[0] ? <Image source={{ uri: listing.photos[0] }} style={styles.photo} /> : <View style={styles.photo} />}
-            <View style={styles.rowText}>
-              <Text style={styles.title} numberOfLines={1}>{pet}</Text>
+            <View style={large ? styles.rowTextLarge : styles.rowText}>
+              <Text style={styles.title} numberOfLines={large ? undefined : 1} maxFontSizeMultiplier={maxFontScale.title}>{pet}</Text>
               <Text style={styles.rowSub}>{sub}</Text>
             </View>
             <View testID="chip.posterListing.status">
@@ -162,6 +165,10 @@ const styles = StyleSheet.create({
   photo: { width: 62, height: 62, borderRadius: squircle(62), backgroundColor: colors.soft },
   title: { color: colors.ink, ...typography.title },
   rowText: { flex: 1 },
+  // large: the rows stack. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  rowTextLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  headRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  rowLarge: { flexDirection: "column", alignItems: "flex-start" },
   rowTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   rowSub: { marginTop: 3, color: colors.muted, ...typography.meta },
   hint: { marginTop: 12, color: colors.muted, ...typography.meta, lineHeight: 18 },
