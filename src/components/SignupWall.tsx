@@ -6,7 +6,7 @@
 // the separate Verified Member gate (MemberUpgradeScreen) once the account exists; that gate is
 // unrelated and already built (M7).
 import { ReactNode } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
@@ -97,6 +97,8 @@ export function SignupWall({ visible, action, subject, onCreateAccount, onLogin,
         </TouchableWithoutFeedback>
 
         <View style={styles.sheet}>
+          {/* At AX5 the sheet's text outgrows the screen; a short sheet is the same height as before, a tall one scrolls. */}
+          <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
           <View style={styles.handle} />
 
           <View style={styles.iconCircle}>{copy.icon}</View>
@@ -131,6 +133,7 @@ export function SignupWall({ visible, action, subject, onCreateAccount, onLogin,
               <Text style={styles.devLink}>Dev · Seed as e2e.owner</Text>
             </TouchableOpacity>
           ) : null}
+          </ScrollView>
         </View>
       </View>
     </Modal>
@@ -174,13 +177,16 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(18, 33, 58, 0.45)"
   },
   sheet: {
+    maxHeight: "92%",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
+    backgroundColor: "#FFFFFF"
+  },
+  sheetContent: {
     paddingHorizontal: 28,
     paddingTop: 14,
     paddingBottom: 34,
-    alignItems: "center",
-    backgroundColor: "#FFFFFF"
+    alignItems: "center"
   },
   handle: {
     width: 44,

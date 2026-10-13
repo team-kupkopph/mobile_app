@@ -1,7 +1,7 @@
 // Spec §2 · the decline sheet — four reasons worded as the adopter reads them; the button stays
 // enabled and says what is missing (design system: never disable submit).
 import { useEffect, useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Button } from "../ui";
 import { DECLINE_REASONS } from "../../applicant";
 import { TAP_SLOP } from "../../touch";
@@ -26,6 +26,8 @@ export function DeclineSheet({ visible, name, busy, onDecline, onClose }: Props)
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close" />
       <View style={styles.sheet} testID="sheet.applicant.decline">
+        {/* At AX5 the four reasons outgrow the screen; a short sheet is the same height as before, a tall one scrolls. */}
+        <ScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Decline applicant</Text>
         {DECLINE_REASONS.map((r) => (
           <TouchableOpacity key={r.code} hitSlop={TAP_SLOP} accessibilityRole="radio"
@@ -39,6 +41,7 @@ export function DeclineSheet({ visible, name, busy, onDecline, onClose }: Props)
         <Text style={styles.hint}>{name} will be told you won&apos;t be going ahead.</Text>
         <Button label="Decline applicant" variant="destructive" loading={busy} onPress={submit}
           testID="btn.decline.confirm" style={styles.button} />
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -46,9 +49,10 @@ export function DeclineSheet({ visible, name, busy, onDecline, onClose }: Props)
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: "rgba(18,33,58,0.32)" },
-  sheet: { padding: spacing.lg, paddingBottom: 36, borderTopLeftRadius: radii.card, borderTopRightRadius: radii.card, backgroundColor: colors.white },
+  sheet: { maxHeight: "92%", borderTopLeftRadius: radii.card, borderTopRightRadius: radii.card, backgroundColor: colors.white },
+  sheetContent: { padding: spacing.lg, paddingBottom: 36 },
   title: { color: colors.ink, ...typography.section, marginBottom: 10 },
-  option: { minHeight: 48, flexDirection: "row", alignItems: "center", gap: 12 },
+  option: { minHeight: 48, paddingVertical: 6, flexDirection: "row", alignItems: "center", gap: 12 },
   dot: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.teal },
   dotOn: { backgroundColor: colors.teal },
   optionLabel: { color: colors.ink, ...typography.subtitle },
