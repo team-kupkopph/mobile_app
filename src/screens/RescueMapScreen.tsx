@@ -21,7 +21,8 @@ import { RootStackParamList } from "../navigation/types";
 import { feedState, useCachedFeed } from "../useCachedFeed";
 import { isOffline, loadState } from "../net";
 import { relTime, reportKindChip, reportTitle } from "../sagip";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Card } from "../components/ui";
 
@@ -37,6 +38,8 @@ const APPROX_RADIUS_M = 250;
 type Props = NativeStackScreenProps<RootStackParamList, "rescueMap">;
 
 export function RescueMapScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the map badge needs more room and a card's title | chip row cannot share a line, so the map grows and the card stacks.
+  const large = useLargeText();
   const api = useApi();
   const { city: savedCity } = useAuth();
   // S16 · a shelter's Rescue card passes the shelter's own city; everyone else gets theirs.
@@ -82,7 +85,7 @@ export function RescueMapScreen({ navigation, route }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* City-scoped backdrop: centred on the city + search radius. No per-report pins (§12.5) —
             the strays are in the list below; only rescuers ever see a report's exact spot. */}
-        <View style={styles.mapWrap}>
+        <View style={large ? styles.mapWrapLarge : styles.mapWrap}>
           <MapView
             style={styles.map}
             pointerEvents="none"
@@ -106,7 +109,7 @@ export function RescueMapScreen({ navigation, route }: Props) {
               />
             ) : null)}
           </MapView>
-          <View style={styles.mapBadge} pointerEvents="none">
+          <View style={[styles.mapBadge, large && styles.mapBadgeLarge]} pointerEvents="none">
             {/* The count is a claim about the world, so it is only made once a request has
                 actually succeeded. "0 nearby" over a failed fetch is the same lie as the
                 empty copy below, just in fewer words. */}
@@ -151,9 +154,9 @@ export function RescueMapScreen({ navigation, route }: Props) {
                 activeOpacity={0.85}
                 onPress={() => navigation.navigate("reportDetail", { reportId: r.report_id })}
               >
-                <Card style={styles.card}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{reportTitle(r)}</Text>
+                <Card style={[styles.card, large && styles.cardLarge]}>
+                  <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+                    <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{reportTitle(r)}</Text>
                     <Text style={styles.cardMeta}>{(r.city ? r.city + " · " : "") + relTime(r.reported_at)}</Text>
                   </View>
                   <View style={[styles.chip, { backgroundColor: tone.bg }]}>
@@ -183,18 +186,25 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
   mapWrap: { height: 200, borderRadius: radii.card, overflow: "hidden", backgroundColor: colors.soft },
+  // large: a taller map so the multi-line badge fits inside it.
+  mapWrapLarge: { height: 300, borderRadius: radii.card, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
-  mapBadge: { position: "absolute", left: 12, bottom: 12, backgroundColor: "rgba(255,255,255,0.94)", paddingHorizontal: 14, height: 34, borderRadius: 17, justifyContent: "center" },
+  mapBadge: { position: "absolute", left: 12, bottom: 12, backgroundColor: "rgba(255,255,255,0.94)", paddingHorizontal: 14, minHeight: 34, paddingVertical: 6, borderRadius: 17, justifyContent: "center" },
+  mapBadgeLarge: { right: 12 },
   mapBadgeText: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },
   mapNote: { marginTop: 10, color: colors.muted, ...typography.meta, lineHeight: 18 },
-  legendRow: { flexDirection: "row", gap: 18, marginTop: 16, marginBottom: 18 },
+  legendRow: { flexDirection: "row", flexWrap: "wrap", columnGap: 18, rowGap: 8, marginTop: 16, marginBottom: 18 },
   legend: { flexDirection: "row", alignItems: "center", gap: 7 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { color: colors.muted, ...typography.meta, fontWeight: "600" },
   card: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18, marginBottom: 12 },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
-  chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
+  chip: { paddingHorizontal: 12, minHeight: 28, paddingVertical: 4, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   empty: { marginTop: 30, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });
