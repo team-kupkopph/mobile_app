@@ -3,17 +3,20 @@
 // navigate) so HomeScreen remounts and its useFocusEffect refetches /me — that's what flips on
 // the amber "Verified Member · Under review" banner built in M4.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { ClockIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, Card } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
 
 export function MemberSubmittedScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the notice's icon cannot share a line with its text, so it stacks.
+  const large = useLargeText();
   function backToHome() {
     navigation.reset({ index: 0, routes: [{ name: "home" }] });
   }
@@ -21,7 +24,8 @@ export function MemberSubmittedScreen({ navigation }: Props) {
   return (
     <View style={styles.screen}>
       <ScreenBackdrop />
-      <View style={styles.content}>
+      {/* At AX5 the card outgrows the screen; a short one still sits where it did. */}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* The "done" layout: one hero Card carrying the check glyph, title, body and CTA. */}
         <Card tone="hero" style={styles.doneCard}>
           <View style={styles.checkCircle}>
@@ -29,14 +33,14 @@ export function MemberSubmittedScreen({ navigation }: Props) {
             <View style={styles.checkMarkKick} />
           </View>
 
-          <Text style={styles.heading}>Request submitted</Text>
+          <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>Request submitted</Text>
           <Text style={styles.subheading}>We've got your ID and social link.</Text>
 
-          <View style={styles.noticeBar}>
+          <View style={[styles.noticeBar, large && styles.noticeBarLarge]}>
             <View style={styles.noticeIcon}>
               <ClockIcon color={colors.teal} size={26} />
             </View>
-            <View style={styles.noticeCopy}>
+            <View style={large ? styles.noticeCopyLarge : styles.noticeCopy}>
               <Text style={styles.noticeTitle}>This takes a few days</Text>
               <Text style={styles.noticeBody}>A person reviews every request — usually 2-3 business days. We'll notify you.</Text>
             </View>
@@ -46,7 +50,7 @@ export function MemberSubmittedScreen({ navigation }: Props) {
 
           <Button label="Back to home" onPress={backToHome} style={styles.doneButton} />
         </Card>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -58,9 +62,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.page
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: spacing.lg,
     paddingTop: 90,
+    paddingBottom: 60,
     alignItems: "center"
   },
   doneCard: {
@@ -123,6 +128,9 @@ const styles = StyleSheet.create({
   noticeCopy: {
     flex: 1
   },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  noticeBarLarge: { flexDirection: "column", alignItems: "flex-start" },
+  noticeCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   noticeTitle: {
     color: colors.tealDark,
     ...typography.meta,

@@ -3,12 +3,13 @@
 // rescue tooling — see Design Package decision: adoption is gated on the badge too) and hands off
 // to MemberVerifyScreen for the actual submission.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AdoptIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, Card, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberUpgrade">;
@@ -21,19 +22,22 @@ const UNLOCKS = [
 ];
 
 export function MemberUpgradeScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up the hero's icon cannot share a line with its text, so the hero stacks.
+  const large = useLargeText();
   return (
     <View style={styles.screen}>
       <ScreenBackdrop />
       <ScreenHeader title="Get verified" onBack={() => navigation.goBack()} />
 
-      <View style={styles.content}>
+      {/* At AX5 the content outgrows the screen (the "Get verified" button was unreachable); a short screen is the same as before. */}
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* The You artboard's hero: the one tinted Card in scope for this task. */}
-        <Card tone="hero" style={styles.heroCard}>
+        <Card tone="hero" style={[styles.heroCard, large && styles.heroCardLarge]}>
           <View style={styles.heroIcon}>
             <UserBadgeIcon color={colors.white} />
           </View>
-          <View style={styles.heroCopy}>
-            <Text style={styles.heroTitle}>Become a Verified Member</Text>
+          <View style={large ? styles.heroCopyLarge : styles.heroCopy}>
+            <Text style={styles.heroTitle} maxFontSizeMultiplier={maxFontScale.title}>Become a Verified Member</Text>
             <Text style={styles.heroText}>One quick check unlocks adopting & rescue tools.</Text>
           </View>
         </Card>
@@ -53,7 +57,7 @@ export function MemberUpgradeScreen({ navigation }: Props) {
 
         <Button label="Get verified" onPress={() => navigation.navigate("memberVerify")} style={styles.cta} />
         <Text style={styles.footnote}>Free · takes a few minutes</Text>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -65,8 +69,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.page
   },
   content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg
+    flexGrow: 1,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: 30
   },
   heroCard: {
     marginTop: 10,
@@ -76,6 +81,9 @@ const styles = StyleSheet.create({
     // The one tinted Card in scope for this task — the You artboard's hero tile.
     backgroundColor: colors.teal
   },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  heroCardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  heroCopyLarge: { flex: 0, marginLeft: 0, marginTop: 14, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   heroIcon: {
     width: 64,
     height: 64,
