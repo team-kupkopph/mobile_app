@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   card: { padding: 18, marginBottom: 18 },
   name: { color: colors.ink, ...typography.section },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip: { alignSelf: "flex-start", marginTop: 10, paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
+  chip: { alignSelf: "flex-start", marginTop: 10, paddingHorizontal: 12, paddingVertical: 4, minHeight: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   reliabilityLine: { marginTop: 12, color: colors.muted, ...typography.meta, fontWeight: "700" },
   sectionLabel: { marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "800", letterSpacing: 0.6, textTransform: "uppercase" },

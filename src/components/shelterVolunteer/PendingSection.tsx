@@ -13,6 +13,7 @@ import { ConfirmModal } from "../ConfirmModal";
 import { PendingRequest, ShelterShift, reapprovalCopy, reliabilityChip } from "../../shelterVolunteer";
 import { TAP_SLOP } from "../../touch";
 import { colors, radii, squircle, typography } from "../../theme";
+import { useLargeText } from "../../useLargeText";
 import { Avatar, Button, Card, ChipTone, chipTones } from "../ui";
 import { useRequestActions } from "./useRequestActions";
 
@@ -47,6 +48,8 @@ type Props = {
 };
 
 export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }: Props) {
+  // At Dynamic Type AX3 and up a sign-up card's avatar | text | chip row and its side-by-side buttons cannot share a line, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const [requests, setRequests] = useState<PendingRequest[]>([]);
   // US-R2 · PRIMARY for this section — a failed load must not read as "0 pending".
@@ -101,9 +104,9 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }:
           return (
             <Card key={row.signup_id} style={styles.card}>
               <TouchableOpacity activeOpacity={0.85} onPress={() => onOpenDetail(row.signup_id)}>
-                <View style={styles.cardTop}>
+                <View style={[styles.cardTop, large && styles.cardTopLarge]}>
                   <Avatar initials={initials(row.volunteer.display_name)} size={44} />
-                  <View style={{ flex: 1 }}>
+                  <View style={[styles.cardCopy, large && styles.cardCopyLarge]}>
                     <View style={styles.nameRow}>
                       <Text style={styles.name}>{row.volunteer.display_name}</Text>
                       {row.is_verified_member && (
@@ -139,9 +142,9 @@ export function PendingSection({ shiftId, shift, onOpenDetail, onCountSettled }:
                 </View>
               )}
 
-              <View style={styles.actionsRow}>
-                <Button size="small" variant="secondary" label="Decline" accessibilityLabel={`Decline ${row.volunteer.display_name}`} onPress={() => actions.doDecline(row.signup_id)} style={styles.half} />
-                <Button size="small" label="Approve" accessibilityLabel={`Approve ${row.volunteer.display_name}`} onPress={() => actions.onPressApprove(row.signup_id)} loading={approveBusy} style={styles.half} />
+              <View style={[styles.actionsRow, large && styles.actionsRowLarge]}>
+                <Button size="small" variant="secondary" label="Decline" accessibilityLabel={`Decline ${row.volunteer.display_name}`} onPress={() => actions.doDecline(row.signup_id)} style={[styles.half, large && styles.halfLarge]} />
+                <Button size="small" label="Approve" accessibilityLabel={`Approve ${row.volunteer.display_name}`} onPress={() => actions.onPressApprove(row.signup_id)} loading={approveBusy} style={[styles.half, large && styles.halfLarge]} />
               </View>
             </Card>
           );
@@ -237,11 +240,15 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { padding: 16, marginBottom: 14 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
+  // large: stacked. The base `cardCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardTopLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopyLarge: { flex: 0, marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  cardCopy: { flex: 1 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   requestedAt: { marginTop: 2, color: colors.muted, ...typography.meta },
   declinedNote: { marginTop: 2, color: colors.muted, ...typography.meta, fontStyle: "italic" },
-  chip: { paddingHorizontal: 12, height: 30, borderRadius: 15, justifyContent: "center" },
+  chip: { paddingHorizontal: 12, paddingVertical: 4, minHeight: 30, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   flagStrip: {
     marginTop: 12, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 12,
@@ -251,9 +258,11 @@ const styles = StyleSheet.create({
   flagSub: { marginTop: 1, color: colors.warningStrong, ...typography.meta },
   actionsRow: { flexDirection: "row", gap: 10, marginTop: 14 },
   half: { flex: 1, alignSelf: "stretch" },
+  actionsRowLarge: { flexDirection: "column" },
+  halfLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   pickerOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(18, 33, 58, 0.45)" },
   pickerSheet: { maxHeight: "78%", borderTopLeftRadius: 26, borderTopRightRadius: 26, backgroundColor: colors.page, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 28 },
-  pickerHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  pickerHeader: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 },
   pickerTitle: { color: colors.ink, ...typography.section },
   pickerClose: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   pickerSub: { marginTop: 6, color: colors.muted, ...typography.meta },
@@ -263,6 +272,6 @@ const styles = StyleSheet.create({
   animalPhotoEmpty: { backgroundColor: colors.greyPill },
   animalName: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   animalSpecies: { marginTop: 2, color: colors.muted, ...typography.meta },
-  skipBtn: { marginTop: 8, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
+  skipBtn: { marginTop: 8, minHeight: 50, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   skipText: { color: colors.tealDark, ...typography.meta, fontWeight: "800" }
 });

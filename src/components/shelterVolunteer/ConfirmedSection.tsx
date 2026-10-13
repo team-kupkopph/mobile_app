@@ -13,6 +13,7 @@ import { ConfirmModal } from "../ConfirmModal";
 import { ListingCard, RosterRow, ShelterShift } from "../../shelterVolunteer";
 import { TAP_SLOP } from "../../touch";
 import { colors, radii, squircle, typography } from "../../theme";
+import { useLargeText } from "../../useLargeText";
 import { Avatar, Card, Chip } from "../ui";
 
 function initials(name: string): string {
@@ -35,6 +36,8 @@ type Props = {
 };
 
 export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled }: Props) {
+  // At Dynamic Type AX3 and up a sign-up card's avatar | text | chip row and its side-by-side buttons cannot share a line, so they stack.
+  const large = useLargeText();
   const api = useApi();
   const [roster, setRoster] = useState<RosterRow[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -136,9 +139,9 @@ export function ConfirmedSection({ shiftId, shift, onOpenDetail, onCountSettled 
           return (
             <TouchableOpacity key={row.signup_id} activeOpacity={0.85} onPress={() => onOpenDetail(row.signup_id)} disabled={busy}>
               <Card style={styles.card}>
-                <View style={styles.cardTop}>
+                <View style={[styles.cardTop, large && styles.cardTopLarge]}>
                   <Avatar initials={initials(row.volunteer.display_name)} size={44} />
-                  <View style={{ flex: 1 }}>
+                  <View style={[styles.cardCopy, large && styles.cardCopyLarge]}>
                     <Text style={styles.name}>{row.volunteer.display_name}</Text>
                     {shift?.type === "walking" && (
                       <View style={styles.animalRow}>
@@ -231,15 +234,19 @@ const styles = StyleSheet.create({
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   card: { padding: 16, marginBottom: 14 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 12 },
+  // large: stacked. The base `cardCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardTopLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopyLarge: { flex: 0, marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
+  cardCopy: { flex: 1 },
   name: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  animalRow: { marginTop: 4, flexDirection: "row", alignItems: "center", gap: 10 },
+  animalRow: { marginTop: 4, flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 10 },
   animalLabel: { color: colors.muted, ...typography.meta },
   changeLink: { color: colors.teal, ...typography.meta, fontWeight: "800" },
-  removeBtn: { marginTop: 14, alignSelf: "flex-start", height: 44, justifyContent: "center" },
+  removeBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 44, paddingVertical: 8, justifyContent: "center" },
   removeText: { color: colors.danger, ...typography.meta, fontWeight: "800" },
   pickerOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(18, 33, 58, 0.45)" },
   pickerSheet: { maxHeight: "78%", borderTopLeftRadius: 26, borderTopRightRadius: 26, backgroundColor: colors.page, paddingHorizontal: 22, paddingTop: 20, paddingBottom: 28 },
-  pickerHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  pickerHeader: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 },
   pickerTitle: { color: colors.ink, ...typography.section },
   pickerClose: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   pickerList: { marginTop: 14 },
@@ -248,6 +255,6 @@ const styles = StyleSheet.create({
   animalPhotoEmpty: { backgroundColor: colors.greyPill },
   animalName: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   animalSpecies: { marginTop: 2, color: colors.muted, ...typography.meta },
-  skipBtn: { marginTop: 8, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
+  skipBtn: { marginTop: 8, minHeight: 50, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: colors.soft },
   skipText: { color: colors.tealDark, ...typography.meta, fontWeight: "800" }
 });
