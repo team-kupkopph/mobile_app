@@ -56,7 +56,7 @@ export function ShiftWhenPicker({ day, start, durationMins, onChange }: {
 const styles = StyleSheet.create({
   label: { marginTop: 14, marginBottom: 8, color: colors.muted, ...typography.meta, fontWeight: "700" },
   row: { gap: 8, paddingRight: 24 },
-  chip: { height: 44, paddingHorizontal: 16, borderRadius: 22, justifyContent: "center", backgroundColor: colors.white },
+  chip: { minHeight: 44, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 22, justifyContent: "center", backgroundColor: colors.white },
   chipOn: { backgroundColor: colors.teal },
   chipText: { color: colors.ink, ...typography.meta, fontWeight: "700" },
   chipTextOn: { color: colors.white }

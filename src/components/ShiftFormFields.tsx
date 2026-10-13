@@ -207,8 +207,8 @@ const styles = StyleSheet.create({
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   chipGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   chip: {
-    minWidth: "47%", height: 48, borderRadius: radii.chip, alignItems: "center", justifyContent: "center",
-    paddingHorizontal: 12, backgroundColor: colors.white
+    minWidth: "47%", minHeight: 48, borderRadius: radii.chip, alignItems: "center", justifyContent: "center",
+    paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.white
   },
   chipActive: { backgroundColor: colors.soft },
   chipText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
@@ -221,6 +221,6 @@ const styles = StyleSheet.create({
   // other use for.
   checkbox: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: colors.muted, marginRight: spacing.sm },
   checkboxOn: { backgroundColor: colors.teal, borderColor: colors.teal },
-  toggleLabel: { color: colors.ink, ...typography.strong, fontWeight: "700" },
+  toggleLabel: { flexShrink: 1, color: colors.ink, ...typography.strong, fontWeight: "700" },
   errorText: { ...typography.meta, fontWeight: "600", color: colors.danger, marginTop: 4 }
 });
