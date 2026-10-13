@@ -12,7 +12,8 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { OFFER_TYPE_LABEL, offerStatusChip, sagipTitle } from "../sagip";
 import { TAP_SLOP } from "../touch";
-import { colors, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { CheckIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, ScreenHeader } from "../components/ui";
@@ -29,6 +30,8 @@ const GROUPS: Array<{ key: "open" | "matched" | "expired"; label: string }> = [
 type Props = NativeStackScreenProps<RootStackParamList, "myOffers">;
 
 export function MyOffersScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up an offer row's title | chip + Withdraw cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const [offers, setOffers] = useState<MyOffer[]>([]);
   // US-R3 · `loaded` tracked that a response ARRIVED, never that it succeeded — so
@@ -106,21 +109,21 @@ export function MyOffersScreen({ navigation }: Props) {
                       activeOpacity={0.85}
                       onPress={() => navigation.navigate("reportDetail", { reportId: o.report.report_id })}
                     >
-                      <Card style={styles.card}>
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.cardTitle}>{sagipTitle(o.report.species, o.report.condition)}</Text>
+                      <Card style={[styles.card, large && styles.cardLarge]}>
+                        <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+                          <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{sagipTitle(o.report.species, o.report.condition)}</Text>
                           <Text style={styles.cardMeta}>
                             {OFFER_TYPE_LABEL[o.offer_type]}{o.report.city ? " · " + o.report.city : ""}
                           </Text>
                         </View>
-                        <View style={styles.rightCol}>
+                        <View style={[styles.rightCol, large && styles.rightColLarge]}>
                           <View style={[styles.chip, { backgroundColor: tone.bg }]}>
                             <Text style={[styles.chipText, { color: tone.fg }]}>{chip.label}</Text>
                           </View>
                           {o.status === "open" ? (
                             <TouchableOpacity
                               onPress={(e) => { e.stopPropagation(); withdraw(o); }} hitSlop={TAP_SLOP}
-                              style={styles.withdrawBtn}
+                              style={[styles.withdrawBtn, large && styles.withdrawBtnLarge]}
                             >
                               <Text style={styles.withdrawText}>Withdraw</Text>
                             </TouchableOpacity>
@@ -149,12 +152,18 @@ const styles = StyleSheet.create({
   doneIcon: { width: 76, height: 76, borderRadius: squircle(76), alignItems: "center", justifyContent: "center", backgroundColor: colors.teal },
   doneTitle: { marginTop: 18, color: colors.ink, ...typography.subtitle, fontWeight: "800", textAlign: "center" },
   doneButton: { marginTop: 24, width: "100%" },
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  cardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardTitle: { color: colors.ink, ...typography.section },
   cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   rightCol: { alignItems: "flex-end", gap: 8 },
-  chip: { paddingHorizontal: 12, height: 28, borderRadius: 14, justifyContent: "center" },
+  rightColLarge: { alignItems: "flex-start" },
+  chip: { paddingHorizontal: 12, minHeight: 28, paddingVertical: 4, borderRadius: 14, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   withdrawBtn: { paddingVertical: 2 },
+  withdrawBtnLarge: { minHeight: 44, justifyContent: "center" },
   withdrawText: { color: colors.danger, ...typography.meta, fontWeight: "700" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" }
 });
