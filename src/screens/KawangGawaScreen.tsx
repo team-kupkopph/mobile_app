@@ -457,7 +457,7 @@ function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSe
   return (
     <View testID="calendar.kawanggawa">
       <View style={calStyles.header}>
-        <Text style={calStyles.monthLabel}>{monthLabel(year, month)}</Text>
+        <Text style={calStyles.monthLabel} maxFontSizeMultiplier={maxFontScale.title}>{monthLabel(year, month)}</Text>
         <View style={calStyles.navGroup}>
           <TouchableOpacity
             hitSlop={TAP_SLOP}
@@ -466,7 +466,7 @@ function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSe
             accessibilityRole="button"
             accessibilityLabel={`Previous month, ${monthLabel(month === 0 ? year - 1 : year, month === 0 ? 11 : month - 1)}`}
           >
-            <Text style={calStyles.chev}>‹</Text>
+            <Text style={calStyles.chev} allowFontScaling={false}>‹</Text>
           </TouchableOpacity>
           <TouchableOpacity
             hitSlop={TAP_SLOP}
@@ -475,7 +475,7 @@ function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSe
             accessibilityRole="button"
             accessibilityLabel={`Next month, ${monthLabel(month === 11 ? year + 1 : year, month === 11 ? 0 : month + 1)}`}
           >
-            <Text style={calStyles.chev}>›</Text>
+            <Text style={calStyles.chev} allowFontScaling={false}>›</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -571,8 +571,8 @@ function BrowseCalendar({ shifts, year, month, selectedIso, onPrev, onNext, onSe
 const calStyles = StyleSheet.create({
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between",
             marginTop: 4 },
-  monthLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  navGroup: { flexDirection: "row" },
+  monthLabel: { flexShrink: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  navGroup: { flexDirection: "row", flexShrink: 0 },
   nav: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   chev: { color: colors.teal, fontSize: 19, fontWeight: "700" },
   weekdayRow: { flexDirection: "row", marginTop: 6 },
