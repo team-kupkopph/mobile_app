@@ -85,7 +85,7 @@ export function ScreenHeader({ title, onBack, right, align = "left", children }:
 
   return (
     <View style={[styles.header, { paddingTop: insets.top }]}>
-      <View style={styles.row}>
+      <View style={[styles.row, large && styles.rowLarge]}>
         {onBack ? <BackButton onPress={onBack} /> : null}
         {title ? (
           <Text
@@ -104,7 +104,7 @@ export function ScreenHeader({ title, onBack, right, align = "left", children }:
             {title}
           </Text>
         ) : null}
-        {right ? <View style={styles.right}>{right}</View> : null}
+        {right ? <View style={[styles.right, large && styles.rightLarge]}>{right}</View> : null}
       </View>
       {children}
     </View>
@@ -157,5 +157,8 @@ const styles = StyleSheet.create({
   right: {
     marginLeft: "auto",
     paddingLeft: spacing.sm
-  }
+  },
+  // large: the row wraps, so a wide action (a "+ Post an activity" button) drops under the title instead of squeezing it out
+  rowLarge: { flexWrap: "wrap" },
+  rightLarge: { marginLeft: 0, paddingLeft: 0 }
 });

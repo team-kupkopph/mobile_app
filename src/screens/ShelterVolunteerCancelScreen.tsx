@@ -25,7 +25,8 @@ import { ShelterShift, blastRadiusCopy } from "../shelterVolunteer";
 import { shiftTypeLabel } from "../volunteer";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { colors, radii, spacing, typography } from "../theme";
+import { colors, maxFontScale, radii, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 import { Avatar, Button, Card, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
@@ -44,6 +45,8 @@ type Phase = "review" | "submitting" | "done";
 type Props = NativeStackScreenProps<RootStackParamList, "shelterVolunteerCancel">;
 
 export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the summary card's avatar | text cannot share a row, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { shiftId } = route.params;
 
@@ -120,7 +123,7 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
           <View style={[styles.iconCircle, { backgroundColor: colors.successBg }]}>
             <CheckIcon color={colors.success} size={32} />
           </View>
-          <Text style={styles.heading}>Activity cancelled</Text>
+          <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>Activity cancelled</Text>
           <Text style={styles.subheading}>
             {cancelledSignups} volunteer{cancelledSignups === 1 ? "" : "s"} notified.
           </Text>
@@ -139,11 +142,11 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
           onBack={() => navigation.goBack()} />
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <Card tone="hero" style={styles.summaryCard}>
+          <Card tone="hero" style={[styles.summaryCard, large && styles.summaryCardLarge]}>
             <Avatar size={48}>
               <VolunteerIcon color={colors.teal} size={26} />
             </Avatar>
-            <View style={{ flex: 1 }}>
+            <View style={[styles.summaryCopy, large && styles.summaryCopyLarge]}>
               <Text style={styles.summaryTitle}>{shiftTypeLabel(shift.type)}</Text>
               <Text style={styles.summaryWhen}>{shiftWhenLabel(shift.starts_at, shift.ends_at)}</Text>
               <Text style={styles.summarySub}>
@@ -152,7 +155,7 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
             </View>
           </Card>
 
-          <Text style={styles.question}>Cancel this activity?</Text>
+          <Text style={styles.question} maxFontSizeMultiplier={maxFontScale.title}>Cancel this activity?</Text>
           <Text style={styles.body}>{blastRadiusCopy(affected)}</Text>
 
           {!!banner && (
@@ -194,6 +197,11 @@ const styles = StyleSheet.create({
   summaryCard: {
     width: "100%", flexDirection: "row", alignItems: "center", gap: 14, padding: 18
   },
+  // large: stacked. The base `summaryCopy` is `flex: 1`, which survives in a style array and would collapse the text in a column.
+  summaryCardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  summaryCopy: { flex: 1 },
+  // `flex: 0` rather than only grow / basis: on this screen the stacked text collapsed to zero height otherwise (seen on the device).
+  summaryCopyLarge: { flex: 0, marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   summaryTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   summaryWhen: { marginTop: 3, color: colors.teal, ...typography.meta, fontWeight: "700" },
   summarySub: { marginTop: 3, color: colors.muted, ...typography.meta },
@@ -202,7 +210,7 @@ const styles = StyleSheet.create({
   bannerBox: { width: "100%", marginTop: 18, borderRadius: radii.notice, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: colors.dangerBg },
   bannerText: { color: colors.danger, ...typography.meta, fontWeight: "700", textAlign: "center" },
   cancelButton: { width: "100%", marginTop: 36 },
-  keepLink: { marginTop: 16, height: 40, alignItems: "center", justifyContent: "center" },
+  keepLink: { marginTop: 16, minHeight: 40, paddingVertical: 8, alignItems: "center", justifyContent: "center" },
   keepLinkText: { color: colors.teal, ...typography.meta, fontWeight: "800" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, ...typography.hero },
