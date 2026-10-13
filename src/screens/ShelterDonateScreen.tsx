@@ -25,7 +25,8 @@ import {
   ShelterOwnDonationQr,
   ShelterOwnDonationQrResponse
 } from "../shelterDonate";
-import { colors, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
 const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
@@ -50,6 +51,7 @@ type RawPledge = { pledge_id: string; quantity: number; status: string };
 
 export function ShelterDonateScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const large = useLargeText();
   const api = useApi();
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [dashRes, setDashRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -129,7 +131,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.shelterDonate">
       <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
-        <Text style={styles.pageTitle}>Donate</Text>
+        <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Donate</Text>
 
         {/* Decision 5 · the QR must render at full contrast — Card is white by default, but
             the explicit fill is kept in source so a future tone change to Card can never
@@ -185,8 +187,8 @@ export function ShelterDonateScreen({ navigation }: Props) {
             return (
               <TouchableOpacity key={row.id} activeOpacity={0.8} onPress={() => navigation.navigate("shelterNeeds")}>
                 <Card style={styles.needCard}>
-                  <View style={styles.needRow}>
-                    <Text style={styles.needTitle}>{row.title}</Text>
+                  <View style={[styles.needRow, large && styles.needRowLarge]}>
+                    <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{row.title}</Text>
                     <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
                   </View>
                   <Text style={styles.needMeta}>Pledged {row.pledged} · Received {row.received}</Text>
@@ -222,6 +224,10 @@ const styles = StyleSheet.create({
   emptyNote: { marginTop: 4, color: colors.muted, ...typography.body },
   needCard: { marginBottom: 12, padding: 18 },
   needRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  // No `alignSelf: "stretch"`: with the title cap it reserved the frame for the uncapped size (a ~100 pt gap, seen on My donations).
+  needRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  needTitleLarge: { flex: 0, flexGrow: 0, flexBasis: "auto" },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   needMeta: { marginTop: 8, color: colors.muted, ...typography.meta }
 });
