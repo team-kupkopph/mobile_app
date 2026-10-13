@@ -2,7 +2,7 @@
 // Native's own <Modal> (no bottom-sheet dependency, same posture as SignupWall's bottom sheet).
 // Kept deliberately generic — no volunteer/cancel-specific copy or logic lives here — so any
 // destructive-action confirm (starting with V9's shelter-cancel confirm) can reuse it as-is.
-import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { colors, typography } from "../theme";
 import { Card } from "./ui";
 
@@ -39,6 +39,8 @@ export function ConfirmModal({
         </TouchableWithoutFeedback>
 
         <Card style={styles.card}>
+          {/* At AX5 a dialog's text can outgrow the screen; a short one is the same height as before, a tall one scrolls. */}
+          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.body}>{body}</Text>
 
@@ -59,6 +61,7 @@ export function ConfirmModal({
               <Text style={styles.cancelText}>Never mind</Text>
             </TouchableOpacity>
           )}
+          </ScrollView>
         </Card>
       </View>
     </Modal>
@@ -77,6 +80,7 @@ const styles = StyleSheet.create({
   // which is taller top/bottom than Card's default `spacing.md` on every side.
   card: {
     width: "100%",
+    maxHeight: "90%",
     paddingHorizontal: 24,
     paddingTop: 26,
     paddingBottom: 22
@@ -94,7 +98,9 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   confirmButton: {
-    height: 52,
+    minHeight: 52,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     marginTop: 22,
     borderRadius: 26,
     alignItems: "center",
@@ -106,7 +112,8 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   cancelButton: {
-    height: 44,
+    minHeight: 44,
+    paddingVertical: 10,
     marginTop: 4,
     alignItems: "center",
     justifyContent: "center"
