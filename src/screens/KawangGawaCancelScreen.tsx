@@ -12,7 +12,7 @@
 // that's the only place `cancel_cutoff_at` and `status` (needed for `cancelVariant`) live.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { AlertIcon, CheckIcon } from "../components/AppIcons";
@@ -22,7 +22,7 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { CancelVariant, MySignupItem, MySignups, cancelVariant, lateCancelCopy } from "../volunteer";
-import { colors, spacing, typography } from "../theme";
+import { colors, maxFontScale, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
 
 type Phase = "confirm" | "submitting" | "result";
@@ -129,14 +129,14 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
       )}
 
       {phase === "result" && !!outcome && (
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={[styles.iconCircle, { backgroundColor: resultTone.bg }]}>
             {outcome.variant !== "request" && outcome.wasLate
               ? <AlertIcon color={resultTone.fg} size={40} />
               : <CheckIcon color={resultTone.fg} size={32} />}
           </View>
 
-          <Text style={styles.heading}>
+          <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>
             {outcome.variant === "request" ? "Request withdrawn" : "Shift cancelled"}
           </Text>
           <Text style={styles.subheading}>
@@ -150,19 +150,19 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
             onPress={() => navigation.navigate("kawanggawa", { tab: "mine" })}
             style={styles.primaryButton}
           />
-        </View>
+        </ScrollView>
       )}
 
       {phase === "confirm" && !!item && !!errorMessage && (
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={[styles.iconCircle, { backgroundColor: colors.dangerBg }]}>
             <AlertIcon color={colors.danger} size={40} />
           </View>
-          <Text style={styles.heading}>Couldn't cancel</Text>
+          <Text style={styles.heading} maxFontSizeMultiplier={maxFontScale.title}>Couldn't cancel</Text>
           <Text style={styles.subheading}>{errorMessage}</Text>
 
           <Button label="Back" onPress={() => navigation.goBack()} style={styles.primaryButton} />
-        </View>
+        </ScrollView>
       )}
 
       {!!variant && (
@@ -183,7 +183,7 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "transparent" },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 60, alignItems: "center" },
+  content: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 60, paddingBottom: 60, alignItems: "center" },
   iconCircle: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center" },
   heading: { marginTop: 22, color: colors.ink, ...typography.hero },
   subheading: { marginTop: 10, color: colors.muted, ...typography.body, textAlign: "center" },

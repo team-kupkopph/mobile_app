@@ -24,7 +24,8 @@ import { VolunteerIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { checkinState, locationLine, MySignupItem, MySignups, shiftHeadline } from "../volunteer";
-import { colors, radii, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { Card, Button, ScreenHeader } from "../components/ui";
 
 function shiftWhenLabel(startsAt: string, endsAt: string): string {
@@ -43,6 +44,8 @@ function timeLabel(iso: string): string {
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaCheckin">;
 
 export function KawangGawaCheckinScreen({ navigation, route }: Props) {
+  // At Dynamic Type AX3 and up the shift card's icon | copy row cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const { signupId } = route.params;
 
@@ -158,12 +161,12 @@ export function KawangGawaCheckinScreen({ navigation, route }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <Card style={styles.shiftCard}>
+          <Card style={[styles.shiftCard, large && styles.shiftCardLarge]}>
             <View style={styles.cardIcon}>
               <VolunteerIcon color={colors.teal} size={22} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{shiftHeadline(item.shift)}</Text>
+            <View style={large ? styles.cardCopyLarge : styles.cardCopy}>
+              <Text style={styles.cardTitle} maxFontSizeMultiplier={maxFontScale.title}>{shiftHeadline(item.shift)}</Text>
               <Text style={styles.cardOrg}>{item.shift.org_name}</Text>
               <Text style={styles.cardMeta}>{shiftWhenLabel(item.shift.starts_at, item.shift.ends_at)}</Text>
               {/* G2 · the meeting point, once the shelter has approved and it's on the
@@ -264,6 +267,10 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 22, paddingBottom: 60 },
   shiftCard: { flexDirection: "row", alignItems: "center", gap: 12, padding: 18 },
   // Squircle (0.32 × size), matching the hub's browse row tile.
+  // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  shiftCardLarge: { flexDirection: "column", alignItems: "flex-start" },
+  cardCopy: { flex: 1 },
+  cardCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   cardIcon: { width: 44, height: 44, borderRadius: squircle(44), backgroundColor: colors.soft,
               alignItems: "center", justifyContent: "center" },
   cardTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
