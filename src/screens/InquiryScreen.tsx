@@ -39,7 +39,8 @@ import { loadState } from "../net";
 import { listingTitle } from "../shelterAnimals";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, gradients, motion, pill, radii, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, gradients, maxFontScale, motion, pill, radii, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "inquiry">;
 
@@ -155,6 +156,8 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
   // AQ1 · the poster's number, from the inquiry alone: an AD16 404 on the listing fetch blanks
   // `poster`, and the promise "you'll both see each other's phone numbers" still has to hold.
   const contact = contactLine(inquiry);
+  // At Dynamic Type AX3 and up the pet card, a step's head, the contact and the phone row cannot share a line, so each stacks.
+  const large = useLargeText();
 
   return (
     <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -163,7 +166,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
       <PressScale scale={motion.pressScale} onPress={onListing} accessibilityRole="button"
         accessibilityLabel={`View ${pet}'s listing, ${inquiryStatusLabel(inquiry.status, inquiry.end_reason)}`} testID="card.inquiry.pet">
         <Card>
-          <View style={styles.petRow}>
+          <View style={[styles.petRow, large && styles.petRowLarge]}>
             <View style={styles.tile}>
               {photo ? (
                 <Image source={{ uri: photo }} style={styles.tileImage} resizeMode="cover" />
@@ -171,9 +174,9 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
                 <AdoptIcon color={colors.teal} size={30} />
               )}
             </View>
-            <View style={styles.petText}>
-              <Text style={styles.petName} numberOfLines={1}>{listingTitle(inquiry.listing.name)}</Text>
-              <Text style={styles.petMeta} numberOfLines={1}>
+            <View style={large ? styles.petTextLarge : styles.petText}>
+              <Text style={styles.petName} numberOfLines={large ? undefined : 1} maxFontSizeMultiplier={maxFontScale.title}>{listingTitle(inquiry.listing.name)}</Text>
+              <Text style={styles.petMeta} numberOfLines={large ? undefined : 1}>
                 {poster ? `${poster.name}${poster.city ? ` · ${poster.city}` : ""}` : capitalize(inquiry.listing.species)}
               </Text>
             </View>
@@ -225,7 +228,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
               accessibilityLabel={`${def.title}, ${chip.label}`} testID={`row.inquiry.${key}`}
               style={styles.stage}>
               <View style={styles.stageRow}>
-                <View style={styles.rail}>
+                <View style={[styles.rail, large && styles.railLarge]}>
                   {!last ? (
                     <View style={[styles.line, { backgroundColor: done || skipped ? colors.teal : colors.border }]} />
                   ) : null}
@@ -241,8 +244,8 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
                   )}
                 </View>
                 <View style={styles.stageText}>
-                  <View style={styles.stageHead}>
-                    <Text style={[styles.stageTitle, {
+                  <View style={[styles.stageHead, large && styles.stageHeadLarge]}>
+                    <Text style={[styles.stageTitle, large && styles.stageTitleLarge, {
                       fontWeight: current ? "800" : done ? "700" : "600",
                       color: current || done ? colors.ink : colors.muted
                     }]}>{def.title}</Text>
@@ -268,11 +271,11 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
           <Text style={styles.sectionLabelTight}>
             {poster ? (poster.is_shelter ? "Shelter contact" : "Rescuer contact") : "Contact"}
           </Text>
-          <View style={styles.contactRow}>
+          <View style={[styles.contactRow, large && styles.contactRowLarge]}>
             <Avatar initials={initials(poster?.name ?? contact?.name ?? "")} tinted size={46} />
-            <View style={styles.contactText}>
+            <View style={large ? styles.contactTextLarge : styles.contactText}>
               <View style={styles.contactHead}>
-                <Text style={styles.contactName} numberOfLines={1}>{poster?.name ?? contact?.name}</Text>
+                <Text style={styles.contactName} numberOfLines={large ? undefined : 1}>{poster?.name ?? contact?.name}</Text>
                 {poster ? (
                   <Chip label={poster.is_shelter ? "Verified Shelter" : "Verified Member"} tone="success" dot={false} />
                 ) : null}
@@ -286,7 +289,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
                 <Text style={styles.contactMeta} testID="text.inquiry.contactName">{contact.name}</Text>
               ) : null}
               {contact.phone ? (
-                <View style={styles.phoneRow}>
+                <View style={[styles.phoneRow, large && styles.phoneRowLarge]}>
                   <Text style={styles.phone} testID="text.inquiry.phone">{contact.phone}</Text>
                   <Button label="Call" size="small" variant="secondary"
                     accessibilityLabel={`Call ${contact.name}`}
@@ -333,6 +336,9 @@ const styles = StyleSheet.create({
   },
   tileImage: { width: TILE, height: TILE },
   petText: { flex: 1, minWidth: 0 },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  petRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  petTextLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", minWidth: 0 },
   petName: { ...typography.title, color: colors.ink },
   petMeta: { marginTop: 3, ...typography.meta, color: colors.muted },
   // Fully rounded bars: pill() of their own height, not a radius from the container scale.
@@ -347,6 +353,8 @@ const styles = StyleSheet.create({
   stage: { paddingVertical: 11, paddingHorizontal: 12 },
   stageRow: { flexDirection: "row", alignItems: "flex-start", gap: 14 },
   rail: { width: DOT, alignItems: "center" },
+  // large: the row is taller than the dot, and the connector line is measured from the rail's bottom, so the rail takes the row's height.
+  railLarge: { alignSelf: "stretch" },
   // The artboard: `top: 30px; bottom: -22px; width: 3px` — from under this dot to the next.
   line: { position: "absolute", top: DOT, bottom: -22, width: 3, borderRadius: pill(3) },
   dot: { width: DOT, height: DOT, borderRadius: pill(DOT), alignItems: "center", justifyContent: "center" },
@@ -362,6 +370,8 @@ const styles = StyleSheet.create({
   // as the artboard draws it — so the token's 400 never renders; the 600 for a step not yet
   // reached is the one fifteen-at-600 left in the app, and it is the design's.
   stageTitle: { flex: 1, ...typography.body },
+  stageHeadLarge: { flexDirection: "column", alignItems: "flex-start", gap: 2 },
+  stageTitleLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   stageMeta: { ...typography.meta, fontWeight: "700" },
   note: { marginTop: 8, paddingVertical: 11, paddingHorizontal: 13, borderRadius: radii.chip, backgroundColor: colors.page },
   noteText: { ...typography.meta, lineHeight: 19, color: colors.muted },
@@ -370,11 +380,14 @@ const styles = StyleSheet.create({
   sectionLabelTight: { ...typography.label, textTransform: "uppercase", color: colors.muted },
   contactRow: { flexDirection: "row", alignItems: "center", gap: 13, marginTop: 12 },
   contactText: { flex: 1, minWidth: 0 },
+  contactRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  contactTextLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", minWidth: 0 },
   contactHead: { flexDirection: "row", alignItems: "center", gap: 7, flexWrap: "wrap" },
   contactName: { ...typography.subtitle, fontWeight: "800", color: colors.ink, flexShrink: 1 },
   contactMeta: { marginTop: 3, ...typography.meta, color: colors.muted },
   reach: { marginTop: 14 },
   phoneRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 4 },
+  phoneRowLarge: { flexDirection: "column", alignItems: "flex-start" },
   phone: { ...typography.subtitle, fontWeight: "800", color: colors.ink, flexShrink: 1 },
 
   badgeCard: { marginTop: 14, gap: 12 },
