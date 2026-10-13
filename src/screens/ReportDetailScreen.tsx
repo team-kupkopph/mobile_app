@@ -28,7 +28,7 @@ import {
 } from "../sagip";
 import { ContactShareRow } from "../components/sagip/ContactShareRow";
 import { RescuePeople } from "../components/sagip/RescuePeople";
-import { colors, elevation, radii, spacing, typography } from "../theme";
+import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, Card, ScreenHeader } from "../components/ui";
 import { TAP_SLOP } from "../touch";
 
@@ -198,7 +198,7 @@ export function ReportDetailScreen({ navigation, route }: Props) {
             <Image source={{ uri: report.photos[0] }} style={styles.photo} resizeMode="cover" />
           ) : null}
 
-          <Text style={styles.h1}>{reportTitle(report)}</Text>
+          <Text style={styles.h1} maxFontSizeMultiplier={maxFontScale.title}>{reportTitle(report)}</Text>
           <Text style={styles.sub}>
             {(report.city ? report.city + " · " : "") + "reported " + relTime(report.reported_at)}
           </Text>
@@ -491,12 +491,12 @@ const styles = StyleSheet.create({
   photo: { width: "100%", height: 200, borderRadius: radii.card, marginBottom: 18, backgroundColor: colors.border },
   h1: { color: colors.ink, ...typography.display },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
-  chip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, height: 30, borderRadius: 15, justifyContent: "center" },
+  chip: { marginTop: 14, alignSelf: "flex-start", paddingHorizontal: 14, minHeight: 30, paddingVertical: 4, borderRadius: 15, justifyContent: "center" },
   chipText: { ...typography.meta, fontWeight: "800" },
   notesCard: { marginTop: 20, padding: 18, borderRadius: radii.tile, ...card },
   notesText: { color: colors.ink, ...typography.body },
-  matchesRow: { marginTop: 16, paddingHorizontal: 18, height: 62, borderRadius: radii.tile, flexDirection: "row", alignItems: "center", justifyContent: "space-between", ...card },
-  matchesLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
+  matchesRow: { marginTop: 16, paddingHorizontal: 18, minHeight: 62, paddingVertical: 12, gap: 12, borderRadius: radii.tile, flexDirection: "row", alignItems: "center", justifyContent: "space-between", ...card },
+  matchesLabel: { flexShrink: 1, color: colors.teal, ...typography.subtitle, fontWeight: "800" },
   matchesChevron: { color: colors.muted, fontSize: 19, fontWeight: "700" },
   mapWrap: { marginTop: 20, height: 160, borderRadius: radii.field, overflow: "hidden", backgroundColor: colors.soft },
   map: { ...StyleSheet.absoluteFillObject },
@@ -535,6 +535,6 @@ const styles = StyleSheet.create({
   ladderLabelDone: { color: colors.ink, fontWeight: "700" },
   actionRow: { marginTop: 30 },
   claimFine: { marginTop: 10, color: colors.muted, ...typography.meta, lineHeight: 18, textAlign: "center" },
-  offerBtn: { marginTop: 16, height: 54, borderRadius: 27, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal },
-  offerBtnText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" }
+  offerBtn: { marginTop: 16, minHeight: 54, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 27, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: colors.teal },
+  offerBtnText: { textAlign: "center", color: colors.teal, ...typography.subtitle, fontWeight: "700" }
 });
