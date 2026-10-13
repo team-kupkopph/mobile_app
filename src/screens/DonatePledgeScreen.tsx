@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, pill, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, pill, spacing, squircle, typography } from "../theme";
 import { Button, Card, ScreenHeader } from "../components/ui";
 
 
@@ -43,8 +43,8 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
       <View style={styles.screen}>
         <ScreenBackdrop />
         <ScrollView contentContainerStyle={styles.confirmWrap}>
-          <View style={styles.checkTile}><Text style={styles.checkGlyph}>✓</Text></View>
-          <Text style={styles.confirmTitle}>Pledge recorded</Text>
+          <View style={styles.checkTile}><Text style={styles.checkGlyph} allowFontScaling={false}>✓</Text></View>
+          <Text style={styles.confirmTitle} maxFontSizeMultiplier={maxFontScale.title}>Pledge recorded</Text>
           <Text style={styles.confirmBody}>
             You pledged {qty} to “{needTitle}”. {shelterName} will confirm once it arrives —
             you'll get a notification then. Salamat sa pagtulong!
@@ -65,7 +65,7 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Pledge" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.needTitle}>{needTitle}</Text>
+        <Text style={styles.needTitle} maxFontSizeMultiplier={maxFontScale.title}>{needTitle}</Text>
         <Text style={styles.shelter}>{shelterName}</Text>
         <Text style={styles.note}>
           A pledge is a promise to bring these — the shelter confirms once they receive them.
@@ -77,14 +77,14 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
           <TouchableOpacity style={styles.stepBtn} onPress={() => setQty((q) => Math.max(1, q - 1))} hitSlop={TAP_SLOP}
             accessibilityRole="button" accessibilityLabel="Decrease pledge quantity"
             accessibilityValue={{ now: qty }}>
-            <Text style={styles.stepGlyph}>–</Text>
+            <Text style={styles.stepGlyph} allowFontScaling={false}>–</Text>
           </TouchableOpacity>
-          <Text style={styles.qty}>{qty}</Text>
+          <Text style={styles.qty} maxFontSizeMultiplier={maxFontScale.code}>{qty}</Text>
           <TouchableOpacity
             style={styles.stepBtn} onPress={() => setQty((q) => q + 1)} hitSlop={TAP_SLOP}
             accessibilityRole="button" accessibilityLabel="Increase pledge quantity"
             accessibilityValue={{ now: qty }}>
-            <Text style={styles.stepGlyph}>+</Text>
+            <Text style={styles.stepGlyph} allowFontScaling={false}>+</Text>
           </TouchableOpacity>
         </Card>
 
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   note: { marginTop: 14, color: colors.muted, ...typography.body, lineHeight: 21 },
   label: { marginTop: 26, marginBottom: 12, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   // A control track is a pill of its height, as SegmentedControl's is: 8 + 52 + 8.
-  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", height: 68, padding: 8, borderRadius: pill(68) },
+  stepper: { flexDirection: "row", alignItems: "center", gap: 24, alignSelf: "flex-start", minHeight: 68, padding: 8, borderRadius: pill(68) },
   stepBtn: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepGlyph: { color: colors.teal, fontSize: 30, fontWeight: "800", marginTop: -2 },
   qty: { color: colors.ink, fontSize: 30, fontWeight: "800", minWidth: 40, textAlign: "center" },

@@ -13,7 +13,7 @@ import { needProgressLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, pill, radii, spacing, typography } from "../theme";
+import { colors, maxFontScale, pill, radii, spacing, typography } from "../theme";
 import { Card, ScreenHeader } from "../components/ui";
 
 
@@ -58,7 +58,7 @@ export function DonateScreen({ navigation, route }: Props) {
       <ScreenHeader title="Donate" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.orgName}>{orgName}</Text>
+        <Text style={styles.orgName} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text>
         <Text style={styles.offPlatformNote}>
           Donations happen in your payment app — Kupkop never touches the money.
         </Text>
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   needCard: { marginBottom: 12, padding: 18 },
   needTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   needMeta: { marginTop: 6, color: colors.muted, ...typography.meta, textTransform: "capitalize" },
-  pledgeBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
+  pledgeBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   pledgeLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   myDonationsRow: { marginTop: 26, alignItems: "center" },
   myDonationsLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" }

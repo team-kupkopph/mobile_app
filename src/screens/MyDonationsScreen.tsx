@@ -14,7 +14,8 @@ import { ChipTone, pledgeIsCancellable, pledgeStatusChip, PledgeStatus } from ".
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, pill, spacing, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
+import { colors, maxFontScale, pill, spacing, typography } from "../theme";
 import { Card, Chip, ScreenHeader } from "../components/ui";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
@@ -31,6 +32,8 @@ type Pledge = {
 type Props = NativeStackScreenProps<RootStackParamList, "myDonations">;
 
 export function MyDonationsScreen({ navigation }: Props) {
+  // At Dynamic Type AX3 and up a pledge's title | status chip row cannot share a line, so it stacks.
+  const large = useLargeText();
   const api = useApi();
   const [pledges, setPledges] = useState<Pledge[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -83,8 +86,8 @@ export function MyDonationsScreen({ navigation }: Props) {
             const chip = pledgeStatusChip(p.status);
             return (
               <Card key={p.pledge_id} style={styles.pledgeCard}>
-                <View style={styles.row}>
-                  <Text style={styles.needTitle}>{p.need.title}</Text>
+                <View style={[styles.row, large && styles.rowLarge]}>
+                  <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{p.need.title}</Text>
                   <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
                 </View>
                 <Text style={styles.meta}>{p.need.shelter_name} · pledged {p.quantity}</Text>
@@ -111,8 +114,11 @@ const styles = StyleSheet.create({
   empty: { marginTop: 40, color: colors.muted, ...typography.body, textAlign: "center" },
   pledgeCard: { marginBottom: 14, padding: 18 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  // large: stacked. The base `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  rowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  needTitleLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   meta: { marginTop: 8, color: colors.muted, ...typography.body },
-  cancelBtn: { marginTop: 14, alignSelf: "flex-start", height: 38, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: "#FBEEEC" },
+  cancelBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: "#FBEEEC" },
   cancelLabel: { color: colors.danger, ...typography.strong, fontWeight: "700" }
 });
