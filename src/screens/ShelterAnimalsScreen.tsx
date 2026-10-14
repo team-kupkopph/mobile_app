@@ -45,6 +45,7 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
         onTabPress={(t) => {
           if (t === "home") navigation.navigate("shelterDashboard");
           if (t === "donate") navigation.navigate("shelterDonate");
+          if (t === "requests") navigation.navigate("shelterRequests");
           if (t === "profile") navigation.navigate("shelterProfile");
         }}
       />

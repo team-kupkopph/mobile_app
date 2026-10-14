@@ -121,7 +121,12 @@ export function ShelterDonateScreen({ navigation }: Props) {
             there is no back button, and the offline state must not be a dead end. */}
         <ShelterTabs
           active="donate"
-          onTabPress={(t) => t === "home" && navigation.navigate("shelterDashboard")}
+          onTabPress={(t) => {
+            if (t === "home") navigation.navigate("shelterDashboard");
+            if (t === "animals") navigation.navigate("shelterAnimals");
+            if (t === "requests") navigation.navigate("shelterRequests");
+            if (t === "profile") navigation.navigate("shelterProfile");
+          }}
         />
       </View>
     );
@@ -201,7 +206,12 @@ export function ShelterDonateScreen({ navigation }: Props) {
 
       <ShelterTabs
         active="donate"
-        onTabPress={(t) => t === "home" && navigation.navigate("shelterDashboard")}
+        onTabPress={(t) => {
+            if (t === "home") navigation.navigate("shelterDashboard");
+            if (t === "animals") navigation.navigate("shelterAnimals");
+            if (t === "requests") navigation.navigate("shelterRequests");
+            if (t === "profile") navigation.navigate("shelterProfile");
+          }}
       />
     </View>
   );
