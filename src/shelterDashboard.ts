@@ -5,11 +5,13 @@ import { Me, ShelterDashboard, ShelterDashboardRescue, ShelterDashboardVolunteer
 // documents were never sent. Derivation only — the server stores no gate flag (§3.5).
 // US-V5 adds the third state: once the request is approved the dashboard flips to
 // "verified" — the amber banner clears, the badge appears, listings stop being drafts.
-export type ShelterBannerState = "verified" | "pending" | "incomplete";
+export type ShelterBannerState = "verified" | "pending" | "rejected" | "incomplete";
 
 export function shelterBannerState(d: ShelterDashboard): ShelterBannerState {
   if (d.verification.status === "approved") return "verified";
-  return d.verification.submitted ? "pending" : "incomplete";
+  if (!d.verification.submitted) return "incomplete";
+  // A reviewed-and-refused request is not "under review" (the Profile card already says so).
+  return d.verification.status === "rejected" ? "rejected" : "pending";
 }
 
 // F13 · the profile tab's verification card, for a GATED shelter. The gate
