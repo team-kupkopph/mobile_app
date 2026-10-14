@@ -22,6 +22,14 @@ describe("shelterBannerState (US-B5 — two derived states)", () => {
   it("shows 'verified' once the request is approved (US-V5)", () => {
     expect(shelterBannerState(dash(true, "approved"))).toBe("verified");
   });
+
+  it("shows 'rejected' for a reviewed-and-refused request, not 'Under review' (Home said the wrong thing; the Profile card and Document status already said rejected)", () => {
+    expect(shelterBannerState(dash(true, "rejected"))).toBe("rejected");
+  });
+
+  it("keeps needs_info under 'pending' (still being worked on)", () => {
+    expect(shelterBannerState(dash(true, "needs_info"))).toBe("pending");
+  });
 });
 
 describe("volunteerSummary (Task 10 — K8/G12)", () => {

@@ -26,12 +26,18 @@ import { Button, Card } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
 
-const BANNER: Record<"pending" | "incomplete", { title: string; l1: string; l2: string; cta: string }> = {
+const BANNER: Record<"pending" | "rejected" | "incomplete", { title: string; l1: string; l2: string; cta: string }> = {
   pending: {
     title: "Under review",
     l1: "Listings stay hidden & donations off",
     l2: "until approved.",
     cta: "Status ›"
+  },
+  rejected: {
+    title: "Not verified",
+    l1: "Fix the flagged files and",
+    l2: "resubmit.",
+    cta: "Fix ›"
   },
   incomplete: {
     title: "Documents not sent yet",
@@ -94,7 +100,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
     // already reached verifyDocuments for the same gated state; this banner (the first
     // thing a pending shelter sees) is the more obvious entry point.
     if (state === "incomplete") navigation.navigate("shelterVerify", { tier });
-    else if (state === "pending") navigation.navigate("verifyDocuments");
+    else navigation.navigate("verifyDocuments");
   }
 
   // US-R1 · when the load FAILED and we have nothing, say so instead of rendering the
@@ -259,7 +265,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             <View style={[styles.footCopy, large && styles.footCopyLarge]}>
               <Text style={styles.footTitle}>{state === "pending" ? "Draft your listings while you wait" : "Finish verifying to go live"}</Text>
               <Text style={styles.footBody}>
-                {state === "pending" ? "They go live the moment you're approved." : "Upload your documents to get approved."}
+                {state === "pending" ? "They go live the moment you're approved." : state === "rejected" ? "Fix the flagged files to get approved." : "Upload your documents to get approved."}
               </Text>
             </View>
             <TouchableOpacity testID="btn.shelterDashboard.continueVerify" hitSlop={TAP_SLOP} activeOpacity={0.8} onPress={onBannerPress}>
