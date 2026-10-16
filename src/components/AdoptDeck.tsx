@@ -284,8 +284,8 @@ function posterInitials(name: string) {
 
 const styles = StyleSheet.create({
   positionRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 6 },
-  position: { ...typography.meta, fontWeight: "700", color: colors.muted },
-  undo: { minHeight: 32, paddingVertical: 5, paddingHorizontal: 13, borderRadius: pill(32), justifyContent: "center", backgroundColor: colors.white, ...elevation.soft },
+  position: { flexShrink: 1, ...typography.meta, fontWeight: "700", color: colors.muted },
+  undo: { flexShrink: 0, marginLeft: 8, minHeight: 32, paddingVertical: 5, paddingHorizontal: 13, borderRadius: pill(32), justifyContent: "center", backgroundColor: colors.white, ...elevation.soft },
   undoLabel: { ...typography.meta, fontWeight: "700", color: colors.teal },
 
   stage: { height: CARD_HEIGHT, marginTop: 12 },
