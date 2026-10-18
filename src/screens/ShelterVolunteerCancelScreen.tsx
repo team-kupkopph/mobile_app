@@ -193,7 +193,7 @@ export function ShelterVolunteerCancelScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60, alignItems: "center" },
+  content: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 20, paddingBottom: 60, alignItems: "center" },
   summaryCard: {
     width: "100%", flexDirection: "row", alignItems: "center", gap: 14, padding: 18
   },
