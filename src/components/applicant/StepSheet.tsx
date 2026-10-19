@@ -2,7 +2,7 @@
 // for the current state is hidden; finalization is finished by Complete) with an optional note the
 // adopter sees on their ladder.
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Button, Chip } from "../ui";
 import { STAGE_STEP, StageKey } from "../../adoption";
 import { stepActions, stepSheetState } from "../../applicant";
@@ -26,6 +26,8 @@ export function StepSheet({ stageKey, state, name, pet, busy, onMove, onClose }:
       <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close" />
       <View style={styles.sheet} testID="sheet.applicant.step">
+        {/* At AX5 with the keyboard up the sheet outgrew the screen (Skip under the keyboard, title under the status bar); a short sheet is the same as before, a tall one scrolls. */}
+        <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>{title}</Text>
         <View style={styles.stateRow} testID="chip.step.state">
           <Chip label={stepSheetState(state).label} tone={stepSheetState(state).tone} dot={false} />
@@ -41,6 +43,7 @@ export function StepSheet({ stageKey, state, name, pet, busy, onMove, onClose }:
               loading={busy} onPress={() => onMove(a.state, note.trim())} testID={`btn.step.${a.state}`} />
           ))}
         </View>
+        </ScrollView>
       </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -50,7 +53,8 @@ export function StepSheet({ stageKey, state, name, pet, busy, onMove, onClose }:
 const styles = StyleSheet.create({
   root: { flex: 1 },
   backdrop: { flex: 1, backgroundColor: "rgba(18,33,58,0.32)" },
-  sheet: { padding: spacing.lg, paddingBottom: 36, borderTopLeftRadius: radii.card, borderTopRightRadius: radii.card, backgroundColor: colors.white },
+  sheet: { maxHeight: "92%", borderTopLeftRadius: radii.card, borderTopRightRadius: radii.card, backgroundColor: colors.white },
+  sheetContent: { padding: spacing.lg, paddingBottom: 36 },
   title: { color: colors.ink, ...typography.section },
   stateRow: { marginTop: 8, flexDirection: "row" },
   hint: { marginTop: 6, color: colors.muted, ...typography.meta },
