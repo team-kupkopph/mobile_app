@@ -146,7 +146,7 @@ export type RootStackParamList = {
   listingDetail: { listingId: string };
   myInquiries: undefined;
   // US-A2 — create (no listingId) or edit (listingId) a listing.
-  listingForm: { listingId?: string } | undefined;
+  listingForm: { listingId?: string; petId?: string } | undefined;   // AQ8 · petId prefills and links
   // Owner-side first-use phone verification (decision 14); first trigger = US-A4 inquiry.
   verifyPhone: undefined;
   // Track Q — donations. donationQr (shelter side) uploads/replaces the QR; donate

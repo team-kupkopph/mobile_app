@@ -17,6 +17,7 @@ import { inquireBlockedCopy, inquireRefusalMessage, inquirySentCopy } from "../a
 import { useAuth } from "../auth/AuthContext";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { ScreenBackdrop } from "../components/ScreenBackground";
+import { InquireSheet } from "../components/InquireSheet";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
@@ -43,6 +44,8 @@ export function ListingDetailScreen({ navigation, route }: Props) {
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 
   const [inquiring, setInquiring] = useState(false);
+  const [sheet, setSheet] = useState(false);          // AD8 · the Inquire bottom sheet
+  const [isShelter, setIsShelter] = useState(false);  // AD14 · a shelter can't adopt: no Inquire for it
   const [inquired, setInquired] = useState(false);
   // Which gated tap raised the wall: Inquire → "adopt"; "Report this" → the generic
   // "account" copy (the "report" copy is about reporting a stray, not flagging a listing).
@@ -54,6 +57,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
 
   const load = useCallback(() => {
     setRes(null);
+    if (!isGuest) api.get("/me").then((r) => { if (r.ok) setIsShelter(r.data?.account_type === "shelter"); });
     api.get(`/listings/${listingId}`).then((r) => {
       setRes({ ok: r.ok, status: r.status });
       if (r.ok) {
@@ -76,14 +80,15 @@ export function ListingDetailScreen({ navigation, route }: Props) {
       openWall("adopt");
       return;
     }
-    inquire();
+    setSheet(true);
   }
 
-  async function inquire() {
+  async function inquire(body: object) {
     if (inquiring) return;
     setInquiring(true);
-    const res = await api.post(`/listings/${listingId}/inquiries`, {});
+    const res = await api.post(`/listings/${listingId}/inquiries`, body);
     setInquiring(false);
+    setSheet(false);
     if (res.ok) {
       setInquired(true);
       // AQ1/AQ2 · say what really happens next; a non-member hears about the badge now.
@@ -161,7 +166,13 @@ export function ListingDetailScreen({ navigation, route }: Props) {
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {listing.photos.length > 0 ? (
-            <Image source={{ uri: listing.photos[0] }} style={styles.photo} resizeMode="cover" />
+            // AD9 · every photo, the main one first.
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoStrip}
+              testID="strip.listingDetail.photos">
+              {listing.photos.map((uri) => (
+                <Image key={uri} source={{ uri }} style={[styles.photo, listing.photos.length > 1 && styles.photoOfMany]} resizeMode="cover" />
+              ))}
+            </ScrollView>
           ) : null}
 
           <Text style={styles.name} maxFontSizeMultiplier={maxFontScale.title}>{listing.pet.name}</Text>
@@ -234,6 +245,11 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             <Text style={styles.inquiredNote} testID="text.listingDetail.unavailable">
               {listing.status === "pending" ? "Reserved for an applicant." : "No longer available for adoption."}
             </Text>
+          ) : isShelter ? (
+            // AD14 · Inquire would only answer 403 shelter_cannot_adopt; say so up front instead.
+            <Text style={styles.inquiredNote} testID="text.listingDetail.shelterNote">
+              Shelters can't adopt through Kupkop, so there's nothing to send here.
+            </Text>
           ) : (
             <Button
               testID="btn.listingDetail.inquire"
@@ -246,6 +262,9 @@ export function ListingDetailScreen({ navigation, route }: Props) {
         </ScrollView>
       )}
 
+      <InquireSheet
+        visible={sheet} petName={listing?.pet.name ?? "this animal"} posterName={listing?.poster.name ?? "The poster"}
+        sending={inquiring} onSend={inquire} onCancel={() => setSheet(false)} />
       <SignupWall
         visible={wall.open}
         action={wall.action}
@@ -270,7 +289,9 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   flagLinkText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  photo: { width: "100%", height: 240, borderRadius: radii.card, marginBottom: 18, backgroundColor: colors.border },
+  photoStrip: { marginBottom: 18 },
+  photo: { width: "100%", height: 240, borderRadius: radii.card, backgroundColor: colors.border },
+  photoOfMany: { width: 320, marginRight: 12 },
   name: { color: colors.ink, ...typography.hero },
   sub: { marginTop: 8, color: colors.muted, ...typography.subtitle },
   donateLink: { marginTop: 10 },

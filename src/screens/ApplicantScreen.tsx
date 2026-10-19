@@ -2,6 +2,7 @@
 // design/mobile-v3/Applicant.dc.html). Renders from GET /inquiries/{id}'s poster tier alone —
 // no listing fetch, so an AD16-hidden listing never blanks it. Every decision is a pure helper
 // in ../applicant.ts; this file only lays them out.
+import { applicationRows } from "../inquireApplication";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -131,6 +132,19 @@ export function ApplicantScreen({ navigation, route }: Props) {
           </Card>
         ) : null}
 
+        {applicationRows(row.application).length > 0 ? (
+          // AD8 · what the adopter said about their home, to screen them with.
+          <Card style={styles.card} testID="card.applicant.answers">
+            <Text style={styles.label}>Answers</Text>
+            {applicationRows(row.application).map((a) => (
+              <View key={a.label} style={styles.answerRow}>
+                <Text style={styles.answerLabel}>{a.label}</Text>
+                <Text style={styles.body}>{a.value}</Text>
+              </View>
+            ))}
+          </Card>
+        ) : null}
+
         {open || row.status === "adopted" ? (
           <Card style={styles.card} testID="card.applicant.contact">
             <Text style={styles.label}>Contact</Text>
@@ -241,6 +255,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 48 },
   card: { marginTop: 14, padding: spacing.lg },
   quote: { backgroundColor: colors.soft },
+  answerRow: { marginTop: 10 },
+  answerLabel: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   personRow: { flexDirection: "row", alignItems: "center", gap: 14 },
   personText: { flex: 1 },
   personRowLarge: { flexWrap: "wrap", rowGap: 10 },

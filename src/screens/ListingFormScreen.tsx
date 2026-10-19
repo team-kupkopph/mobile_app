@@ -2,14 +2,17 @@
 // they share the same fields; edit just pre-fills from GET /listings/{id} and PATCHes
 // instead of POSTs. Reference: screens/user/screen-shelter-list-animal-rescue.png.
 //
-// Creation is gated on being signed in, NOT verification (decision 2 — draft-only,
-// gated-public): an unverified poster's listing saves fine, it just won't appear in
-// GET /listings until they're verified. This screen doesn't re-check verification
-// itself; it just says so plainly when the listing isn't public yet.
+// AD12 · every listing is born a DRAFT. "Save draft" creates it and opens Your listing (the
+// preview), whose Publish button puts it on the Adopt feed; an unverified poster is refused there
+// (403 verification_required) instead of going "live" to nobody. This screen doesn't re-check
+// verification itself; it just says so plainly when the listing can't be published yet.
+// AD9/AD11 · up to six photos (the first is the main one) and the fields the detail shows:
+// size, vaccinated, spayed/neutered, walkable, temperament, requirements.
+// AQ8 · opened with a `petId` it prefills from that pet and links the listing to it.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View
+  ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View
 } from "react-native";
 
 import { useApi } from "../api/useApi";
@@ -17,6 +20,10 @@ import { PrefillWarning } from "../components/PrefillWarning";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { useAuth } from "../auth/AuthContext";
+import {
+  MAX_PHOTOS, SIZES, TRI_LABELS, FormState, Tri, addPhoto, createBody, makeMain, patchBody,
+  removePhoto, triAt, triFromBool, triIndex
+} from "../listingForm";
 import { TAP_SLOP } from "../touch";
 import { RootStackParamList } from "../navigation/types";
 import { Me } from "../api/types";
@@ -32,6 +39,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
   const api = useApi();
   const { city: homeCity } = useAuth();
   const listingId = route.params?.listingId;
+  const petId = route.params?.petId;   // AQ8
   const isEdit = !!listingId;
 
   const [name, setName] = useState("");
@@ -40,6 +48,12 @@ export function ListingFormScreen({ navigation, route }: Props) {
   const [sex, setSex] = useState<string>("unknown");
   const [birthdate, setBirthdate] = useState(""); // YYYY-MM-DD, optional
   const [description, setDescription] = useState("");
+  const [requirements, setRequirements] = useState("");
+  const [size, setSize] = useState("");
+  const [vaccinated, setVaccinated] = useState<Tri>("unknown");
+  const [spayed, setSpayed] = useState<Tri>("unknown");
+  const [walkable, setWalkable] = useState(false);
+  const [temperament, setTemperament] = useState("");
   const [fee, setFee] = useState("0");
   const [city, setCity] = useState(homeCity ?? "");
   // Whether this listing will be SEEN. Decision 2: anyone signed in may draft one, and only a
@@ -60,7 +74,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
   const verifiedPoster = me
     ? me.is_verified_rescuer
     : null; // unknown until /me answers; no notice is shown while unknown
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [wasPublic, setWasPublic] = useState<string | null>(null); // listing.status, edit mode only
 
@@ -97,6 +111,13 @@ export function ListingFormScreen({ navigation, route }: Props) {
         setSex(d.pet.sex ?? "unknown");
         setBirthdate(d.pet.birthdate ?? "");
         setDescription(d.description ?? "");
+        setRequirements(d.requirements ?? "");
+        setSize(d.pet.size_category ?? "");
+        setVaccinated(triFromBool(d.pet.vaccinated));
+        setSpayed(triFromBool(d.pet.spayed_neutered));
+        setWalkable(!!d.pet.walkable);
+        setTemperament(d.pet.temperament ?? "");
+        setPhotos(d.photos ?? []);
         setFee(d.adoption_fee ?? "0");
         setCity(d.city ?? "");
         setWasPublic(d.status);
@@ -105,12 +126,26 @@ export function ListingFormScreen({ navigation, route }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once, keyed by listingId
   }, [listingId]);
 
-  async function addPhoto() {
+  // AQ8 · "List one of my pets": prefill from the pet (the server links it on create).
+  useEffect(() => {
+    if (isEdit || !petId) return;
+    api.get(`/me/pets/${petId}`).then((r) => {
+      if (!r.ok) return;
+      const d = r.data;
+      setName(d.name); setSpecies(d.species); setBreed(d.breed ?? ""); setSex(d.sex ?? "unknown");
+      setBirthdate(d.birthdate ?? ""); setSize(d.size_category ?? "");
+      setSpayed(triFromBool(d.spayed_neutered)); setTemperament(d.temperament ?? "");
+      setPhotos((d.photos ?? []).slice(0, MAX_PHOTOS));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount
+  }, [petId]);
+
+  async function pickPhoto() {
     if (uploadingPhoto) return;
     setUploadingPhoto(true);
     const res = await pickAndUpload(api, "listing_photo");
     setUploadingPhoto(false);
-    if (res?.ok) setPhotoUrl(res.fileUrl);
+    if (res?.ok) setPhotos((p) => addPhoto(p, res.fileUrl));
   }
 
   async function submit() {
@@ -126,28 +161,32 @@ export function ListingFormScreen({ navigation, route }: Props) {
     setSubmitting(true);
     setError(undefined);
 
+    const form: FormState = {
+      name, species, breed, sex, birthdate, description, requirements, fee, city, size,
+      vaccinated, spayed, walkable, temperament, photos, petId
+    };
     const res = isEdit
-      ? await api.patch(`/listings/${listingId}`, {
-          name: name.trim(), species, breed: breed.trim(), sex,
-          birthdate: birthdate.trim() || null,
-          description: description.trim(), adoption_fee: fee || "0", city: city.trim()
-        })
-      : await api.post("/listings", {
-          pet: { name: name.trim(), species, breed: breed.trim() || undefined,
-                sex, birthdate: birthdate.trim() || undefined },
-          description: description.trim(), adoption_fee: fee || "0", city: city.trim(),
-          photos: photoUrl ? [{ file_url: photoUrl }] : []
-        });
+      ? await api.patch(`/listings/${listingId}`, patchBody(form))
+      : await api.post("/listings", createBody(form));
 
     setSubmitting(false);
     if (res.ok) {
       const id = isEdit ? listingId! : res.data.listing_id;
-      navigation.replace("listingDetail", { listingId: id });
+      // AD12 · Your listing is the preview: a draft's Publish button lives there.
+      navigation.replace("posterListing", { listingId: id });
       return;
     }
     const code = res.data?.error?.code;
     if (code === "fee_over_cap") {
       setError(`The adoption fee can't exceed ₱${res.data.error.details?.cap ?? 500}.`);
+      return;
+    }
+    if (code === "pet_already_listed") {
+      setError("That pet already has a listing. Withdraw it first to list again.");
+      return;
+    }
+    if (code === "listing_removed") {
+      setError("Our moderators removed this listing, so it can't be edited.");
       return;
     }
     if (res.status === 403) {
@@ -183,10 +222,10 @@ export function ListingFormScreen({ navigation, route }: Props) {
         {!isEdit && verifiedPoster === false ? (
           <View style={styles.visibilityNote} accessibilityRole="text">
             <Text style={styles.visibilityTitle}>
-              {me?.shelter ? "It appears once your shelter is verified" : "It appears once you're a Verified Member"}
+              {me?.shelter ? "You can publish once your shelter is verified" : "You can publish once you're a Verified Member"}
             </Text>
             <Text style={styles.visibilityBody}>
-              You can list now. It stays a draft nobody else sees, and goes public on its own once you're approved.
+              You can save it as a draft now. It stays private until you're approved and publish it.
             </Text>
             {!me?.shelter ? (
               <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("memberUpgrade")}>
@@ -231,6 +270,39 @@ export function ListingFormScreen({ navigation, route }: Props) {
         />
 
         <Field
+          label="Adoption requirements (optional)"
+          value={requirements}
+          onChangeText={setRequirements}
+          multiline
+          testID="field.listingForm.requirements"
+          placeholder="Fenced yard, no chaining, a vet visit within a month…"
+        />
+
+        <Text style={styles.label}>Size (optional)</Text>
+        <View style={styles.chipRow}>
+          {SIZES.map((opt) => {
+            const on = size === opt;
+            return (
+              <TouchableOpacity key={opt} activeOpacity={0.85} accessibilityRole="button"
+                accessibilityState={{ selected: on }} testID={`btn.listingForm.size.${opt}`}
+                style={[styles.pill, on && styles.pillOn]} onPress={() => setSize(on ? "" : opt)}>
+                <Text style={[styles.pillText, on && styles.pillTextOn]}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <Text style={styles.label}>Vaccinated</Text>
+        <SegmentedControl segments={[...TRI_LABELS]} index={triIndex(vaccinated)} onChange={(i) => setVaccinated(triAt(i))} />
+        <Text style={styles.label}>Spayed / neutered</Text>
+        <SegmentedControl segments={[...TRI_LABELS]} index={triIndex(spayed)} onChange={(i) => setSpayed(triAt(i))} />
+        <Text style={styles.label}>Can be walked on a leash</Text>
+        <SegmentedControl segments={["No", "Yes"]} index={walkable ? 1 : 0} onChange={(i) => setWalkable(i === 1)} />
+
+        <Field label="Temperament (optional)" value={temperament} onChangeText={setTemperament}
+          placeholder="Calm, good with kids" />
+
+        <Field
           label="Adoption fee (₱)"
           value={fee}
           onChangeText={setFee}
@@ -243,20 +315,38 @@ export function ListingFormScreen({ navigation, route }: Props) {
 
         <Field label="City" value={city} onChangeText={setCity} placeholder="Marikina" />
 
-        {!isEdit ? (
-          <>
-            <Text style={styles.label}>Photo (optional)</Text>
-            <TouchableOpacity style={styles.photoBtn} onPress={addPhoto} activeOpacity={0.85}>
-              {uploadingPhoto ? <ActivityIndicator color={colors.teal} />
-                : <Text style={styles.photoText}>{photoUrl ? "✓ Photo added" : "Add a photo"}</Text>}
-            </TouchableOpacity>
-          </>
+        <Text style={styles.label}>Photos (optional)</Text>
+        <Text style={styles.fine}>Up to {MAX_PHOTOS}. The first is the one adopters see on the deck.</Text>
+        <View style={styles.photoGrid}>
+          {photos.map((url, i) => (
+            <View key={url} style={styles.photoCell} testID={`photo.listingForm.${i}`}>
+              <Image source={{ uri: url }} style={styles.thumb} resizeMode="cover" />
+              {i === 0 ? <Text style={styles.mainTag}>Main photo</Text> : (
+                <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.photoAct}
+                  onPress={() => setPhotos((p) => makeMain(p, i))}>
+                  <Text style={styles.photoActText}>Make main</Text>
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.photoAct}
+                testID={`btn.listingForm.removePhoto.${i}`} onPress={() => setPhotos((p) => removePhoto(p, i))}>
+                <Text style={styles.photoRemove}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+        {photos.length < MAX_PHOTOS ? (
+          <TouchableOpacity style={styles.photoBtn} onPress={pickPhoto} activeOpacity={0.85}
+            testID="btn.listingForm.addPhoto" accessibilityRole="button">
+            {uploadingPhoto ? <ActivityIndicator color={colors.teal} />
+              : <Text style={styles.photoText}>{photos.length ? "Add another photo" : "Add a photo"}</Text>}
+          </TouchableOpacity>
         ) : null}
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Button
-          label={isEdit ? "Save changes" : "Create listing"}
+          label={isEdit ? "Save changes" : "Save draft"}
+          testID="btn.listingForm.submit"
           onPress={submit}
           loading={submitting}
           style={styles.submit}
@@ -290,7 +380,19 @@ const styles = StyleSheet.create({
   visibilityTitle: { color: colors.ink, ...typography.strong, fontWeight: "700" },
   visibilityBody: { marginTop: 4, color: colors.muted, ...typography.meta, lineHeight: 19 },
   visibilityLink: { marginTop: 8, color: colors.tealDark, ...typography.meta, fontWeight: "800" },
-  photoBtn: { minHeight: 90, paddingVertical: 12, paddingHorizontal: 12, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  pill: { minHeight: 44, paddingHorizontal: 18, borderRadius: 22, borderWidth: 1, borderColor: colors.border, justifyContent: "center" },
+  pillOn: { backgroundColor: colors.soft, borderColor: colors.teal },
+  pillText: { color: colors.ink, ...typography.strong, fontWeight: "600" },
+  pillTextOn: { color: colors.tealDark, fontWeight: "800" },
+  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 12 },
+  photoCell: { width: "47%" },
+  thumb: { width: "100%", height: 110, borderRadius: radii.field, backgroundColor: colors.border },
+  mainTag: { marginTop: 6, minHeight: 44, textAlignVertical: "center", color: colors.tealDark, ...typography.meta, fontWeight: "800" },
+  photoAct: { minHeight: 44, justifyContent: "center" },
+  photoActText: { color: colors.teal, ...typography.meta, fontWeight: "700" },
+  photoRemove: { color: colors.danger, ...typography.meta, fontWeight: "700" },
+  photoBtn: { marginTop: 12, minHeight: 90, paddingVertical: 12, paddingHorizontal: 12, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
   submit: { marginTop: 26 }
