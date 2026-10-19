@@ -29,7 +29,7 @@ import { Alert, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, 
 
 import { ListingDetail, MyInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
-import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, canWithdraw, closedChipTone, contactLine, inquiryClosedNote, inquiryIsClosed, inquiryPetName, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
+import { STAGE_ORDER, STAGE_STEP, adopterBadgeNote, canWithdraw, closedChipTone, contactLine, inquiryClosedNote, inquiryIsClosed, inquiryPetName, inquiryReservedNote, inquiryStatusLabel, ladderHeader, ladderStageTone, stageMeta, stageStateChip } from "../adoption";
 import { AdoptIcon, CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
@@ -153,6 +153,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
   const closed = inquiryIsClosed(inquiry.status);
   const closedNote = inquiryClosedNote(inquiry.status, inquiry.end_reason, { pet, poster: shelter });
   const badgeNote = adopterBadgeNote(inquiry, shelter, pet);
+  const reservedNote = inquiryReservedNote(inquiry, pet);
   // AQ1 · the poster's number, from the inquiry alone: an AD16 404 on the listing fetch blanks
   // `poster`, and the promise "you'll both see each other's phone numbers" still has to hold.
   const contact = contactLine(inquiry);
@@ -194,6 +195,7 @@ function InquiryBody({ inquiry, listing, open, onToggle, onListing, onGetVerifie
             </View>
           )}
           {closedNote ? <Text style={styles.closedNote} testID="text.inquiry.closedNote">{closedNote}</Text> : null}
+          {reservedNote ? <Text style={styles.closedNote} testID="text.inquiry.reservedNote">{reservedNote}</Text> : null}
         </Card>
       </PressScale>
 
