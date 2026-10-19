@@ -16,6 +16,11 @@ appId: ph.kupkop.app
     id: "screen.listingDetail"
 - tapOn:
     id: "btn.listingDetail.inquire"
+# AD8 · Inquire opens a sheet (a message and a few quick answers, all optional); send it as it is.
+- assertVisible:
+    id: "sheet.inquire"
+- tapOn:
+    id: "btn.inquire.send"
 # An alert confirms either outcome — "Inquiry sent" on a fresh one, "Already inquired" when
 # this account has inquired before — and while it is up nothing behind it is visible to an
 # assertion. Dismiss it, then assert the screen's own copy: the button is replaced by an

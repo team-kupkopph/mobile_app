@@ -53,10 +53,13 @@ describe("the listing form's visibility notice", () => {
   });
 
   it("names the badge, offers the way to it, and promises only what the backend does", () => {
-    expect(form).toMatch(/It appears once you're a Verified Member/);
-    expect(form).toMatch(/It appears once your shelter is verified/);
+    expect(form).toMatch(/You can publish once you're a Verified Member/);
+    expect(form).toMatch(/You can publish once your shelter is verified/);
     expect(form).toMatch(/navigation\.navigate\("memberUpgrade"\)/);
-    expect(form).toMatch(/goes public on its own once you're approved/); // public_poster_q is derived, never a flag
+    // AD12 · it no longer "goes public on its own": a draft needs the poster's Publish, which an
+    // unverified poster is refused (403 verification_required) rather than going live invisibly.
+    expect(form).toMatch(/stays private until you're approved and publish it/);
+    expect(form).not.toMatch(/goes public on its own/);
   });
 
   it("keeps + List open to everyone signed in, as the panel's small button", () => {

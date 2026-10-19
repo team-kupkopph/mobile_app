@@ -82,6 +82,7 @@ import { RescuePlaceSentScreen } from "../screens/RescuePlaceSentScreen";
 import { PlaceRequestScreen } from "../screens/PlaceRequestScreen";
 import { PlaceAcceptedScreen } from "../screens/PlaceAcceptedScreen";
 import { MyPetsScreen } from "../screens/MyPetsScreen";
+import { PetFormScreen } from "../screens/PetFormScreen";
 import { NotificationsScreen } from "../screens/NotificationsScreen";
 import { ListingDetailScreen } from "../screens/ListingDetailScreen";
 import { ListingFormScreen } from "../screens/ListingFormScreen";
@@ -179,6 +180,7 @@ export function RootNavigator() {
       <Stack.Screen name="placeAccepted" component={PlaceAcceptedScreen} />
       {/* US-H3 — the recipient's own pets. */}
       <Stack.Screen name="myPets" component={MyPetsScreen} />
+      <Stack.Screen name="petForm" component={PetFormScreen} />
       <Stack.Screen name="notifications" component={NotificationsScreen} />
       <Stack.Screen name="listingDetail" component={ListingDetailScreen} />
       <Stack.Screen name="listingForm" component={ListingFormScreen} />

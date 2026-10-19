@@ -140,13 +140,14 @@ export type RootStackParamList = {
   // Track H — the owner's own pets (US-H3): what a rescuer/shelter placed with them, or what
   // they adopted. Reachable from ProfileScreen; GET /me/pets.
   myPets: undefined;
+  petForm: undefined;   // AQ8 · add a pet
   // US-X1 — the bell
   notifications: undefined;
   // Track A — adoption (US-A3/A4)
   listingDetail: { listingId: string };
   myInquiries: undefined;
   // US-A2 — create (no listingId) or edit (listingId) a listing.
-  listingForm: { listingId?: string } | undefined;
+  listingForm: { listingId?: string; petId?: string } | undefined;   // AQ8 · petId prefills and links
   // Owner-side first-use phone verification (decision 14); first trigger = US-A4 inquiry.
   verifyPhone: undefined;
   // Track Q — donations. donationQr (shelter side) uploads/replaces the QR; donate

@@ -30,7 +30,9 @@ export type NotificationTarget =
   | { screen: "applicant"; inquiryId: string }
   | { screen: "inquiry"; inquiryId: string }
   | { screen: "memberUpgrade" }
-  | { screen: "listingDetail"; listingId: string };
+  | { screen: "listingDetail"; listingId: string }
+  // AD7 · the poster's own view reads "Removed by moderation".
+  | { screen: "posterListing"; listingId: string };
 
 const REPORT_LINKED_TYPES = new Set([
   "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened",
@@ -56,7 +58,7 @@ const MY_INQUIRIES_TYPES = new Set(["placement_offered", "placement_withdrawn"])
 // inquiry_id (from before the Applicant screen) keeps PR A's interim routing: a shelter lands on
 // Requests, an individual poster on the listing. The backend says which (`poster_is_shelter`),
 // because the client holds no account type.
-const POSTER_INQUIRY_TYPES = new Set(["inquiry_received", "inquiry_withdrawn"]);
+const POSTER_INQUIRY_TYPES = new Set(["inquiry_received", "inquiry_withdrawn", "inquiry_waiting"]);
 // US-V8 · the volunteer side of notify(): schedule and history folded onto one hub screen
 // (Task 5, K30/G9) — every volunteer notification now opens the hub on its "My shifts" tab,
 // whether it's "look at your upcoming shifts" (shift_confirmed/shift_reminder) or "see what
@@ -94,6 +96,9 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
     if (n.data?.poster_is_shelter === true) return { screen: "shelterRequests" };
     if (n.data?.listing_id) return { screen: "listingDetail", listingId: n.data.listing_id };
     return null;
+  }
+  if (n.type === "listing_removed" && n.data?.listing_id) {
+    return { screen: "posterListing", listingId: n.data.listing_id };
   }
   if (n.type === "adoption_badge_needed") return { screen: "memberUpgrade" };
   if (ADOPTER_INQUIRY_TYPES.has(n.type)) {

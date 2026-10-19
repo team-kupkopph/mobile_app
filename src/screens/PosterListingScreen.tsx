@@ -8,10 +8,13 @@ import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } fr
 import { ListingDetail, PosterInquiry } from "../api/types";
 import { useApi } from "../api/useApi";
 import { applicantStatusLine, applicantsHeading, closedToggleLabel, listingStatusChip } from "../applicant";
+import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Avatar, Button, Card, Chip, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
+import { publishRefusal } from "../listingForm";
+import { markAdoptedConfirm, posterActions, takedownRefusal, withdrawConfirm } from "../posterActions";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
@@ -35,6 +38,10 @@ export function PosterListingScreen({ navigation, route }: Props) {
   const [next, setNext] = useState<number | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  // AD10 · which take-down confirm is open, and whether the server has said people are waiting.
+  const [confirm, setConfirm] = useState<"withdraw" | "markAdopted" | null>(null);
+  const [acting, setActing] = useState(false);
+  const [isShelter, setIsShelter] = useState(false);
 
   const loadApplicants = useCallback((page: number) => {
     api.get(`/listings/${listingId}/inquiries?page=${page}`).then((r) => {
@@ -47,6 +54,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
   }, [listingId]);
 
   const load = useCallback(() => {
+    api.get("/me").then((r) => { if (r.ok) setIsShelter(r.data?.account_type === "shelter"); });
     api.get(`/listings/${listingId}`).then((r) => {
       setRes({ ok: r.ok, status: r.status });
       if (r.ok) setListing(r.data);
@@ -61,9 +69,41 @@ export function PosterListingScreen({ navigation, route }: Props) {
     setPublishing(true);
     const r = await api.post(`/listings/${listingId}/publish`, {});
     setPublishing(false);
-    if (!r.ok) { Alert.alert("Couldn't publish", r.data?.error?.message ?? "Try again."); return; }
+    if (!r.ok) {
+      // AD12 · an unverified poster's draft can't go live; say why and offer the way to the badge.
+      const refusal = publishRefusal(r.data?.error?.code, isShelter);
+      if (refusal) {
+        Alert.alert(refusal.title, refusal.body, refusal.offerVerify
+          ? [{ text: "Not now", style: "cancel" }, { text: "Get verified", onPress: () => navigation.navigate("memberUpgrade") }]
+          : [{ text: "OK" }]);
+        return;
+      }
+      Alert.alert("Couldn't publish", r.data?.error?.message ?? "Try again.");
+      return;
+    }
     load();
   }
+
+  // AD10 · Withdraw is two-step on the server: the first call answers how many people are
+  // waiting (409 has_active_inquiries) and changes nothing; confirming resends with the flag.
+  async function takeDown(kind: "withdraw" | "markAdopted") {
+    if (acting) return;
+    setActing(true);
+    const path = kind === "withdraw" ? "withdraw" : "mark-adopted";
+    // The confirm already told the poster how many people are waiting; confirming is the "close them" consent.
+    const closing = kind === "withdraw" && (waiting ?? openCount) > 0;
+    const r = await api.post(`/listings/${listingId}/${path}`, closing ? { close_inquiries: true } : {});
+    setActing(false);
+    if (r.ok) { setConfirm(null); setWaiting(null); load(); return; }
+    const code = r.data?.error?.code;
+    // Someone asked since this screen loaded: show the real count and let the poster confirm again.
+    if (code === "has_active_inquiries") { setWaiting(r.data?.error?.details?.active_inquiries ?? 1); return; }
+    setConfirm(null); setWaiting(null);
+    const msg = takedownRefusal(code) ?? r.data?.error?.message ?? "Try again.";
+    Alert.alert("Couldn't do that", msg);
+    load();
+  }
+  const [waiting, setWaiting] = useState<number | null>(null);
 
   if (!listing) {
     return (
@@ -81,6 +121,11 @@ export function PosterListingScreen({ navigation, route }: Props) {
   const fee = Number(listing.adoption_fee) > 0 ? `₱${Number(listing.adoption_fee).toLocaleString()}` : "Free";
   const sub = [listing.pet.species, listing.city, fee].filter(Boolean).join(" · ");
   const pet = listing.pet.name || "this animal";
+  const reserved = applicants.some((a) => a.status === "active" && !!a.reserved_at);
+  const actions = posterActions(listing, reserved);
+  const openCount = openRows.length;
+  const withdrawCopy = withdrawConfirm(pet, waiting ?? openCount);
+  const adoptedCopy = markAdoptedConfirm(pet, openRows.length);
 
   function rowFor(a: PosterInquiry) {
     return (
@@ -116,16 +161,31 @@ export function PosterListingScreen({ navigation, route }: Props) {
               <Chip label={chip.label} tone={chip.tone} dot={false} />
             </View>
           </View>
-          {listing.status === "draft" ? (
+          {listing.removed_by_moderation ? (
+            <Text style={styles.removed} testID="text.posterListing.removed">
+              Removed by moderation. {pet} is no longer on Kupkop. If you think this was a mistake, contact support.
+            </Text>
+          ) : null}
+          {actions.includes("publish") ? (
             <>
               <Text style={styles.hint}>Add a story and an adoption fee, then publish to put them on the Adopt feed.</Text>
               <Button label="Publish to the Adopt feed" loading={publishing} onPress={publish}
                 testID="btn.posterListing.publish" style={styles.action} />
             </>
           ) : null}
-          {listing.status === "draft" || listing.status === "available" || listing.status === "pending" ? (
+          {actions.includes("edit") ? (
             <Button label="Edit" variant="secondary" testID="btn.posterListing.edit" style={styles.action}
               onPress={() => navigation.navigate("listingForm", { listingId })} />
+          ) : null}
+          {actions.includes("markAdopted") ? (
+            <Button label="Mark as adopted" variant="secondary" testID="btn.posterListing.markAdopted" style={styles.action}
+              onPress={() => setConfirm("markAdopted")} />
+          ) : null}
+          {actions.includes("withdraw") ? (
+            <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.posterListing.withdraw"
+              style={styles.more} onPress={() => setConfirm("withdraw")}>
+              <Text style={styles.withdrawLabel}>{listing.status === "draft" ? "Delete draft" : "Withdraw listing"}</Text>
+            </TouchableOpacity>
           ) : null}
         </Card>
 
@@ -153,6 +213,15 @@ export function PosterListingScreen({ navigation, route }: Props) {
           </>
         )}
       </ScrollView>
+      <ConfirmModal
+        visible={confirm === "withdraw"}
+        title={withdrawCopy.title} body={withdrawCopy.body} confirmLabel={withdrawCopy.confirm} tone="danger"
+        onConfirm={() => takeDown("withdraw")}
+        onCancel={() => { setConfirm(null); setWaiting(null); }} />
+      <ConfirmModal
+        visible={confirm === "markAdopted"}
+        title={adoptedCopy.title} body={adoptedCopy.body} confirmLabel={adoptedCopy.confirm}
+        onConfirm={() => takeDown("markAdopted")} onCancel={() => setConfirm(null)} />
     </View>
   );
 }
@@ -173,6 +242,8 @@ const styles = StyleSheet.create({
   rowSub: { marginTop: 3, color: colors.muted, ...typography.meta },
   hint: { marginTop: 12, color: colors.muted, ...typography.meta, lineHeight: 18 },
   action: { marginTop: 12 },
+  removed: { marginTop: 12, color: colors.danger, ...typography.meta, fontWeight: "700", lineHeight: 18 },
+  withdrawLabel: { color: colors.danger, ...typography.strong, fontWeight: "700" },
   section: { marginTop: 24, color: colors.ink, ...typography.section },
   row: { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
   more: { alignSelf: "center", marginTop: 12, minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },

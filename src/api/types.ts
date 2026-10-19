@@ -145,6 +145,8 @@ export type Listing = {
   poster?: ListingPoster;
   /** On the poster's own cards (?mine=true) only. */
   open_inquiries?: number;
+  /** AD7 · on the poster's own cards (?mine=true) only. */
+  removed_by_moderation?: boolean;
 };
 export type ListingDetail = {
   listing_id: string;
@@ -154,8 +156,11 @@ export type ListingDetail = {
   requirements: string | null;
   city: string;
   status: string;
+  /** The main photo first. */
   photos: string[];
   poster: ListingPoster;
+  /** AD7 · only the poster ever reads a hidden listing; everyone else gets a 404. */
+  removed_by_moderation?: boolean;
 };
 /**
  * `updated_at` is null until the stage has moved — all six rows exist from the inquiry's first
@@ -184,6 +189,8 @@ export type MyInquiry = {
 export type PosterInquiry = MyInquiry & {
   viewer: "poster";
   message?: string | null;
+  /** AD8 · the adopter's quick answers; null when they gave none. */
+  application?: Record<string, string | boolean> | null;
   created_at?: string;
   adopter: { account_id: string; display_name: string; city: string | null; verified_member: boolean };
   /** AQ1 · present once the poster has accepted the applicant for screening (phone null if unverified). */

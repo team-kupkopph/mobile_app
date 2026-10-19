@@ -30,13 +30,19 @@ describe("notificationTarget", () => {
   });
 
   it("routes the poster's pushes to the Applicant screen (spec §1)", () => {
-    for (const type of ["inquiry_received", "inquiry_withdrawn"]) {
+    for (const type of ["inquiry_received", "inquiry_withdrawn", "inquiry_waiting"]) {   // AD23 · the week-old nudge
       expect(notificationTarget({ type, data: { listing_id: "l1", inquiry_id: "i1", poster_is_shelter: true } }))
         .toEqual({ screen: "applicant", inquiryId: "i1" });
       // without an inquiry_id, PR A's interim routing still applies
       expect(notificationTarget({ type, data: { listing_id: "l1", poster_is_shelter: true } })).toEqual({ screen: "shelterRequests" });
       expect(notificationTarget({ type, data: { listing_id: "l1" } })).toEqual({ screen: "listingDetail", listingId: "l1" });
     }
+  });
+
+  it("routes a moderation takedown to the poster's own view of the listing (AD7)", () => {
+    expect(notificationTarget({ type: "listing_removed", data: { listing_id: "l1" } }))
+      .toEqual({ screen: "posterListing", listingId: "l1" });
+    expect(notificationTarget({ type: "listing_removed", data: {} })).toBeNull();
   });
 
   it("routes the adopter's pushes to that inquiry's ladder, and the badge push to the upgrade", () => {

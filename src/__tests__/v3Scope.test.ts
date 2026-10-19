@@ -16,8 +16,8 @@ describe("v3Scope", () => {
     + "screens, moved from V3_EXCLUDED into scope once converted — 35 -> 41 — minus "
     + "RescueListedScreen, deleted by C15 when List for adoption became a draft that continues "
     + "into the listing form — 41 -> 40 — plus ApplicantScreen, the adoption poster loop's "
-    + "(plan 2026-10-06) first screen, born V3 — 40 -> 41 — plus PosterListingScreen — 41 -> 42 — plus MyListingsScreen — 42 -> 43", () => {
-    expect(V3_SCOPE.length).toBe(43);
+    + "(plan 2026-10-06) first screen, born V3 — 40 -> 41 — plus PosterListingScreen — 41 -> 42 — plus MyListingsScreen — 42 -> 43 — plus PetFormScreen (AQ8) — 43 -> 44", () => {
+    expect(V3_SCOPE.length).toBe(44);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {
