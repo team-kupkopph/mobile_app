@@ -26,7 +26,7 @@ import { Animated, Image, LayoutChangeEvent, PanResponder, StyleSheet, Text, Vie
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Listing } from "../api/types";
-import { advance, buildDeck, cardMeta, DeckState, Dir, endSummary, factRows, feeLabel, showHidden, topId, undo } from "../adoptDeck";
+import { advance, buildDeck, cardMeta, DeckState, Dir, endSummary, factRows, feeLabel, positionLabel, showHidden, topId, undo } from "../adoptDeck";
 import { useShortlist } from "../useShortlist";
 import { useLargeText } from "../useLargeText";
 import { useReducedMotion } from "../useReducedMotion";
@@ -129,9 +129,7 @@ export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
   const measured = Math.max(0, ...stack.map((l) => heights[l.listing_id] ?? 0));
   const cardHeight = large && measured > 0 ? measured : CARD_HEIGHT;
   const where = city ? ` near ${city}` : "";
-  const position = top
-    ? `${deck.index + 1} of ${deck.order.length}${where}`
-    : `You have seen all ${deck.order.length}${where}`;
+  const position = positionLabel(deck, where);
 
   return (
     <View testID="deck.adopt">
