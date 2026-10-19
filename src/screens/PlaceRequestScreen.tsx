@@ -18,7 +18,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { acceptedPlacementParams } from "../shelterAnimals";
+import { acceptedPlacementParams, listingTitle } from "../shelterAnimals";
 import { RootStackParamList } from "../navigation/types";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
@@ -125,7 +125,7 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
             <Image source={{ uri: listing.photos[0] }} style={styles.photo} resizeMode="cover" />
           ) : null}
 
-          <Text style={styles.name} maxFontSizeMultiplier={maxFontScale.title}>{inquiry.listing.name || "This pet"}</Text>
+          <Text style={styles.name} maxFontSizeMultiplier={maxFontScale.title}>{listingTitle(inquiry.listing.name)}</Text>
           <Text style={styles.sub}>{capitalize(inquiry.listing.species)}{listing?.city ? ` · ${listing.city}` : ""}</Text>
 
           {listing?.description ? <Text style={styles.body}>{listing.description}</Text> : null}
