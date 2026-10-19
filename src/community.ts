@@ -38,6 +38,11 @@ export function pledgeIsCancellable(status: PledgeStatus): boolean {
   return status === "pledged";
 }
 
+/** A need's category as the API sends it is lower-case ("food"); only its first letter is capitalised. */
+export function needCategoryLabel(category: string): string {
+  return category ? category.charAt(0).toUpperCase() + category.slice(1) : category;
+}
+
 export function needProgressLabel(received: number, needed: number): string {
   return `${received} of ${needed} received`;
 }

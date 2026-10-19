@@ -9,7 +9,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { ChipTone, needProgressLabel, needStatusChip, NeedStatus } from "../community";
+import { ChipTone, needCategoryLabel, needProgressLabel, needStatusChip, NeedStatus } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
@@ -86,7 +86,7 @@ export function ShelterNeedsScreen({ navigation }: Props) {
                     <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
                   </View>
                   <Text style={styles.meta}>
-                    {need.category} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
+                    {needCategoryLabel(need.category)} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
                   </Text>
                 </Card>
               </TouchableOpacity>
@@ -111,5 +111,5 @@ const styles = StyleSheet.create({
   rowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
   needTitleLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  meta: { marginTop: 8, color: colors.muted, ...typography.meta, textTransform: "capitalize" }
+  meta: { marginTop: 8, color: colors.muted, ...typography.meta }
 });
