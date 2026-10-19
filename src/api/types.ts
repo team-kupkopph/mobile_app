@@ -73,7 +73,7 @@ export type ReportDetail = {
   // Reporter or active claimer only (S8) — as precise as the pin, so it follows the pin.
   location_text?: string | null;
   // Active claimer only (S27 · S9): their case, and when an unposted claim reopens.
-  my_case?: { case_id: string; claim_due_at: string | null; contact_shared?: boolean };
+  my_case?: { case_id: string; claim_due_at: string | null; contact_shared?: boolean; handoff?: CaseHandoff | null };
   // D1 + D8 · reporter only: their own contact consent, and whether they reported anonymously.
   contact_shared?: boolean;
   is_anonymous?: boolean;
@@ -124,6 +124,10 @@ export type MyOffer = {
   offer_id: string;
   report: { report_id: string; species: string; condition: string; city: string | null };
   offer_type: OfferType; status: OfferListStatus; expires_at: string;
+};
+/** AD20 · where the claimer's handoff stands. Absent from an older server; null when nothing is listed or offered. */
+export type CaseHandoff = {
+  listing_id: string; kind: "listing" | "placement"; status: string; open_inquiries: number; recipient?: string;
 };
 // Track A — adoption listings. The browse card (US-A1b/A3) plus the fuller shapes
 // US-A3's detail and US-A4's inquiries add.
