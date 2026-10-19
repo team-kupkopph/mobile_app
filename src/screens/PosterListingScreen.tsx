@@ -115,7 +115,7 @@ export function PosterListingScreen({ navigation, route }: Props) {
     );
   }
 
-  const chip = listingStatusChip(listing.status);
+  const chip = listingStatusChip(listing.status, !!listing.removed_by_moderation);
   const openRows = applicants.filter((a) => a.status === "active");
   const closedRows = applicants.filter((a) => a.status !== "active");
   const fee = Number(listing.adoption_fee) > 0 ? `₱${Number(listing.adoption_fee).toLocaleString()}` : "Free";

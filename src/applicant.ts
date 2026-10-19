@@ -147,7 +147,9 @@ export function stepActions(stageKey: string, state: string): Array<{ state: str
     .map((s) => ({ state: s, label: STEP_LABEL[s] }));
 }
 
-export function listingStatusChip(status: string): { label: string; tone: ChipTone } {
+/** `removed` (a moderation takedown, AD7) wins over the status the listing had: a hidden listing keeps `available` underneath. */
+export function listingStatusChip(status: string, removed = false): { label: string; tone: ChipTone } {
+  if (removed) return { label: "Removed", tone: "danger" };
   switch (status) {
     case "draft": return { label: "Draft", tone: "neutral" };
     case "pending": return { label: "Reserved", tone: "warning" };
