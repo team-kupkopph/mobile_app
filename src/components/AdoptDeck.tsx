@@ -26,7 +26,7 @@ import { Animated, Image, LayoutChangeEvent, PanResponder, StyleSheet, Text, Vie
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Listing } from "../api/types";
-import { advance, buildDeck, cardMeta, DeckState, Dir, endSummary, factRows, feeLabel, positionLabel, showHidden, topId, undo } from "../adoptDeck";
+import { advance, buildDeck, cardMeta, continueDeck, nearEnd, DeckState, Dir, endSummary, factRows, feeLabel, positionLabel, showHidden, topId, undo } from "../adoptDeck";
 import { useShortlist } from "../useShortlist";
 import { useLargeText } from "../useLargeText";
 import { useReducedMotion } from "../useReducedMotion";
@@ -46,9 +46,13 @@ type AdoptDeckProps = {
   listings: Listing[];
   city: string | null;
   onOpen: (listingId: string) => void;
+  /** AD17 · the server has another page after these listings. */
+  hasMore?: boolean;
+  /** AD17 · asked once each time the deck gets within three cards of its end. */
+  onNearEnd?: () => void;
 };
 
-export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
+export function AdoptDeck({ listings, city, onOpen, hasMore, onNearEnd }: AdoptDeckProps) {
   const reduced = useReducedMotion();
   // At Dynamic Type AX3 and up the artboard's fixed 452 pt card cannot hold the name, the shelter row and the fee, so the card takes the height
   // of its measured content (photo + body, per card) and the rows that were one line wrap or stack. Default size keeps the artboard's numbers.
@@ -70,12 +74,18 @@ export function AdoptDeck({ listings, city, onOpen }: AdoptDeckProps) {
   const shortlist = useShortlist();
   useEffect(() => {
     if (!shortlist.loaded) return;
-    setDeck((prev) => {
-      const next = buildDeck(ids, shortlist.list.saved, shortlist.list.hidden);
-      return prev ? { ...next, gone: prev.gone.filter((g) => ids.includes(g.id)) } : next;
-    });
+    setDeck((prev) => continueDeck(prev, ids, shortlist.list.saved, shortlist.list.hidden));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `generation` stands in for `list`: only an outside change rebuilds
   }, [ids, shortlist.loaded, shortlist.generation]);
+
+  // AD17 · ask for the next page when the deck runs low, once per feed length so a slow response
+  // can't be asked for twice.
+  const askedAt = useRef(-1);
+  useEffect(() => {
+    if (!deck || !hasMore || !onNearEnd || !nearEnd(deck) || askedAt.current === ids.length) return;
+    askedAt.current = ids.length;
+    onNearEnd();
+  }, [deck, hasMore, onNearEnd, ids.length]);
 
   function commit(next: DeckState) {
     setDeck(next);

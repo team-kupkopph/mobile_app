@@ -24,6 +24,30 @@ export function buildDeck(ids: string[], saved: string[], hidden: string[]): Dec
   return { order: ids.filter((id) => !hid.has(id)), index: 0, gone: [], saved: [...saved], hidden: [...hidden] };
 }
 
+/**
+ * AD17 · rebuild the deck for a changed feed WITHOUT sending the person back to the first card.
+ * When the feed only grew (the next page was appended), the cards already passed stay passed:
+ * what survives of the old order (minus anything hidden since) must be a prefix of the new one,
+ * and the top card is the first one not yet swiped. Any other change (a species filter, a
+ * refetch that reordered) starts over, as it always did. `gone`, the undo stack, is kept for
+ * the listings that are still in the feed.
+ */
+export function continueDeck(prev: DeckState | null, ids: string[], saved: string[], hidden: string[]): DeckState {
+  const next = buildDeck(ids, saved, hidden);
+  if (!prev) return next;
+  const hid = new Set(hidden);
+  const survivors = prev.order.filter((id) => !hid.has(id));
+  const grew = survivors.length > 0 && survivors.length <= next.order.length
+    && survivors.every((id, i) => next.order[i] === id);
+  const passed = prev.order.slice(0, prev.index).filter((id) => !hid.has(id)).length;
+  return { ...next, index: grew ? passed : 0, gone: prev.gone.filter((g) => ids.includes(g.id)) };
+}
+
+/** Whether the deck is close enough to its end that the next page should be fetched. */
+export function nearEnd(s: DeckState, margin = 3): boolean {
+  return s.order.length - s.index <= margin;
+}
+
 export function topId(s: DeckState): string | null {
   return s.index < s.order.length ? s.order[s.index] : null;
 }

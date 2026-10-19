@@ -115,3 +115,30 @@ describe("card copy", () => {
     expect(factRows({ name: "B", species: "dog", breed: null, walkable: true }).map((r) => r.label)).toEqual(["Walkable"]);
   });
 });
+
+describe("paging the deck (AD17)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { advance, buildDeck, continueDeck, nearEnd } = require("../adoptDeck");
+  it("keeps the person's place when the next page is appended", () => {
+    let d = buildDeck(["a", "b", "c"], [], []);
+    d = advance(d, 1); d = advance(d, -1);              // saved a, hid b; c is on top
+    const grown = continueDeck(d, ["a", "b", "c", "d", "e"], d.saved, d.hidden);
+    expect(grown.order).toEqual(["a", "c", "d", "e"]);  // b is hidden now
+    expect(grown.order[grown.index]).toBe("c");
+    expect(grown.gone).toHaveLength(2);                 // Undo still works
+  });
+  it("starts over when the feed changed some other way (a filter, a reorder)", () => {
+    let d = buildDeck(["a", "b", "c"], [], []);
+    d = advance(d, 1);
+    expect(continueDeck(d, ["x", "y"], [], []).index).toBe(0);
+    expect(continueDeck(d, ["b", "a", "c"], d.saved, d.hidden).index).toBe(0);
+  });
+  it("builds fresh with no previous deck", () => {
+    expect(continueDeck(null, ["a", "b"], [], []).index).toBe(0);
+  });
+  it("is near the end with three or fewer left, and not before", () => {
+    const d = buildDeck(["a", "b", "c", "d", "e", "f"], [], []);
+    expect(nearEnd(d)).toBe(false);
+    expect(nearEnd(advance(advance(advance(d, 1), 1), 1))).toBe(true);   // 3 left
+  });
+});
