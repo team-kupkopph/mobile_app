@@ -67,7 +67,7 @@ describe("the inquiry ladder", () => {
   });
 
   it("resolves the inquiry the way the app already does, and the listing only as decoration", () => {
-    expect(screen).toMatch(/api\.get\("\/me\/inquiries"\)/);
+    expect(screen).toMatch(/api\.get\(`\/inquiries\/\$\{inquiryId\}`\)/);
     expect(screen).toMatch(/api\.get\(`\/listings\/\$\{found\.listing\.listing_id\}`\)/);
     // The ladder renders from the inquiry alone; `poster` and `photo` are nullable.
     expect(screen).toMatch(/const poster = listing\?\.poster \?\? null/);
