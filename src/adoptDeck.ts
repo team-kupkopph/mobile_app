@@ -64,6 +64,13 @@ export function showHidden(s: DeckState, ids: string[]): DeckState {
   return buildDeck(ids, s.saved, []);
 }
 
+/** The row above the deck. `where` is " near <city>" or "". An empty order means every listing is hidden (they are filtered on rebuild),
+ *  so "seen all 0" would be wrong. */
+export function positionLabel(s: DeckState, where: string): string {
+  if (!s.order.length) return "You've hidden every listing. Nothing left to swipe.";
+  return s.index < s.order.length ? `${s.index + 1} of ${s.order.length}${where}` : `You have seen all ${s.order.length}${where}`;
+}
+
 export function endSummary(s: DeckState): string {
   const hid = s.gone.filter((g) => g.dir < 0).length;
   return `You saved ${s.saved.length} and hid ${hid}. Hidden pets stop appearing here — bring them back any time.`;
