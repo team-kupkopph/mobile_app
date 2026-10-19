@@ -9,7 +9,7 @@ import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacit
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { needProgressLabel } from "../community";
+import { needCategoryLabel, needProgressLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
@@ -90,7 +90,7 @@ export function DonateScreen({ navigation, route }: Props) {
               <Card key={need.need_id} style={styles.needCard}>
                 <Text style={styles.needTitle}>{need.title}</Text>
                 <Text style={styles.needMeta}>
-                  {need.category} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
+                  {needCategoryLabel(need.category)} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
                 </Text>
                 <TouchableOpacity hitSlop={TAP_SLOP} style={styles.pledgeBtn}
                   onPress={() => navigation.navigate("donatePledge", {
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   sectionNote: { marginTop: 6, marginBottom: 14, color: colors.muted, ...typography.meta, lineHeight: 20 },
   needCard: { marginBottom: 12, padding: 18 },
   needTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  needMeta: { marginTop: 6, color: colors.muted, ...typography.meta, textTransform: "capitalize" },
+  needMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   pledgeBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   pledgeLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   myDonationsRow: { marginTop: 26, alignItems: "center" },
