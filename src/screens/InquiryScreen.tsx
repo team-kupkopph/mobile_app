@@ -1,7 +1,7 @@
 // The adopter's inquiry ladder. Reference: design/mobile-v3/Inquiry.dc.html.
 //
-// There is no GET /inquiries/{id}: this resolves the inquiry the way PlaceRequestScreen does —
-// GET /me/inquiries matched by id — then fetches the listing for the pet's photo and the
+// This resolves the inquiry the way PlaceRequestScreen does — GET /inquiries/{id} (the adopter's own
+// row; a page-1 scan of /me/inquiries lost every inquiry past the first page) — then fetches the listing for the pet's photo and the
 // poster (the shelter). The stages ARE the inquiry; the listing is decoration on them, and its
 // failure degrades the header rather than taking down the ladder.
 //
@@ -64,11 +64,9 @@ export function InquiryScreen({ navigation, route }: Props) {
 
   const load = useCallback(() => {
     setRes(null);
-    api.get("/me/inquiries").then((r) => {
+    api.get(`/inquiries/${inquiryId}`).then((r) => {
       setRes({ ok: r.ok, status: r.status });
-      const found: MyInquiry | undefined = r.ok
-        ? (r.data?.results ?? []).find((iq: MyInquiry) => iq.inquiry_id === inquiryId)
-        : undefined;
+      const found: MyInquiry | undefined = r.ok ? r.data : undefined;
       setInquiry(found ?? null);
       if (found) {
         // D15 · a closed inquiry has no current step to open.
