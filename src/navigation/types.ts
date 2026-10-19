@@ -140,6 +140,7 @@ export type RootStackParamList = {
   // Track H — the owner's own pets (US-H3): what a rescuer/shelter placed with them, or what
   // they adopted. Reachable from ProfileScreen; GET /me/pets.
   myPets: undefined;
+  petForm: undefined;   // AQ8 · add a pet
   // US-X1 — the bell
   notifications: undefined;
   // Track A — adoption (US-A3/A4)
