@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
+import { ScreenHeader } from "../components/ui";
 import { useSocialSignIn } from "../auth/useSocialSignIn";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { AdoptScreen } from "../screens/AdoptScreen";
@@ -248,29 +249,21 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
 
 // Minimal stand-in so passwordChanged's "Need help?" link has somewhere to go and typechecks
 // end-to-end. A real contact-support flow (ticket form, FAQ, etc.) is out of scope for M6.
-function PlaceholderSupport() {
+function PlaceholderSupport({ navigation }: NativeStackScreenProps<RootStackParamList, "support">) {
   return (
-    <View style={styles.lockedScreen}>
-      <Text style={styles.lockedTitle}>Contact support</Text>
-      <Text style={styles.lockedBody}>Support is coming soon. Email hello@kupkop.ph for now.</Text>
+    <View style={styles.supportScreen}>
+      <ScreenHeader title="Contact support" onBack={() => navigation.goBack()} />
+      <View style={styles.supportBody}>
+        <Text style={styles.lockedBody}>Support is coming soon. Email hello@kupkop.ph for now.</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  lockedScreen: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    backgroundColor: "#F7F7F4"
-  },
-  lockedTitle: {
-    color: "#1F3A5F",
-    ...typography.section
-  },
+  supportScreen: { flex: 1, backgroundColor: "#F7F7F4" },
+  supportBody: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
   lockedBody: {
-    marginTop: 10,
     color: "#62615C",
     ...typography.meta,
     textAlign: "center",
