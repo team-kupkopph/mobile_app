@@ -80,3 +80,9 @@ describe("the form screen", () => {
     expect(form).toContain("btn.listingForm.addPhoto");
   });
 });
+
+describe("a blank city (Run 8, R8-F1)", () => {
+  it("is caught before the request, in words, instead of the server's nameless 'may not be blank'", () => {
+    expect(read("screens/ListingFormScreen.tsx")).toMatch(/if \(!city\.trim\(\)\) \{ setError\("Add the city where the animal is\."\); return; \}/);
+  });
+});

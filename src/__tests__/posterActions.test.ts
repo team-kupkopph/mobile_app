@@ -49,3 +49,19 @@ describe("Your listing screen", () => {
     expect(screen).toMatch(/publishRefusal\(/);
   });
 });
+
+describe("the chip on Your listing for a removed listing (Run 8, R8-F7)", () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { listingStatusChip } = require("../applicant");
+  it("reads Removed, not the status it had, when moderation took it down", () => {
+    expect(listingStatusChip("available", true)).toEqual({ label: "Removed", tone: "danger" });
+    expect(listingStatusChip("pending", true).label).toBe("Removed");
+  });
+  it("is unchanged for a listing that wasn't removed", () => {
+    expect(listingStatusChip("available").label).toBe("Live");
+    expect(listingStatusChip("available", false).label).toBe("Live");
+  });
+  it("the screen passes the flag", () => {
+    expect(read("screens/PosterListingScreen.tsx")).toMatch(/listingStatusChip\(listing\.status, !!listing\.removed_by_moderation\)/);
+  });
+});

@@ -158,6 +158,9 @@ export function ListingFormScreen({ navigation, route }: Props) {
       return;
     }
     if (!name.trim()) { setError("Give the listing a name."); return; }
+    // Run 8 · the server answers a blank city with a bare "This field may not be blank." that names no field, and the
+    // City field's grey placeholder ("Marikina") reads as a value when the person has no home city set.
+    if (!city.trim()) { setError("Add the city where the animal is."); return; }
     setSubmitting(true);
     setError(undefined);
 
