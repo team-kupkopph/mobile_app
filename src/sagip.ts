@@ -1,4 +1,5 @@
 import { MyReport, OfferListStatus, OfferType, RescueCaseSummary, RescuePerson, ReportDetail, StrayStatus } from "./api/types";
+import type { CaseHandoff } from "./api/types";
 
 // Sagip's shared display logic, unit-tested (like shelterDashboard.ts / verifications.ts).
 
@@ -516,4 +517,27 @@ export function handoffConflictAction(
   if (d?.listing_status === "draft" && d.listing_id) return { kind: "openDraft", listingId: d.listing_id };
   if (d?.listing_status === "adopted") return { kind: "message", text: "This animal already has a home." };
   return { kind: "message", text: "This animal is already listed or offered to someone — take that back first." };
+}
+
+
+// AD20 · the case screen's handoff card: where the animal's handoff stands, in words, and where a tap
+// on it goes. `null` handoff = nothing listed or offered, so the List / Place buttons stay.
+export type HandoffCard = { title: string; line: string; opensListing: boolean };
+
+export function handoffCard(h: CaseHandoff | null | undefined): HandoffCard | null {
+  if (!h) return null;
+  if (h.kind === "placement") {
+    return h.status === "adopted"
+      ? { title: "Placed", line: `${h.recipient ?? "They"} accepted. The animal has a new home.`, opensListing: false }
+      : { title: "Placed", line: `Waiting for ${h.recipient ?? "them"} to answer.`, opensListing: false };
+  }
+  const n = h.open_inquiries;
+  const asked = n === 0 ? "no inquiries yet" : n === 1 ? "1 inquiry" : `${n} inquiries`;
+  switch (h.status) {
+    case "draft": return { title: "Draft listing", line: "Finish it and publish when you are ready.", opensListing: true };
+    case "available": return { title: "Listed", line: `Live on the Adopt feed · ${asked}`, opensListing: true };
+    case "pending": return { title: "Listed", line: `Reserved for an applicant · ${asked}`, opensListing: true };
+    case "adopted": return { title: "Adopted", line: "This animal has a new home.", opensListing: true };
+    default: return null;
+  }
 }

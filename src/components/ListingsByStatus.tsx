@@ -9,7 +9,8 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Listing } from "../api/types";
 import { useApi } from "../api/useApi";
 import { loadState } from "../net";
-import { DRAFT_STATUS, ListingStatus, SEGMENT_STATUS, STATUS_CHIP, applicantsChip, listingInitial, listingTitle } from "../shelterAnimals";
+import { ARCHIVED_STATUS, DRAFT_STATUS, SEGMENT_STATUS, applicantsChip, cardChip, listingInitial, listingTitle } from "../shelterAnimals";
+import { TAP_SLOP } from "../touch";
 import { colors, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 import { LoadStateView } from "./LoadStateView";
@@ -33,6 +34,8 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
   const large = useLargeText();
   const api = useApi();
   const [segment, setSegment] = useState(0);
+  // AD10 · withdrawn listings, behind a link (the segmented control holds three).
+  const [archived, setArchived] = useState(false);
   const [listings, setListings] = useState<Listing[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   // D7 · animals taken in from a rescuer's placement arrive as private drafts. Fetched on
@@ -45,7 +48,7 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
   const load = useCallback(() => {
       setRes(null);
       setListings(null);
-      const status = SEGMENT_STATUS[segment as keyof typeof SEGMENT_STATUS];
+      const status = archived ? ARCHIVED_STATUS : SEGMENT_STATUS[segment as keyof typeof SEGMENT_STATUS];
       api.get(`/listings?mine=true&status=${status}`).then((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setListings(r.data?.results ?? []);
@@ -54,7 +57,7 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
         if (r.ok) setDrafts(r.data?.results ?? []);
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + segment change
-    }, [segment]);
+    }, [segment, archived]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const state = loadState(res, listings?.length);
@@ -67,7 +70,7 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
             {drafts.length === 1 ? "1 draft to finish" : `${drafts.length} drafts to finish`}
           </Text>
           <Text style={styles.draftsSub}>
-            Taken in from a rescue. Add a story and fee, then publish. Only you can see these.
+            Finish the details, then publish. Only you can see these.
           </Text>
           {drafts.map((d) => (
             <TouchableOpacity
@@ -94,16 +97,21 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
 
       {actions}
 
+      <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.listings.archived"
+        style={styles.archivedLink} onPress={() => setArchived((a) => !a)}>
+        <Text style={styles.archivedLabel}>{archived ? "‹ Back to your listings" : "Archived listings ›"}</Text>
+      </TouchableOpacity>
+
       {state.kind !== "ready" ? (
         <LoadStateView
           state={state}
-          emptyTitle="No animals here yet."
-          emptyBody='Tap "+  List an animal" to post one.'
+          emptyTitle={archived ? "Nothing archived." : "No animals here yet."}
+          emptyBody={archived ? "Listings you withdraw show up here." : 'Tap "+  List an animal" to post one.'}
           onRetry={load}
         />
       ) : (
         (listings ?? []).map((l) => {
-          const chip = STATUS_CHIP[l.status as ListingStatus] ?? STATUS_CHIP.available;
+          const chip = cardChip(l, archived);
           const applicants = applicantsChip(l.open_inquiries);
           const subtitle = [l.pet.breed ?? l.pet.species, l.city].filter(Boolean).join(" · ");
           return (
@@ -137,6 +145,8 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
 
 const styles = StyleSheet.create({
   segmented: { marginTop: 18 },
+  archivedLink: { alignSelf: "flex-start", marginTop: 12, minHeight: 44, justifyContent: "center" },
+  archivedLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   row: { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 14, padding: 14 },
   draftsCard: { marginTop: 14, padding: spacing.lg },
   draftsTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },

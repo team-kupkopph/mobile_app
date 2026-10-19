@@ -20,7 +20,7 @@ import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
 import {
   RELEASE_REASONS, ReleaseReason, advanceableStatuses, caseScreenState, claimDeadline, directionsUrl, endedCaseLine,
-  handoffCancelMessage, closeInquiriesPrompt, closedInquiriesDone, isReportRemoved, sagipTitle, strayChip,
+  handoffCancelMessage, handoffCard, closeInquiriesPrompt, closedInquiriesDone, isReportRemoved, sagipTitle, strayChip,
 } from "../sagip";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
@@ -81,6 +81,8 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
   const holdsClaim = state === "active" || state === "custody";
   // US-H1/H2 · the handoff is the claimer's, once the animal is safe in their care.
   const canHandOff = state === "custody" && report?.status === "safe";
+  // AD20 · when the animal is already listed or offered, say where that stands instead of offering to start another.
+  const handoff = handoffCard(report?.my_case?.handoff);
 
   async function addOutcomePhoto() {
     if (uploadingPhoto) return;
@@ -321,6 +323,16 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                   moved on to resolved), not instead of them. */}
               {canHandOff ? (
                 <>
+                  {handoff ? (
+                    <TouchableOpacity activeOpacity={0.85} accessibilityRole={handoff.opensListing ? "button" : "text"}
+                      disabled={!handoff.opensListing} testID="card.rescueUpdate.handoff"
+                      onPress={() => navigation.navigate("posterListing", { listingId: report!.my_case!.handoff!.listing_id })}>
+                      <Card style={styles.handoffCard}>
+                        <Text style={styles.handoffTitle}>{handoff.title}</Text>
+                        <Text style={styles.handoffLine}>{handoff.line}{handoff.opensListing ? " ›" : ""}</Text>
+                      </Card>
+                    </TouchableOpacity>
+                  ) : (
                   <View style={[styles.handoffRow, large && styles.handoffRowLarge]}>
                     <Button
                       label="List for adoption"
@@ -333,6 +345,7 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                       variant="secondary"
                     />
                   </View>
+                  )}
                   <TouchableOpacity style={styles.releaseLink} accessibilityRole="button"
                     testID="btn.rescueUpdate.cancelHandoff" disabled={cancelBusy} onPress={confirmCancelHandoff}
                     accessibilityState={{ disabled: cancelBusy, busy: cancelBusy }}>
@@ -457,6 +470,9 @@ const styles = StyleSheet.create({
   endedCard: { marginTop: 14 },
   endedTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   endedBody: { marginTop: 6, marginBottom: 14, color: colors.muted, ...typography.body },
+  handoffCard: { marginTop: 20, padding: 16 },
+  handoffTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  handoffLine: { marginTop: 4, color: colors.muted, ...typography.meta, lineHeight: 18 },
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
   handoffRowLarge: { flexDirection: "column" },
   handoffBtn: { flex: 1 },

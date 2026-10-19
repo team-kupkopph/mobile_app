@@ -3,10 +3,11 @@
 // V2 list it replaced). Replaces the M8 placeholder.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AdoptDeck } from "../components/AdoptDeck";
 import { InquiryList } from "../components/InquiryList";
+import { SavedList } from "../components/SavedList";
 import { Button, PressScale, SegmentedControl } from "../components/ui";
 import { maxFontScale, motion, spacing, tabBarClearance, typography } from "../theme";
 
@@ -24,8 +25,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors } from "../theme";
 
 
-/** The canvas's Adopt artboard: ["Browse", "My inquiries"]. */
-const SEGMENTS = ["Browse", "My inquiries"];
+import { SEGMENTS, SEG_INQUIRIES, SEG_SAVED } from "../savedList";
 
 const SPECIES: Array<{ key: string; label: string }> = [
   { key: "", label: "All" }, { key: "dog", label: "Dogs" },
@@ -41,18 +41,43 @@ export function AdoptScreen({ navigation }: Props) {
   // not tell "not loaded" from "genuinely none", which only stayed safe because `res` was
   // tracked alongside it. With a cache the distinction does real work: null means show the
   // load state, [] means the city really has no pets.
-  const { rows: listings, res, stale, load: loadFeed } =
+  const { rows: listings, res, stale, load: loadFeed, data: firstPage } =
     useCachedFeed<Listing>(api, (d) => d?.results ?? []);
 
   const [species, setSpecies] = useState("");
+
+  // AD17 · the feed is paged (20 a time). The deck asks for the next page as it runs low; pages
+  // after the first live here, because useCachedFeed caches and replaces only page 1.
+  const [more, setMore] = useState<Listing[]>([]);
+  const [nextPage, setNextPage] = useState<number | null>(null);
+  const query = useRef("");
+  const loadingMore = useRef(false);
+  useEffect(() => { setNextPage(firstPage?.next ?? null); }, [firstPage]);
 
   const load = useCallback(() => {
     const params = new URLSearchParams();
     if (city) params.set("city", city);
     if (species) params.set("species", species);
-    loadFeed(`/listings?${params.toString()}`);
+    query.current = params.toString();
+    setMore([]);
+    loadFeed(`/listings?${query.current}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter change
   }, [city, species]);
+
+  const loadMore = useCallback(() => {
+    if (!nextPage || loadingMore.current) return;
+    loadingMore.current = true;
+    api.get(`/listings?${query.current}&page=${nextPage}`).then((r) => {
+      loadingMore.current = false;
+      if (!r.ok) return;     // a failed page leaves the deck as it was; the next swipe asks again
+      setMore((prev) => {
+        const seen = new Set(prev.map((l) => l.listing_id));
+        return [...prev, ...(r.data?.results ?? []).filter((l: Listing) => !seen.has(l.listing_id))];
+      });
+      setNextPage(r.data?.next ?? null);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reads the current page
+  }, [nextPage]);
 
   const [segment, setSegment] = useState(0);
 
@@ -76,14 +101,18 @@ export function AdoptScreen({ navigation }: Props) {
           than sending "My inquiries" to a screen of its own. The route still exists — see
           components/InquiryList.tsx for why — this is the in-place view. */}
       <SegmentedControl
-        segments={SEGMENTS}
+        segments={[...SEGMENTS]}
         index={segment}
         onChange={setSegment}
         testID="seg.adopt"
         style={styles.segmented}
       />
 
-      {segment === 1 ? (
+      {segment === SEG_SAVED ? (
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} testID="list.adopt.saved">
+          <SavedList />
+        </ScrollView>
+      ) : segment === SEG_INQUIRIES ? (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <InquiryList />
         </ScrollView>
@@ -121,8 +150,10 @@ export function AdoptScreen({ navigation }: Props) {
               The species chips above still drive the query; the deck is what the result
               becomes. `card.adopt.0` stays the top card, so 20-browse-and-inquire.yaml holds. */}
           <AdoptDeck
-            listings={listings ?? []}
+            listings={[...(listings ?? []), ...more.filter((m) => !(listings ?? []).some((l) => l.listing_id === m.listing_id))]}
             city={city}
+            hasMore={!!nextPage}
+            onNearEnd={loadMore}
             onOpen={(listingId) => navigation.navigate("listingDetail", { listingId })}
           />
           </>

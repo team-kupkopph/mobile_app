@@ -17,6 +17,20 @@ export const SEGMENT_STATUS = { 0: "available", 1: "pending", 2: "adopted" } as 
 
 export type ListingStatus = (typeof SEGMENT_STATUS)[keyof typeof SEGMENT_STATUS];
 
+/** AD10 · a withdrawn listing isn't a fourth segment (the control holds three); it sits behind an
+ *  "Archived" link under the segments and is read with this status. */
+export const ARCHIVED_STATUS = "withdrawn" as const;
+export const ARCHIVED_CHIP: { label: string; tone: ChipTone } = { label: "Withdrawn", tone: "neutral" };
+/** AD7 · a card the poster sees after a moderation takedown. */
+export const REMOVED_CHIP: { label: string; tone: ChipTone } = { label: "Removed", tone: "danger" };
+
+/** The chip for a poster's own card: a takedown wins over whatever the status was. */
+export function cardChip(l: { status: string; removed_by_moderation?: boolean }, archived: boolean): { label: string; tone: ChipTone } {
+  if (l.removed_by_moderation) return REMOVED_CHIP;
+  if (archived) return ARCHIVED_CHIP;
+  return STATUS_CHIP[l.status as ListingStatus] ?? STATUS_CHIP.available;
+}
+
 /**
  * One status chip per segment. "available" and "adopted" both read as `success` — a live
  * listing and one that reached its goal are both a good state; only "pending" is waiting on
