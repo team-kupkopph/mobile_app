@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
     padding: 0,
     ...typography.subtitle,
+    lineHeight: 24,
     color: colors.ink
   },
   inputReadOnly: { color: colors.muted },
