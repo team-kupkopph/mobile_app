@@ -121,7 +121,8 @@ const styles = StyleSheet.create({
   primaryLabel: { ...typography.subtitle, fontWeight: "800", color: colors.white },
   plainLabel: { ...typography.subtitle, fontWeight: "800", color: colors.ink },
   destructiveLabel: { ...typography.subtitle, fontWeight: "800", color: colors.danger },
-  secondary: { backgroundColor: colors.white, ...elevation.soft },
+  // R8-F3 · a hairline, so a secondary on a white card reads as a button and not as plain text.
+  secondary: { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, ...elevation.soft },
   glass: {
     backgroundColor: colors.glass,
     borderWidth: 1,
