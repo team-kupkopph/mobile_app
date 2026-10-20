@@ -65,9 +65,9 @@ export function applicantsChip(n: number | undefined): string | null {
 // a fourth segment — the three above follow the canvas artboard — they sit in their own strip.
 export const DRAFT_STATUS = "draft" as const;
 
-/** Where a tap on a draft goes: the form, so the shelter can add the story and fee first. */
-export function draftRoute(listingId: string): { name: "listingForm"; params: { listingId: string } } {
-  return { name: "listingForm", params: { listingId } };
+/** Where a tap on a draft goes: Your listing (the preview), which carries Edit, Publish and Delete draft. */
+export function draftRoute(listingId: string): { name: "posterListing"; params: { listingId: string } } {
+  return { name: "posterListing", params: { listingId } };
 }
 
 /** The accept response is `{ listing_id, draft: true }` for a shelter and `{ pet_id }` for a

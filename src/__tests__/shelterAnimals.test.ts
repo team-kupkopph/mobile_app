@@ -66,8 +66,10 @@ describe("drafts from accepted placements (D7)", () => {
     expect(Object.values(SEGMENT_STATUS)).not.toContain("draft");
   });
 
-  it("opens a draft in the listing form, to finish it before publishing", () => {
-    expect(draftRoute("l-1")).toEqual({ name: "listingForm", params: { listingId: "l-1" } });
+  // Run 9 (R9-F3): every listing is a draft now (AD12), and Your listing is where a draft is previewed, edited,
+  // published or deleted. The strip used to open the form, putting Publish one Save away.
+  it("opens a draft on Your listing, where Edit, Publish and Delete draft live", () => {
+    expect(draftRoute("l-1")).toEqual({ name: "posterListing", params: { listingId: "l-1" } });
   });
 
   it("threads the draft's id from the accept response to the confirmation", () => {
