@@ -62,6 +62,11 @@ describe("the Archived link (AD10) and the removed chip (AD7)", () => {
     expect(by).toMatch(/archived \? ARCHIVED_STATUS : SEGMENT_STATUS/);
     expect(by).toContain("btn.listings.archived");
   });
+  it("the Archived view selects no segment, and tapping one leaves it (Run 8, R8-F4)", () => {
+    const by = read("components/ListingsByStatus.tsx");
+    expect(by).toMatch(/index=\{archived \? -1 : segment\}/);
+    expect(by).toMatch(/onChange=\{\(i\) => \{\s*setArchived\(false\);\s*setSegment\(i\);\s*\}\}/);
+  });
   it("a takedown wins over the status on the poster's own card", () => {
     expect(cardChip({ status: "available", removed_by_moderation: true }, false).label).toBe("Removed");
     expect(cardChip({ status: "withdrawn" }, true).label).toBe("Withdrawn");
