@@ -34,7 +34,8 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
   const large = useLargeText();
   const api = useApi();
   const [segment, setSegment] = useState(0);
-  // AD10 · withdrawn listings, behind a link (the segmented control holds three).
+  // AD10 · withdrawn listings, behind a link (the segmented control holds three). While showing them no segment is
+  // selected (R8-F4), and tapping one returns to that segment.
   const [archived, setArchived] = useState(false);
   const [listings, setListings] = useState<Listing[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -89,8 +90,11 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
 
       <SegmentedControl
         segments={SEGMENTS}
-        index={segment}
-        onChange={setSegment}
+        index={archived ? -1 : segment}
+        onChange={(i) => {
+          setArchived(false);
+          setSegment(i);
+        }}
         testID={segmentTestID}
         style={styles.segmented}
       />
