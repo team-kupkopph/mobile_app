@@ -121,7 +121,7 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
                   <Image source={{ uri: l.photo_url }} style={styles.photo} />
                 ) : (
                   <View style={styles.photoPlaceholder}>
-                    <Text style={styles.photoGlyph}>{listingInitial(l.pet.name)}</Text>
+                    <Text style={styles.photoGlyph} maxFontSizeMultiplier={1.2}>{listingInitial(l.pet.name)}</Text>
                   </View>
                 )}
                 <View style={[styles.rowCopy, large && styles.rowCopyLarge]}>

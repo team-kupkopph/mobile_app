@@ -324,7 +324,11 @@ export function ListingFormScreen({ navigation, route }: Props) {
           {photos.map((url, i) => (
             <View key={url} style={styles.photoCell} testID={`photo.listingForm.${i}`}>
               <Image source={{ uri: url }} style={styles.thumb} resizeMode="cover" />
-              {i === 0 ? <Text style={styles.mainTag}>Main photo</Text> : (
+              {i === 0 ? (
+                <View style={styles.photoAct}>
+                  <Text style={styles.mainTag}>Main photo</Text>
+                </View>
+              ) : (
                 <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.photoAct}
                   onPress={() => setPhotos((p) => makeMain(p, i))}>
                   <Text style={styles.photoActText}>Make main</Text>
@@ -391,7 +395,7 @@ const styles = StyleSheet.create({
   photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 12 },
   photoCell: { width: "47%" },
   thumb: { width: "100%", height: 110, borderRadius: radii.field, backgroundColor: colors.border },
-  mainTag: { marginTop: 6, minHeight: 44, textAlignVertical: "center", color: colors.tealDark, ...typography.meta, fontWeight: "800" },
+  mainTag: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },
   photoAct: { minHeight: 44, justifyContent: "center" },
   photoActText: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   photoRemove: { color: colors.danger, ...typography.meta, fontWeight: "700" },
