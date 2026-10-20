@@ -159,3 +159,18 @@ describe("Sagip loop-closure notifications", () => {
       .toEqual({ screen: "myRescues" });
   });
 });
+
+describe("a push's data is all strings (backend#89)", () => {
+  it("routes a poster push whose poster_is_shelter arrives as the string \"true\", like the bell's boolean", () => {
+    for (const flag of [true, "true"]) {
+      expect(notificationTarget({ type: "inquiry_waiting", data: { listing_id: "l1", poster_is_shelter: flag } }))
+        .toEqual({ screen: "shelterRequests" });
+    }
+  });
+  it("does not read \"false\" (or anything else) as a shelter", () => {
+    for (const flag of [false, "false", "no", undefined]) {
+      expect(notificationTarget({ type: "inquiry_waiting", data: { listing_id: "l1", poster_is_shelter: flag } }))
+        .toEqual({ screen: "listingDetail", listingId: "l1" });
+    }
+  });
+});

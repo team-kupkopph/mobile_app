@@ -58,6 +58,7 @@ const MY_INQUIRIES_TYPES = new Set(["placement_offered", "placement_withdrawn"])
 // inquiry_id (from before the Applicant screen) keeps PR A's interim routing: a shelter lands on
 // Requests, an individual poster on the listing. The backend says which (`poster_is_shelter`),
 // because the client holds no account type.
+// A push's data map is all strings (backend#89), so poster_is_shelter is true in the bell and "true" in a push.
 const POSTER_INQUIRY_TYPES = new Set(["inquiry_received", "inquiry_withdrawn", "inquiry_waiting"]);
 // US-V8 · the volunteer side of notify(): schedule and history folded onto one hub screen
 // (Task 5, K30/G9) — every volunteer notification now opens the hub on its "My shifts" tab,
@@ -93,7 +94,7 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   }
   if (POSTER_INQUIRY_TYPES.has(n.type)) {
     if (n.data?.inquiry_id) return { screen: "applicant", inquiryId: n.data.inquiry_id };
-    if (n.data?.poster_is_shelter === true) return { screen: "shelterRequests" };
+    if ((n.data?.poster_is_shelter === true || n.data?.poster_is_shelter === "true")) return { screen: "shelterRequests" };
     if (n.data?.listing_id) return { screen: "listingDetail", listingId: n.data.listing_id };
     return null;
   }
