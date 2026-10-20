@@ -53,12 +53,19 @@ export type UploadPurpose =
 export type UploadDeps = {
   /** Strip EXIF + downscale. Returns the processed file's uri. */
   process: (uri: string, resize: { width: number } | { height: number } | null) => Promise<string>;
-  /** Read the processed file as a blob for the multipart POST. */
-  toBlob: (uri: string) => Promise<Blob>;
   post: (path: string, body: unknown) => Promise<{ ok: boolean; status: number; data: any }>;
   /** Raw multipart POST to S3's presigned endpoint (NOT the API client — different host). */
   putToStorage: (url: string, form: FormData) => Promise<{ ok: boolean; status: number }>;
 };
+
+/**
+ * The multipart `file` part, as React Native's FormData wants it: a descriptor of the file on disk, which the
+ * networking layer streams. R12-F3 · reading the file into a Blob first instead reached a receiver as a
+ * 0-byte part on a device (the blob's own size was 391,292), which S3's `content-length-range 0..max` would accept.
+ */
+export function filePart(uri: string): { uri: string; type: string; name: string } {
+  return { uri, type: "image/jpeg", name: "photo.jpg" };
+}
 
 export type UploadResult =
   | { ok: true; fileUrl: string }
@@ -97,18 +104,11 @@ export async function uploadImage(
     return { ok: true, fileUrl: file_url };
   }
 
-  let blob: Blob;
-  try {
-    blob = await deps.toBlob(processedUri);
-  } catch {
-    return { ok: false, reason: "processing" };
-  }
-
   // S3 presigned POST: every policy field first, the file LAST — S3 ignores anything after
   // the file part, so a field placed after it is silently dropped and the upload is refused.
   const form = new FormData();
   Object.entries(fields ?? {}).forEach(([k, v]) => form.append(k, v));
-  form.append("file", blob as any);
+  form.append("file", filePart(processedUri) as any);
 
   const res = await deps.putToStorage(upload_url, form);
   if (!res.ok) {

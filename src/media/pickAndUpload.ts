@@ -54,7 +54,6 @@ export async function pickAndUpload(
         });
         return saved.uri;
       },
-      toBlob: async (uri) => (await fetch(uri)).blob(),
       post: (path, body) => api.post(path, body),
       // A raw fetch, deliberately NOT the API client: this goes to S3, a different host with
       // no bearer token, and sending our JWT to a storage endpoint would leak it.

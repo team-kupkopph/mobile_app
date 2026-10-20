@@ -1,4 +1,6 @@
-import { MAX_EDGE, resizeTarget, uploadErrorMessage, uploadImage } from "../upload";
+import { readFileSync } from "fs";
+import { join } from "path";
+import { MAX_EDGE, filePart, resizeTarget, uploadErrorMessage, uploadImage } from "../upload";
 
 const PRESIGN = {
   upload_url: "https://bucket.s3.example.com/",
@@ -9,7 +11,6 @@ const PRESIGN = {
 function deps(over: Partial<Parameters<typeof uploadImage>[0]> = {}) {
   return {
     process: jest.fn().mockResolvedValue("file:///processed.jpg"),
-    toBlob: jest.fn().mockResolvedValue({ size: 1234 } as any),
     post: jest.fn().mockResolvedValue({ ok: true, status: 200, data: PRESIGN }),
     putToStorage: jest.fn().mockResolvedValue({ ok: true, status: 204 }),
     ...over,
@@ -76,7 +77,8 @@ describe("uploadImage", () => {
 
     await uploadImage(d, "stray_photo", image);
 
-    if (appended.length) expect(appended[appended.length - 1]).toBe("file");
+    expect(appended.length).toBeGreaterThan(1);                       // the scan found the form's parts
+    expect(appended[appended.length - 1]).toBe("file");
   });
 
   it("succeeds against the dev stub, which has no bucket to receive bytes", async () => {
@@ -128,5 +130,27 @@ describe("uploadErrorMessage", () => {
     expect(uploadErrorMessage("offline")).toMatch(/offline/i);
     expect(uploadErrorMessage("too_large")).toMatch(/too large/i);
     expect(uploadErrorMessage("anything else")).toMatch(/try again/i);
+  });
+});
+
+// Run 12 · R12-F3: on a device the file part built from `(await fetch(uri)).blob()` reached the receiver as 0 bytes
+// (the blob's own size was 391,292), while a React Native file descriptor sent all of it.
+describe("the file part is a React Native file descriptor, not a fetched blob (R12-F3)", () => {
+  it("names the processed file's uri, as JPEG, with a file name", () => {
+    expect(filePart("file:///cache/ImageManipulator/abc.jpg")).toEqual(
+      { uri: "file:///cache/ImageManipulator/abc.jpg", type: "image/jpeg", name: "photo.jpg" });
+  });
+  it("uploads without reading the file into a blob first", async () => {
+    const d = deps();
+    const result = await uploadImage(d, "stray_photo", image);
+    expect(result).toEqual({ ok: true, fileUrl: PRESIGN.file_url });
+    expect(d.putToStorage).toHaveBeenCalledTimes(1);
+  });
+  it("neither the uploader nor its wiring builds a blob for the form", () => {
+    const up = readFileSync(join(__dirname, "..", "upload.ts"), "utf8");
+    const wire = readFileSync(join(__dirname, "..", "media/pickAndUpload.ts"), "utf8");
+    expect(up).toContain('form.append("file", filePart(processedUri) as any)');
+    expect(up).not.toMatch(/deps\.toBlob|toBlob:|await fetch\(/);
+    expect(wire).not.toMatch(/toBlob|await fetch\(uri\)/);
   });
 });
