@@ -74,3 +74,20 @@ describe("the Archived link (AD10) and the removed chip (AD7)", () => {
     expect(cardChip({ status: "wat" }, false).label).toBe("Available");
   });
 });
+
+describe("My listings / Animals read every page (Run 1, R1-F1 / ML-N1)", () => {
+  const by = read("components/ListingsByStatus.tsx");
+  it("asks for the next page with the same status, and appends rather than replaces", () => {
+    expect(by).toMatch(/status=\$\{status\}&page=\$\{page\}/);
+    expect(by).toMatch(/page === 1 \? \(r\.data\?\.results \?\? \[\]\) : \[\.\.\.\(prev \?\? \[\]\), \.\.\.\(r\.data\?\.results \?\? \[\]\)\]/);
+    expect(by).toMatch(/setNext\(r\.data\?\.next \?\? null\)/);
+  });
+  it("shows a Load more button only while the server says there is a next page", () => {
+    expect(by).toMatch(/state\.kind === "ready" && next \? \(/);
+    expect(by).toContain("btn.listings.loadMore");
+    expect(by).toMatch(/onPress=\{\(\) => loadPage\(next\)\}/);
+  });
+  it("drops a page that answers after the segment changed, so rows never mix statuses", () => {
+    expect(by).toMatch(/if \(gen !== generation\.current\) return;/);
+  });
+});

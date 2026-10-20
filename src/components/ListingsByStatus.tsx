@@ -3,7 +3,7 @@
 // segmented Live / Reserved / Adopted, with a strip of private drafts above them. Extracted whole
 // from ShelterAnimalsScreen (Task B2); the two screens differ only in chrome and where a row goes.
 import { useFocusEffect } from "@react-navigation/native";
-import { ReactNode, useCallback, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Listing } from "../api/types";
@@ -44,21 +44,35 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
   // fetch shows nothing rather than claiming there are none.
   const [drafts, setDrafts] = useState<Listing[]>([]);
 
-  // US-R1 · named so the same function serves the focus refetch AND the retry button.
-  // Re-derived on every segment change too, same shape as AdoptScreen's species filter.
-  const load = useCallback(() => {
-      setRes(null);
-      setListings(null);
+  // R1-F1 · the server pages at 20; `next` is the following page number, null on the last.
+  const [next, setNext] = useState<number | null>(null);
+  // Bumped on every page-1 load: an answer from an earlier segment (or a stale page 2) is dropped, so rows never mix statuses.
+  const generation = useRef(0);
+  const loadPage = useCallback((page: number) => {
+      const gen = page === 1 ? ++generation.current : generation.current;
+      if (page === 1) {
+        setRes(null);
+        setListings(null);
+        setNext(null);
+      }
       const status = archived ? ARCHIVED_STATUS : SEGMENT_STATUS[segment as keyof typeof SEGMENT_STATUS];
-      api.get(`/listings?mine=true&status=${status}`).then((r) => {
-        setRes({ ok: r.ok, status: r.status });
-        if (r.ok) setListings(r.data?.results ?? []);
+      api.get(`/listings?mine=true&status=${status}&page=${page}`).then((r) => {
+        if (gen !== generation.current) return;
+        if (page === 1) setRes({ ok: r.ok, status: r.status });
+        if (!r.ok) return;
+        setListings((prev) => (page === 1 ? (r.data?.results ?? []) : [...(prev ?? []), ...(r.data?.results ?? [])]));
+        setNext(r.data?.next ?? null);
       });
-      api.get(`/listings?mine=true&status=${DRAFT_STATUS}`).then((r) => {
-        if (r.ok) setDrafts(r.data?.results ?? []);
-      });
+      if (page === 1) {
+        api.get(`/listings?mine=true&status=${DRAFT_STATUS}`).then((r) => {
+          if (r.ok) setDrafts(r.data?.results ?? []);
+        });
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + segment change
     }, [segment, archived]);
+  // US-R1 · named so the same function serves the focus refetch AND the retry button.
+  // Re-derived on every segment change too, same shape as AdoptScreen's species filter.
+  const load = useCallback(() => loadPage(1), [loadPage]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const state = loadState(res, listings?.length);
@@ -143,6 +157,13 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
           );
         })
       )}
+
+      {state.kind === "ready" && next ? (
+        <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.listings.loadMore"
+          style={styles.more} onPress={() => loadPage(next)}>
+          <Text style={styles.archivedLabel}>Load more</Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }
@@ -150,6 +171,7 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
 const styles = StyleSheet.create({
   segmented: { marginTop: 18 },
   archivedLink: { alignSelf: "flex-start", marginTop: 12, minHeight: 44, justifyContent: "center" },
+  more: { alignSelf: "center", marginTop: 12, minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
   archivedLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   row: { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 14, padding: 14 },
   draftsCard: { marginTop: 14, padding: spacing.lg },
