@@ -57,6 +57,26 @@ describe("notificationTarget", () => {
     }
   });
 
+  // Run 12 · NO-4, NO-B1, NO-P2 (R1-F2): the branches the rows name but no test pinned.
+  it("a poster push with no data at all goes nowhere, rather than guessing a listing (NO-4)", () => {
+    for (const type of ["inquiry_received", "inquiry_withdrawn", "inquiry_waiting"]) {
+      expect(notificationTarget({ type, data: {} })).toBeNull();
+      expect(notificationTarget({ type, data: null })).toBeNull();
+    }
+  });
+
+  it("the badge push opens the upgrade whether or not it carries an inquiry (NO-B1)", () => {
+    expect(notificationTarget({ type: "adoption_badge_needed", data: {} })).toEqual({ screen: "memberUpgrade" });
+    expect(notificationTarget({ type: "adoption_badge_needed", data: null })).toEqual({ screen: "memberUpgrade" });
+  });
+
+  it("a placement push without an inquiry still lands on My inquiries (NO-P2)", () => {
+    for (const type of ["placement_offered", "placement_withdrawn"]) {
+      expect(notificationTarget({ type, data: {} })).toEqual({ screen: "myInquiries" });
+      expect(notificationTarget({ type, data: null })).toEqual({ screen: "myInquiries" });
+    }
+  });
+
   it("opens the three new destinations from the bell", () => {
     const src = require("fs").readFileSync(require("path").join(__dirname, "../screens/NotificationsScreen.tsx"), "utf8");
     expect(src).toMatch(/case "applicant":\s*navigation\.navigate\("applicant", \{ inquiryId: target\.inquiryId \}\)/);
