@@ -29,7 +29,9 @@ export function InquireSheet({ visible, petName, posterName, sending, onSend, on
           <View style={StyleSheet.absoluteFill} />
         </TouchableWithoutFeedback>
         <View style={styles.sheet} testID="sheet.inquire">
-          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}
+          {/* Run 9 · at AX5 the sheet's own text fills the room above the keyboard, so a focused field sat behind it and
+              could not be scrolled to. The inset makes the scroll view move for the keyboard (same fix as the auth screens). */}
+          <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.content}>
             <Text style={styles.title}>Ask about {petName}</Text>
             <Text style={styles.sub}>{posterName} will see this when they review your inquiry. Everything here is optional.</Text>

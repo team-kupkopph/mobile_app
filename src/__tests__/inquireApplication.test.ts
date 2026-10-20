@@ -46,3 +46,12 @@ describe("the screens", () => {
     expect(read("screens/ApplicantScreen.tsx")).toContain("card.applicant.answers");
   });
 });
+
+describe("the Inquire sheet follows the keyboard (Run 9, R9-F1)", () => {
+  const sheet = read("components/InquireSheet.tsx");
+  it("its ScrollView adds a keyboard inset, so a focused field isn't left behind the keyboard at AX5", () => {
+    const tag = /<ScrollView\b[\s\S]*?[}"]\s*>/.exec(sheet)?.[0] ?? "";
+    expect(tag).toMatch(/keyboardShouldPersistTaps/);      // the scan found the tag
+    expect(tag).toMatch(/\bautomaticallyAdjustKeyboardInsets\b/);
+  });
+});
