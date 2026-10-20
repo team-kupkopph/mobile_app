@@ -116,6 +116,15 @@ describe("posterLadderHeader / applicantStatusLine", () => {
     expect(applicantStatusLine(row({ status: "declined", end_reason: "not_a_fit" }))).toBe("Declined");
     expect(applicantStatusLine(row({ kind: "placement" }))).toBe("Placement offer");
   });
+
+  // Run 12 · R12-F1: the list line agrees with the detail screen's closedLine, which already tells these apart.
+  it("a closed row's list line follows the detail wording, not a blanket 'Declined'", () => {
+    expect(applicantStatusLine(row({ status: "withdrawn", end_reason: "listing_withdrawn" }))).toBe("Listing taken down");
+    expect(applicantStatusLine(row({ status: "declined", end_reason: "another_adopter_chosen" }))).toBe("Another applicant chosen");
+    for (const end_reason of ["requirements_not_met", "no_response", "other", "", undefined]) {
+      expect(applicantStatusLine(row({ status: "declined", end_reason }))).toBe("Declined");
+    }
+  });
 });
 
 describe("sheets, chips, refusals, dates", () => {

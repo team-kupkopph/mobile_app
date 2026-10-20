@@ -104,6 +104,9 @@ export function applicantStatusLine(row: PosterInquiry): string {
   if (row.kind === "placement" && row.status === "active") return "Placement offer";
   if (row.status === "adopted") return "Adopted";
   if (row.status === "withdrawn" && row.end_reason === "adopter_withdrew") return "Withdrew";
+  // R12-F1 · the two closings that are not the poster's decision read as the detail screen's closedLine does.
+  if (row.end_reason === "listing_withdrawn") return "Listing taken down";
+  if (row.end_reason === "another_adopter_chosen") return "Another applicant chosen";
   if (row.status !== "active") return "Declined";
   if (row.reserved_at) return "Reserved for them";
   if (!row.accepted_at) return "New";
