@@ -20,6 +20,9 @@ export const EMPTY_APPLICATION: ApplicationState = {
 
 export const ANSWER_MAX = 500;
 
+/** Selected segment of a No / Yes control: -1 (nothing chosen) while the answer is null, so an untouched control isn't read as "No". */
+export const yesNoIndex = (v: boolean | null): number => (v === null ? -1 : v ? 1 : 0);
+
 /** Only what was answered. `landlord_ok` is asked of renters alone, so an owner never sends one. */
 export function buildApplication(a: ApplicationState): Record<string, string | boolean> {
   const out: Record<string, string | boolean> = {};

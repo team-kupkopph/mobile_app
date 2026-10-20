@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import { EMPTY_APPLICATION, applicationRows, buildApplication, inquiryBody } from "../inquireApplication";
+import { EMPTY_APPLICATION, applicationRows, buildApplication, inquiryBody, yesNoIndex } from "../inquireApplication";
 
 const read = (rel: string) => readFileSync(join(__dirname, "..", rel), "utf8");
 
@@ -53,5 +53,19 @@ describe("the Inquire sheet follows the keyboard (Run 9, R9-F1)", () => {
     const tag = /<ScrollView\b[\s\S]*?[}"]\s*>/.exec(sheet)?.[0] ?? "";
     expect(tag).toMatch(/keyboardShouldPersistTaps/);      // the scan found the tag
     expect(tag).toMatch(/\bautomaticallyAdjustKeyboardInsets\b/);
+  });
+});
+
+describe("an unanswered Yes/No shows as unanswered (Run 8, R8-F5)", () => {
+  it("maps null to no selection, so the control never claims an answer that isn't sent", () => {
+    expect(yesNoIndex(null)).toBe(-1);
+    expect(yesNoIndex(false)).toBe(0);
+    expect(yesNoIndex(true)).toBe(1);
+  });
+  it("the sheet draws both Yes/No controls from that mapping, not from `=== true ? 1 : 0`", () => {
+    const sheet = read("components/InquireSheet.tsx");
+    expect(sheet).toMatch(/index=\{yesNoIndex\(app\.rents\)\}/);
+    expect(sheet).toMatch(/index=\{yesNoIndex\(app\.landlordOk\)\}/);
+    expect(sheet).not.toMatch(/=== true \? 1 : 0/);
   });
 });
