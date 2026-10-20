@@ -59,5 +59,10 @@
     "jest-expo": "^54.0.17",
     "js-yaml": "^5.4.2",
     "typescript": "~5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "shell-quote": ">=1.11.0"
+    }
   }
 }
