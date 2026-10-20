@@ -24,6 +24,7 @@ import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
+import { listingTitle } from "../shelterAnimals";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "listingDetail">;
@@ -175,7 +176,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             </ScrollView>
           ) : null}
 
-          <Text style={styles.name} maxFontSizeMultiplier={maxFontScale.title}>{listing.pet.name}</Text>
+          <Text style={styles.name} maxFontSizeMultiplier={maxFontScale.title}>{listingTitle(listing.pet.name)}</Text>
           <Text style={styles.sub}>
             {[capitalize(listing.pet.species), listing.pet.breed,
               listing.pet.sex ? capitalize(listing.pet.sex) : null, listing.city]
@@ -197,7 +198,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
 
           {listing.description ? (
             <>
-              <Text style={styles.sectionTitle}>About {listing.pet.name}</Text>
+              <Text style={styles.sectionTitle}>{`About ${listing.pet.name.trim() || "this animal"}`}</Text>
               <Text style={styles.body}>{listing.description}</Text>
             </>
           ) : null}

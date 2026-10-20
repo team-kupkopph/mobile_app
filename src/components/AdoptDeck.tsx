@@ -33,6 +33,7 @@ import { useReducedMotion } from "../useReducedMotion";
 import { AdoptIcon, CheckIcon, VolunteerIcon, XIcon } from "./AppIcons";
 import { Avatar, Chip, PressScale } from "./ui";
 import { colors, elevation, gradients, maxFontScale, motion, pill, radii, squircle, typography } from "../theme";
+import { listingTitle } from "../shelterAnimals";
 
 const CARD_HEIGHT = 452;
 const PHOTO_HEIGHT = 268;
@@ -168,7 +169,7 @@ export function AdoptDeck({ listings, city, onOpen, hasMore, onNearEnd }: AdoptD
                 {...(isTop ? pan.panHandlers : {})}
               >
                 <PressScale onPress={isTop ? () => onOpen(l.listing_id) : undefined} disabled={!isTop}
-                  accessibilityRole="button" accessibilityLabel={`${l.pet.name}, open listing`}
+                  accessibilityRole="button" accessibilityLabel={`${listingTitle(l.pet.name)}, open listing`}
                   // `card.adopt.0` is the contract 20-browse-and-inquire.yaml taps; the index is
                   // the card's place in the visible stack, so the top card is always 0.
                   testID={`card.adopt.${n}`} style={styles.cardInner}>
@@ -207,7 +208,7 @@ export function AdoptDeck({ listings, city, onOpen, hasMore, onNearEnd }: AdoptD
                   </View>
                   <View style={styles.body}>
                     <View style={styles.nameRow}>
-                      <Text style={styles.name} numberOfLines={large ? undefined : 1} maxFontSizeMultiplier={maxFontScale.title}>{l.pet.name}</Text>
+                      <Text style={styles.name} numberOfLines={large ? undefined : 1} maxFontSizeMultiplier={maxFontScale.title}>{listingTitle(l.pet.name)}</Text>
                       <Chip label="Available" tone="success" />
                     </View>
                     <Text style={styles.meta} numberOfLines={large ? undefined : 1}>{cardMeta(l.pet)}</Text>

@@ -25,6 +25,7 @@ import { gradients, heroDirection } from "../../theme/v3";
 import { TAP_SLOP } from "../../touch";
 import { useLargeText } from "../../useLargeText";
 import { Avatar } from "../ui";
+import { listingTitle } from "../../shelterAnimals";
 
 const paw = require("../../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -115,7 +116,7 @@ export function ListingRow({ listing, onPress, testID }: { listing: Listing; onP
         <Image source={paw} resizeMode="contain" style={styles.avatarPaw} />
       </Avatar>
       <View style={[styles.copy, large && styles.copyLarge]}>
-        <Text style={styles.name}>{listing.pet.name}</Text>
+        <Text style={styles.name}>{listingTitle(listing.pet.name)}</Text>
         <Text style={styles.details}>
           {[listing.pet.species, listing.pet.breed, listing.city].filter(Boolean).join(" · ")}
         </Text>
