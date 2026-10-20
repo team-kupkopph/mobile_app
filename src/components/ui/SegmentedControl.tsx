@@ -77,6 +77,8 @@ export function SegmentedControl({ segments, index, onChange, testID, style }: S
             <PressScale
               key={label}
               style={styles.segment}
+              // AX-4 · the segment is the track less its padding (38 pt); the padding is not touchable, so give it back.
+              hitSlop={{ top: PAD, bottom: PAD }}
               onPress={() => onChange(i)}
               accessibilityRole="tab"
               accessibilityLabel={label}
