@@ -26,6 +26,27 @@ type Need = {
 };
 type Props = NativeStackScreenProps<RootStackParamList, "donate">;
 
+// AT31 · an image that fails to load used to leave a blank grey box, so a donor could not tell "loading" from "failed" from "no code".
+// The card keeps the provider and the account name (who the gift is for) and says plainly that the code did not load.
+function QrCard({ qr }: { qr: DonationQr }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    // Decision 5 · the code must render at full contrast — Card is white by default,
+    // but the explicit fill is kept so a future tone change can't tint the code.
+    <Card style={styles.qrCard}>
+      <Text style={styles.provider}>{PROVIDER_LABEL[qr.provider] ?? qr.provider}</Text>
+      {failed ? (
+        <View style={[styles.qrImage, styles.qrFailed]}>
+          <Text style={styles.qrFailedText}>We couldn't load this code. Check your connection, then open Donate again.</Text>
+        </View>
+      ) : (
+        <Image source={{ uri: qr.qr_image_url }} style={styles.qrImage} resizeMode="contain" onError={() => setFailed(true)} />
+      )}
+      <Text style={styles.accountName}>{qr.account_name}</Text>
+    </Card>
+  );
+}
+
 export function DonateScreen({ navigation, route }: Props) {
   const api = useApi();
   const { accountId, orgName } = route.params;
@@ -72,11 +93,7 @@ export function DonateScreen({ navigation, route }: Props) {
           qrs.map((qr) => (
             // Decision 5 · the code must render at full contrast — Card is white by default,
             // but the explicit fill is kept so a future tone change can't tint the code.
-            <Card key={qr.provider} style={styles.qrCard}>
-              <Text style={styles.provider}>{PROVIDER_LABEL[qr.provider] ?? qr.provider}</Text>
-              <Image source={{ uri: qr.qr_image_url }} style={styles.qrImage} resizeMode="contain" />
-              <Text style={styles.accountName}>{qr.account_name}</Text>
-            </Card>
+            <QrCard key={qr.provider} qr={qr} />
           ))
         ) : null}
 
@@ -120,7 +137,9 @@ const styles = StyleSheet.create({
   qrCard: { marginBottom: 18, padding: spacing.lg, alignItems: "center", backgroundColor: colors.white },
   provider: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
   qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: radii.chip, backgroundColor: colors.border },
-  accountName: { marginTop: 14, color: colors.ink, ...typography.strong, fontWeight: "700" },
+  accountName: { marginTop: 14, color: colors.ink, ...typography.strong, fontWeight: "700", textAlign: "center" },
+  qrFailed: { alignItems: "center", justifyContent: "center", padding: spacing.md },
+  qrFailedText: { color: colors.muted, ...typography.meta, textAlign: "center" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
   wishlist: { marginTop: 28 },
   sectionTitle: { color: colors.ink, ...typography.section },
