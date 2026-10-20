@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
-import { ApplicationState, EMPTY_APPLICATION, HOME_TYPES, SHARING_NOTE, inquiryBody } from "../inquireApplication";
+import { ApplicationState, EMPTY_APPLICATION, HOME_TYPES, SHARING_NOTE, inquiryBody, yesNoIndex } from "../inquireApplication";
 import { TAP_SLOP } from "../touch";
 import { colors, radii, spacing, typography } from "../theme";
 import { Button, Field, SegmentedControl } from "./ui";
@@ -54,13 +54,13 @@ export function InquireSheet({ visible, petName, posterName, sending, onSend, on
             </View>
 
             <Text style={styles.label}>Do you rent?</Text>
-            <SegmentedControl segments={["No", "Yes"]} index={app.rents === true ? 1 : 0}
+            <SegmentedControl segments={["No", "Yes"]} index={yesNoIndex(app.rents)}
               onChange={(i) => set({ rents: i === 1, landlordOk: i === 1 ? app.landlordOk : null })}
               testID="seg.inquire.rents" />
             {app.rents === true ? (
               <>
                 <Text style={styles.label}>Does your landlord allow pets?</Text>
-                <SegmentedControl segments={["No", "Yes"]} index={app.landlordOk === true ? 1 : 0}
+                <SegmentedControl segments={["No", "Yes"]} index={yesNoIndex(app.landlordOk)}
                   onChange={(i) => set({ landlordOk: i === 1 })} />
               </>
             ) : null}
