@@ -1,5 +1,6 @@
 import {
-  impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
+  awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
+  needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
   needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
   pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip
 } from "../community";
@@ -205,5 +206,92 @@ describe("pledgeWhen / pledgeSubtitle (My donations' second line)", () => {
   });
   it("is just the shelter when there is no date at all", () => {
     expect(pledgeSubtitle("Happy Paws", null, undefined, now)).toBe("Happy Paws");
+  });
+});
+
+describe("shelter wishlist words (Task 8)", () => {
+  it("pledgeCountLabel agrees with its number", () => {
+    expect(pledgeCountLabel(1)).toBe("1 pledge");
+    expect(pledgeCountLabel(0)).toBe("0 pledges");
+    expect(pledgeCountLabel(3)).toBe("3 pledges");
+  });
+
+  it("awaitingConfirmTag is the amber row tag, and nothing at 0", () => {
+    expect(awaitingConfirmTag(0)).toBeNull();
+    expect(awaitingConfirmTag(undefined)).toBeNull();
+    expect(awaitingConfirmTag(1)).toBe("1 to confirm");
+    expect(awaitingConfirmTag(4)).toBe("4 to confirm");
+  });
+
+  it("completeNeedBody always says it leaves the wishlist, and adds the cancel line only when pledges are open", () => {
+    const base = "It comes off your wishlist — donors can no longer pledge to it.";
+    expect(completeNeedBody(0)).toBe(base);
+    expect(completeNeedBody(undefined)).toBe(base);
+    expect(completeNeedBody(1)).toBe(`${base} 1 open pledge will be cancelled and the donor told.`);
+    expect(completeNeedBody(3)).toBe(`${base} 3 open pledges will be cancelled and the donors told.`);
+  });
+});
+
+describe("needFormErrors (AW20 · each error under its own field)", () => {
+  const ok = { title: "Dog food", description: "Dry, adult", qty: 5 };
+  it("bounds mirror the backend", () => {
+    expect(NEED_TITLE_MAX).toBe(120);
+    expect(NEED_DETAILS_MAX).toBe(1000);
+    expect(NEED_UNIT_MAX).toBe(16);
+    expect(INSTRUCTIONS_MAX).toBe(500);
+  });
+  it("a valid form has no errors", () => {
+    expect(needFormErrors(ok)).toEqual({});
+  });
+  it("a blank title, an over-long title, over-long details and a bad quantity each land on their own field", () => {
+    expect(needFormErrors({ ...ok, title: "   " })).toEqual({ title: "Give the need a short title." });
+    expect(needFormErrors({ ...ok, title: "x".repeat(121) }).title).toMatch(/120/);
+    expect(needFormErrors({ ...ok, title: "x".repeat(120) })).toEqual({});
+    expect(needFormErrors({ ...ok, description: "y".repeat(1001) }).description).toMatch(/1000/);
+    expect(needFormErrors({ ...ok, description: "y".repeat(1000) })).toEqual({});
+    expect(needFormErrors({ ...ok, qty: 0 }).quantity).toMatch(/1/);
+    expect(needFormErrors({ ...ok, qty: MAX_QTY + 1 }).quantity).toMatch(/100000/);
+    expect(needFormErrors({ ...ok, qty: MAX_QTY })).toEqual({});
+    expect(needFormErrors({ ...ok, qty: 1 })).toEqual({});
+    expect(Object.keys(needFormErrors({ title: "", description: "y".repeat(1001), qty: 0 })).sort())
+      .toEqual(["description", "quantity", "title"]);
+  });
+});
+
+describe("needSaveError (the words for a failed save)", () => {
+  it("422 below_received goes under the quantity, with the received count", () => {
+    expect(needSaveError(422, "below_received", { quantity_received: 8 }))
+      .toEqual({ field: "quantity", message: "8 already received — the target can't go lower." });
+  });
+  it("409 need_not_open says the need is no longer open", () => {
+    const e = needSaveError(409, "need_not_open");
+    expect(e.field).toBe("form");
+    expect(e.message).toMatch(/no longer open/);
+  });
+  it("400 bad_category is a form-level message", () => {
+    expect(needSaveError(400, "bad_category").field).toBe("form");
+  });
+  it("a network or server failure says so; anything else keeps the generic line", () => {
+    expect(needSaveError(0).message).toMatch(/Couldn't reach Kupkop/);
+    expect(needSaveError(503).message).toMatch(/Couldn't reach Kupkop/);
+    expect(needSaveError(400, "weird")).toEqual({ field: "form", message: "Couldn't save. Please try again." });
+  });
+});
+
+describe("needActionErrorCopy (confirm received / mark complete)", () => {
+  it("a 409 or 404 means the screen is stale: say so and reload, never 'couldn't confirm'", () => {
+    expect(needActionErrorCopy(409, "pledge_decided")).toEqual({ message: "That pledge was already settled — refreshing.", reload: true });
+    expect(needActionErrorCopy(409, "need_not_open").reload).toBe(true);
+    expect(needActionErrorCopy(404).reload).toBe(true);
+  });
+  it("total_overflow is a 422 the shelter can fix, so no reload", () => {
+    const e = needActionErrorCopy(422, "total_overflow");
+    expect(e.reload).toBe(false);
+    expect(e.message).toMatch(/limit/);
+  });
+  it("a dropped connection or a server error says so; the rest is generic", () => {
+    expect(needActionErrorCopy(0).message).toMatch(/Couldn't reach Kupkop/);
+    expect(needActionErrorCopy(500).message).toMatch(/Couldn't reach Kupkop/);
+    expect(needActionErrorCopy(400)).toEqual({ message: "Couldn't save that. Please try again.", reload: false });
   });
 });

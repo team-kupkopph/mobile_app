@@ -1,140 +1,224 @@
-// US-W3 · a need's pledges, and the shelter's confirm-received action. Covers screen-need-pledges,
-// -need-received-confirm and -need-complete (close). Received-confirm defaults to the pledged
-// quantity (the common case); the backend accepts any actual amount (D-S6-7) — a per-item
-// quantity editor is a later refinement.
+// US-W3 · a need's pledges, and the shelter's confirm-received and mark-complete actions.
+// The screen loads the need BY ID (GET /needs/{id}) on focus and again after every write: a bell or push
+// tap opens it with only a `needId`, and a snapshot passed in from the list would go stale the moment a
+// donor pledged or cancelled. `route.params.need` is at most a first-paint placeholder.
+//
+// What the shelter may do comes from `needActions(status)`. "Mark received" asks for the quantity that
+// ACTUALLY arrived (it can differ from the pledge) in the shared ConfirmModal; "Mark complete" takes the
+// need off the wishlist and cancels what is still pledged.
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
-import {
-  ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View
-} from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import {
+  ChipTone, completeNeedBody, needActionErrorCopy, needActions, needCategoryLabel, needProgressLabel,
+  needStatusChip, pledgeStatusChip, pledgeWhen, quantityLabel, receivedPreview, CancelReason, PledgeStatus
+} from "../community";
+import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
+import { QuantityStepper } from "../components/QuantityStepper";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
-import { ChipTone, needProgressLabel, pledgeStatusChip, PledgeStatus } from "../community";
 import { RootStackParamList, ShelterNeedShape } from "../navigation/types";
-import { TAP_SLOP } from "../touch";
-import { colors, elevation, pill, radii, spacing, typography } from "../theme";
+import { colors, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
-import { ScreenHeader } from "../components/ui";
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-const CHIP: Record<ChipTone, { bg: string; fg: string }> = {
-  ok: { bg: colors.successBg, fg: colors.success },
-  warn: { bg: colors.warningBg, fg: colors.warning },
-  muted: { bg: colors.greyPill, fg: colors.muted }
+/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
+const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
+  ok: "success",
+  warn: "warning",
+  muted: "neutral"
 };
 
-type Pledge = { pledge_id: string; quantity: number; status: PledgeStatus; pledger_name: string };
+type Pledge = {
+  pledge_id: string; quantity: number; status: PledgeStatus; pledger_name: string;
+  created_at?: string; note?: string | null; quantity_received?: number | null;
+  decided_at?: string | null; cancel_reason?: CancelReason | null;
+};
 type Props = NativeStackScreenProps<RootStackParamList, "needPledges">;
+type Res = { ok: boolean; status: number } | null;
 
 export function NeedPledgesScreen({ navigation, route }: Props) {
   // At Dynamic Type AX3 and up a pledge's name and status chip cannot share a row, so the card stacks.
   const large = useLargeText();
   const api = useApi();
-  // TEMPORARY (wishlist refactor Task 6): `need` became optional so a notification can open this
-  // screen by id alone. Task 8 rewrites the screen to load by `needId`; until then every in-app
-  // caller still passes `need`, so narrow it rather than restructure.
-  const { need } = route.params as { need: ShelterNeedShape };
+  const { needId } = route.params;
+  // The list's row, when we came from it, paints the first frame; GET /needs/{id} replaces it.
+  const [need, setNeed] = useState<ShelterNeedShape | null>(route.params.need ?? null);
+  const [needRes, setNeedRes] = useState<Res>(null);
   const [pledges, setPledges] = useState<Pledge[] | null>(null);
-  const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [pledgesRes, setPledgesRes] = useState<Res>(null);
 
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // Mark received: which pledge, and the quantity the shelter says arrived.
+  const [receiving, setReceiving] = useState<Pledge | null>(null);
+  const [recvQty, setRecvQty] = useState(1);
+  const [completing, setCompleting] = useState(false);
 
   const load = useCallback(() => {
-    setRes(null);
-    api.get(`/needs/${need.need_id}/pledges`).then((r) => {
-      setRes({ ok: r.ok, status: r.status });
-      if (r.ok) setPledges(r.data.results);
+    let alive = true;
+    api.get(`/needs/${needId}`).then((r) => {
+      if (!alive) return;
+      setNeedRes({ ok: r.ok, status: r.status });
+      if (r.ok) setNeed(r.data);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [need.need_id]);
+    api.get(`/needs/${needId}/pledges`).then((r) => {
+      if (!alive) return;
+      setPledgesRes({ ok: r.ok, status: r.status });
+      if (r.ok) setPledges(r.data.results ?? []);
+    });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
+  }, [needId]);
   useFocusEffect(load);
 
-  function confirmReceived(p: Pledge) {
-    Alert.alert("Mark received?",
-      `Confirm you received ${p.quantity} from ${p.pledger_name}. This adds to the need's total.`,
-      [{ text: "Not yet", style: "cancel" },
-       { text: "Confirm", onPress: () => doReceive(p) }]);
+  function retry() {
+    setNeedRes(null);
+    setPledgesRes(null);
+    load();
   }
 
-  async function doReceive(p: Pledge) {
-    if (busyId) return;
-    setBusyId(p.pledge_id);
-    const res = await api.post(`/needs/${need.need_id}/received`,
-      { pledge_id: p.pledge_id, quantity_received: p.quantity });
-    setBusyId(null);
-    if (res.ok) load();
-    else Alert.alert("Couldn't confirm", "Please try again.");
+  function startReceive(p: Pledge) {
+    setError(null);
+    setRecvQty(p.quantity);
+    setReceiving(p);
   }
 
-  function confirmClose() {
-    Alert.alert("Close this need?",
-      "It stops accepting new pledges. Delivered pledges stay on record.",
-      [{ text: "Keep open", style: "cancel" },
-       { text: "Close need", style: "destructive", onPress: doClose }]);
+  async function doReceive() {
+    if (busy || !receiving) return;
+    setBusy(true);
+    const res = await api.post(`/needs/${needId}/received`,
+      { pledge_id: receiving.pledge_id, quantity_received: recvQty });
+    setBusy(false);
+    setReceiving(null);
+    if (res.ok) { setError(null); load(); return; }
+    // A 409 means the pledge or the need moved under us (a donor cancelled, or it was completed elsewhere):
+    // reload and say so, rather than a dead "couldn't confirm" over data that is already out of date.
+    const copy = needActionErrorCopy(res.status, res.data?.error?.code);
+    setError(copy.message);
+    if (res.status === 409 || copy.reload) load();
   }
 
-  async function doClose() {
-    const res = await api.patch(`/needs/${need.need_id}`, { status: "closed" });
-    if (res.ok) navigation.goBack();
-    else Alert.alert("Couldn't close", "Please try again.");
+  async function doComplete() {
+    if (busy) return;
+    setBusy(true);
+    const res = await api.post(`/needs/${needId}/complete`, {});
+    setBusy(false);
+    setCompleting(false);
+    if (res.ok) { setError(null); load(); return; }
+    const copy = needActionErrorCopy(res.status, res.data?.error?.code);
+    setError(copy.message);
+    if (copy.reload) load();
   }
+
+  const needState = loadState(needRes);
+  const unit = need?.unit || undefined;
+
+  // Without a need to show (a notification opened us by id and the request has not answered, or failed) the
+  // whole screen is its load state. With one — even a stale placeholder — keep it on screen, unless the server
+  // says it is gone (404): a placeholder must not outlive the need.
+  if (needState.kind === "gone" || (!need && needState.kind !== "ready")) {
+    return (
+      <View style={styles.screen}>
+        <ScreenBackdrop />
+        <ScreenHeader title="Need" onBack={() => navigation.goBack()} />
+        <LoadStateView state={needState} subject="need" onRetry={retry} onBack={() => navigation.goBack()} />
+      </View>
+    );
+  }
+  if (!need) return null;   // unreachable: `ready` implies the need was set. Keeps the types honest.
+
+  const actions = needActions(need.status);
+  const chip = needStatusChip(need.status);
+  const pledgesState = loadState(pledgesRes, pledges?.length);
+  // What Mark complete will cancel: the pledges still open. Counted from the list when it has loaded (it is what the
+  // shelter is looking at); the need's own `pledge_count` is the fallback before then.
+  const openPledges = pledges ? pledges.filter((p) => p.status === "pledged").length : need.pledge_count;
 
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       <ScreenHeader title={need.title} onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.progress}>
-          {needProgressLabel(need.quantity_received, need.quantity_needed)}
-        </Text>
-        <View style={styles.actionRow}>
-          <TouchableOpacity hitSlop={TAP_SLOP} style={styles.secondaryBtn}
-            onPress={() => navigation.navigate("needForm", { need })}>
-            <Text style={styles.secondaryLabel}>Edit</Text>
-          </TouchableOpacity>
-          {need.status === "open" ? (
-            <TouchableOpacity hitSlop={TAP_SLOP} style={styles.secondaryBtn} onPress={confirmClose}>
-              <Text style={[styles.secondaryLabel, { color: colors.danger }]}>Close need</Text>
-            </TouchableOpacity>
+        <Card style={styles.summary}>
+          <View style={[styles.row, large && styles.rowLarge]}>
+            <Text style={styles.progress}>
+              {needProgressLabel(need.quantity_received, need.quantity_needed, unit, need.quantity_pledged)}
+            </Text>
+            <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
+          </View>
+          <Text style={styles.meta}>{needCategoryLabel(need.category)}</Text>
+          {need.description ? <Text style={styles.description}>{need.description}</Text> : null}
+          {actions.edit || actions.complete ? (
+            <View style={styles.actionRow}>
+              {actions.edit ? (
+                <Button size="small" variant="secondary" label="Edit" onPress={() => navigation.navigate("needForm", { need })} />
+              ) : null}
+              {actions.complete ? (
+                <Button size="small" variant="destructive" label="Mark complete" onPress={() => { setError(null); setCompleting(true); }} />
+              ) : null}
+            </View>
           ) : null}
-        </View>
+        </Card>
 
-        <Text style={styles.sectionTitle}>Pledges</Text>
-        {loadState(res, pledges?.length).kind !== "ready" ? (
-          <LoadStateView
-            state={loadState(res, pledges?.length)}
-            emptyTitle="No pledges yet."
-            onRetry={load}
-          />
+        {error ? <Text style={styles.error} accessibilityRole="alert">{error}</Text> : null}
+
+        <Text style={styles.sectionTitle} accessibilityRole="header">Pledges</Text>
+        {pledgesState.kind !== "ready" ? (
+          <LoadStateView state={pledgesState} emptyTitle="No pledges yet." onRetry={retry} />
         ) : (
           (pledges ?? []).map((p) => {
-            const chip = pledgeStatusChip(p.status);
+            const pChip = pledgeStatusChip(p.status, p.cancel_reason);
+            const when = pledgeWhen(p.decided_at ?? p.created_at);
+            const head = p.status === "delivered"
+              ? `Received ${quantityLabel(p.quantity_received ?? p.quantity, unit)}`
+              : `Pledged ${quantityLabel(p.quantity, unit)}`;
             return (
-              <View key={p.pledge_id} style={styles.pledgeCard}>
+              <Card key={p.pledge_id} style={styles.pledgeCard}>
                 <View style={[styles.row, large && styles.rowLarge]}>
                   <Text style={[styles.pledger, large && styles.pledgerLarge]}>{p.pledger_name}</Text>
-                  <View style={[styles.chip, { backgroundColor: CHIP[chip.tone].bg }]}>
-                    <Text style={[styles.chipText, { color: CHIP[chip.tone].fg }]}>{chip.label}</Text>
-                  </View>
+                  <Chip tone={CHIP_TONE[pChip.tone]} dot={false} label={pChip.label} />
                 </View>
-                <Text style={styles.meta}>Pledged {p.quantity}</Text>
-                {p.status === "pledged" ? (
-                  <TouchableOpacity hitSlop={TAP_SLOP} style={styles.receiveBtn} onPress={() => confirmReceived(p)}
-                    disabled={busyId === p.pledge_id}>
-                    <Text style={styles.receiveLabel}>
-                      {busyId === p.pledge_id ? "Confirming…" : "Mark received"}
-                    </Text>
-                  </TouchableOpacity>
+                <Text style={styles.meta}>{when ? `${head} · ${when}` : head}</Text>
+                {p.note ? <Text style={styles.note}>“{p.note}”</Text> : null}
+                {p.status === "pledged" && actions.receive ? (
+                  <Button size="small" label="Mark received" style={styles.receiveBtn} onPress={() => startReceive(p)} />
                 ) : null}
-              </View>
+              </Card>
             );
           })
         )}
       </ScrollView>
+
+      <ConfirmModal
+        visible={receiving !== null}
+        title="Mark received?"
+        body={receiving ? `${receiving.pledger_name} pledged ${quantityLabel(receiving.quantity, unit)}. How many actually arrived?` : ""}
+        confirmLabel={busy ? "Confirming…" : "Confirm received"}
+        onConfirm={doReceive}
+        onCancel={() => { if (!busy) setReceiving(null); }}
+      >
+        <QuantityStepper value={recvQty} onChange={setRecvQty} style={styles.stepper}
+          decreaseLabel="Decrease quantity received" increaseLabel="Increase quantity received" />
+        <Text style={styles.preview} accessibilityLiveRegion="polite">
+          {receivedPreview(need.quantity_received, need.quantity_needed, recvQty, unit)}
+        </Text>
+        <Text style={styles.irreversible}>Can't be undone — confirm only what's actually arrived.</Text>
+      </ConfirmModal>
+
+      <ConfirmModal
+        visible={completing}
+        title="Mark this need complete?"
+        body={completeNeedBody(openPledges)}
+        confirmLabel={busy ? "Completing…" : "Mark complete"}
+        tone="danger"
+        onConfirm={doComplete}
+        onCancel={() => { if (!busy) setCompleting(false); }}
+      />
     </View>
   );
 }
@@ -142,21 +226,23 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  progress: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
-  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 14 },
-  secondaryBtn: { minHeight: 38, paddingVertical: 8, paddingHorizontal: 20, justifyContent: "center", borderRadius: pill(38), ...card },
-  secondaryLabel: { color: colors.ink, ...typography.strong, fontWeight: "700" },
+  summary: { padding: 18 },
+  progress: { flex: 1, color: colors.teal, ...typography.subtitle, fontWeight: "700" },
+  description: { marginTop: 10, color: colors.ink, ...typography.body },
+  actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 16 },
+  error: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "600" },
   sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.section },
-  empty: { marginTop: 20, color: colors.muted, ...typography.body },
-  pledgeCard: { marginBottom: 12, padding: 18, borderRadius: radii.card, ...card },
+  pledgeCard: { marginBottom: 12, padding: 18 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
   // large: stacked. The base `pledger` is `flex: 1`, which survives in a style array and would collapse the text in a column.
   rowLarge: { flexDirection: "column", alignItems: "flex-start", gap: 10 },
   pledgerLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   pledger: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  chip: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: radii.chip },
-  chipText: { ...typography.meta, fontWeight: "700" },
   meta: { marginTop: 8, color: colors.muted, ...typography.body },
-  receiveBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.soft },
-  receiveLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" }
+  note: { marginTop: 8, color: colors.ink, ...typography.body, fontStyle: "italic" },
+  receiveBtn: { marginTop: 14 },
+  // Centred in the dialog; the control's own geometry lives in QuantityStepper.
+  stepper: { alignSelf: "center", marginTop: 18 },
+  preview: { marginTop: 14, color: colors.teal, ...typography.strong, fontWeight: "700", textAlign: "center" },
+  irreversible: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 20, textAlign: "center" }
 });

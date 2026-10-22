@@ -10,6 +10,7 @@ import { AdoptScreen } from "../screens/AdoptScreen";
 import { DonateScreen } from "../screens/DonateScreen";
 import { DonatePledgeScreen } from "../screens/DonatePledgeScreen";
 import { MyDonationsScreen } from "../screens/MyDonationsScreen";
+import { DonationInstructionsScreen } from "../screens/DonationInstructionsScreen";
 import { ShelterNeedsScreen } from "../screens/ShelterNeedsScreen";
 import { NeedFormScreen } from "../screens/NeedFormScreen";
 import { NeedPledgesScreen } from "../screens/NeedPledgesScreen";
@@ -191,6 +192,7 @@ export function RootNavigator() {
       <Stack.Screen name="donatePledge" component={DonatePledgeScreen} />
       <Stack.Screen name="myDonations" component={MyDonationsScreen} />
       <Stack.Screen name="shelterNeeds" component={ShelterNeedsScreen} />
+      <Stack.Screen name="donationInstructions" component={DonationInstructionsScreen} />
       <Stack.Screen name="needForm" component={NeedFormScreen} />
       <Stack.Screen name="needPledges" component={NeedPledgesScreen} />
       <Stack.Screen name="settings" component={SettingsScreen} />

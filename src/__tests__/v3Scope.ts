@@ -29,6 +29,11 @@
 // and INTO V3_SCOPE (see KAWANG_GAWA_V3 below), now that they are converted onto
 // <ScreenBackdrop> + <Card>. V3_SCOPE grows from 35 to 41; V3_EXCLUDED shrinks by the same
 // six.
+//
+// Wishlist refactor Task 8 (WD9): NeedFormScreen and NeedPledgesScreen — the last two V3 holdouts
+// on the shelter's wishlist — move OUT of OTHER_OWNER_SCREENS and INTO SHELTER_NEEDS once rewritten
+// on <ScreenBackdrop> + <Card> + <Chip> + <Button>, and the new DonationInstructionsScreen is added
+// there too. V3_SCOPE grows from 44 to 47; V3_EXCLUDED shrinks by two (OTHER_OWNER_SCREENS: 33 names).
 
 /** Shell roots (5) — Task B1 added ShelterDonateScreen, the Donate tab's new root, born
  * converted (spec §5); Task B2 added ShelterAnimalsScreen, the Animals tab's new root, the
@@ -49,8 +54,13 @@ const SHELTER_LISTINGS = ["ListingFormScreen", "ListingDetailScreen", "PlaceRequ
 /** Shelter donations (4) */
 const SHELTER_DONATIONS = ["DonationQrScreen", "DonateScreen", "DonatePledgeScreen", "MyDonationsScreen"] as const;
 
-/** Shelter needs (1) */
-const SHELTER_NEEDS = ["ShelterNeedsScreen"] as const;
+/** Shelter needs (4) — the wishlist manager, its form, a need's pledges, and the drop-off instructions.
+ * NeedFormScreen and NeedPledgesScreen were V3 holdouts (OTHER_OWNER_SCREENS) until the wishlist
+ * refactor (Task 8, WD9) rewrote them on <ScreenBackdrop> + <Card> + <Chip> + <Button>;
+ * DonationInstructionsScreen is V3 from birth. */
+const SHELTER_NEEDS = [
+  "ShelterNeedsScreen", "NeedFormScreen", "NeedPledgesScreen", "DonationInstructionsScreen"
+] as const;
 
 /** Shelter volunteer (7 — DOWN FROM 9. Task 9 (P4) deleted ShelterVolunteerRequestsScreen and
  * ShelterVolunteerAttendanceScreen: their cards folded into ShelterVolunteerActivityScreen's
@@ -139,7 +149,7 @@ const OWNER_V3 = [
   "SigninScreen"
 ] as const;
 
-/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 35 names */
+/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 33 names */
 const OTHER_OWNER_SCREENS = [
   "AccountTypeScreen",
   "AdjustPinScreen",
@@ -153,8 +163,6 @@ const OTHER_OWNER_SCREENS = [
   "MatchDetailScreen",
   "MyPetsScreen",
   "MyReportsScreen",
-  "NeedFormScreen",
-  "NeedPledgesScreen",
   "NotificationsScreen",
   "OtpLockedScreen",
   "OtpScreen",

@@ -136,6 +136,80 @@ export function needActions(status: NeedStatus): { edit: boolean; complete: bool
   }
 }
 
+/** "1 pledge" / "3 pledges". */
+export function pledgeCountLabel(n: number): string {
+  return `${n} ${n === 1 ? "pledge" : "pledges"}`;
+}
+
+/** The amber tag on a wishlist row: "3 to confirm". Nothing when there is nothing to confirm (or an older server sent no count). */
+export function awaitingConfirmTag(n: number | null | undefined): string | null {
+  return n && n > 0 ? `${n} to confirm` : null;
+}
+
+/** Mark complete's dialog body. The cancel line appears only when open pledges will really be cancelled. */
+export function completeNeedBody(pledgeCount: number | null | undefined): string {
+  const base = "It comes off your wishlist — donors can no longer pledge to it.";
+  const n = pledgeCount ?? 0;
+  if (n <= 0) return base;
+  return n === 1
+    ? `${base} 1 open pledge will be cancelled and the donor told.`
+    : `${base} ${n} open pledges will be cancelled and the donors told.`;
+}
+
+/** Mirrors the backend bounds on a need's title, details and unit. */
+export const NEED_TITLE_MAX = 120;
+export const NEED_DETAILS_MAX = 1000;
+export const NEED_UNIT_MAX = 16;
+/** Mirrors the backend bound on `PATCH /shelter/profile {donation_instructions}`. */
+export const INSTRUCTIONS_MAX = 500;
+
+export type NeedFormErrors = { title?: string; description?: string; quantity?: string };
+
+/** Client-side bounds for the need form, each message keyed to the field it belongs under (AW20). */
+export function needFormErrors(f: { title: string; description: string; qty: number }): NeedFormErrors {
+  const errors: NeedFormErrors = {};
+  const title = f.title.trim();
+  if (!title) errors.title = "Give the need a short title.";
+  else if (title.length > NEED_TITLE_MAX) errors.title = `Keep the title to ${NEED_TITLE_MAX} characters or fewer.`;
+  if (f.description.trim().length > NEED_DETAILS_MAX) errors.description = `Keep the details to ${NEED_DETAILS_MAX} characters or fewer.`;
+  if (!Number.isInteger(f.qty) || f.qty < 1 || f.qty > MAX_QTY) errors.quantity = `Enter a number from 1 to ${MAX_QTY}.`;
+  return errors;
+}
+
+/**
+ * The words for a failed shelter-side write on a need (confirm received, mark complete). `reload` means what
+ * the screen showed is stale and should be re-fetched — a 409/404 is the server saying the state moved, which
+ * is not "couldn't confirm, try again".
+ */
+export function needActionErrorCopy(status: number, code?: string): { message: string; reload: boolean } {
+  if (status === 409 && code === "pledge_decided") return { message: "That pledge was already settled — refreshing.", reload: true };
+  if (status === 409 || status === 404) return { message: "This need changed while you were looking — refreshing.", reload: true };
+  if (status === 422 && code === "total_overflow") {
+    return { message: "That would push the received total over the limit. Check the number and try again.", reload: false };
+  }
+  if (status === 0 || status >= 500) return { message: "Couldn't reach Kupkop. Check your connection and try again.", reload: false };
+  return { message: "Couldn't save that. Please try again.", reload: false };
+}
+
+/** The words for a failed need save, and which field they belong under (`form` = above the button). */
+export function needSaveError(
+  status: number, code?: string, details?: { quantity_received?: number } | null
+): { field: "quantity" | "form"; message: string } {
+  if (status === 422 && code === "below_received") {
+    return { field: "quantity", message: `${details?.quantity_received ?? 0} already received — the target can't go lower.` };
+  }
+  if (status === 409 && code === "need_not_open") {
+    return { field: "form", message: "This need is no longer open, so it can't be changed." };
+  }
+  if (status === 400 && code === "bad_category") {
+    return { field: "form", message: "That category isn't available for the wishlist. Pick another." };
+  }
+  if (status === 0 || status >= 500) {
+    return { field: "form", message: "Couldn't reach Kupkop. Check your connection and try again." };
+  }
+  return { field: "form", message: "Couldn't save. Please try again." };
+}
+
 // Clamped 0..1 for a progress bar; a zero/negative target never divides-by-zero.
 export function needProgressFraction(received: number, needed: number): number {
   if (needed <= 0) return 0;

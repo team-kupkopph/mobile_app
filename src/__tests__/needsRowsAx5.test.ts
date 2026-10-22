@@ -15,6 +15,7 @@ import { join } from "path";
 const src = (f: string) => readFileSync(join(__dirname, "..", "screens", f), "utf-8");
 const needs = src("ShelterNeedsScreen.tsx");
 const pledges = src("NeedPledgesScreen.tsx");
+const buttonSrc = readFileSync(join(__dirname, "..", "components", "ui", "Button.tsx"), "utf-8");
 const body = (s: string, name: string) => {
   const m = new RegExp(`(?:^|\\n)\\s*${name}\\s*:\\s*\\{([^{}]*)\\}`).exec(s);
   return m ? m[1] : null;
@@ -32,7 +33,7 @@ function expectStackedCopy(s: string, name: string) {
 describe("the Wishlist's need row", () => {
   it("the scan found the styles (a guard that matches nothing proves nothing)", () => {
     for (const n of ["needCard", "row", "needTitle", "meta"]) expect(body(needs, n)).not.toBeNull();
-    for (const n of ["secondaryBtn", "receiveBtn", "actionRow", "pledgeCard", "pledger"]) expect(body(pledges, n)).not.toBeNull();
+    for (const n of ["actionRow", "pledgeCard", "pledger", "receiveBtn"]) expect(body(pledges, n)).not.toBeNull();
   });
   it("stacks when large (title, then its chip), with the base flex cancelled", () => {
     expect(needs).toMatch(/const large = useLargeText\(\)/);
@@ -49,13 +50,18 @@ describe("the need screen (NeedPledgesScreen)", () => {
   it("reads the large-text flag", () => {
     expect(pledges).toMatch(/const large = useLargeText\(\)/);
   });
-  it.each(["secondaryBtn", "receiveBtn"])("%s uses minHeight 38 + padding, not a fixed height", (n) => {
-    const b = body(pledges, n) as string;
-    expect(b).toMatch(/minHeight\s*:\s*38/);
+  it("its buttons are the shared small Button (a 38 pt pill with minHeight + padding, never a fixed height), not hand-drawn ones", () => {
+    expect(pledges).toMatch(/<Button\b[^>]*size="small"[^>]*label="Edit"/);
+    expect(pledges).toMatch(/<Button\b[^>]*size="small"[^>]*label="Mark complete"/);
+    expect(pledges).toMatch(/<Button\b[^>]*size="small"[^>]*label="Mark received"/);
+    const b = body(buttonSrc, "smallFill") as string;
+    expect(b).toMatch(/minHeight\s*:\s*SMALL_HEIGHT/);
     expect(b).toMatch(/paddingVertical\s*:/);
     expect(b).not.toMatch(fixedHeight);
+    expect(buttonSrc).toMatch(/const SMALL_HEIGHT = 38/);
+    expect(pledges).not.toMatch(/\bsecondaryBtn\b/);
   });
-  it("the Edit / Close need row wraps, so a wide button drops to the next line instead of running off the screen", () => {
+  it("the Edit / Mark complete row wraps, so a wide button drops to the next line instead of running off the screen", () => {
     expect(body(pledges, "actionRow") as string).toMatch(/flexWrap\s*:\s*"wrap"/);
   });
   it("a pledge card stacks when large (name, then its chip), with the base flex cancelled", () => {

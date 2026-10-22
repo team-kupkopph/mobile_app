@@ -16,8 +16,8 @@ describe("v3Scope", () => {
     + "screens, moved from V3_EXCLUDED into scope once converted — 35 -> 41 — minus "
     + "RescueListedScreen, deleted by C15 when List for adoption became a draft that continues "
     + "into the listing form — 41 -> 40 — plus ApplicantScreen, the adoption poster loop's "
-    + "(plan 2026-10-06) first screen, born V3 — 40 -> 41 — plus PosterListingScreen — 41 -> 42 — plus MyListingsScreen — 42 -> 43 — plus PetFormScreen (AQ8) — 43 -> 44", () => {
-    expect(V3_SCOPE.length).toBe(44);
+    + "(plan 2026-10-06) first screen, born V3 — 40 -> 41 — plus PosterListingScreen — 41 -> 42 — plus MyListingsScreen — 42 -> 43 — plus PetFormScreen (AQ8) — 43 -> 44 — plus NeedFormScreen and NeedPledgesScreen, moved from V3_EXCLUDED when the wishlist refactor (Task 8) rewrote them on ScreenBackdrop + Card + Chip + Button — 44 -> 46 — plus DonationInstructionsScreen, born V3 in the same task — 46 -> 47", () => {
+    expect(V3_SCOPE.length).toBe(47);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {
@@ -48,5 +48,12 @@ describe("v3Scope", () => {
   it("V3_SCOPE union V3_EXCLUDED equals the full screen file list — nothing forgotten", () => {
     const all = readdirSync(SCREENS).filter((f) => f.endsWith(".tsx")).map((f) => f.replace(/\.tsx$/, ""));
     expect([...V3_SCOPE, ...V3_EXCLUDED].sort()).toEqual(all.sort());
+  });
+
+  it("the wishlist's shelter screens are in scope (WD9), and no longer excluded", () => {
+    for (const n of ["ShelterNeedsScreen", "NeedFormScreen", "NeedPledgesScreen", "DonationInstructionsScreen"]) {
+      expect(V3_SCOPE).toContain(n);
+      expect(V3_EXCLUDED).not.toContain(n);
+    }
   });
 });
