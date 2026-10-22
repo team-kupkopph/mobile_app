@@ -8,8 +8,12 @@ import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { useAuth } from "../auth/AuthContext";
+import { setIntent } from "../guestIntent";
+import { SignupWall } from "../components/SignupWall";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { donateLoadState } from "../donateState";
 import { needCategoryLabel, needProgressLabel, quantityLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
@@ -74,7 +78,14 @@ export function DonateScreen({ navigation, route }: Props) {
   }, [accountId, api]);
   useFocusEffect(loadNeeds);
 
-  useEffect(() => {
+  // AT14 · a guest may open Donate (public), but "My donations" is the pledger's own list (401 for a guest): the wall, not a dead-end error.
+  const { tokens } = useAuth();
+  const isGuest = tokens === null;
+  const [wall, setWall] = useState(false);
+  const openWall = (_action: "account") => setWall(true);
+
+  // AT2 · one callable load, so the state view can offer Try again after an offline or 5xx answer.
+  const load = useCallback(() => {
     setRes(null);
     // ⚠️ was `setQrs(r.ok ? ... : [])` — so a failed request rendered "Donations aren't
     // available for this org yet.", a false statement about a shelter that could cost it a
@@ -83,12 +94,13 @@ export function DonateScreen({ navigation, route }: Props) {
       setRes({ ok: r.ok, status: r.status });
       if (r.ok) setQrs(r.data.donation_qrs);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once for this accountId
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload for this accountId
   }, [accountId]);
+  useEffect(load, [load]);
 
   // Rows already on screen stay on screen if a later refresh fails; the state only decides the first load.
   const needsState = needs === null ? loadState(needsRes) : ({ kind: "ready" } as const);
-  const qrState = loadState(res, qrs?.length);
+  const qrState = donateLoadState(res, qrs?.length);
   // AW14b · the shelter has a wishlist but no verified code (the API answers 404, or an empty list): say that,
   // rather than "donations aren't available". Waits for the wishlist so the line does not flash and flip.
   const noQr = qrState.kind === "gone" || qrState.kind === "empty";
@@ -114,6 +126,7 @@ export function DonateScreen({ navigation, route }: Props) {
           <LoadStateView
             state={qrState}
             emptyTitle="Donations aren't available for this org yet."
+            onRetry={load}
           />
         ) : qrs && qrs.length > 0 ? (
           qrs.map((qr) => (
@@ -157,10 +170,17 @@ export function DonateScreen({ navigation, route }: Props) {
         ) : null}
 
         <TouchableOpacity hitSlop={TAP_SLOP} style={styles.myDonationsRow}
-          onPress={() => navigation.navigate("myDonations")}>
+          onPress={() => (isGuest ? openWall("account") : navigation.navigate("myDonations"))}>
           <Text style={styles.myDonationsLabel}>My donations ›</Text>
         </TouchableOpacity>
       </ScrollView>
+      <SignupWall
+        visible={wall}
+        action="account"
+        onCreateAccount={() => { setIntent("account"); setWall(false); navigation.navigate("accountType"); }}
+        onLogin={() => { setWall(false); navigation.navigate("signin"); }}
+        onDismiss={() => setWall(false)}
+      />
     </View>
   );
 }
