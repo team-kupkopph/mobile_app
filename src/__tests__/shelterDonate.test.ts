@@ -54,19 +54,24 @@ describe("donateSections", () => {
     expect(r.qr).toBe("ready");
   });
 
-  it("maps needs to id/title/pledged/received rows, in order", () => {
+  it("maps the list rows to id/title/pledged/received, in order — pledged is the row's own quantity_pledged (no per-need fan-out)", () => {
     const r = donateSections(
       { gates: { can_publish: true, donations_enabled: true } },
       { donation_qrs: [] },
       [
-        { need_id: "n1", title: "Dog food", quantity_received: 3, pledged: 5 },
-        { need_id: "n2", title: "Blankets", quantity_received: 0, pledged: 0 }
+        { need_id: "n1", title: "Dog food", quantity_received: 3, quantity_pledged: 5 },
+        { need_id: "n2", title: "Blankets", quantity_received: 0, quantity_pledged: 0 }
       ]
     );
     expect(r.needs).toEqual([
       { id: "n1", title: "Dog food", pledged: 5, received: 3 },
       { id: "n2", title: "Blankets", pledged: 0, received: 0 }
     ]);
+  });
+
+  it("treats a row from an older server (no quantity_pledged) as 0 pledged", () => {
+    const r = donateSections(null, null, [{ need_id: "n1", title: "Dog food", quantity_received: 3 }]);
+    expect(r.needs[0].pledged).toBe(0);
   });
 
   it("returns an empty needs array when needs haven't loaded", () => {

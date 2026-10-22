@@ -1,12 +1,13 @@
 import { ShelterDashboard, ShelterDashboardVolunteer } from "../api/types";
-import { rescueSummary, shelterBannerState, volunteerSummary } from "../shelterDashboard";
+import { rescueSummary, shelterBannerState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 
 function dash(submitted: boolean, status: ShelterDashboard["verification"]["status"]): ShelterDashboard {
   return {
     verification: { submitted, status, docs: [] },
     counts: { draft_listings: 0, adopted: 0, donations: 0 },
     gates: { can_publish: false, donations_enabled: false },
-    volunteer: { pending_requests: 0, attendance_due: 0, next_shift: null }
+    volunteer: { pending_requests: 0, attendance_due: 0, next_shift: null },
+    wishlist: { open_needs: 0, pledges_awaiting_confirm: 0 }
   };
 }
 
@@ -94,5 +95,21 @@ describe("rescueSummary (S16)", () => {
 
   it("tells an unverified shelter that claiming needs verification", () => {
     expect(rescueSummary(r({}), false).note).toBe("Get verified to claim a rescue.");
+  });
+});
+
+// US-W3 · the dashboard's Wishlist line. Only what the shelter has to DO is worth a line: a count of open needs is not a task.
+describe("wishlistSummary (US-W3)", () => {
+  it("says nothing at 0 pledges to confirm, however many needs are open", () => {
+    expect(wishlistSummary({ open_needs: 4, pledges_awaiting_confirm: 0 })).toBeNull();
+  });
+  it("singularises at 1", () => {
+    expect(wishlistSummary({ open_needs: 1, pledges_awaiting_confirm: 1 })).toBe("1 pledge to confirm");
+  });
+  it("pluralises at n", () => {
+    expect(wishlistSummary({ open_needs: 2, pledges_awaiting_confirm: 3 })).toBe("3 pledges to confirm");
+  });
+  it("says nothing from an older server that sends no wishlist block", () => {
+    expect(wishlistSummary(undefined)).toBeNull();
   });
 });

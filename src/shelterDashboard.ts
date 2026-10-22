@@ -1,4 +1,5 @@
-import { Me, ShelterDashboard, ShelterDashboardRescue, ShelterDashboardVolunteer } from "./api/types";
+import { Me, ShelterDashboard, ShelterDashboardRescue, ShelterDashboardVolunteer, ShelterDashboardWishlist } from "./api/types";
+import { pledgeCountLabel } from "./community";
 
 // US-B5: two derived dashboard states, never one screen. A shelter_org
 // verification_request existing (`submitted`) means "Under review"; no row means the
@@ -71,4 +72,12 @@ export function rescueSummary(r: ShelterDashboardRescue, canClaim: boolean): {
     mapCity: r.city && r.city_supported ? r.city : null,
     note: canClaim ? null : "Get verified to claim a rescue."
   };
+}
+
+// US-W3 · the dashboard's "Wishlist" line: the one thing there is to DO on it (pledges a donor says
+// they delivered, waiting on the shelter's confirm). null when there is none — or when an older
+// server sent no wishlist block — so the screen shows a quiet line instead of a "0".
+export function wishlistSummary(w: ShelterDashboardWishlist | undefined | null): string | null {
+  const n = w?.pledges_awaiting_confirm ?? 0;
+  return n > 0 ? `${pledgeCountLabel(n)} to confirm` : null;
 }

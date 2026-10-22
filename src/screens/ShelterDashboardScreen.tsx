@@ -18,7 +18,7 @@ import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterBannerState, rescueSummary, shelterBannerState, volunteerSummary } from "../shelterDashboard";
+import { ShelterBannerState, rescueSummary, shelterBannerState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
@@ -221,6 +221,24 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             </Card>
           </TouchableOpacity>
         )}
+
+        {/* US-W3 · the Wishlist line — what is waiting on the shelter (pledges a giver says arrived). Only for a verified
+            shelter (the wishlist is locked until approval, as on the Profile tab) and only once the dashboard has
+            loaded, so a failed request never reads as "nothing to confirm". */}
+        {verified && dash?.wishlist ? (() => {
+          const summary = wishlistSummary(dash.wishlist);
+          return (
+            <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("shelterNeeds")}
+              accessibilityRole="button">
+              <Card style={styles.volunteerCard}>
+                <Text style={styles.volunteerTitle} maxFontSizeMultiplier={maxFontScale.title}>Wishlist</Text>
+                {summary
+                  ? <Text style={styles.volunteerWarning}>{summary}</Text>
+                  : <Text style={styles.volunteerLine}>Nothing to confirm right now</Text>}
+              </Card>
+            </TouchableOpacity>
+          );
+        })() : null}
 
         {/* S16 · the Rescue card. A verified shelter may claim strays and is paged about them, but
             the shell had no rescue surface — and a case it claimed was unreachable once it left

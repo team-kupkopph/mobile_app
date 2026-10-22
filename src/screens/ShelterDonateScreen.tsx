@@ -17,11 +17,12 @@ import { loadState } from "../net";
 import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
-import { Card, Chip, SectionHeader } from "../components/ui";
-import { ChipTone, NeedStatus, needStatusChip } from "../community";
+import { Button, Card, Chip, SectionHeader } from "../components/ui";
+import { ChipTone, NeedStatus, needProgressLabel, needStatusChip } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import {
   donateSections,
+  DonateNeedInput,
   ShelterOwnDonationQr,
   ShelterOwnDonationQrResponse
 } from "../shelterDonate";
@@ -39,15 +40,11 @@ const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDonate">;
 
-type RawNeed = {
-  need_id: string;
-  title: string;
-  quantity_needed: number;
-  quantity_received: number;
-  status: NeedStatus;
+// One row of GET /shelters/{me}/needs. `quantity_pledged` rides on it, so this tab makes ONE request for the whole
+// wishlist; it used to fan out a `/needs/{id}/pledges` call per need to add the pledged total up itself.
+type Need = DonateNeedInput & {
+  quantity_needed: number; status: NeedStatus; unit?: string;
 };
-
-type RawPledge = { pledge_id: string; quantity: number; status: string };
 
 export function ShelterDonateScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
@@ -56,7 +53,13 @@ export function ShelterDonateScreen({ navigation }: Props) {
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [dashRes, setDashRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [qr, setQr] = useState<ShelterOwnDonationQrResponse | null>(null);
-  const [needs, setNeeds] = useState<Array<RawNeed & { pledged: number }> | null>(null);
+  const [needs, setNeeds] = useState<Need[] | null>(null);
+  // The wishlist has its own load state (AW17): a failed request must not read as "No needs posted yet."
+  const [needsRes, setNeedsRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [moreNeeds, setMoreNeeds] = useState(false);
+  // "Add a need" follows the approval gate the Profile tab's Wishlist row uses: /me's `is_verified_rescuer`
+  // ("any approved", not the latest request's status). Unknown until /me answers, so it reads as gated.
+  const [verifiedRescuer, setVerifiedRescuer] = useState<boolean | null>(null);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
@@ -72,7 +75,10 @@ export function ShelterDonateScreen({ navigation }: Props) {
       if (r.ok) setDash(r.data);
     });
     api.get("/me").then((me) => {
-      if (!alive || !me.ok) return;
+      if (!alive) return;
+      // A failed /me is the wishlist's failure too: without this its spinner never ended.
+      if (!me.ok) { setNeedsRes({ ok: false, status: me.status }); return; }
+      setVerifiedRescuer(!!me.data.is_verified_rescuer);
       const accountId = me.data.account_id;
 
       api.get(`/shelters/${accountId}/donation-qr`).then((r) => {
@@ -84,23 +90,11 @@ export function ShelterDonateScreen({ navigation }: Props) {
 
       api.get(`/shelters/${accountId}/needs`).then((r) => {
         if (!alive) return;
-        if (!r.ok) { setNeeds([]); return; }
-        const rows: RawNeed[] = r.data.results ?? [];
-        // Each need's "pledged" total is a sum over ITS OWN pledges — the needs list
-        // endpoint only ever carries `quantity_received` (backend `_need_repr`), never an
-        // aggregate of outstanding pledges. There is no bulk endpoint for this, so it is
-        // one GET per need, same fan-out shape `DonateScreen` already accepts for needs.
-        Promise.all(
-          rows.map((n) =>
-            api.get(`/needs/${n.need_id}/pledges`).then((rp) => {
-              const pledges: RawPledge[] = rp.ok ? rp.data.results ?? [] : [];
-              const pledged = pledges
-                .filter((p) => p.status === "pledged")
-                .reduce((sum, p) => sum + p.quantity, 0);
-              return { ...n, pledged };
-            })
-          )
-        ).then((withPledged) => { if (alive) setNeeds(withPledged); });
+        setNeedsRes({ ok: r.ok, status: r.status });
+        if (r.ok) {
+          setNeeds(r.data.results ?? []);
+          setMoreNeeds(r.data.next != null);
+        }
       });
     });
     return () => { alive = false; };
@@ -109,6 +103,9 @@ export function ShelterDonateScreen({ navigation }: Props) {
   useFocusEffect(load);
 
   const sections = donateSections(dash, qr, needs);
+  const gated = verifiedRescuer !== true;
+  const needsState = loadState(needsRes);
+  function retryNeeds() { setNeedsRes(null); load(); }
 
   // US-R1 · when the PRIMARY load failed and we have nothing, say so instead of rendering
   // the gated/locked fallback as fact — same rule as ShelterDashboardScreen/ShelterProfileScreen.
@@ -176,31 +173,40 @@ export function ShelterDonateScreen({ navigation }: Props) {
 
         <SectionHeader
           title="Wishlist"
-          actionLabel="Add a need"
-          onAction={() => navigation.navigate("shelterNeeds")}
+          actionLabel={gated ? undefined : "Add a need"}
+          onAction={() => navigation.navigate("needForm", {})}
           testID="btn.shelterDonate.wishlist"
         />
+        {verifiedRescuer === false ? (
+          <Text style={styles.emptyNote}>You can add needs once your shelter is verified.</Text>
+        ) : null}
 
-        {needs === null ? (
-          <LoadStateView state={{ kind: "loading" }} />
+        {needsState.kind !== "ready" ? (
+          <LoadStateView state={needsState} onRetry={retryNeeds} />
         ) : sections.needs.length === 0 ? (
           <Text style={styles.emptyNote}>No needs posted yet.</Text>
         ) : (
-          sections.needs.map((row, i) => {
-            const raw = needs[i];
-            const chip = needStatusChip(raw.status);
-            return (
-              <TouchableOpacity key={row.id} activeOpacity={0.8} onPress={() => navigation.navigate("shelterNeeds")}>
-                <Card style={styles.needCard}>
-                  <View style={[styles.needRow, large && styles.needRowLarge]}>
-                    <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{row.title}</Text>
-                    <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
-                  </View>
-                  <Text style={styles.needMeta}>Pledged {row.pledged} · Received {row.received}</Text>
-                </Card>
-              </TouchableOpacity>
-            );
-          })
+          <>
+            {sections.needs.map((row, i) => {
+              const raw = (needs ?? [])[i];
+              const chip = needStatusChip(raw.status);
+              return (
+                <TouchableOpacity key={row.id} activeOpacity={0.8}
+                  onPress={() => navigation.navigate("needPledges", { needId: row.id })}>
+                  <Card style={styles.needCard}>
+                    <View style={[styles.needRow, large && styles.needRowLarge]}>
+                      <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{row.title}</Text>
+                      <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
+                    </View>
+                    <Text style={styles.needMeta}>{needProgressLabel(row.received, raw.quantity_needed, raw.unit, row.pledged)}</Text>
+                  </Card>
+                </TouchableOpacity>
+              );
+            })}
+            {moreNeeds ? (
+              <Button label="See the full wishlist" variant="secondary" onPress={() => navigation.navigate("shelterNeeds")} />
+            ) : null}
+          </>
         )}
       </ScrollView>
 
