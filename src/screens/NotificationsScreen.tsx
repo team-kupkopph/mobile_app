@@ -106,6 +106,9 @@ export function NotificationsScreen({ navigation }: Props) {
       case "shelterNeeds":
         navigation.navigate("shelterNeeds");
         return;
+      case "needPledges":
+        navigation.navigate("needPledges", { needId: target.needId });
+        return;
       case "shelterRequests":
         navigation.navigate("shelterRequests");
         return;

@@ -13,7 +13,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ChipTone, needProgressLabel, pledgeStatusChip, PledgeStatus } from "../community";
-import { RootStackParamList } from "../navigation/types";
+import { RootStackParamList, ShelterNeedShape } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, pill, radii, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
@@ -35,7 +35,10 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
   // At Dynamic Type AX3 and up a pledge's name and status chip cannot share a row, so the card stacks.
   const large = useLargeText();
   const api = useApi();
-  const { need } = route.params;
+  // TEMPORARY (wishlist refactor Task 6): `need` became optional so a notification can open this
+  // screen by id alone. Task 8 rewrites the screen to load by `needId`; until then every in-app
+  // caller still passes `need`, so narrow it rather than restructure.
+  const { need } = route.params as { need: ShelterNeedShape };
   const [pledges, setPledges] = useState<Pledge[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 

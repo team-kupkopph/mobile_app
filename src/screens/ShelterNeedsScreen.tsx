@@ -79,7 +79,7 @@ export function ShelterNeedsScreen({ navigation }: Props) {
             const chip = needStatusChip(need.status);
             return (
               <TouchableOpacity key={need.need_id} activeOpacity={0.8}
-                onPress={() => navigation.navigate("needPledges", { need })}>
+                onPress={() => navigation.navigate("needPledges", { needId: need.need_id, need })}>
                 <Card style={styles.needCard}>
                   <View style={[styles.row, large && styles.rowLarge]}>
                     <Text style={[styles.needTitle, large && styles.needTitleLarge]}>{need.title}</Text>

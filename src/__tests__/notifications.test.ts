@@ -126,10 +126,31 @@ describe("notificationTarget", () => {
       .toEqual({ screen: "impact" });
     expect(notificationTarget({ type: "pledge_confirmed", data: { need_id: "n", pledge_id: "p" } }))
       .toEqual({ screen: "myDonations" });
-    expect(notificationTarget({ type: "pledge_received", data: { need_id: "n", pledge_id: "p" } }))
-      .toEqual({ screen: "shelterNeeds" });
     expect(notificationTarget({ type: "match_suggested", data: { report_id: "r" } }))
       .toEqual({ screen: "reportDetail", reportId: "r" });
+  });
+
+  it("pledge_received and pledge_cancelled open that need's pledges (shelter side)", () => {
+    for (const type of ["pledge_received", "pledge_cancelled"]) {
+      expect(notificationTarget({ type, data: { need_id: "n", pledge_id: "p" } }))
+        .toEqual({ screen: "needPledges", needId: "n" });
+    }
+  });
+
+  it("pledge_received and pledge_cancelled fall back to the needs list without a need_id", () => {
+    for (const type of ["pledge_received", "pledge_cancelled"]) {
+      expect(notificationTarget({ type, data: {} })).toEqual({ screen: "shelterNeeds" });
+      expect(notificationTarget({ type, data: null })).toEqual({ screen: "shelterNeeds" });
+    }
+  });
+
+  it("pledge_confirmed and need_closed open My donations (donor side), with or without need_id", () => {
+    for (const type of ["pledge_confirmed", "need_closed"]) {
+      expect(notificationTarget({ type, data: { need_id: "n", pledge_id: "p" } }))
+        .toEqual({ screen: "myDonations" });
+      expect(notificationTarget({ type, data: {} })).toEqual({ screen: "myDonations" });
+      expect(notificationTarget({ type, data: null })).toEqual({ screen: "myDonations" });
+    }
   });
 });
 

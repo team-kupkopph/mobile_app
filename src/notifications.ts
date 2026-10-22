@@ -24,6 +24,9 @@ export type NotificationTarget =
   | { screen: "impact" }
   | { screen: "myDonations" }
   | { screen: "shelterNeeds" }
+  // Wishlist refactor · a pledge landing on / withdrawn from a need opens THAT need's pledges.
+  // `needId` matches the route param because PushBridge navigates with the target's fields.
+  | { screen: "needPledges"; needId: string }
   // Poster-push fallbacks when the push lacks an inquiry_id: shelter → their Requests tab,
   // individual → the listing. Spec 2026-10-06 §1.
   | { screen: "shelterRequests" }
@@ -124,11 +127,16 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   if (n.type === "badge_earned") {
     return { screen: "impact" };
   }
-  if (n.type === "pledge_confirmed") {
+  // Donor side: a confirmed pledge and a closed need both land on the donor's own list.
+  if (n.type === "pledge_confirmed" || n.type === "need_closed") {
     return { screen: "myDonations" };
   }
-  if (n.type === "pledge_received") {
-    return { screen: "shelterNeeds" };
+  // Shelter side: pledge_received / pledge_cancelled open the need they concern, falling back
+  // to the needs list for a notification that predates need_id.
+  if (n.type === "pledge_received" || n.type === "pledge_cancelled") {
+    return n.data?.need_id
+      ? { screen: "needPledges", needId: n.data.need_id }
+      : { screen: "shelterNeeds" };
   }
   return null; // unknown type, or a report-linked type missing its report_id — no-op tap
 }

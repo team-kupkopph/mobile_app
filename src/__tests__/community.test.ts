@@ -1,6 +1,7 @@
 import {
-  impactTiles, matchReasons, matchStrength, needProgressFraction, needProgressLabel,
-  needStatusChip, pledgeIsCancellable, pledgeStatusChip, storyTypeChip
+  impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
+  needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
+  pledgeStatusChip, quantityLabel, receivedPreview, remainingAfter, storyTypeChip
 } from "../community";
 
 describe("pledgeStatusChip", () => {
@@ -8,6 +9,107 @@ describe("pledgeStatusChip", () => {
     expect(pledgeStatusChip("pledged")).toEqual({ label: "Pledged", tone: "warn" });
     expect(pledgeStatusChip("delivered")).toEqual({ label: "Delivered", tone: "ok" });
     expect(pledgeStatusChip("cancelled")).toEqual({ label: "Cancelled", tone: "muted" });
+  });
+  it("a cancel the shelter's closing caused reads 'Need closed', muted", () => {
+    expect(pledgeStatusChip("cancelled", "need_closed")).toEqual({ label: "Need closed", tone: "muted" });
+  });
+  it("a donor-initiated cancel, or no reason, stays 'Cancelled'", () => {
+    expect(pledgeStatusChip("cancelled", "donor")).toEqual({ label: "Cancelled", tone: "muted" });
+    expect(pledgeStatusChip("cancelled", null)).toEqual({ label: "Cancelled", tone: "muted" });
+  });
+  it("cancel_reason only matters on a cancelled pledge", () => {
+    expect(pledgeStatusChip("pledged", "need_closed")).toEqual({ label: "Pledged", tone: "warn" });
+  });
+});
+
+describe("MAX_QTY", () => {
+  it("mirrors the backend bound", () => {
+    expect(MAX_QTY).toBe(100000);
+  });
+});
+
+describe("quantityLabel", () => {
+  it("appends the unit", () => {
+    expect(quantityLabel(10, "kg")).toBe("10 kg");
+  });
+  it("is just the number with no unit", () => {
+    expect(quantityLabel(3)).toBe("3");
+    expect(quantityLabel(3, "")).toBe("3");
+  });
+});
+
+describe("remainingAfter", () => {
+  it("is needed minus received minus pledged", () => {
+    expect(remainingAfter(20, 8, 5)).toBe(7);
+  });
+  it("is clamped at zero", () => {
+    expect(remainingAfter(20, 15, 10)).toBe(0);
+  });
+});
+
+describe("overPledgeWarning", () => {
+  it("warns when the quantity exceeds a positive remainder", () => {
+    expect(overPledgeWarning(10, 4)).toBe("They still need 4 — anything extra is welcome, but 4 covers it.");
+  });
+  it("is silent at or under the remainder", () => {
+    expect(overPledgeWarning(4, 4)).toBeNull();
+    expect(overPledgeWarning(2, 4)).toBeNull();
+  });
+  it("is silent when nothing remains", () => {
+    expect(overPledgeWarning(5, 0)).toBeNull();
+  });
+});
+
+describe("pledgeErrorCopy", () => {
+  it("401 is a sign-in wall", () => {
+    expect(pledgeErrorCopy(401).wall).toBe(true);
+  });
+  it("403 own_need", () => {
+    expect(pledgeErrorCopy(403, "own_need"))
+      .toEqual({ message: "You can't pledge to your own wishlist.", reload: false, wall: false });
+  });
+  it("404 says the wishlist is unavailable and reloads", () => {
+    expect(pledgeErrorCopy(404, "not_found"))
+      .toEqual({ message: "This shelter's wishlist isn't available right now.", reload: true, wall: false });
+  });
+  it("409 need_not_open", () => {
+    expect(pledgeErrorCopy(409, "need_not_open"))
+      .toEqual({ message: "This need is no longer open for pledges.", reload: true, wall: false });
+  });
+  it("409 pledge_decided", () => {
+    expect(pledgeErrorCopy(409, "pledge_decided"))
+      .toEqual({ message: "This pledge was already settled — refreshing.", reload: true, wall: false });
+  });
+  it("429", () => {
+    expect(pledgeErrorCopy(429))
+      .toEqual({ message: "You've made a lot of pledges today. Try again tomorrow.", reload: false, wall: false });
+  });
+  it("0 and 5xx are a connection failure", () => {
+    const row = { message: "Couldn't reach Kupkop. Check your connection and try again.", reload: false, wall: false };
+    expect(pledgeErrorCopy(0)).toEqual(row);
+    expect(pledgeErrorCopy(500)).toEqual(row);
+    expect(pledgeErrorCopy(503)).toEqual(row);
+  });
+});
+
+describe("needActions", () => {
+  it("open: edit, complete and receive", () => {
+    expect(needActions("open")).toEqual({ edit: true, complete: true, receive: true });
+  });
+  it("fulfilled: receive only (late deliveries from over-pledges)", () => {
+    expect(needActions("fulfilled")).toEqual({ edit: false, complete: false, receive: true });
+  });
+  it("closed: none", () => {
+    expect(needActions("closed")).toEqual({ edit: false, complete: false, receive: false });
+  });
+});
+
+describe("receivedPreview", () => {
+  it("shows received before and after the add", () => {
+    expect(receivedPreview(8, 20, 6, "kg")).toBe("8 → 14 of 20 kg received");
+  });
+  it("works without a unit", () => {
+    expect(receivedPreview(8, 20, 6)).toBe("8 → 14 of 20 received");
   });
 });
 
@@ -30,6 +132,14 @@ describe("pledgeIsCancellable", () => {
 describe("need progress", () => {
   it("labels received-of-needed", () => {
     expect(needProgressLabel(2, 5)).toBe("2 of 5 received");
+  });
+  it("carries the unit", () => {
+    expect(needProgressLabel(8, 20, "kg")).toBe("8 of 20 kg received");
+  });
+  it("adds the pledged clause only above zero", () => {
+    expect(needProgressLabel(8, 20, "kg", 5)).toBe("8 of 20 kg received · 5 pledged");
+    expect(needProgressLabel(8, 20, "kg", 0)).toBe("8 of 20 kg received");
+    expect(needProgressLabel(8, 20, undefined, 5)).toBe("8 of 20 received · 5 pledged");
   });
   it("fraction is clamped and never divides by zero", () => {
     expect(needProgressFraction(2, 4)).toBe(0.5);

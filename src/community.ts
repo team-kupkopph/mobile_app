@@ -8,12 +8,24 @@ export type NeedStatus = "open" | "fulfilled" | "closed";
 // amber = pledged/open (still needs action), grey = cancelled/closed.
 export type ChipTone = "ok" | "warn" | "muted";
 
-export function pledgeStatusChip(status: PledgeStatus): { label: string; tone: ChipTone } {
+export type CancelReason = "donor" | "need_closed";
+
+/** Mirrors the backend bound on a need's quantity, a pledge's quantity and a received count. */
+export const MAX_QTY = 100_000;
+
+// `cancelReason` is only read on a cancelled pledge: a cancel the shelter's closing caused
+// reads "Need closed" so the donor can tell it from one they made themselves.
+export function pledgeStatusChip(
+  status: PledgeStatus,
+  cancelReason?: CancelReason | null
+): { label: string; tone: ChipTone } {
   switch (status) {
     case "delivered":
       return { label: "Delivered", tone: "ok" };
     case "cancelled":
-      return { label: "Cancelled", tone: "muted" };
+      return cancelReason === "need_closed"
+        ? { label: "Need closed", tone: "muted" }
+        : { label: "Cancelled", tone: "muted" };
     case "pledged":
     default:
       return { label: "Pledged", tone: "warn" };
@@ -43,8 +55,65 @@ export function needCategoryLabel(category: string): string {
   return category ? category.charAt(0).toUpperCase() + category.slice(1) : category;
 }
 
-export function needProgressLabel(received: number, needed: number): string {
-  return `${received} of ${needed} received`;
+/** "10 kg", or just "3" when the need has no unit. */
+export function quantityLabel(n: number, unit?: string): string {
+  return unit ? `${n} ${unit}` : `${n}`;
+}
+
+/** "8 of 20 kg received · 5 pledged" — the pledged clause is omitted at 0. */
+export function needProgressLabel(received: number, needed: number, unit?: string, pledged?: number): string {
+  const base = `${received} of ${quantityLabel(needed, unit)} received`;
+  return pledged && pledged > 0 ? `${base} · ${pledged} pledged` : base;
+}
+
+/** What is still unspoken for: needed less what has arrived and what is already promised. Never negative. */
+export function remainingAfter(needed: number, received: number, pledged: number): number {
+  return Math.max(0, needed - received - pledged);
+}
+
+/** A nudge, not a block: pledging more than the remainder is allowed. */
+export function overPledgeWarning(qty: number, remaining: number): string | null {
+  return remaining > 0 && qty > remaining
+    ? `They still need ${remaining} — anything extra is welcome, but ${remaining} covers it.`
+    : null;
+}
+
+/** The shelter's received-confirm preview: "8 → 14 of 20 kg received". */
+export function receivedPreview(received: number, needed: number, add: number, unit?: string): string {
+  return `${received} → ${received + add} of ${quantityLabel(needed, unit)} received`;
+}
+
+/**
+ * The words for a failed pledge call. `reload` means the screen's data is stale and should be
+ * re-fetched; `wall` means the caller is signed out (show the sign-in wall, not a message).
+ * Anything outside the table gets a generic line rather than a misleading connection error.
+ */
+export function pledgeErrorCopy(status: number, code?: string): { message: string; reload: boolean; wall: boolean } {
+  const row = (message: string, reload = false, wall = false) => ({ message, reload, wall });
+  if (status === 401) return row("Sign in to pledge.", false, true);
+  if (status === 403 && code === "own_need") return row("You can't pledge to your own wishlist.");
+  if (status === 404) return row("This shelter's wishlist isn't available right now.", true);
+  if (status === 409 && code === "need_not_open") return row("This need is no longer open for pledges.", true);
+  if (status === 409 && code === "pledge_decided") return row("This pledge was already settled — refreshing.", true);
+  if (status === 429) return row("You've made a lot of pledges today. Try again tomorrow.");
+  if (status === 0 || status >= 500) return row("Couldn't reach Kupkop. Check your connection and try again.");
+  return row("Couldn't save that. Please try again.");
+}
+
+/**
+ * What a shelter may do to a need in each state. `fulfilled` keeps `receive` because an
+ * over-pledge can still be delivered after the target flips; `closed` is final.
+ */
+export function needActions(status: NeedStatus): { edit: boolean; complete: boolean; receive: boolean } {
+  switch (status) {
+    case "open":
+      return { edit: true, complete: true, receive: true };
+    case "fulfilled":
+      return { edit: false, complete: false, receive: true };
+    case "closed":
+    default:
+      return { edit: false, complete: false, receive: false };
+  }
 }
 
 // Clamped 0..1 for a progress bar; a zero/negative target never divides-by-zero.

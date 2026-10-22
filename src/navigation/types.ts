@@ -160,7 +160,7 @@ export type RootStackParamList = {
   // US-W3 · Abot-tulong wishlist (shelter side): manage needs, edit/create, confirm pledges.
   shelterNeeds: undefined;
   needForm: { need?: ShelterNeedShape } | undefined;
-  needPledges: { need: ShelterNeedShape };
+  needPledges: { needId: string; need?: ShelterNeedShape };
   // US-N5 · settings + the two RA 10173 data rights (§12.6/§12.7).
   // F-R3-4 · `shelter` hides the owner-only ACCOUNT rows (Edit profile → the OWNER
   // ProfileScreen, Phone number → the owner verifyPhone, which would desync the org's
