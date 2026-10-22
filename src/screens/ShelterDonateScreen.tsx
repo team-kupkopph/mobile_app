@@ -60,6 +60,8 @@ export function ShelterDonateScreen({ navigation }: Props) {
   // "Add a need" follows the approval gate the Profile tab's Wishlist row uses: /me's `is_verified_rescuer`
   // ("any approved", not the latest request's status). Unknown until /me answers, so it reads as gated.
   const [verifiedRescuer, setVerifiedRescuer] = useState<boolean | null>(null);
+  // Artboard · the QR card names the org. `/me` already answers for the accountId below; its display_name is the org's name for a shelter.
+  const [orgName, setOrgName] = useState<string | null>(null);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
@@ -80,6 +82,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
       if (!me.ok) { setNeedsRes({ ok: false, status: me.status }); return; }
       setVerifiedRescuer(!!me.data.is_verified_rescuer);
       const accountId = me.data.account_id;
+      if (alive) setOrgName(me.data.display_name ?? null);
 
       api.get(`/shelters/${accountId}/donation-qr`).then((r) => {
         // A 404 here is the two-key gate saying "nothing to show yet" — the same reading
@@ -106,6 +109,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
   const gated = verifiedRescuer !== true;
   const needsState = loadState(needsRes);
   function retryNeeds() { setNeedsRes(null); load(); }
+  const donationsOn = dash?.gates.donations_enabled ?? false;
 
   // US-R1 · when the PRIMARY load failed and we have nothing, say so instead of rendering
   // the gated/locked fallback as fact — same rule as ShelterDashboardScreen/ShelterProfileScreen.
@@ -134,11 +138,20 @@ export function ShelterDonateScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Donate</Text>
+        <Text style={styles.subtitle}>Your donation QR and wishlist, in one place.</Text>
 
         {/* Decision 5 · the QR must render at full contrast — Card is white by default, but
             the explicit fill is kept in source so a future tone change to Card can never
             tint the code (same convention DonateScreen's qrCard follows). */}
         <Card style={styles.qrCard}>
+          {/* Artboard · org name, "Donations are on/paused" and an On/Off chip. (The amber "Pending verification" chip waits for DW2: a shelter cannot read its own pending QR yet.) */}
+          <View style={styles.qrHead}>
+            <View style={styles.qrHeadCopy}>
+              {orgName ? <Text style={styles.qrOrg} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text> : null}
+              <Text style={styles.qrSub}>{donationsOn ? "Donations are on" : "Donations are paused"}</Text>
+            </View>
+            <Chip tone={donationsOn ? "success" : "neutral"} dot={false} label={donationsOn ? "On" : "Off"} />
+          </View>
           {sections.qr === "locked" ? (
             <View style={styles.lockedRow}>
               <LockIcon color={colors.muted} size={18} />
@@ -171,12 +184,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
           )}
         </Card>
 
-        <SectionHeader
-          title="Wishlist"
-          actionLabel={gated ? undefined : "Add a need"}
-          onAction={() => navigation.navigate("needForm", {})}
-          testID="btn.shelterDonate.wishlist"
-        />
+        <SectionHeader title="Wishlist" />
         {verifiedRescuer === false ? (
           <Text style={styles.emptyNote}>You can add needs once your shelter is verified.</Text>
         ) : null}
@@ -208,6 +216,14 @@ export function ShelterDonateScreen({ navigation }: Props) {
             ) : null}
           </>
         )}
+
+        {/* Artboard · "Add a need" is a dashed button BELOW the list (it was a header action). Same approval gate as before (`gated`), same destination. */}
+        {!gated ? (
+          <TouchableOpacity activeOpacity={0.8} style={styles.addNeed} onPress={() => navigation.navigate("needForm", {})}
+            testID="btn.shelterDonate.wishlist" accessibilityRole="button" accessibilityLabel="Add a need to your wishlist">
+            <Text style={styles.addNeedLabel}>+ Add a need</Text>
+          </TouchableOpacity>
+        ) : null}
       </ScrollView>
 
       <ShelterTabs
@@ -227,6 +243,13 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 24, paddingBottom: 120 },
   pageTitle: { color: colors.ink, ...typography.display },
+  subtitle: { marginTop: 6, color: colors.muted, ...typography.body },
+  qrHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 4 },
+  qrHeadCopy: { flex: 1 },
+  qrOrg: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  qrSub: { marginTop: 2, color: colors.muted, ...typography.meta },
+  addNeed: { marginTop: 4, minHeight: 48, alignItems: "center", justifyContent: "center", borderRadius: squircle(48), borderWidth: 1.5, borderStyle: "dashed", borderColor: colors.teal },
+  addNeedLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   qrCard: { marginTop: 16, padding: spacing.lg, backgroundColor: colors.white },
   lockedRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   lockedText: { flex: 1, color: colors.muted, ...typography.meta, lineHeight: 19 },
