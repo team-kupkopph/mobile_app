@@ -87,6 +87,17 @@ describe("DonatePledgeScreen", () => {
     expect(pledge).toMatch(/loadState\(needRes\)\.kind === "gone"/);
     expect(pledge).toMatch(/<LoadStateView state=\{\{ kind: "gone" \}\}[^>]*onBack=/);
   });
+  it("Review Focus #5: the gone branch keeps the specific refusal on screen, above the shared state, with a way back", () => {
+    const start = pledge.indexOf("needGone ? (");
+    const branch = pledge.slice(start, pledge.indexOf(") : (", start));
+    // the scan found the branch (a guard that matches nothing proves nothing)
+    expect(start).toBeGreaterThan(-1);
+    expect(branch).toContain("<LoadStateView");
+    // pledgeErrorCopy's 404 sentence is set by submit(); the reload then 404s too, so without this line the donor reads only the generic copy
+    expect(branch).toMatch(/\{error \? <Text style=\{styles\.error\} accessibilityRole="alert">\{error\}<\/Text> : null\}/);
+    expect(branch.indexOf("{error ?")).toBeLessThan(branch.indexOf("<LoadStateView"));
+    expect(branch).toMatch(/onBack=\{\(\) => navigation\.goBack\(\)\}/);
+  });
   it("the form's ScrollViews follow the keyboard (it has a text field now)", () => {
     const tags = [...pledge.matchAll(/<ScrollView\b[^>]*>/g)].map((m) => m[0]);
     expect(tags.length).toBe(2);

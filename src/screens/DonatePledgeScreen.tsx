@@ -138,7 +138,11 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
         {isGuest ? (
           <Button label="Create an account or log in" onPress={() => setWallOpen(true)} style={styles.primaryBtn} />
         ) : needGone ? (
-          <LoadStateView state={{ kind: "gone" }} subject="need" onBack={() => navigation.goBack()} />
+          <>
+            {/* submit()'s own refusal (e.g. "This shelter's wishlist isn't available right now.") survives the reload that 404s too */}
+            {error ? <Text style={styles.error} accessibilityRole="alert">{error}</Text> : null}
+            <LoadStateView state={{ kind: "gone" }} subject="need" onBack={() => navigation.goBack()} />
+          </>
         ) : (
           <>
             <Text style={styles.label}>How many can you give?</Text>

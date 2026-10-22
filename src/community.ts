@@ -156,7 +156,7 @@ export function completeNeedBody(pledgeCount: number | null | undefined): string
     : `${base} ${n} open pledges will be cancelled and the donors told.`;
 }
 
-/** Mirrors the backend bounds on a need's title, details and unit. */
+/** Client-side limits on a need's title, details and unit. (The backend has no max_length on the description, so NEED_DETAILS_MAX is ours alone.) */
 export const NEED_TITLE_MAX = 120;
 export const NEED_DETAILS_MAX = 1000;
 export const NEED_UNIT_MAX = 16;
