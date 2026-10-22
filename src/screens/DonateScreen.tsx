@@ -8,7 +8,7 @@ import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacit
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
-import { loadState } from "../net";
+import { donateLoadState } from "../donateState";
 import { needCategoryLabel, needProgressLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
@@ -84,9 +84,9 @@ export function DonateScreen({ navigation, route }: Props) {
           Donations happen in your payment app — Kupkop never touches the money.
         </Text>
 
-        {loadState(res, qrs?.length).kind !== "ready" ? (
+        {donateLoadState(res, qrs?.length).kind !== "ready" ? (
           <LoadStateView
-            state={loadState(res, qrs?.length)}
+            state={donateLoadState(res, qrs?.length)}
             emptyTitle="Donations aren't available for this org yet."
           />
         ) : qrs && qrs.length > 0 ? (
