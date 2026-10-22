@@ -13,6 +13,7 @@ import { setIntent } from "../guestIntent";
 import { SignupWall } from "../components/SignupWall";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { saveQrImage } from "../saveQr";
 import { donateLoadState } from "../donateState";
 import { needCategoryLabel, needProgressLabel, quantityLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -37,6 +38,8 @@ type Props = NativeStackScreenProps<RootStackParamList, "donate">;
 // The card keeps the provider and the account name (who the gift is for) and says plainly that the code did not load.
 function QrCard({ qr }: { qr: DonationQr }) {
   const [failed, setFailed] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
   return (
     // Decision 5 · the code must render at full contrast — Card is white by default,
     // but the explicit fill is kept so a future tone change can't tint the code.
@@ -50,6 +53,18 @@ function QrCard({ qr }: { qr: DonationQr }) {
         <Image source={{ uri: qr.qr_image_url }} style={styles.qrImage} resizeMode="contain" onError={() => setFailed(true)} />
       )}
       <Text style={styles.accountName}>{qr.account_name}</Text>
+      {/* DW1 / OQ2 · a donor with one phone cannot scan this screen; GCash and Maya can scan a saved image. */}
+      <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.85} style={styles.saveBtn} disabled={saving}
+        accessibilityRole="button" accessibilityLabel={`Save the ${PROVIDER_LABEL[qr.provider] ?? qr.provider} QR code to your photos`}
+        onPress={async () => {
+          setSaving(true); setSaveFailed(false);
+          const r = await saveQrImage(qr.qr_image_url, qr.provider);
+          setSaving(false); setSaveFailed(!r.ok);
+        }}>
+        <Text style={styles.saveLabel}>{saving ? "Saving…" : "Save QR"}</Text>
+      </TouchableOpacity>
+      {saveFailed ? <Text style={styles.saveError}>We couldn't save this code. Check your connection and try again.</Text> : null}
+      <Text style={styles.saveHint}>Using one phone? Save the code, then in GCash or Maya choose Scan QR and upload the saved image.</Text>
     </Card>
   );
 }
@@ -194,6 +209,10 @@ const styles = StyleSheet.create({
   provider: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
   qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: radii.chip, backgroundColor: colors.border },
   accountName: { marginTop: 14, color: colors.ink, ...typography.strong, fontWeight: "700", textAlign: "center" },
+  saveBtn: { marginTop: 14, minHeight: 44, paddingHorizontal: 26, justifyContent: "center", borderRadius: pill(44), borderWidth: 1.5, borderColor: colors.teal },
+  saveLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" },
+  saveError: { marginTop: 10, color: colors.danger, ...typography.meta, textAlign: "center" },
+  saveHint: { marginTop: 10, color: colors.muted, ...typography.meta, lineHeight: 19, textAlign: "center" },
   qrFailed: { alignItems: "center", justifyContent: "center", padding: spacing.md },
   qrFailedText: { color: colors.muted, ...typography.meta, textAlign: "center" },
   empty: { marginTop: 40, color: colors.muted, ...typography.subtitle, textAlign: "center" },
