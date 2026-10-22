@@ -103,6 +103,8 @@ export function MyDonationsScreen({ navigation }: Props) {
             );
           })
         )}
+        {/* DW4 / OQ6 · a gift sent by QR leaves no record here. Said in both the empty and the list state, so a donor who gave by QR is not left wondering. */}
+        <Text style={styles.qrNote}>Gifts you send by QR go straight to the shelter and don't appear here.</Text>
       </ScrollView>
     </View>
   );
@@ -120,5 +122,6 @@ const styles = StyleSheet.create({
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   meta: { marginTop: 8, color: colors.muted, ...typography.body },
   cancelBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: "#FBEEEC" },
+  qrNote: { marginTop: 18, color: colors.muted, ...typography.meta, lineHeight: 20, textAlign: "center" },
   cancelLabel: { color: colors.danger, ...typography.strong, fontWeight: "700" }
 });
