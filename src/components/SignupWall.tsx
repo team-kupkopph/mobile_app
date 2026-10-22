@@ -70,6 +70,13 @@ function getCopy(action: SignupWallAction, subject?: string): WallCopy {
         body: "Create a free account to react to stories from the community.",
         note: "Takes a minute — we'll bring you right back."
       };
+    case "donate":
+      return {
+        icon: <HeartIcon />,
+        title: "Pledge to a shelter",
+        body: "Create a free account to pledge items from a shelter's wishlist and keep track of your donations.",
+        note: "Takes a minute — we'll bring you right back."
+      };
     case "account":
     default:
       return {

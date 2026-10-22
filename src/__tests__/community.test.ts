@@ -1,7 +1,7 @@
 import {
   impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
   needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
-  pledgeStatusChip, quantityLabel, receivedPreview, remainingAfter, storyTypeChip
+  pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip
 } from "../community";
 
 describe("pledgeStatusChip", () => {
@@ -181,5 +181,29 @@ describe("matchStrength", () => {
   it("is a soft label, not a number", () => {
     expect(matchStrength(0.9)).toEqual({ label: "Very likely", tone: "ok" });
     expect(matchStrength(0.55)).toEqual({ label: "Possible", tone: "warn" });
+  });
+});
+
+describe("pledgeWhen / pledgeSubtitle (My donations' second line)", () => {
+  const now = new Date("2026-10-22T09:00:00");
+  it("formats a date in the same month-and-day style as the rest of the app, adding the year only for another year", () => {
+    expect(pledgeWhen("2026-10-05T10:00:00", now)).toMatch(/Oct\w*\.?\s+5|5\s+Oct/);
+    expect(pledgeWhen("2026-10-05T10:00:00", now)).not.toContain("2026");
+    expect(pledgeWhen("2025-03-05T10:00:00", now)).toContain("2025");
+  });
+  it("returns an empty string for a missing or unparseable date", () => {
+    expect(pledgeWhen(null, now)).toBe("");
+    expect(pledgeWhen(undefined, now)).toBe("");
+    expect(pledgeWhen("not a date", now)).toBe("");
+  });
+  it("joins the shelter and the decided date, falling back to the created date", () => {
+    const decided = pledgeSubtitle("Happy Paws", "2026-10-06T10:00:00", "2026-10-01T10:00:00", now);
+    expect(decided.startsWith("Happy Paws · ")).toBe(true);
+    expect(decided).toMatch(/6/);
+    const pending = pledgeSubtitle("Happy Paws", null, "2026-10-01T10:00:00", now);
+    expect(pending).toMatch(/^Happy Paws · .*1/);
+  });
+  it("is just the shelter when there is no date at all", () => {
+    expect(pledgeSubtitle("Happy Paws", null, undefined, now)).toBe("Happy Paws");
   });
 });

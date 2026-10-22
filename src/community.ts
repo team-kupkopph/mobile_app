@@ -101,6 +101,26 @@ export function pledgeErrorCopy(status: number, code?: string): { message: strin
 }
 
 /**
+ * "Oct 5" (or "Oct 5, 2025" in another year) — the app's usual short date. "" for a missing or
+ * unreadable date, so a caller can leave it out rather than print "Invalid Date".
+ */
+export function pledgeWhen(iso: string | null | undefined, now: Date = new Date()): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return d.toLocaleDateString(undefined, sameYear ? { month: "short", day: "numeric" } : { month: "short", day: "numeric", year: "numeric" });
+}
+
+/** My donations' second line: "{shelter} · {date}", the date being when the pledge was settled (else made). */
+export function pledgeSubtitle(
+  shelterName: string, decidedAt: string | null | undefined, createdAt: string | null | undefined, now: Date = new Date()
+): string {
+  const when = pledgeWhen(decidedAt || createdAt, now);
+  return when ? `${shelterName} · ${when}` : shelterName;
+}
+
+/**
  * What a shelter may do to a need in each state. `fulfilled` keeps `receive` because an
  * over-pledge can still be delivered after the target flips; `closed` is final.
  */

@@ -2,14 +2,15 @@
 // gate (org approved AND the QR reviewer-verified), so a 404 here just means "nothing to
 // show yet," not an error. Payments happen off-platform in the payment app itself —
 // Kupkop never touches the money (decision: donations stay off-platform QR by design).
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { needCategoryLabel, needProgressLabel } from "../community";
+import { needCategoryLabel, needProgressLabel, quantityLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
@@ -23,6 +24,8 @@ type DonationQr = { provider: string; account_name: string; qr_image_url: string
 type Need = {
   need_id: string; title: string; category: string;
   quantity_needed: number; quantity_received: number; status: string;
+  unit?: string; quantity_pledged?: number;
+  my_pledged?: number;   // only when the caller is signed in
 };
 type Props = NativeStackScreenProps<RootStackParamList, "donate">;
 
@@ -56,6 +59,20 @@ export function DonateScreen({ navigation, route }: Props) {
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
 
   const [needs, setNeeds] = useState<Need[] | null>(null);
+  // AW14a · the wishlist's own result, so a failed request says so (offline / error + retry) instead of the
+  // section quietly not being there.
+  const [needsRes, setNeedsRes] = useState<{ ok: boolean; status: number } | null>(null);
+
+  // US-W2 · the shelter's open wishlist, shown beside the QR block (both live on Donate). Refetched on focus
+  // (AW13): coming back from a pledge shows the new progress and "You pledged …".
+  const loadNeeds = useCallback(() => {
+    api.get(`/shelters/${accountId}/needs?status=open`).then((r) => {
+      setNeedsRes({ ok: r.ok, status: r.status });
+      if (r.ok) setNeeds(r.data.results);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- api changes with the tokens, which also change what comes back
+  }, [accountId, api]);
+  useFocusEffect(loadNeeds);
 
   useEffect(() => {
     setRes(null);
@@ -66,12 +83,17 @@ export function DonateScreen({ navigation, route }: Props) {
       setRes({ ok: r.ok, status: r.status });
       if (r.ok) setQrs(r.data.donation_qrs);
     });
-    // US-W2 · the shelter's open wishlist, shown beside the QR block (both live on Donate).
-    api.get(`/shelters/${accountId}/needs?status=open`).then((r) => {
-      setNeeds(r.ok ? r.data.results : []);
-    });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once for this accountId
   }, [accountId]);
+
+  // Rows already on screen stay on screen if a later refresh fails; the state only decides the first load.
+  const needsState = needs === null ? loadState(needsRes) : ({ kind: "ready" } as const);
+  const qrState = loadState(res, qrs?.length);
+  // AW14b · the shelter has a wishlist but no verified code (the API answers 404, or an empty list): say that,
+  // rather than "donations aren't available". Waits for the wishlist so the line does not flash and flip.
+  const noQr = qrState.kind === "gone" || qrState.kind === "empty";
+  const hasNeeds = !!needs && needs.length > 0;
+  const needsPending = needs === null && needsState.kind === "loading";
 
   return (
     <View style={styles.screen}>
@@ -84,9 +106,13 @@ export function DonateScreen({ navigation, route }: Props) {
           Donations happen in your payment app — Kupkop never touches the money.
         </Text>
 
-        {loadState(res, qrs?.length).kind !== "ready" ? (
+        {noQr && needsPending ? null : noQr && hasNeeds ? (
+          <Text style={styles.noQr}>
+            This shelter doesn't take QR donations yet — you can still pledge an item below.
+          </Text>
+        ) : qrState.kind !== "ready" ? (
           <LoadStateView
-            state={loadState(res, qrs?.length)}
+            state={qrState}
             emptyTitle="Donations aren't available for this org yet."
           />
         ) : qrs && qrs.length > 0 ? (
@@ -95,6 +121,13 @@ export function DonateScreen({ navigation, route }: Props) {
             // but the explicit fill is kept so a future tone change can't tint the code.
             <QrCard key={qr.provider} qr={qr} />
           ))
+        ) : null}
+
+        {needsState.kind !== "ready" ? (
+          <LoadStateView
+            state={needsState}
+            onRetry={() => { setNeedsRes(null); loadNeeds(); }}
+          />
         ) : null}
 
         {needs && needs.length > 0 ? (
@@ -107,8 +140,11 @@ export function DonateScreen({ navigation, route }: Props) {
               <Card key={need.need_id} style={styles.needCard}>
                 <Text style={styles.needTitle}>{need.title}</Text>
                 <Text style={styles.needMeta}>
-                  {needCategoryLabel(need.category)} · {needProgressLabel(need.quantity_received, need.quantity_needed)}
+                  {needCategoryLabel(need.category)} · {needProgressLabel(need.quantity_received, need.quantity_needed, need.unit, need.quantity_pledged)}
                 </Text>
+                {need.my_pledged && need.my_pledged > 0 ? (
+                  <Text style={styles.myPledge}>You pledged {quantityLabel(need.my_pledged, need.unit)}</Text>
+                ) : null}
                 <TouchableOpacity hitSlop={TAP_SLOP} style={styles.pledgeBtn}
                   onPress={() => navigation.navigate("donatePledge", {
                     needId: need.need_id, needTitle: need.title, shelterName: orgName
@@ -146,6 +182,8 @@ const styles = StyleSheet.create({
   sectionNote: { marginTop: 6, marginBottom: 14, color: colors.muted, ...typography.meta, lineHeight: 20 },
   needCard: { marginBottom: 12, padding: 18 },
   needTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
+  noQr: { color: colors.muted, ...typography.meta, lineHeight: 20, marginBottom: 4 },
+  myPledge: { marginTop: 4, color: colors.teal, ...typography.meta, fontWeight: "700" },
   needMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   pledgeBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   pledgeLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
