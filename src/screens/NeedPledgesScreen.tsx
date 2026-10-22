@@ -3,7 +3,8 @@
 // tap opens it with only a `needId`, and a snapshot passed in from the list would go stale the moment a
 // donor pledged or cancelled. `route.params.need` is at most a first-paint placeholder.
 //
-// What the shelter may do comes from `needActions(status)`. "Mark received" asks for the quantity that
+// What the shelter may do comes from `needActions(status)`, but only once the need has been read fresh
+// (`liveNeedActions`): a placeholder, or a copy from before a failed refresh, grants nothing. "Mark received" asks for the quantity that
 // ACTUALLY arrived (it can differ from the pledge) in the shared ConfirmModal; "Mark complete" takes the
 // need off the wishlist and cancels what is still pledged.
 import { useFocusEffect } from "@react-navigation/native";
@@ -13,7 +14,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import {
-  ChipTone, completeNeedBody, needActionErrorCopy, needActions, needCategoryLabel, needProgressLabel,
+  ChipTone, completeNeedBody, liveNeedActions, needActionErrorCopy, needCategoryLabel, needProgressLabel,
   needStatusChip, pledgeStatusChip, pledgeWhen, quantityLabel, receivedPreview, CancelReason, PledgeStatus
 } from "../community";
 import { ConfirmModal } from "../components/ConfirmModal";
@@ -132,7 +133,8 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
   }
   if (!need) return null;   // unreachable: `ready` implies the need was set. Keeps the types honest.
 
-  const actions = needActions(need.status);
+  const actions = liveNeedActions(needState.kind, need.status);
+  const stale = needState.kind === "offline" || needState.kind === "error";
   const chip = needStatusChip(need.status);
   const pledgesState = loadState(pledgesRes, pledges?.length);
   // What Mark complete will cancel: the pledges still open. Counted from the list when it has loaded (it is what the
@@ -164,6 +166,15 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
             </View>
           ) : null}
         </Card>
+
+        {stale ? (
+          <View style={styles.staleBox}>
+            <Text style={styles.error} accessibilityRole="alert">
+              Couldn't refresh this need, so what's shown may be out of date. Editing and confirming are paused.
+            </Text>
+            <Button size="small" variant="secondary" label="Retry" onPress={retry} style={styles.staleRetry} />
+          </View>
+        ) : null}
 
         {error ? <Text style={styles.error} accessibilityRole="alert">{error}</Text> : null}
 
@@ -230,6 +241,8 @@ const styles = StyleSheet.create({
   progress: { flex: 1, color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   description: { marginTop: 10, color: colors.ink, ...typography.body },
   actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 16 },
+  staleBox: { marginTop: 4 },
+  staleRetry: { marginTop: 10 },
   error: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "600" },
   sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.section },
   pledgeCard: { marginBottom: 12, padding: 18 },

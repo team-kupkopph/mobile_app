@@ -87,11 +87,17 @@ describe("AW10 · NeedPledgesScreen loads the need by id", () => {
 
 describe("AW11 · actions follow the need's state", () => {
   it("comes from needActions", () => {
-    expect(pledges).toMatch(/import \{[^}]*\bneedActions\b[^}]*\} from "\.\.\/community"/);
-    expect(pledges).toMatch(/needActions\(need\.status\)/);
+    expect(pledges).toMatch(/import \{[^}]*\bliveNeedActions\b[^}]*\} from "\.\.\/community"/);
+    expect(pledges).toMatch(/liveNeedActions\(needState\.kind, need\.status\)/);
     expect(pledges).toMatch(/actions\.edit/);
     expect(pledges).toMatch(/actions\.complete/);
     expect(pledges).toMatch(/actions\.receive/);
+  });
+  it("the placeholder is not trusted: a need that is not freshly loaded shows an error with a Retry, and no actions", () => {
+    expect(code(pledges)).not.toMatch(/\bneedActions\(/);   // only the gated wrapper
+    expect(pledges).toMatch(/needState\.kind === "offline" \|\| needState\.kind === "error"/);
+    expect(pledges).toMatch(/Couldn't refresh this need/);
+    expect(pledges).toMatch(/label="Retry" onPress=\{retry\}/);
   });
   it("Close need is replaced by Mark complete, which calls POST /needs/{id}/complete", () => {
     expect(pledges).not.toMatch(/Close need/);
@@ -201,7 +207,14 @@ describe("DonationInstructionsScreen", () => {
     expect(instr).toMatch(/maxLength=\{INSTRUCTIONS_MAX\}/);
     expect(instr).toMatch(/api\.patch\("\/shelter\/profile", \{ donation_instructions/);
     expect(instr).toMatch(/<PrefillWarning\b/);
-    expect(instr).toMatch(/if \(prefillFailed \|\| !loaded\)/);
+    expect(instr).toMatch(/if \(prefillFailed\) \{ setError\(PREFILL_FAILED\); return; \}/);
+  });
+  it("while the prefill is loading: the field is read-only (typing can't be overwritten), Save shows a spinner, and PREFILL_FAILED is not shown", () => {
+    expect(instr).toMatch(/const loading = !loaded && !prefillFailed/);
+    expect(instr).toMatch(/readOnly=\{loading\}/);
+    expect(instr).toMatch(/loading=\{busy \|\| loading\}/);
+    expect(instr).toMatch(/if \(!loaded\) return;/);
+    expect(instr).toMatch(/Loading your current instructions/);
   });
 });
 
@@ -235,6 +248,13 @@ describe("AW17 · ShelterDonateScreen", () => {
 });
 
 describe("US-W3 · the dashboard's Wishlist line", () => {
+  it("is gated on /me's is_verified_rescuer (the Profile tab's gate), not on the latest request's banner state", () => {
+    const m = /\{(\S[^\n]*)\? \(\(\) => \{\s*const summary = wishlistSummary/.exec(dash);
+    expect(m).not.toBeNull();   // the scan found the Wishlist block's condition
+    expect(m![1]).toMatch(/me\?\.is_verified_rescuer/);
+    expect(m![1]).not.toMatch(/\bverified\b/);
+    expect(m![1]).not.toMatch(/\bstate\b/);
+  });
   it("comes from wishlistSummary and opens the wishlist", () => {
     expect(dash).toMatch(/import \{[^}]*\bwishlistSummary\b[^}]*\} from "\.\.\/shelterDashboard"/);
     expect(dash).toMatch(/wishlistSummary\(dash\.wishlist\)/);

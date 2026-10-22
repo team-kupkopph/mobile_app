@@ -210,6 +210,15 @@ export function needSaveError(
   return { field: "form", message: "Couldn't save. Please try again." };
 }
 
+/**
+ * `needActions`, but only for a need that has been freshly read from the server. `kind` is `loadState(...).kind` of the
+ * `GET /needs/{id}` request: anything but "ready" (still loading, offline, failed, gone) grants nothing, so a placeholder
+ * passed in from the list, or a copy from before a failed refresh, can never drive Edit / Mark complete / Mark received.
+ */
+export function liveNeedActions(kind: string, status: NeedStatus): { edit: boolean; complete: boolean; receive: boolean } {
+  return kind === "ready" ? needActions(status) : { edit: false, complete: false, receive: false };
+}
+
 // Clamped 0..1 for a progress bar; a zero/negative target never divides-by-zero.
 export function needProgressFraction(received: number, needed: number): number {
   if (needed <= 0) return 0;

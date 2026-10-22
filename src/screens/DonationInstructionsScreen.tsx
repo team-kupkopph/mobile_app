@@ -47,9 +47,13 @@ export function DonationInstructionsScreen({ navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on open
   }, []);
 
+  // Until the current text has arrived the field is read-only (typing would be overwritten by it) and Save waits.
+  const loading = !loaded && !prefillFailed;
+
   async function submit() {
     if (busy) return;
-    if (prefillFailed || !loaded) { setError(PREFILL_FAILED); return; }
+    if (prefillFailed) { setError(PREFILL_FAILED); return; }
+    if (!loaded) return;
     const value = text.trim();
     if (value.length > INSTRUCTIONS_MAX) { setError(`Keep it to ${INSTRUCTIONS_MAX} characters or fewer.`); return; }
     setBusy(true);
@@ -79,10 +83,12 @@ export function DonationInstructionsScreen({ navigation }: Props) {
           numberOfLines={5}
           maxLength={INSTRUCTIONS_MAX}
           placeholder="e.g. Gate B, weekdays 9am–4pm. Ask for Ate Liza."
+          readOnly={loading}
           error={error ?? undefined}
         />
+        {loading ? <Text style={styles.loadingNote}>Loading your current instructions…</Text> : null}
         <Text style={styles.count}>{text.length} / {INSTRUCTIONS_MAX}</Text>
-        <Button label="Save" onPress={submit} loading={busy} style={styles.primaryBtn} />
+        <Button label="Save" onPress={submit} loading={busy || loading} style={styles.primaryBtn} />
       </ScrollView>
     </View>
   );
@@ -92,6 +98,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   note: { color: colors.muted, ...typography.body, lineHeight: 21, marginBottom: 16 },
+  loadingNote: { marginTop: 6, marginLeft: 6, color: colors.muted, ...typography.meta },
   count: { marginTop: 6, marginRight: 6, alignSelf: "flex-end", color: colors.muted, ...typography.meta },
   primaryBtn: { marginTop: 24 }
 });

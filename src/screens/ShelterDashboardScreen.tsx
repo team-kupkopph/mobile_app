@@ -222,10 +222,12 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           </TouchableOpacity>
         )}
 
-        {/* US-W3 · the Wishlist line — what is waiting on the shelter (pledges a giver says arrived). Only for a verified
-            shelter (the wishlist is locked until approval, as on the Profile tab) and only once the dashboard has
-            loaded, so a failed request never reads as "nothing to confirm". */}
-        {verified && dash?.wishlist ? (() => {
+        {/* US-W3 · the Wishlist line — what is waiting on the shelter (pledges a giver says arrived). Only for a shelter
+            with an approved org, and only once the dashboard has loaded, so a failed request never reads as
+            "nothing to confirm". The gate is /me's `is_verified_rescuer` ("any approved"), the SAME source as the Profile
+            tab's Wishlist row, NOT the banner state (the latest request's status): an approved tier-1 shelter with an
+            upgrade in review is pending there and must keep its wishlist. */}
+        {me?.is_verified_rescuer && dash?.wishlist ? (() => {
           const summary = wishlistSummary(dash.wishlist);
           return (
             <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("shelterNeeds")}

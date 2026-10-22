@@ -60,6 +60,8 @@ describe("the need screen (NeedPledgesScreen)", () => {
     expect(b).not.toMatch(fixedHeight);
     expect(buttonSrc).toMatch(/const SMALL_HEIGHT = 38/);
     expect(pledges).not.toMatch(/\bsecondaryBtn\b/);
+    // receiveBtn is only the spacing around the primitive; a fixed height there would clip it again.
+    expect(body(pledges, "receiveBtn") as string).not.toMatch(fixedHeight);
   });
   it("the Edit / Mark complete row wraps, so a wide button drops to the next line instead of running off the screen", () => {
     expect(body(pledges, "actionRow") as string).toMatch(/flexWrap\s*:\s*"wrap"/);

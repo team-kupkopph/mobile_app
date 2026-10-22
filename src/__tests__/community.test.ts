@@ -1,6 +1,6 @@
 import {
   awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
-  needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
+  liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
   needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
   pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip
 } from "../community";
@@ -293,5 +293,18 @@ describe("needActionErrorCopy (confirm received / mark complete)", () => {
     expect(needActionErrorCopy(0).message).toMatch(/Couldn't reach Kupkop/);
     expect(needActionErrorCopy(500).message).toMatch(/Couldn't reach Kupkop/);
     expect(needActionErrorCopy(400)).toEqual({ message: "Couldn't save that. Please try again.", reload: false });
+  });
+});
+
+describe("liveNeedActions (a placeholder or a stale need grants nothing)", () => {
+  const none = { edit: false, complete: false, receive: false };
+  it("follows needActions once the need has loaded", () => {
+    expect(liveNeedActions("ready", "open")).toEqual({ edit: true, complete: true, receive: true });
+    expect(liveNeedActions("ready", "fulfilled")).toEqual({ edit: false, complete: false, receive: true });
+    expect(liveNeedActions("ready", "closed")).toEqual(none);
+  });
+  it.each(["loading", "offline", "error", "gone", "empty"])("grants nothing while the need is %s, whatever the status it last showed", (kind) => {
+    expect(liveNeedActions(kind, "open")).toEqual(none);
+    expect(liveNeedActions(kind, "fulfilled")).toEqual(none);
   });
 });
