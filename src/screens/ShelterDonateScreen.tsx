@@ -20,12 +20,8 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { Button, Card, Chip, SectionHeader } from "../components/ui";
 import { ChipTone, NeedStatus, needProgressLabel, needStatusChip } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import {
-  donateSections,
-  DonateNeedInput,
-  ShelterOwnDonationQr,
-  ShelterOwnDonationQrResponse
-} from "../shelterDonate";
+import { donateSections, DonateNeedInput } from "../shelterDonate";
+import { donateChip, OwnQr } from "../ownQr";
 import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
@@ -52,7 +48,9 @@ export function ShelterDonateScreen({ navigation }: Props) {
   const api = useApi();
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [dashRes, setDashRes] = useState<{ ok: boolean; status: number } | null>(null);
-  const [qr, setQr] = useState<ShelterOwnDonationQrResponse | null>(null);
+  // DW2 (backend#93) · the shelter's OWN QRs (live, pending, latest refusal), not the donor-facing public endpoint: a pending QR is finally visible (AT3).
+  const [ownQr, setOwnQr] = useState<OwnQr[] | null>(null);
+  const [ownQrFailed, setOwnQrFailed] = useState(false);
   const [needs, setNeeds] = useState<Need[] | null>(null);
   // The wishlist has its own load state (AW17): a failed request must not read as "No needs posted yet."
   const [needsRes, setNeedsRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -76,6 +74,11 @@ export function ShelterDonateScreen({ navigation }: Props) {
       setDashRes({ ok: r.ok, status: r.status });
       if (r.ok) setDash(r.data);
     });
+    api.get("/shelter/donation-qr").then((r) => {
+      if (!alive) return;
+      setOwnQrFailed(!r.ok);
+      if (r.ok) setOwnQr(r.data.donation_qrs ?? []);
+    });
     api.get("/me").then((me) => {
       if (!alive) return;
       // A failed /me is the wishlist's failure too: without this its spinner never ended.
@@ -84,12 +87,6 @@ export function ShelterDonateScreen({ navigation }: Props) {
       const accountId = me.data.account_id;
       if (alive) setOrgName(me.data.display_name ?? null);
 
-      api.get(`/shelters/${accountId}/donation-qr`).then((r) => {
-        // A 404 here is the two-key gate saying "nothing to show yet" — the same reading
-        // `DonateScreen` gives this endpoint for a donor — not a fault, so it degrades to
-        // "no QR on file" instead of an error banner over an otherwise-working screen.
-        if (alive) setQr(r.ok ? r.data : { donation_qrs: [] });
-      });
 
       api.get(`/shelters/${accountId}/needs`).then((r) => {
         if (!alive) return;
@@ -105,11 +102,12 @@ export function ShelterDonateScreen({ navigation }: Props) {
   }, []);
   useFocusEffect(load);
 
-  const sections = donateSections(dash, qr, needs);
+  const sections = donateSections(dash, ownQr ? { donation_qrs: ownQr.filter((r) => r.status === "live") } : null, needs);
   const gated = verifiedRescuer !== true;
   const needsState = loadState(needsRes);
   function retryNeeds() { setNeedsRes(null); load(); }
   const donationsOn = dash?.gates.donations_enabled ?? false;
+  const chip = donateChip(ownQr, donationsOn);
 
   // US-R1 · when the PRIMARY load failed and we have nothing, say so instead of rendering
   // the gated/locked fallback as fact — same rule as ShelterDashboardScreen/ShelterProfileScreen.
@@ -144,44 +142,46 @@ export function ShelterDonateScreen({ navigation }: Props) {
             the explicit fill is kept in source so a future tone change to Card can never
             tint the code (same convention DonateScreen's qrCard follows). */}
         <Card style={styles.qrCard}>
-          {/* Artboard · org name, "Donations are on/paused" and an On/Off chip. (The amber "Pending verification" chip waits for DW2: a shelter cannot read its own pending QR yet.) */}
+          {/* Artboard · org name, "Donations are on/paused" and a chip: On / Pending verification / Off (DW2: the pending state is now real). */}
           <View style={styles.qrHead}>
             <View style={styles.qrHeadCopy}>
               {orgName ? <Text style={styles.qrOrg} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text> : null}
-              <Text style={styles.qrSub}>{donationsOn ? "Donations are on" : "Donations are paused"}</Text>
+              <Text style={styles.qrSub}>{chip.sub}</Text>
             </View>
-            <Chip tone={donationsOn ? "success" : "neutral"} dot={false} label={donationsOn ? "On" : "Off"} />
+            <Chip tone={chip.tone} dot={false} label={chip.label} />
           </View>
-          {sections.qr === "locked" ? (
-            <View style={styles.lockedRow}>
-              <LockIcon color={colors.muted} size={18} />
-              <Text style={styles.lockedText}>
-                Donations turn on once your shelter is verified and your QR is reviewed.
-              </Text>
-            </View>
-          ) : (
-            <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("donationQr")}>
-              {sections.qr === "missing" ? (
-                <>
-                  <Text style={styles.qrTitle}>Add your donation QR</Text>
-                  <Text style={styles.qrBody}>Donors won't see a QR until you upload one.</Text>
-                </>
-              ) : (
-                <>
-                  <Text style={styles.qrTitle}>Donation QR</Text>
-                  {(qr?.donation_qrs ?? []).map((q: ShelterOwnDonationQr) => (
-                    <View key={q.provider} style={styles.qrRow}>
-                      <Image source={{ uri: q.qr_image_url }} style={styles.qrThumb} resizeMode="contain" />
-                      <View style={styles.qrCopy}>
-                        <Text style={styles.qrProvider}>{PROVIDER_LABEL[q.provider] ?? q.provider}</Text>
-                        <Text style={styles.qrAccountName}>{q.account_name}</Text>
-                      </View>
+          {/* AT4 · the whole card opens the form, locked or not: draft-first upload is meant to work before approval, so the card is never a dead end. */}
+          <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("donationQr")} accessibilityRole="button"
+            accessibilityLabel="Open your donation QR">
+            {ownQrFailed && ownQr === null ? (
+              <Text style={styles.qrBody}>Couldn't load your QR. Pull to refresh or reopen this tab.</Text>
+            ) : (
+              <>
+                {sections.qr === "locked" ? (
+                  <View style={styles.lockedRow}>
+                    <LockIcon color={colors.muted} size={18} />
+                    <Text style={styles.lockedText}>
+                      Donations turn on once your shelter is verified and your QR is reviewed.
+                    </Text>
+                  </View>
+                ) : null}
+                {(ownQr ?? []).filter((q) => q.status === "live" || q.status === "pending").map((q: OwnQr) => (
+                  <View key={q.donation_qr_id} style={styles.qrRow}>
+                    <Image source={{ uri: q.qr_image_url }} style={styles.qrThumb} resizeMode="contain" />
+                    <View style={styles.qrCopy}>
+                      <Text style={styles.qrProvider}>{PROVIDER_LABEL[q.provider] ?? q.provider}{q.status === "pending" ? " · pending" : ""}</Text>
+                      <Text style={styles.qrAccountName}>{q.account_name}</Text>
                     </View>
-                  ))}
-                </>
-              )}
-            </TouchableOpacity>
-          )}
+                  </View>
+                ))}
+                {ownQr && ownQr.length === 0 && sections.qr !== "locked" ? (
+                  <Text style={styles.qrBody}>Tap to add your donation QR.</Text>
+                ) : ownQr && ownQr.length === 0 ? (
+                  <Text style={[styles.qrBody, { marginTop: 8 }]}>Tap to add your donation QR now. It is reviewed before donations go live.</Text>
+                ) : null}
+              </>
+            )}
+          </TouchableOpacity>
         </Card>
 
         <SectionHeader title="Wishlist" />

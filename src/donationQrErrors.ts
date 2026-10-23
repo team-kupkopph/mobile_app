@@ -4,9 +4,12 @@ export const NAME_MAX = 120; // backend `DonationQrUploadSerializer.account_name
 
 type Failed = { ok: boolean; status: number; data: any };
 
-export function donationQrSaveError(res: Failed): { field: "name" | null; message: string } {
+export function donationQrSaveError(res: Failed): { field: "name" | "password" | null; message: string } {
   if (res.status === 0) return { field: null, message: "You're offline — we couldn't reach the server. Try again when you're back online." };
   const err = res.data?.error;
+  // DW2 · replacing a live QR needs the password (backend: 403 reauth_required); a refused image cannot be re-submitted (400 refused_image).
+  if (err?.code === "reauth_required") return { field: "password", message: "That password isn't right. Enter your account password to replace a live QR." };
+  if (err?.code === "refused_image") return { field: null, message: "That image was already refused. Upload a different one." };
   if (err?.field === "account_name") {
     return /blank|required/i.test(String(err.message))
       ? { field: "name", message: "Enter the name on the receiving account." }

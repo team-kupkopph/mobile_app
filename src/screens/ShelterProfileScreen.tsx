@@ -11,6 +11,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
+import { OwnQr, youRowValue } from "../ownQr";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Me, ShelterDashboard, ShelterTier } from "../api/types";
@@ -68,6 +69,8 @@ export function ShelterProfileScreen({ navigation }: Props) {
   }
   const [me, setMe] = useState<Me | null>(null);
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
+  // DW2 (backend#93) · the shelter's own QRs, so the Donation QR row says On only when a QR is live (AT5).
+  const [ownQr, setOwnQr] = useState<OwnQr[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   // US-C1 · a REAL count, not the hardcoded "3 active". Active = shifts still open or full.
   const [activeShifts, setActiveShifts] = useState<number | null>(null);
@@ -89,6 +92,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
         if (r.ok) setMe(r.data);
       });
       api.get("/shelter/dashboard").then((r) => { if (r.ok) setDash(r.data); });
+      api.get("/shelter/donation-qr").then((r) => { if (r.ok) setOwnQr(r.data.donation_qrs ?? []); });
       // Task 10 (K8) · `?when=upcoming` — the same query the manage list and calendar use,
       // so "active" means the same set of shifts everywhere it's counted.
       api.get("/shelter/shifts?when=upcoming").then((r) => {
@@ -201,7 +205,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
               animal" dead button US-A2 found) — upload works pre-approval (decision 2's
               draft-first pattern), donations just stay off until the org is approved. */}
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("donationQr")}>
-            <Row label="Donation QR" locked={gated} value={gated ? undefined : "On"} />
+            <Row label="Donation QR" locked={gated} value={youRowValue(ownQr, gated)} />
           </TouchableOpacity>
           {/* US-W3 · the real Abot-tulong wishlist manager (needs + pledges), distinct from
               the QR row above; gated until the org is approved, same as donations. */}

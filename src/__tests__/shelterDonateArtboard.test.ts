@@ -14,9 +14,12 @@ describe("ShelterDonateScreen vs the artboard", () => {
     expect(src).toContain("Your donation QR and wishlist, in one place.");
   });
   it("#3 the QR card names the org, says on/paused and shows an On/Off chip", () => {
-    expect(src).toContain("Donations are on");
-    expect(src).toContain("Donations are paused");
-    expect(src).toMatch(/label=\{donationsOn \? "On" : "Off"\}/);
+    // DW2: the chip and its sub-line come from donateChip (On / Pending verification / Off; "Donations are on" / "Waiting for review" / "Donations are paused").
+    const chipSrc = readFileSync(join(__dirname, "..", "ownQr.ts"), "utf-8");
+    expect(chipSrc).toContain("Donations are on");
+    expect(chipSrc).toContain("Donations are paused");
+    expect(src).toMatch(/label=\{chip\.label\}/);
+    expect(src).toMatch(/\{chip\.sub\}/);
     expect(src).toMatch(/orgName/);
   });
   it("#8 'Add a need' is a dashed button below the list, not a header action", () => {
