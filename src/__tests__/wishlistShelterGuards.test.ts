@@ -243,7 +243,8 @@ describe("AW17 · ShelterDonateScreen", () => {
   it("'Add a need' follows the profile's approval gate (/me is_verified_rescuer): no action for a gated shelter", () => {
     expect(donate).toMatch(/is_verified_rescuer/);
     expect(donate).toMatch(/const gated = verifiedRescuer !== true/);
-    expect(donate).toMatch(/actionLabel=\{gated \? undefined : "Add a need"\}/);
+    // Artboard (owner ruling 2026-10-22, AT-D1 #8): the action is a dashed button BELOW the list, rendered only when not gated; same destination.
+    expect(donate).toMatch(/\{!gated \? \(\s*<TouchableOpacity[\s\S]*?navigate\("needForm", \{\}\)[\s\S]*?\+ Add a need/);
   });
 });
 
