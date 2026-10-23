@@ -12,13 +12,8 @@ describe("My donations", () => {
   it("explains that QR gifts do not appear here", () => {
     expect(src).toContain("Gifts you send by QR go straight to the shelter and don't appear here.");
   });
-  it("shows it outside the ready/empty branch, so both states carry it", () => {
-    const i = src.indexOf("Gifts you send by QR");
-    const scroll = src.indexOf("</ScrollView>");
-    expect(i).toBeGreaterThan(-1);
-    expect(i).toBeLessThan(scroll);
-    // it is not inside the `.map(` list body or the LoadStateView element
-    const before = src.slice(0, i);
-    expect(before.lastIndexOf("(pledges ?? []).map(")).toBeLessThan(before.lastIndexOf("})\n        )}"));
+  it("shows it as a direct child of the scroll content (outside every state branch), so both states carry it", () => {
+    // 8-space indent = a top-level child of <ScrollView>, not inside the list's ternary/map (which indents deeper).
+    expect(src).toMatch(/\n {8}<Text style=\{styles\.qrNote\}>Gifts you send by QR/);
   });
 });
