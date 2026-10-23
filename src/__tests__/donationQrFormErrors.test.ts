@@ -28,6 +28,15 @@ describe("donationQrSaveError (AT7)", () => {
     expect(r).toEqual({ field: null, message: "Couldn't save. Try again." });
     expect(donationQrSaveError({ ok: false, status: 500, data: "<html>" })).toEqual({ field: null, message: "Couldn't save. Try again." });
   });
+  it("DW2: a wrong password is a password-field error", () => {
+    const r = donationQrSaveError({ ok: false, status: 403, data: { error: { code: "reauth_required", message: "x" } } });
+    expect(r.field).toBe("password");
+    expect(r.message).toMatch(/password/i);
+  });
+  it("DW2: a refused image is told to upload a different one", () => {
+    const r = donationQrSaveError({ ok: false, status: 400, data: { error: { code: "refused_image", field: "file_url", message: "x" } } });
+    expect(r).toEqual({ field: null, message: "That image was already refused. Upload a different one." });
+  });
   it("offline says so", () => {
     expect(donationQrSaveError({ ok: false, status: 0, data: null }).message).toMatch(/offline|reach the server/i);
   });

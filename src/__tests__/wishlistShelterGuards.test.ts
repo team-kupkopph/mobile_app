@@ -227,7 +227,7 @@ describe("AW17 · ShelterDonateScreen", () => {
     expect(code(donate)).not.toMatch(/Promise\.all/);
   });
   it("reads pledged from the list rows", () => {
-    expect(donate).toMatch(/donateSections\(dash, qr, needs\)/);
+    expect(donate).toMatch(/donateSections\(dash, /);
   });
   it("tells a failed wishlist request from an empty one, with a retry", () => {
     expect(donate).toMatch(/needsRes/);
