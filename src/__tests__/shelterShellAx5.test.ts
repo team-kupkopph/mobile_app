@@ -99,7 +99,7 @@ describe("shelter dashboard", () => {
   });
   it("the card titles are capped", () => {
     const tags = [...dash.matchAll(/<Text\b[^>]*style=\{styles\.volunteerTitle\}[^>]*>/gs)].map((m) => m[0]);
-    expect(tags.length).toBe(2);
+    expect(tags.length).toBe(3);   // Volunteers, Rescue and (wishlist refactor Task 8) Wishlist
     for (const t of tags) expect(t).toMatch(/maxFontSizeMultiplier=\{maxFontScale\.title\}/);
   });
 });

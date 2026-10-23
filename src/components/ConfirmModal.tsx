@@ -2,6 +2,7 @@
 // Native's own <Modal> (no bottom-sheet dependency, same posture as SignupWall's bottom sheet).
 // Kept deliberately generic — no volunteer/cancel-specific copy or logic lives here — so any
 // destructive-action confirm (starting with V9's shelter-cancel confirm) can reuse it as-is.
+import { ReactNode } from "react";
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import { colors, typography } from "../theme";
 import { Card } from "./ui";
@@ -22,10 +23,13 @@ export type ConfirmModalProps = {
   // visible label changes. Omitted by every other caller, so their rendering is unchanged.
   secondaryLabel?: string;
   onSecondary?: () => void;
+  // Opt-in content between the body and the buttons (e.g. the shelter's received-quantity stepper).
+  // Omitted by every other caller, so their rendering is unchanged.
+  children?: ReactNode;
 };
 
 export function ConfirmModal({
-  visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel, secondaryLabel, onSecondary
+  visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel, secondaryLabel, onSecondary, children
 }: ConfirmModalProps) {
   // P5 · Task 4 moves the whole component onto theme tokens.
   const confirmColor =
@@ -43,6 +47,7 @@ export function ConfirmModal({
           <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.body}>{body}</Text>
+          {children}
 
           <TouchableOpacity
             activeOpacity={0.85}

@@ -58,7 +58,7 @@ describe("V3 screens sit on the backdrop", () => {
     // 41 -> 42: PosterListingScreen, the poster's own listing (spec §3), born V3.
     // 42 -> 43: MyListingsScreen, an individual poster's listings (spec §3), born V3.
     // 43 -> 44: PetFormScreen, an owner adding a pet to rehome later (AQ8), born V3.
-    expect(V3_SCOPE.length).toBe(44);
+    expect(V3_SCOPE.length).toBe(47);
   });
 
   it("every in-scope screen not in the holdout list renders ScreenBackdrop", () => {

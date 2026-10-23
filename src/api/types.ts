@@ -230,7 +230,10 @@ export type ShelterDashboard = {
   volunteer: ShelterDashboardVolunteer;
   // S16 · the Rescue card. needs_help is null (never 0) when the map can't search the city.
   rescue?: ShelterDashboardRescue;
+  // US-W3 · the Wishlist line. Optional: a server older than the wishlist refactor sends no block.
+  wishlist?: ShelterDashboardWishlist;
 };
+export type ShelterDashboardWishlist = { open_needs: number; pledges_awaiting_confirm: number };
 export type ShelterDashboardRescue = {
   city: string | null; city_supported: boolean; needs_help: number | null; open_cases: number;
 };

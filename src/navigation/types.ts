@@ -31,6 +31,8 @@ export type BadgeShape = {
 export type ShelterNeedShape = {
   need_id: string; title: string; category: string; description: string;
   quantity_needed: number; quantity_received: number; status: "open" | "fulfilled" | "closed";
+  // The wishlist refactor's additions. Optional: a server older than the refactor sends none of them.
+  unit?: string; quantity_pledged?: number; pledge_count?: number; awaiting_confirm?: number;
 };
 
 export type RootStackParamList = {
@@ -159,8 +161,10 @@ export type RootStackParamList = {
   myDonations: undefined;
   // US-W3 · Abot-tulong wishlist (shelter side): manage needs, edit/create, confirm pledges.
   shelterNeeds: undefined;
+  // US-W3 · the shelter's drop-off instructions, shown to a giver after they pledge.
+  donationInstructions: undefined;
   needForm: { need?: ShelterNeedShape } | undefined;
-  needPledges: { need: ShelterNeedShape };
+  needPledges: { needId: string; need?: ShelterNeedShape };
   // US-N5 · settings + the two RA 10173 data rights (§12.6/§12.7).
   // F-R3-4 · `shelter` hides the owner-only ACCOUNT rows (Edit profile → the OWNER
   // ProfileScreen, Phone number → the owner verifyPhone, which would desync the org's

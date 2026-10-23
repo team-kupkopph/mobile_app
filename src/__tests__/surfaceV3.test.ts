@@ -46,6 +46,9 @@
 // <ScreenBackdrop> — these are now inside V3_SCOPE/v3Scope.ts too (commit a1b23d0 moved them
 // out of V3_EXCLUDED), but this guard scans every screen file regardless of scope, so the
 // baseline grows from 42 to 48 here either way.
+//
+// Wishlist refactor Task 8 (WD9) puts NeedFormScreen and NeedPledgesScreen on <ScreenBackdrop> and adds
+// DonationInstructionsScreen (V3 from birth): the baseline grows from 50 to 53 here.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -55,12 +58,13 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the fifty V3 screens on the backdrop (4 adoption poster loop (Applicant, PosterListing, MyListings, plan 2026-10-06; PetForm, AQ8) + 7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 11 Sagip rescuer (RescueListedScreen deleted by C15) + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root + 6 P5 Task 3 KawangGawa/Waiver)", () => {
+  it("found the fifty-three V3 screens on the backdrop (+ 3 wishlist refactor Task 8: NeedForm, NeedPledges, DonationInstructions; 4 adoption poster loop (Applicant, PosterListing, MyListings, plan 2026-10-06; PetForm, AQ8) + 7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 11 Sagip rescuer (RescueListedScreen deleted by C15) + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root + 6 P5 Task 3 KawangGawa/Waiver)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "ApplicantScreen",
       "DonatePledgeScreen",
       "DonateScreen",
+      "DonationInstructionsScreen",
       "DonationQrScreen",
       "HomeGuestScreen",
       "HomeScreen",
@@ -80,6 +84,8 @@ describe("surface, re-derived", () => {
       "MyListingsScreen",
       "MyOffersScreen",
       "MyRescuesScreen",
+      "NeedFormScreen",
+      "NeedPledgesScreen",
       "PetFormScreen",
       "PlaceAcceptedScreen",
       "PlaceRequestScreen",

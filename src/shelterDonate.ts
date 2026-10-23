@@ -21,17 +21,16 @@ export type ShelterOwnDonationQr = { provider: string; account_name: string; qr_
 export type ShelterOwnDonationQrResponse = { donation_qrs: ShelterOwnDonationQr[] };
 
 /**
- * A wishlist need, already carrying the `pledged` total the screen computed by summing
- * `GET /needs/{id}/pledges` (only rows still `status === "pledged"` — a cancelled or
- * delivered pledge is not an outstanding ask). `quantity_received` needs no extra fetch:
- * it already rides on the need row from `GET /shelters/{account_id}/needs` (backend
- * `community/views.py::_need_repr`) — there is no `GET /needs/{id}/received`.
+ * A wishlist need as `GET /shelters/{account_id}/needs` sends it. Both totals ride on the row
+ * (`quantity_pledged` is the sum of its still-open pledges), so the screen makes ONE request —
+ * the per-need `/needs/{id}/pledges` fan-out it used to do is gone. `quantity_pledged` is optional
+ * only because a server older than the wishlist refactor does not send it (read as 0).
  */
 export type DonateNeedInput = {
   need_id: string;
   title: string;
   quantity_received: number;
-  pledged: number;
+  quantity_pledged?: number;
 };
 
 export type DonateNeedRow = { id: string; title: string; pledged: number; received: number };
@@ -52,7 +51,7 @@ export function donateSections(
     needs: (needs ?? []).map((n) => ({
       id: n.need_id,
       title: n.title,
-      pledged: n.pledged,
+      pledged: n.quantity_pledged ?? 0,
       received: n.quantity_received
     }))
   };

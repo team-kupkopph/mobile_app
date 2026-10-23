@@ -478,6 +478,8 @@ function intentToast(action: GuestIntentAction): [string, string] {
       return ["You're in!", "You can now sign up to volunteer."];
     case "react":
       return ["You're in!", "You can now react to stories."];
+    case "donate":
+      return ["You're in!", "You can now pledge to a shelter's wishlist."];
     case "account":
     default:
       return ["You're in!", "You can now manage your profile."];
