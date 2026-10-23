@@ -4,10 +4,12 @@
 // separate, always-both-keys gate (org approved AND this QR reviewer-verified).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { AccessibilityInfo, ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
+import { donationQrSaveError, NAME_MAX } from "../donationQrErrors";
 import { pickAndUpload } from "../media/pickAndUpload";
+import { uploadErrorMessage } from "../upload";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { colors, radii, spacing, typography } from "../theme";
@@ -25,19 +27,29 @@ export function DonationQrScreen({ navigation }: Props) {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const [error, setErrorState] = useState<string | undefined>(undefined);
+  const [nameError, setNameError] = useState<string | undefined>(undefined);
+  // AT36 · say it to VoiceOver as well as drawing it (RN's live region is Android-only).
+  const setError = (message: string | undefined) => {
+    setErrorState(message);
+    if (message) AccessibilityInfo.announceForAccessibility(message);
+  };
 
   async function addQrImage() {
     if (uploading) return;
     setUploading(true);
+    setError(undefined);
     const res = await pickAndUpload(api, "donation_qr");
     setUploading(false);
     if (res?.ok) setQrUrl(res.fileUrl);
+    // AT6 · a failed upload used to leave the box unchanged and say nothing (null = cancelled or declined: still silent, by design).
+    else if (res && !res.ok) setError(uploadErrorMessage(res.reason));
   }
 
   async function submit() {
     if (submitting) return;
-    if (!accountName.trim()) { setError("Enter the name on the receiving account."); return; }
+    setNameError(undefined);
+    if (!accountName.trim()) { setNameError("Enter the name on the receiving account."); return; }
     if (!qrUrl) { setError("Add the QR image."); return; }
     setSubmitting(true);
     setError(undefined);
@@ -51,7 +63,9 @@ export function DonationQrScreen({ navigation }: Props) {
       navigation.goBack();
       return;
     }
-    setError(res.data?.error?.message ?? "Couldn't save. Try again.");
+    const failure = donationQrSaveError(res);
+    if (failure.field === "name") setNameError(failure.message);
+    else setError(failure.message);
   }
 
   return (
@@ -74,8 +88,10 @@ export function DonationQrScreen({ navigation }: Props) {
         <Field
           label="Name on the account"
           value={accountName}
-          onChangeText={setAccountName}
+          onChangeText={(t) => { setAccountName(t); if (nameError) setNameError(undefined); }}
           placeholder="Marikina Animal Welfare Group"
+          maxLength={NAME_MAX}
+          error={nameError}
         />
 
         <Text style={styles.label}>QR image</Text>
@@ -84,7 +100,7 @@ export function DonationQrScreen({ navigation }: Props) {
             : <Text style={styles.photoText}>{qrUrl ? "✓ QR added" : "Add the QR image"}</Text>}
         </TouchableOpacity>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={styles.error} accessibilityRole="alert" accessibilityLiveRegion="polite">{error}</Text> : null}
 
         <Button label="Save" onPress={submit} loading={submitting} style={styles.submit} />
       </ScrollView>
