@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Animated, LayoutChangeEvent, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 
 import { colors, elevation, motion, typography } from "../../theme";
+import { useLargeText } from "../../useLargeText";
 import { useReducedMotion } from "../../useReducedMotion";
 import { PressScale } from "./PressScale";
 
@@ -17,9 +18,8 @@ type SegmentedControlProps = {
 /** The canvas's geometry, from Components.dc.html's "Segmented control" panel. */
 const TRACK_HEIGHT = 48;
 const PAD = 5;
-const THUMB_HEIGHT = TRACK_HEIGHT - PAD * 2;   // 38
-const TRACK_RADIUS = 24;
-const THUMB_RADIUS = 19;
+// Abot-tulong QR plan (AT35): at Larger Text AX3+ the track grows to 64 pt (above the 44 pt target floor) so the label can scale with the text around it.
+const TRACK_HEIGHT_LARGE = 64;
 
 /**
  * Two or three views, with a thumb that travels.
@@ -37,6 +37,9 @@ const THUMB_RADIUS = 19;
  */
 export function SegmentedControl({ segments, index, onChange, testID, style }: SegmentedControlProps) {
   const reduced = useReducedMotion();
+  const large = useLargeText();
+  const trackHeight = large ? TRACK_HEIGHT_LARGE : TRACK_HEIGHT;
+  const dyn = { track: { height: trackHeight, borderRadius: trackHeight / 2 }, thumb: { height: trackHeight - PAD * 2, borderRadius: (trackHeight - PAD * 2) / 2 } };
   const [trackWidth, setTrackWidth] = useState(0);
   const slot = trackWidth ? (trackWidth - PAD * 2) / segments.length : 0;
   const x = useRef(new Animated.Value(0)).current;
@@ -58,7 +61,7 @@ export function SegmentedControl({ segments, index, onChange, testID, style }: S
 
   return (
     <View
-      style={[styles.track, style]}
+      style={[styles.track, dyn.track, style]}
       testID={testID}
       accessibilityRole="tablist"
       onLayout={(e: LayoutChangeEvent) => setTrackWidth(e.nativeEvent.layout.width)}
@@ -67,7 +70,7 @@ export function SegmentedControl({ segments, index, onChange, testID, style }: S
       {slot && index >= 0 ? (
         <Animated.View
           pointerEvents="none"
-          style={[styles.thumb, { width: slot, transform: [{ translateX: x }] }]}
+          style={[styles.thumb, dyn.thumb, { width: slot, transform: [{ translateX: x }] }]}
         />
       ) : null}
       <View style={styles.row}>
@@ -98,7 +101,7 @@ export function SegmentedControl({ segments, index, onChange, testID, style }: S
                 numberOfLines={1}
                 adjustsFontSizeToFit
                 minimumFontScale={0.6}
-                maxFontSizeMultiplier={1.5}
+                maxFontSizeMultiplier={large ? 2 : 1.5}
               >
                 {label}
               </Text>
@@ -114,7 +117,6 @@ const styles = StyleSheet.create({
   track: {
     height: TRACK_HEIGHT,
     padding: PAD,
-    borderRadius: TRACK_RADIUS,
     backgroundColor: colors.segmentTrack,
     justifyContent: "center"
   },
@@ -122,8 +124,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: PAD,
     left: PAD,
-    height: THUMB_HEIGHT,
-    borderRadius: THUMB_RADIUS,
+    height: TRACK_HEIGHT - PAD * 2,
     backgroundColor: colors.white,
     ...elevation.soft
   },
