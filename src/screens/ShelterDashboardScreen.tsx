@@ -194,7 +194,8 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         <View style={[styles.statRow, large && styles.statRowLarge]}>
           <Stat n={counts.draft_listings} label="Drafts" large={large} />
           <Stat n={counts.adopted} label="Adopted" large={large} />
-          <Stat n={counts.donations} label="Donations" large={large} />
+          {/* AT19 · was a hard-coded "Donations" 0 (QR gifts leave no record, OQ6). The artboard keeps three tiles, so the third is a real count: listings live now. */}
+          <Stat n={counts.live_listings ?? 0} label="Live" large={large} />
         </View>
 
         {/* Task 10 (K8/G12) · the Volunteers card — only once `dash` has actually loaded, so a

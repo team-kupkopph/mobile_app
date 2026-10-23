@@ -17,7 +17,7 @@ import { colors, radii, spacing, squircle, typography } from "../theme";
 import { Button, Card, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { OwnQr, rowsFor } from "../ownQr";
+import { OwnQr, refusedNote, rowsFor } from "../ownQr";
 import { TAP_SLOP } from "../touch";
 
 const PROVIDERS = ["gcash", "maya"] as const;
@@ -142,7 +142,11 @@ export function DonationQrScreen({ navigation }: Props) {
         <SegmentedControl
           segments={PROVIDERS.map((p) => PROVIDER_LABEL[p])}
           index={PROVIDERS.indexOf(provider)}
-          onChange={(i) => setProvider(PROVIDERS[i])}
+          onChange={(i) => {
+            // AT20 · a picked image belongs to the payment app it was picked for: switching clears it instead of re-labelling it.
+            if (PROVIDERS[i] !== provider) { setQrUrl(null); setError(undefined); }
+            setProvider(PROVIDERS[i]);
+          }}
         />
 
         {/* AT3 · what is on file for this payment app: the live code, a pending replacement, and why the last one was refused. */}
@@ -177,9 +181,7 @@ export function DonationQrScreen({ navigation }: Props) {
           </Card>
         ) : null}
         {!pending && refused ? (
-          <Text style={styles.refusedNote}>
-            Your last {live ? "replacement" : "QR"} wasn't approved{refused.decision_note ? `: ${refused.decision_note}` : "."} Upload a different image to try again.
-          </Text>
+          <Text style={styles.refusedNote}>{refusedNote(live ? "replacement" : "QR", refused.decision_note)}</Text>
         ) : null}
 
         <Field
