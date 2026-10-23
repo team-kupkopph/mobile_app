@@ -48,3 +48,10 @@ export function rowsFor(rows: OwnQr[] | null, provider: string): { live?: OwnQr;
     refused: mine.find((r) => r.status === "refused"),
   };
 }
+
+/** AT39 · the line under a refused replacement. The reviewer's reason may or may not end in punctuation, so the next sentence is always separated. */
+export function refusedNote(what: string, reason: string): string {
+  const r = (reason ?? "").trim();
+  const reasonPart = r ? `: ${/[.!?]$/.test(r) ? r : `${r}.`}` : ".";
+  return `Your last ${what} wasn't approved${reasonPart} Upload a different image to try again.`;
+}

@@ -143,16 +143,16 @@ export function ShelterDonateScreen({ navigation }: Props) {
             tint the code (same convention DonateScreen's qrCard follows). */}
         <Card style={styles.qrCard}>
           {/* Artboard · org name, "Donations are on/paused" and a chip: On / Pending verification / Off (DW2: the pending state is now real). */}
-          <View style={styles.qrHead}>
-            <View style={styles.qrHeadCopy}>
-              {orgName ? <Text style={styles.qrOrg} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text> : null}
-              <Text style={styles.qrSub}>{chip.sub}</Text>
-            </View>
-            <Chip tone={chip.tone} dot={false} label={chip.label} />
-          </View>
           {/* AT4 · the whole card opens the form, locked or not: draft-first upload is meant to work before approval, so the card is never a dead end. */}
           <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("donationQr")} accessibilityRole="button"
             accessibilityLabel="Open your donation QR">
+            <View style={styles.qrHead}>
+              <View style={styles.qrHeadCopy}>
+                {orgName ? <Text style={styles.qrOrg} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text> : null}
+                <Text style={styles.qrSub}>{chip.sub}</Text>
+              </View>
+              <Chip tone={chip.tone} dot={false} label={chip.label} />
+            </View>
             {ownQrFailed && ownQr === null ? (
               <Text style={styles.qrBody}>Couldn't load your QR. Pull to refresh or reopen this tab.</Text>
             ) : (
@@ -167,7 +167,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
                 ) : null}
                 {(ownQr ?? []).filter((q) => q.status === "live" || q.status === "pending").map((q: OwnQr) => (
                   <View key={q.donation_qr_id} style={styles.qrRow}>
-                    <Image source={{ uri: q.qr_image_url }} style={styles.qrThumb} resizeMode="contain" />
+                    <Image source={{ uri: q.qr_image_url }} style={[styles.qrThumb, large && styles.qrThumbLarge]} resizeMode="contain" />
                     <View style={styles.qrCopy}>
                       <Text style={styles.qrProvider}>{PROVIDER_LABEL[q.provider] ?? q.provider}{q.status === "pending" ? " · pending" : ""}</Text>
                       <Text style={styles.qrAccountName}>{q.account_name}</Text>
@@ -256,6 +256,7 @@ const styles = StyleSheet.create({
   qrTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   qrBody: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 19 },
   qrRow: { marginTop: 14, flexDirection: "row", alignItems: "center", gap: 14 },
+  qrThumbLarge: { width: 96, height: 96, borderRadius: squircle(96) },
   qrThumb: { width: 64, height: 64, borderRadius: squircle(64), backgroundColor: colors.border },
   qrCopy: { flex: 1 },
   qrProvider: { color: colors.teal, ...typography.strong, fontWeight: "800" },
