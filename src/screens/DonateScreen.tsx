@@ -13,6 +13,7 @@ import { setIntent } from "../guestIntent";
 import { SignupWall } from "../components/SignupWall";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { qrImageLabel } from "../ownQr";
 import { saveQrImage } from "../saveQr";
 import { donateLoadState } from "../donateState";
 import { needCategoryLabel, needProgressLabel, quantityLabel } from "../community";
@@ -50,7 +51,8 @@ function QrCard({ qr }: { qr: DonationQr }) {
           <Text style={styles.qrFailedText}>We couldn't load this code. Check your connection, then open Donate again.</Text>
         </View>
       ) : (
-        <Image source={{ uri: qr.qr_image_url }} style={styles.qrImage} resizeMode="contain" onError={() => setFailed(true)} />
+        <Image source={{ uri: qr.qr_image_url }} style={styles.qrImage} resizeMode="contain" onError={() => setFailed(true)}
+          accessible accessibilityRole="image" accessibilityLabel={qrImageLabel(qr.provider, qr.account_name)} />
       )}
       <Text style={styles.accountName}>{qr.account_name}</Text>
       {/* DW1 / OQ2 · a donor with one phone cannot scan this screen; GCash and Maya can scan a saved image. */}

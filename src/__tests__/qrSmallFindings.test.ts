@@ -52,7 +52,7 @@ describe("AT39 · refusedNote", () => {
 
 describe("AT40 / AT35 · the Donate tab", () => {
   it("the whole QR card (header included) is inside the tappable that opens the form", () => {
-    const open = donate.indexOf('accessibilityLabel="Open your donation QR"');
+    const open = donate.indexOf("accessibilityLabel={`Open your donation QR.");
     const head = donate.indexOf("styles.qrHead}");
     expect(open).toBeGreaterThan(-1);
     expect(head).toBeGreaterThan(open - 400);   // the header sits within the same touchable's JSX, after its opening tag
