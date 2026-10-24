@@ -16,12 +16,12 @@ import { loadState } from "../net";
 import { qrImageLabel } from "../ownQr";
 import { saveQrImage } from "../saveQr";
 import { donateLoadState } from "../donateState";
-import { needCategoryLabel, needProgressLabel, quantityLabel } from "../community";
+import { needCategoryLabel, needProgressFraction, needProgressLabel, quantityLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, maxFontScale, pill, radii, spacing, typography } from "../theme";
-import { Card, ScreenHeader } from "../components/ui";
+import { Avatar, Card, ScreenHeader } from "../components/ui";
 
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
@@ -73,7 +73,7 @@ function QrCard({ qr }: { qr: DonationQr }) {
 
 export function DonateScreen({ navigation, route }: Props) {
   const api = useApi();
-  const { accountId, orgName } = route.params;
+  const { accountId, orgName, city } = route.params;
   const [qrs, setQrs] = useState<DonationQr[] | null>(null);
   // US-R2 · PRIMARY: this screen exists to show the QR. `needs` below is SECONDARY and
   // degrades on its own rather than taking the screen.
@@ -130,10 +130,17 @@ export function DonateScreen({ navigation, route }: Props) {
       <ScreenHeader title="Donate" onBack={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.orgName} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text>
-        <Text style={styles.offPlatformNote}>
-          Donations happen in your payment app — Kupkop never touches the money.
-        </Text>
+        {/* DW3 · the org's identity, as on the artboard: avatar, name, verified tick (an org is only reachable here once approved), city. */}
+        <View style={styles.identity}>
+          <Avatar initials={orgName} tinted size={56} />
+          <View style={styles.identityCopy}>
+            <View style={styles.nameRow}>
+              <Text style={styles.orgName} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text>
+              <View style={styles.tick} accessible accessibilityLabel="Verified organisation"><Text style={styles.tickMark}>✓</Text></View>
+            </View>
+            {city ? <Text style={styles.city}>{city}</Text> : null}
+          </View>
+        </View>
 
         {noQr && needsPending ? null : noQr && hasNeeds ? (
           <Text style={styles.noQr}>
@@ -146,11 +153,15 @@ export function DonateScreen({ navigation, route }: Props) {
             onRetry={load}
           />
         ) : qrs && qrs.length > 0 ? (
-          qrs.map((qr) => (
-            // Decision 5 · the code must render at full contrast — Card is white by default,
-            // but the explicit fill is kept so a future tone change can't tint the code.
-            <QrCard key={qr.provider} qr={qr} />
-          ))
+          <>
+            <Text style={styles.sectionLabel}>Give directly</Text>
+            <Text style={styles.giveNote}>Scan with GCash or Maya. Straight to the shelter — Kupkop never handles it.</Text>
+            {qrs.map((qr) => (
+              // Decision 5 · the code must render at full contrast — Card is white by default,
+              // but the explicit fill is kept so a future tone change can't tint the code.
+              <QrCard key={qr.provider} qr={qr} />
+            ))}
+          </>
         ) : null}
 
         {needsState.kind !== "ready" ? (
@@ -172,6 +183,9 @@ export function DonateScreen({ navigation, route }: Props) {
                 <Text style={styles.needMeta}>
                   {needCategoryLabel(need.category)} · {needProgressLabel(need.quantity_received, need.quantity_needed, need.unit, need.quantity_pledged)}
                 </Text>
+                <View style={styles.needBarTrack} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  <View style={[styles.needBar, { width: `${Math.round(needProgressFraction(need.quantity_received, need.quantity_needed) * 100)}%` }]} />
+                </View>
                 {need.my_pledged && need.my_pledged > 0 ? (
                   <Text style={styles.myPledge}>You pledged {quantityLabel(need.my_pledged, need.unit)}</Text>
                 ) : null}
@@ -205,8 +219,17 @@ export function DonateScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
+  identity: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 6 },
+  identityCopy: { flex: 1 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" },
   orgName: { color: colors.ink, ...typography.hero },
-  offPlatformNote: { marginTop: 8, marginBottom: 20, color: colors.muted, ...typography.meta, lineHeight: 20 },
+  tick: { width: 18, height: 18, borderRadius: pill(18), backgroundColor: colors.teal, alignItems: "center", justifyContent: "center" },
+  tickMark: { color: colors.white, ...typography.meta, lineHeight: undefined, fontWeight: "900" },
+  city: { marginTop: 2, color: colors.muted, ...typography.meta },
+  sectionLabel: { marginTop: 18, color: colors.muted, ...typography.meta, fontWeight: "800", letterSpacing: 0.9, textTransform: "uppercase" },
+  giveNote: { marginTop: 4, marginBottom: 12, color: colors.muted, ...typography.meta, lineHeight: 20 },
+  needBarTrack: { height: 7, marginTop: 12, borderRadius: pill(7), backgroundColor: colors.border, overflow: "hidden" },
+  needBar: { height: 7, borderRadius: pill(7), backgroundColor: colors.teal },
   qrCard: { marginBottom: 18, padding: spacing.lg, alignItems: "center", backgroundColor: colors.white },
   provider: { color: colors.teal, ...typography.subtitle, fontWeight: "800" },
   qrImage: { marginTop: 14, width: 220, height: 220, borderRadius: radii.chip, backgroundColor: colors.border },

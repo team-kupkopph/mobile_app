@@ -155,7 +155,7 @@ export type RootStackParamList = {
   // Track Q — donations. donationQr (shelter side) uploads/replaces the QR; donate
   // (public side) renders an org's verified QRs, reached from a listing's poster row.
   donationQr: undefined;
-  donate: { accountId: string; orgName: string };
+  donate: { accountId: string; orgName: string; city?: string | null };
   // US-W2 · Abot-tulong wishlist (giver side): pledge to a need, then My Donations.
   donatePledge: { needId: string; needTitle: string; shelterName: string };
   myDonations: undefined;
