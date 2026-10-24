@@ -17,7 +17,7 @@ import { colors, radii, spacing, squircle, typography } from "../theme";
 import { Button, Card, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { OwnQr, refusedNote, rowsFor } from "../ownQr";
+import { OwnQr, qrImageLabel, refusedNote, rowsFor } from "../ownQr";
 import { TAP_SLOP } from "../touch";
 
 const PROVIDERS = ["gcash", "maya"] as const;
@@ -153,7 +153,7 @@ export function DonationQrScreen({ navigation }: Props) {
         {live ? (
           <Card style={styles.statusCard}>
             <View style={styles.statusRow}>
-              <Image source={{ uri: live.qr_image_url }} style={styles.statusThumb} resizeMode="contain" />
+              <Image source={{ uri: live.qr_image_url }} style={styles.statusThumb} resizeMode="contain" accessible accessibilityRole="image" accessibilityLabel={qrImageLabel(live.provider, live.account_name)} />
               <View style={styles.statusCopy}>
                 <Text style={styles.statusTitle}>Live now</Text>
                 <Text style={styles.statusBody}>Donors see this code. {live.account_name}</Text>
@@ -167,7 +167,7 @@ export function DonationQrScreen({ navigation }: Props) {
         {pending ? (
           <Card style={styles.statusCard}>
             <View style={styles.statusRow}>
-              <Image source={{ uri: pending.qr_image_url }} style={styles.statusThumb} resizeMode="contain" />
+              <Image source={{ uri: pending.qr_image_url }} style={styles.statusThumb} resizeMode="contain" accessible accessibilityRole="image" accessibilityLabel={`Replacement ${qrImageLabel(pending.provider, pending.account_name)}`} />
               <View style={styles.statusCopy}>
                 <Text style={styles.statusTitle}>Replacement pending verification</Text>
                 <Text style={styles.statusBody}>

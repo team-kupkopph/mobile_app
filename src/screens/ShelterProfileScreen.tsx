@@ -324,11 +324,12 @@ function Row({
   // inside the card instead of squeezing the label.
   const large = useLargeText();
   return (
-    <View style={[styles.row, !last && styles.rowRule, large && styles.rowLarge]}>
+    <View style={[styles.row, !last && styles.rowRule, large && styles.rowLarge]} accessible
+      accessibilityLabel={locked ? `${label}, locked until your shelter is verified` : value ? `${label}, ${value}` : label}>
       <Text style={[styles.rowLabel, locked && styles.rowLabelLocked]}>{label}</Text>
       {locked ? (
         // Locked, not hidden: a row that vanishes can't tell the shelter *why* it's unavailable.
-        <LockIcon color={colors.muted} size={15} />
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants"><LockIcon color={colors.muted} size={15} /></View>
       ) : (
         <View style={styles.rowRight}>
           {!!value && <Text style={styles.rowValue}>{value}</Text>}

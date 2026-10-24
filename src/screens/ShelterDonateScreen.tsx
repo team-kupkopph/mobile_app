@@ -21,7 +21,7 @@ import { Button, Card, Chip, SectionHeader } from "../components/ui";
 import { ChipTone, NeedStatus, needProgressLabel, needStatusChip } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { donateSections, DonateNeedInput } from "../shelterDonate";
-import { donateChip, OwnQr } from "../ownQr";
+import { donateChip, OwnQr, qrImageLabel } from "../ownQr";
 import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
@@ -145,7 +145,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
           {/* Artboard · org name, "Donations are on/paused" and a chip: On / Pending verification / Off (DW2: the pending state is now real). */}
           {/* AT4 · the whole card opens the form, locked or not: draft-first upload is meant to work before approval, so the card is never a dead end. */}
           <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("donationQr")} accessibilityRole="button"
-            accessibilityLabel="Open your donation QR">
+            accessibilityLabel={`Open your donation QR. ${chip.sub}${sections.qr === "locked" ? ". Locked until your shelter is verified and your QR is reviewed" : ""}`}>
             <View style={styles.qrHead}>
               <View style={styles.qrHeadCopy}>
                 {orgName ? <Text style={styles.qrOrg} maxFontSizeMultiplier={maxFontScale.title}>{orgName}</Text> : null}
@@ -159,7 +159,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
               <>
                 {sections.qr === "locked" ? (
                   <View style={styles.lockedRow}>
-                    <LockIcon color={colors.muted} size={18} />
+                    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants"><LockIcon color={colors.muted} size={18} /></View>
                     <Text style={styles.lockedText}>
                       Donations turn on once your shelter is verified and your QR is reviewed.
                     </Text>
@@ -167,7 +167,8 @@ export function ShelterDonateScreen({ navigation }: Props) {
                 ) : null}
                 {(ownQr ?? []).filter((q) => q.status === "live" || q.status === "pending").map((q: OwnQr) => (
                   <View key={q.donation_qr_id} style={styles.qrRow}>
-                    <Image source={{ uri: q.qr_image_url }} style={[styles.qrThumb, large && styles.qrThumbLarge]} resizeMode="contain" />
+                    <Image source={{ uri: q.qr_image_url }} style={[styles.qrThumb, large && styles.qrThumbLarge]} resizeMode="contain"
+                      accessible accessibilityRole="image" accessibilityLabel={qrImageLabel(q.provider, q.account_name)} />
                     <View style={styles.qrCopy}>
                       <Text style={styles.qrProvider}>{PROVIDER_LABEL[q.provider] ?? q.provider}{q.status === "pending" ? " · pending" : ""}</Text>
                       <Text style={styles.qrAccountName}>{q.account_name}</Text>

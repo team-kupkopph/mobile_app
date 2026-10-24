@@ -55,3 +55,9 @@ export function refusedNote(what: string, reason: string): string {
   const reasonPart = r ? `: ${/[.!?]$/.test(r) ? r : `${r}.`}` : ".";
   return `Your last ${what} wasn't approved${reasonPart} Upload a different image to try again.`;
 }
+
+const PROVIDER_NAME: Record<string, string> = { gcash: "GCash", maya: "Maya" };
+/** AX-1 / AT23 · what VoiceOver reads for a donation QR image. */
+export function qrImageLabel(provider: string, accountName: string): string {
+  return `${PROVIDER_NAME[provider] ?? provider} QR code for ${accountName}`;
+}
