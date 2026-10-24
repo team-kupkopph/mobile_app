@@ -223,7 +223,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
               style={styles.donateLink}
               activeOpacity={0.85}
               onPress={() => navigation.navigate("donate",
-                { accountId: listing.poster.account_id, orgName: listing.poster.name })}
+                { accountId: listing.poster.account_id, orgName: listing.poster.name, city: listing.city })}
             >
               <Text style={styles.donateLinkText}>Donate to {listing.poster.name} ›</Text>
             </TouchableOpacity>
