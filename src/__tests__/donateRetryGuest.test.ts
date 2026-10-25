@@ -26,7 +26,7 @@ describe("DonateScreen", () => {
   it("AT14: a guest's 'My donations ›' raises the sign-up wall instead of navigating", () => {
     expect(src).toMatch(/const \{ tokens \} = useAuth\(\)/);
     expect(src).toMatch(/const isGuest = tokens === null/);
-    expect(src).toMatch(/isGuest\s*\?\s*openWall\("account"\)\s*:\s*navigation\.navigate\("myDonations"\)/);
+    expect(src).toMatch(/isGuest\s*\?\s*openWall\("donate"\)\s*:\s*navigation\.navigate\("myDonations"\)/);
     expect(src).toMatch(/<SignupWall/);
   });
 });

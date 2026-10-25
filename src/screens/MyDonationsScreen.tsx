@@ -13,6 +13,7 @@ import { useAuth } from "../auth/AuthContext";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import {
+  cancelRefusedCopy,
   CancelReason, ChipTone, pledgeIsCancellable, pledgeStatusChip, PledgeStatus, pledgeSubtitle, quantityLabel
 } from "../community";
 import { SignupWall } from "../components/SignupWall";
@@ -52,6 +53,8 @@ export function MyDonationsScreen({ navigation }: Props) {
 
   const [busyId, setBusyId] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  // B4 · why a card changed under the donor: their cancel found the pledge already settled (or gone). Cleared by the next action.
+  const [notice, setNotice] = useState<string | null>(null);
 
   // Page 1, replacing the list. Run on focus (AW13), so a pledge the shelter settled, or one made on the way
   // here, is what you see. It does not blank the list first: only the first load shows the spinner.
@@ -69,6 +72,7 @@ export function MyDonationsScreen({ navigation }: Props) {
 
   async function loadMore() {
     if (next === null || loadingMore) return;
+    setNotice(null);
     setLoadingMore(true);
     const r = await api.get(`/me/pledges?page=${next}`);
     setLoadingMore(false);
@@ -81,6 +85,7 @@ export function MyDonationsScreen({ navigation }: Props) {
   }
 
   function confirmCancel(p: Pledge) {
+    setNotice(null);
     Alert.alert("Cancel this pledge?",
       `You pledged ${quantityLabel(p.quantity, p.need.unit)} to “${p.need.title}”. Cancelling is fine — it just lets the ` +
       "shelter know not to expect it.",
@@ -96,7 +101,7 @@ export function MyDonationsScreen({ navigation }: Props) {
     if (res.ok) { load(); return; }
     // 409 / 404: the shelter settled it (or it is gone) while this screen was open. That is not a failure
     // to apologise for — the list was stale, so refresh it and the card shows what really happened (AW9).
-    if (res.status === 409 || res.status === 404) { load(); return; }
+    if (res.status === 409 || res.status === 404) { setNotice(cancelRefusedCopy(res.status)); load(); return; }
     Alert.alert("Couldn't cancel", res.status === 0
       ? "Check your connection and try again."
       : "Something went wrong on our end. Please try again.");
@@ -124,6 +129,7 @@ export function MyDonationsScreen({ navigation }: Props) {
           />
         ) : (
           <>
+            {notice ? <Text style={styles.notice} accessibilityRole="alert">{notice}</Text> : null}
             {(pledges ?? []).map((p) => {
               const chip = pledgeStatusChip(p.status, p.cancel_reason);
               return (
@@ -177,6 +183,7 @@ const styles = StyleSheet.create({
   qtyLine: { marginTop: 8, color: colors.ink, ...typography.strong, fontWeight: "700" },
   meta: { marginTop: 4, color: colors.muted, ...typography.body },
   loadMore: { marginTop: 4 },
+  notice: { marginBottom: 12, color: colors.ink, ...typography.meta, lineHeight: 20 },
   guestBtn: { marginTop: 24 },
   cancelBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 16, justifyContent: "center", borderRadius: pill(38), backgroundColor: "#FBEEEC" },
   qrNote: { marginTop: 18, color: colors.muted, ...typography.meta, lineHeight: 20, textAlign: "center" },

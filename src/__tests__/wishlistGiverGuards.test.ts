@@ -145,7 +145,51 @@ describe("AW14b · DonateScreen with needs but no QR", () => {
   });
 });
 
+describe("B3 · a need that is no longer open does not keep a live pledge form", () => {
+  const closedBranch = (() => {
+    const i = pledge.indexOf("closedNeed ? (");
+    if (i < 0) return "";
+    const j = pledge.indexOf(") : (", i);
+    return pledge.slice(i, j);
+  })();
+  it("the scan found the closed branch", () => {
+    expect(closedBranch.length).toBeGreaterThan(40);
+  });
+  it("is decided from the fetched need's status, and gives a way back instead of the form", () => {
+    expect(pledge).toMatch(/const closedNeed = !!need && need\.status !== "open"/);
+    expect(closedBranch).toMatch(/accessibilityRole="alert"/);
+    expect(closedBranch).toMatch(/Back to wishlist/);
+    expect(closedBranch).toMatch(/goBack\(\)/);
+    expect(closedBranch).toMatch(/variant="secondary"/);
+    expect(closedBranch).not.toMatch(/Pledge this/);
+    // after the 404 branch, before the form
+    expect(pledge.indexOf("needGone ? (")).toBeGreaterThan(-1);
+    expect(pledge.indexOf("closedNeed ? (")).toBeGreaterThan(pledge.indexOf("needGone ? ("));
+  });
+  it("uses the shared 409 copy when submit() set no error of its own", () => {
+    expect(closedBranch).toMatch(/error \?\? pledgeErrorCopy\(409, "need_not_open"\)\.message/);
+  });
+});
+
+describe("B5 · a guest's 'My donations ›' on Donate raises the donate wall, not the generic account one", () => {
+  it("opens the donate variant and sets the donate intent", () => {
+    expect(donate).toMatch(/isGuest \? openWall\("donate"\)/);
+    expect(donate).toMatch(/action="donate"/);
+    expect(donate).toMatch(/setIntent\("donate"\)/);
+    expect(donate).not.toMatch(/action="account"/);
+  });
+});
+
 describe("MyDonationsScreen", () => {
+  it("B4: says why a cancel found the pledge already settled, before the list refreshes", () => {
+    expect(mine).toMatch(/import \{[^}]*\bcancelRefusedCopy\b[^}]*\} from "\.\.\/community"/);
+    expect(mine).toMatch(/setNotice\(cancelRefusedCopy\(res\.status\)\)/);
+    // cleared by the donor's next action, so it never outlives the thing it explained
+    const fn = (name: string) => new RegExp(`(?:async )?function ${name}\\([^)]*\\) \\{\\s*(?:if \\([^)]*\\) return;\\s*)?setNotice\\(null\\)`);
+    expect(mine).toMatch(fn("confirmCancel"));
+    expect(mine).toMatch(fn("loadMore"));
+    expect(mine).toMatch(/\{notice \? <Text style=\{styles\.notice\} accessibilityRole="alert">\{notice\}<\/Text> : null\}/);
+  });
   it("uses the shared chip and quantity wording", () => {
     expect(mine).toMatch(/import \{[^}]*\bpledgeStatusChip\b[^}]*\} from "\.\.\/community"/);
     expect(mine).toMatch(/import \{[^}]*\bquantityLabel\b[^}]*\} from "\.\.\/community"/);

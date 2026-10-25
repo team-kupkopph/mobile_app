@@ -7,7 +7,7 @@ import {
 } from "react-native";
 
 import { useApi } from "../api/useApi";
-import { NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, NeedFormErrors, needFormErrors, needSaveError } from "../community";
+import { NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, NeedFormErrors, needFormErrors, needSaveError, withoutError } from "../community";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { QuantityStepper } from "../components/QuantityStepper";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -98,7 +98,7 @@ export function NeedFormScreen({ navigation, route }: Props) {
         <Field
           label="What do you need?"
           value={title}
-          onChangeText={setTitle}
+          onChangeText={(v) => { setTitle(v); setErrors((e) => withoutError(e, "title")); }}
           placeholder="e.g. Dog food (adult, dry)"
           maxLength={NEED_TITLE_MAX}
           error={errors.title}
@@ -120,7 +120,7 @@ export function NeedFormScreen({ navigation, route }: Props) {
         </View>
 
         <Text style={styles.groupLabel}>How many needed?</Text>
-        <QuantityStepper value={qty} onChange={setQty} decreaseLabel="Decrease quantity needed" increaseLabel="Increase quantity needed" />
+        <QuantityStepper value={qty} onChange={(n) => { setQty(n); setErrors((e) => withoutError(e, "quantity")); }} decreaseLabel="Decrease quantity needed" increaseLabel="Increase quantity needed" />
         {errors.quantity ? <Text style={styles.fieldError} accessibilityLiveRegion="polite">{errors.quantity}</Text> : null}
 
         <Field
@@ -135,7 +135,7 @@ export function NeedFormScreen({ navigation, route }: Props) {
         <Field
           label="Details (optional)"
           value={description}
-          onChangeText={setDescription}
+          onChangeText={(v) => { setDescription(v); setErrors((e) => withoutError(e, "description")); }}
           multiline
           placeholder="Brand, size, anything specific"
           maxLength={NEED_DETAILS_MAX}

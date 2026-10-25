@@ -171,7 +171,7 @@ describe("AW20 · NeedFormScreen", () => {
     expect(form).toMatch(/needSaveError\(res\.status, res\.data\?\.error\?\.code, res\.data\?\.error\?\.details\)/);
   });
   it("steps the quantity with the shared QuantityStepper, which caps at MAX_QTY", () => {
-    expect(form).toMatch(/<QuantityStepper value=\{qty\} onChange=\{setQty\}/);
+    expect(form).toMatch(/<QuantityStepper value=\{qty\} onChange=\{/);   // the handler also clears the quantity error (B6)
     expect(stepper).toMatch(/max = MAX_QTY/);
   });
   it("still refuses to submit on a failed prefill", () => {
@@ -261,5 +261,18 @@ describe("US-W3 · the dashboard's Wishlist line", () => {
     expect(dash).toMatch(/wishlistSummary\(dash\.wishlist\)/);
     expect(dash).toMatch(/>Wishlist</);
     expect(dash).toMatch(/navigate\("shelterNeeds"\)/);
+  });
+});
+
+describe("B6 · a field's error clears as soon as that field is edited", () => {
+  it("NeedFormScreen drops the title, quantity and details errors on change", () => {
+    expect(form).toMatch(/import \{[^}]*\bwithoutError\b[^}]*\} from "\.\.\/community"/);
+    expect(form).toMatch(/withoutError\(e, "title"\)/);
+    expect(form).toMatch(/withoutError\(e, "quantity"\)/);
+    // attached to the handlers that actually change the field
+    expect(form).toMatch(/onChange=\{\(n\) => \{ setQty\(n\); setErrors\(\(e\) => withoutError\(e, "quantity"\)\)/);
+    expect(form).toMatch(/setTitle\(v\); setErrors\(\(e\) => withoutError\(e, "title"\)\)/);
+    expect(form).toMatch(/setDescription\(v\); setErrors\(\(e\) => withoutError\(e, "description"\)\)/);
+    expect(form).toMatch(/withoutError\(e, "description"\)/);
   });
 });
