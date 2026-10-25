@@ -99,7 +99,7 @@ export function DonateScreen({ navigation, route }: Props) {
   const { tokens } = useAuth();
   const isGuest = tokens === null;
   const [wall, setWall] = useState(false);
-  const openWall = (_action: "account") => setWall(true);
+  const openWall = (_action: "donate") => setWall(true);
 
   // AT2 · one callable load, so the state view can offer Try again after an offline or 5xx answer.
   const load = useCallback(() => {
@@ -201,14 +201,14 @@ export function DonateScreen({ navigation, route }: Props) {
         ) : null}
 
         <TouchableOpacity hitSlop={TAP_SLOP} style={styles.myDonationsRow}
-          onPress={() => (isGuest ? openWall("account") : navigation.navigate("myDonations"))}>
+          onPress={() => (isGuest ? openWall("donate") : navigation.navigate("myDonations"))}>
           <Text style={styles.myDonationsLabel}>My donations ›</Text>
         </TouchableOpacity>
       </ScrollView>
       <SignupWall
         visible={wall}
-        action="account"
-        onCreateAccount={() => { setIntent("account"); setWall(false); navigation.navigate("accountType"); }}
+        action="donate"
+        onCreateAccount={() => { setIntent("donate"); setWall(false); navigation.navigate("accountType"); }}
         onLogin={() => { setWall(false); navigation.navigate("signin"); }}
         onDismiss={() => setWall(false)}
       />

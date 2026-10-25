@@ -71,11 +71,26 @@ export function remainingAfter(needed: number, received: number, pledged: number
   return Math.max(0, needed - received - pledged);
 }
 
-/** A nudge, not a block: pledging more than the remainder is allowed. */
+/**
+ * A nudge, not a block: pledging more than the remainder is allowed. When pledges already cover everything
+ * that is left (`remaining` is 0) it says so — that is the case where a donor most needs the hint (B2).
+ */
 export function overPledgeWarning(qty: number, remaining: number): string | null {
-  return remaining > 0 && qty > remaining
+  if (qty <= 0) return null;
+  if (remaining <= 0) return "Pledges already cover everything they still need — more is welcome, but it may not be needed.";
+  return qty > remaining
     ? `They still need ${remaining} — anything extra is welcome, but ${remaining} covers it.`
     : null;
+}
+
+/**
+ * What to tell a donor whose cancel found the pledge already settled by the shelter (409) or gone (404). The
+ * list is refreshed either way; this says why the card changed under them (B4). Null for every other failure.
+ */
+export function cancelRefusedCopy(status: number): string | null {
+  if (status === 409) return "That pledge was already settled — refreshing your list.";
+  if (status === 404) return "That pledge is no longer there — refreshing your list.";
+  return null;
 }
 
 /** The shelter's received-confirm preview: "8 → 14 of 20 kg received". */
@@ -164,6 +179,13 @@ export const NEED_UNIT_MAX = 16;
 export const INSTRUCTIONS_MAX = 500;
 
 export type NeedFormErrors = { title?: string; description?: string; quantity?: string };
+
+/** `errors` without `key`; the same object when `key` had no message, so a keystroke does not re-render for nothing (B6). */
+export function withoutError(errors: NeedFormErrors, key: keyof NeedFormErrors): NeedFormErrors {
+  if (errors[key] === undefined) return errors;
+  const { [key]: _dropped, ...rest } = errors;
+  return rest;
+}
 
 /** Client-side bounds for the need form, each message keyed to the field it belongs under (AW20). */
 export function needFormErrors(f: { title: string; description: string; qty: number }): NeedFormErrors {

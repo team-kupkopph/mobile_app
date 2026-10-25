@@ -68,6 +68,8 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
   useFocusEffect(useCallback(() => { loadNeed(); }, [loadNeed]));
 
   const needGone = loadState(needRes).kind === "gone";
+  // B3 · the need is closed or fulfilled (the 409 reload tells us): the form could only 409 again, so it is not offered.
+  const closedNeed = !!need && need.status !== "open";
   const unit = need?.unit || undefined;
   const remaining = need ? remainingAfter(need.quantity_needed, need.quantity_received, need.quantity_pledged) : 0;
   const overPledge = need ? overPledgeWarning(qty, remaining) : null;
@@ -142,6 +144,13 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
             {/* submit()'s own refusal (e.g. "This shelter's wishlist isn't available right now.") survives the reload that 404s too */}
             {error ? <Text style={styles.error} accessibilityRole="alert">{error}</Text> : null}
             <LoadStateView state={{ kind: "gone" }} subject="need" onBack={() => navigation.goBack()} />
+          </>
+        ) : closedNeed ? (
+          <>
+            <Text style={styles.error} accessibilityRole="alert">
+              {error ?? pledgeErrorCopy(409, "need_not_open").message}
+            </Text>
+            <Button label="Back to wishlist" onPress={() => navigation.goBack()} variant="secondary" style={styles.secondaryBtn} />
           </>
         ) : (
           <>

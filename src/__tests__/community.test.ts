@@ -1,8 +1,8 @@
 import {
   awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
   liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
-  needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
-  pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip
+  cancelRefusedCopy, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
+  pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip, withoutError
 } from "../community";
 
 describe("pledgeStatusChip", () => {
@@ -56,8 +56,39 @@ describe("overPledgeWarning", () => {
     expect(overPledgeWarning(4, 4)).toBeNull();
     expect(overPledgeWarning(2, 4)).toBeNull();
   });
-  it("is silent when nothing remains", () => {
-    expect(overPledgeWarning(5, 0)).toBeNull();
+  it("B2: says so when pledges already cover everything that is left (the case where the hint matters most)", () => {
+    expect(overPledgeWarning(5, 0)).toBe(
+      "Pledges already cover everything they still need — more is welcome, but it may not be needed.");
+    expect(overPledgeWarning(1, 0)).toBe(
+      "Pledges already cover everything they still need — more is welcome, but it may not be needed.");
+  });
+  it("is silent for a quantity of nothing", () => {
+    expect(overPledgeWarning(0, 0)).toBeNull();
+    expect(overPledgeWarning(0, 4)).toBeNull();
+  });
+});
+
+describe("cancelRefusedCopy (B4)", () => {
+  it("tells the donor a cancel hit a pledge the shelter had already settled", () => {
+    expect(cancelRefusedCopy(409)).toBe("That pledge was already settled — refreshing your list.");
+  });
+  it("tells the donor a cancel hit a pledge that is gone", () => {
+    expect(cancelRefusedCopy(404)).toBe("That pledge is no longer there — refreshing your list.");
+  });
+  it("has nothing to say for other failures (those get their own Alert)", () => {
+    for (const s of [0, 400, 401, 429, 500]) expect(cancelRefusedCopy(s)).toBeNull();
+  });
+});
+
+describe("withoutError (B6)", () => {
+  it("drops only the named field's message", () => {
+    const e = { title: "t", quantity: "q", description: "d" };
+    expect(withoutError(e, "quantity")).toEqual({ title: "t", description: "d" });
+    expect(withoutError(e, "title")).toEqual({ quantity: "q", description: "d" });
+  });
+  it("returns the same object when there was nothing to drop (no pointless re-render)", () => {
+    const e = { title: "t" };
+    expect(withoutError(e, "quantity")).toBe(e);
   });
 });
 
