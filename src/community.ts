@@ -247,6 +247,13 @@ export function needProgressFraction(received: number, needed: number): number {
   return Math.max(0, Math.min(1, received / needed));
 }
 
+// DW-N4 · the donor wishlist's Load more. Pages are newest first, so a need posted between two fetches pushes a row
+// already on screen onto the next page; keep the first copy rather than render it twice (and with a duplicate key).
+export function appendNeedsPage<T extends { need_id: string }>(prev: T[] | null, more: T[]): T[] {
+  const shown = new Set((prev ?? []).map((n) => n.need_id));
+  return [...(prev ?? []), ...more.filter((n) => !shown.has(n.need_id))];
+}
+
 // US-B2 · the four impact aggregates as labelled stat tiles, in a stable display order.
 export type Impact = {
   shifts_completed: number; rescues_helped: number; pets_rehomed: number;

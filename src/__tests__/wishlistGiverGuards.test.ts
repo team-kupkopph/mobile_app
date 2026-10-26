@@ -135,6 +135,22 @@ describe("AW14a · DonateScreen's wishlist load state", () => {
   });
 });
 
+describe("DW-N4 · DonateScreen pages the wishlist instead of stopping at the newest 20", () => {
+  it("keeps the first page's `next`", () => {
+    expect(donate).toMatch(/\[next, setNext\] = useState<number \| null>\(null\)/);
+    expect(donate).toMatch(/setNext\(r\.data\.next \?\? null\)/);
+  });
+  it("asks for the next page of OPEN needs and appends it without repeating a row", () => {
+    expect(donate).toMatch(/\/needs\?status=open&page=\$\{next\}/);
+    expect(donate).toMatch(/appendNeedsPage\(prev, r\.data\.results\)/);
+  });
+  it("offers a secondary Load more while there is a next page, and says so when a page fails", () => {
+    expect(donate).toMatch(/next !== null \?/);
+    expect(donate).toMatch(/<Button label="Load more" variant="secondary" onPress=\{loadMore\} loading=\{loadingMore\}/);
+    expect(donate).toMatch(/Couldn't load more\. Try again\./);
+  });
+});
+
 describe("AW14b · DonateScreen with needs but no QR", () => {
   it("says so plainly, and points at the wishlist, instead of claiming donations are unavailable", () => {
     expect(donate).toContain("This shelter doesn't take QR donations yet — you can still pledge an item below.");
