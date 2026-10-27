@@ -269,6 +269,16 @@ export function needProgressFraction(received: number, needed: number): number {
   return Math.max(0, Math.min(1, received / needed));
 }
 
+/**
+ * D4 · the percentage beside a need's progress bar. Rounded like the artboard (5 of 8 → 63), but honest at the
+ * ends: 100 only once the target is met (199 of 200 reads 99) and 0 only when nothing has arrived (1 of 1000 reads 1).
+ */
+export function needPercent(received: number, needed: number): number {
+  if (needed <= 0 || received <= 0) return 0;
+  if (received >= needed) return 100;
+  return Math.min(99, Math.max(1, Math.round((received / needed) * 100)));
+}
+
 // DW-N4 · the donor wishlist's Load more. Pages are newest first, so a need posted between two fetches pushes a row
 // already on screen onto the next page; keep the first copy rather than render it twice (and with a duplicate key).
 export function appendNeedsPage<T extends { need_id: string }>(prev: T[] | null, more: T[]): T[] {

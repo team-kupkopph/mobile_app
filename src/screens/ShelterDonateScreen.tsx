@@ -8,6 +8,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ShelterDashboard } from "../api/types";
@@ -18,11 +19,11 @@ import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { Button, Card, Chip, SectionHeader } from "../components/ui";
-import { CHIP_UI_TONE, NeedStatus, needProgressLabel, needStatusChip } from "../community";
+import { CHIP_UI_TONE, NeedStatus, needPercent, needProgressFraction, needProgressLabel, needStatusChip } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { donateSections, DonateNeedInput } from "../shelterDonate";
 import { donateChip, OwnQr, qrImageLabel } from "../ownQr";
-import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
+import { colors, gradients, maxFontScale, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
@@ -194,6 +195,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
             {sections.needs.map((row, i) => {
               const raw = (needs ?? [])[i];
               const chip = needStatusChip(raw.status);
+              const pct = needPercent(row.received, raw.quantity_needed);
               return (
                 <TouchableOpacity key={row.id} activeOpacity={0.8}
                   onPress={() => navigation.navigate("needPledges", { needId: row.id })}>
@@ -201,6 +203,14 @@ export function ShelterDonateScreen({ navigation }: Props) {
                     <View style={[styles.needRow, large && styles.needRowLarge]}>
                       <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{row.title}</Text>
                       <Chip tone={CHIP_UI_TONE[chip.tone]} dot={false} label={chip.label} />
+                    </View>
+                    {/* D4 (owner, 2026-10-27) · the artboard's bar, plus the percentage. Decoration: the % and the line under it say it in words. */}
+                    <View style={styles.barRow}>
+                      <View style={styles.barTrack} accessible={false}>
+                        <LinearGradient colors={gradients.button} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                          style={[styles.barFill, { width: `${needProgressFraction(row.received, raw.quantity_needed) * 100}%` }]} />
+                      </View>
+                      <Text style={styles.barPct}>{pct}%</Text>
                     </View>
                     <Text style={styles.needMeta}>{needProgressLabel(row.received, raw.quantity_needed, raw.unit, row.pledged)}</Text>
                   </Card>
@@ -265,5 +275,9 @@ const styles = StyleSheet.create({
   needRowLarge: { flexDirection: "column", alignItems: "flex-start" },
   needTitleLarge: { flex: 0, flexGrow: 0, flexBasis: "auto" },
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
-  needMeta: { marginTop: 8, color: colors.muted, ...typography.meta }
+  needMeta: { marginTop: 8, color: colors.muted, ...typography.meta },
+  barRow: { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 10 },
+  barTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: colors.segmentTrack, overflow: "hidden" },
+  barFill: { height: "100%", borderRadius: 4 },
+  barPct: { color: colors.ink, ...typography.meta, fontWeight: "700" }
 });

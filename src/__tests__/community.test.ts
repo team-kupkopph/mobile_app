@@ -1,7 +1,7 @@
 import {
   appendNeedsPage, awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
   liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
-  CHIP_UI_TONE, cancelRefusedCopy, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
+  CHIP_UI_TONE, cancelRefusedCopy, needPercent, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
   pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip, withoutError
 } from "../community";
 
@@ -384,5 +384,25 @@ describe("CHIP_UI_TONE (D5)", () => {
       expect(src).toMatch(/CHIP_UI_TONE\[/);
       expect(src).not.toMatch(/const CHIP_TONE\b/);
     }
+  });
+});
+
+describe("needPercent (D4)", () => {
+  it("rounds the received share of the target, like the artboard (5 of 8 → 63)", () => {
+    expect(needPercent(5, 8)).toBe(63);
+    expect(needPercent(3, 10)).toBe(30);
+  });
+  it("reads 100 only once the target is met, and never more", () => {
+    expect(needPercent(8, 8)).toBe(100);
+    expect(needPercent(9, 8)).toBe(100);
+    expect(needPercent(199, 200)).toBe(99);
+  });
+  it("reads 0 only when nothing has arrived", () => {
+    expect(needPercent(0, 8)).toBe(0);
+    expect(needPercent(1, 1000)).toBe(1);
+  });
+  it("a zero or negative target is 0, not a division by zero", () => {
+    expect(needPercent(3, 0)).toBe(0);
+    expect(needPercent(3, -1)).toBe(0);
   });
 });
