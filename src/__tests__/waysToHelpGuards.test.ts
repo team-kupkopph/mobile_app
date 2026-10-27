@@ -13,6 +13,7 @@ const screen = read("screens", "WaysToHelpScreen.tsx");
 const nav = read("navigation", "RootNavigator.tsx");
 const types = read("navigation", "types.ts");
 const home = read("screens", "HomeScreen.tsx");
+const guestHome = read("screens", "HomeGuestScreen.tsx");
 const sections = read("components", "home", "HomeSections.tsx");
 
 describe("the scan found its files (a guard that matches nothing proves nothing)", () => {
@@ -23,12 +24,12 @@ describe("the scan found its files (a guard that matches nothing proves nothing)
 });
 
 describe("WaysToHelpScreen", () => {
-  it("is a registered route with no params", () => {
+  it("is a registered route whose only param is an optional city", () => {
     expect(nav).toMatch(/<Stack\.Screen name="waysToHelp" component=\{WaysToHelpScreen\} \/>/);
-    expect(types).toMatch(/waysToHelp: undefined;/);
+    expect(types).toMatch(/waysToHelp: \{ city\?: string \} \| undefined;/);
   });
-  it("asks for the list with the viewer's cached city, and refetches on focus", () => {
-    expect(screen).toMatch(/const \{ city \} = useAuth\(\)/);
+  it("asks for the list with the city it was given, else the viewer's cached city, and refetches on focus", () => {
+    expect(screen).toMatch(/const city = route\.params\?\.city \?\? cachedCity;/);
     expect(screen).toMatch(/`\/shelters\/ways-to-help\?city=\$\{encodeURIComponent\(city \?\? ""\)\}`/);
     expect(screen).toMatch(/useFocusEffect\(load\)/);
   });
@@ -83,5 +84,26 @@ describe("Home · the Ways to help section", () => {
   it("ShelterHelpRow shows the name and the shared meta line", () => {
     expect(sections).toMatch(/export function ShelterHelpRow\(/);
     expect(sections).toMatch(/helpRowMeta\(shelter\)/);
+  });
+});
+
+describe("the guest Home · the Ways to help section", () => {
+  it("fetches with the guest's fixed city and keeps three", () => {
+    expect(guestHome).toMatch(/\/shelters\/ways-to-help\?city=\$\{encodeURIComponent\(GUEST_HELP_CITY\)\}/);
+    expect(guestHome).toMatch(/setHelpers\(\(r\.data\?\.results \?\? \[\]\)\.slice\(0, 3\)\)/);
+  });
+  it("sits between Adopt near you and Community stories, and See all carries the guest's city", () => {
+    const adopt = guestHome.indexOf('title="Adopt near you"');
+    const help = guestHome.indexOf('title="Ways to help"');
+    const stories = guestHome.indexOf('title="Community stories"');
+    expect(adopt).toBeGreaterThan(0);
+    expect(help).toBeGreaterThan(adopt);
+    expect(stories).toBeGreaterThan(help);
+    const block = guestHome.slice(help, stories);
+    expect(block).toMatch(/navigation\.navigate\("waysToHelp", \{ city: GUEST_HELP_CITY \}\)/);
+    expect(block).toMatch(/<LoadStateView state=\{helpPanel\} onRetry=\{load\} \/>/);
+    expect(block).toMatch(/<EmptyNote>\{WAYS_TO_HELP_EMPTY\}<\/EmptyNote>/);
+    expect(block).toMatch(/<ShelterHelpRow/);
+    expect(block).toMatch(/navigation\.navigate\("donate", \{ accountId: s\.account_id, orgName: s\.org_name, city: s\.city \}\)/);
   });
 });

@@ -160,7 +160,8 @@ export type RootStackParamList = {
   donatePledge: { needId: string; needTitle: string; shelterName: string };
   myDonations: undefined;
   // US-W4 · verified shelters asking for help, near the viewer first.
-  waysToHelp: undefined;
+  // `city` overrides the cached one: the guest Home passes its fixed city so the list groups the way its section does.
+  waysToHelp: { city?: string } | undefined;
   // US-W3 · Abot-tulong wishlist (shelter side): manage needs, edit/create, confirm pledges.
   shelterNeeds: undefined;
   // US-W3 · the shelter's drop-off instructions, shown to a giver after they pledge.

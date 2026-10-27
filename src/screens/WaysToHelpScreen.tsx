@@ -21,10 +21,12 @@ import {
 
 type Props = NativeStackScreenProps<RootStackParamList, "waysToHelp">;
 
-export function WaysToHelpScreen({ navigation }: Props) {
+export function WaysToHelpScreen({ navigation, route }: Props) {
   const api = useApi();
-  // The same cached city Home's "Adopt near you" uses; a guest who never picked one gets one unheaded list.
-  const { city } = useAuth();
+  // The city the caller gave (the guest Home's fixed one), else the same cached city Home's "Adopt near you" uses; with
+  // neither, one unheaded list.
+  const { city: cachedCity } = useAuth();
+  const city = route.params?.city ?? cachedCity;
   const [rows, setRows] = useState<HelpShelter[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [next, setNext] = useState<number | null>(null);
