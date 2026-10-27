@@ -54,6 +54,7 @@ const CONVERTED = [
   "ReportMatchesScreen.tsx",
   "ReportSentScreen.tsx",
   "ReportStrayScreen.tsx",
+  "RestoreAccountScreen.tsx",
   "RescueListScreen.tsx",
   "RescueMapScreen.tsx",
   "RescueOfferScreen.tsx",

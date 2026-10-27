@@ -10,6 +10,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { useSocialSignIn } from "../auth/useSocialSignIn";
 import { RootStackParamList } from "../navigation/types";
+import { restoreOfferFrom } from "../restore";
 import { SimpleHeader, authColors } from "./AuthFormKit";
 import { Button, Field } from "../components/ui";
 import { SocialSignIn } from "../components/ui/SocialSignIn";
@@ -81,6 +82,13 @@ export function SigninScreen({ navigation }: Props) {
       }
       if (res.status === 403) {
         navigation.navigate("otp", { email: email.trim(), mode: "unverified" });
+        return;
+      }
+      // AS1 · answered only after the password matched, so it is safe to act on. The wording
+      // lives on the restore screen, not here: this screen stays generic (authEnumeration).
+      const offer = restoreOfferFrom(res);
+      if (offer) {
+        navigation.navigate("restoreAccount", { restoreToken: offer.token, purgeOn: offer.purgeOn });
         return;
       }
       if (res.ok) {

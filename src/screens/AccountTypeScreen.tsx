@@ -22,6 +22,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { isReturningSocialAccount } from "../auth/socialRouting";
 import { RootStackParamList } from "../navigation/types";
+import { restoreOfferFrom } from "../restore";
 import { AuthHeader, authColors } from "./AuthFormKit";
 import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 
@@ -53,6 +54,13 @@ export function AccountTypeScreen({ navigation, route }: Props) {
         id_token: social.idToken,
         account_type: "personal"
       });
+      // AS1 · the provider proved the identity, and the account behind it is deleted but still
+      // inside its 30 days: offer the way back instead of a dead-end "couldn't finish sign-in".
+      const offer = restoreOfferFrom(res);
+      if (offer) {
+        navigation.navigate("restoreAccount", { restoreToken: offer.token, purgeOn: offer.purgeOn });
+        return;
+      }
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
         if (isReturningSocialAccount(res.data)) {
