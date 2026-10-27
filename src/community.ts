@@ -5,8 +5,18 @@ export type PledgeStatus = "pledged" | "delivered" | "cancelled";
 export type NeedStatus = "open" | "fulfilled" | "closed";
 
 // Status chips follow the shared mapping (ui-ux-pro-max): green = delivered/done,
-// amber = pledged/open (still needs action), grey = cancelled/closed.
-export type ChipTone = "ok" | "warn" | "muted";
+// amber = pledged (still needs action), grey = cancelled/closed. D5 (owner, 2026-10-27): an
+// open need is teal, so on the wishlist amber means "act on this" (Pledged, the shelter's
+// "N to confirm") rather than every open need. Wishlist only — elsewhere Open stays amber.
+export type ChipTone = "ok" | "warn" | "muted" | "teal";
+
+/** The shared `Chip` tone each wishlist tone draws with. One map, not a copy per screen. */
+export const CHIP_UI_TONE: Record<ChipTone, "success" | "warning" | "neutral" | "info"> = {
+  ok: "success",
+  warn: "warning",
+  muted: "neutral",
+  teal: "info"
+};
 
 export type CancelReason = "donor" | "need_closed";
 
@@ -40,7 +50,7 @@ export function needStatusChip(status: NeedStatus): { label: string; tone: ChipT
       return { label: "Closed", tone: "muted" };
     case "open":
     default:
-      return { label: "Open", tone: "warn" };
+      return { label: "Open", tone: "teal" };
   }
 }
 

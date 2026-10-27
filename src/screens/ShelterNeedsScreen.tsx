@@ -10,7 +10,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import {
-  ChipTone, awaitingConfirmTag, needCategoryLabel, needProgressLabel, needStatusChip, NeedStatus, pledgeCountLabel
+  CHIP_UI_TONE, awaitingConfirmTag, needCategoryLabel, needProgressLabel, needStatusChip, NeedStatus, pledgeCountLabel
 } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, dangerOnSurface, spacing, typography } from "../theme";
@@ -18,11 +18,6 @@ import { useLargeText } from "../useLargeText";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
-  ok: "success",
-  warn: "warning",
-  muted: "neutral"
-};
 
 // The owner's list row (GET /shelters/{me}/needs): every status, with the counts the screens used to fan out for.
 type Need = {
@@ -127,7 +122,7 @@ export function ShelterNeedsScreen({ navigation }: Props) {
                   <Card style={styles.needCard}>
                     <View style={[styles.row, large && styles.rowLarge]}>
                       <Text style={[styles.needTitle, large && styles.needTitleLarge]}>{need.title}</Text>
-                      <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
+                      <Chip tone={CHIP_UI_TONE[chip.tone]} dot={false} label={chip.label} />
                     </View>
                     <Text style={styles.meta}>
                       {needCategoryLabel(need.category)} · {needProgressLabel(need.quantity_received, need.quantity_needed, need.unit, need.quantity_pledged)}

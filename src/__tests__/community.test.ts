@@ -1,7 +1,7 @@
 import {
   appendNeedsPage, awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
   liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
-  cancelRefusedCopy, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
+  CHIP_UI_TONE, cancelRefusedCopy, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
   pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip, withoutError
 } from "../community";
 
@@ -154,8 +154,9 @@ describe("receivedPreview", () => {
 });
 
 describe("needStatusChip", () => {
-  it("maps need status: open=amber, fulfilled=green, closed=grey", () => {
-    expect(needStatusChip("open").tone).toBe("warn");
+  // D5 (owner, 2026-10-27) · an open need is teal: on the wishlist amber means "act on this" (Pledged, "N to confirm").
+  it("maps need status: open=teal, fulfilled=green, closed=grey", () => {
+    expect(needStatusChip("open")).toEqual({ label: "Open", tone: "teal" });
     expect(needStatusChip("fulfilled").tone).toBe("ok");
     expect(needStatusChip("closed").tone).toBe("muted");
   });
@@ -367,5 +368,21 @@ describe("appendNeedsPage (DW-N4 · the donor wishlist's Load more)", () => {
   });
   it("starts from nothing when nothing is shown yet", () => {
     expect(appendNeedsPage(null, [n("a")]).map((x) => x.need_id)).toEqual(["a"]);
+  });
+});
+
+describe("CHIP_UI_TONE (D5)", () => {
+  it("draws an open need with the shared teal `info` tone, and the rest as before", () => {
+    expect(CHIP_UI_TONE).toEqual({ ok: "success", warn: "warning", muted: "neutral", teal: "info" });
+  });
+  it("is the one map: no wishlist screen keeps its own copy", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { readFileSync } = require("fs") as typeof import("fs");
+    const screens = ["ShelterNeedsScreen", "NeedPledgesScreen", "ShelterDonateScreen", "MyDonationsScreen"];
+    for (const name of screens) {
+      const src = readFileSync(`${__dirname}/../screens/${name}.tsx`, "utf8");
+      expect(src).toMatch(/CHIP_UI_TONE\[/);
+      expect(src).not.toMatch(/const CHIP_TONE\b/);
+    }
   });
 });

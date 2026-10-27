@@ -14,7 +14,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import {
   cancelRefusedCopy,
-  CancelReason, ChipTone, pledgeIsCancellable, pledgeStatusChip, PledgeStatus, pledgeSubtitle, quantityLabel
+  CancelReason, CHIP_UI_TONE, pledgeIsCancellable, pledgeStatusChip, PledgeStatus, pledgeSubtitle, quantityLabel
 } from "../community";
 import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
@@ -26,11 +26,6 @@ import { colors, maxFontScale, pill, spacing, typography } from "../theme";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
-  ok: "success",
-  warn: "warning",
-  muted: "neutral"
-};
 
 type Pledge = {
   pledge_id: string; quantity: number; status: PledgeStatus;
@@ -136,7 +131,7 @@ export function MyDonationsScreen({ navigation }: Props) {
                 <Card key={p.pledge_id} style={styles.pledgeCard}>
                   <View style={[styles.row, large && styles.rowLarge]}>
                     <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{p.need.title}</Text>
-                    <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
+                    <Chip tone={CHIP_UI_TONE[chip.tone]} dot={false} label={chip.label} />
                   </View>
                   <Text style={styles.qtyLine}>{quantityLabel(p.quantity, p.need.unit)}</Text>
                   <Text style={styles.meta}>{pledgeSubtitle(p.need.shelter_name, p.decided_at, p.created_at)}</Text>

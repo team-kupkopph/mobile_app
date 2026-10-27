@@ -18,7 +18,7 @@ import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { Button, Card, Chip, SectionHeader } from "../components/ui";
-import { ChipTone, NeedStatus, needProgressLabel, needStatusChip } from "../community";
+import { CHIP_UI_TONE, NeedStatus, needProgressLabel, needStatusChip } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { donateSections, DonateNeedInput } from "../shelterDonate";
 import { donateChip, OwnQr, qrImageLabel } from "../ownQr";
@@ -26,11 +26,6 @@ import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
-  ok: "success",
-  warn: "warning",
-  muted: "neutral"
-};
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
 
@@ -205,7 +200,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
                   <Card style={styles.needCard}>
                     <View style={[styles.needRow, large && styles.needRowLarge]}>
                       <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{row.title}</Text>
-                      <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
+                      <Chip tone={CHIP_UI_TONE[chip.tone]} dot={false} label={chip.label} />
                     </View>
                     <Text style={styles.needMeta}>{needProgressLabel(row.received, raw.quantity_needed, raw.unit, row.pledged)}</Text>
                   </Card>
