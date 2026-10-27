@@ -24,7 +24,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList, ShelterNeedShape } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { colors, dangerOnSurface, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
 /** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 16 },
   staleBox: { marginTop: 4 },
   staleRetry: { marginTop: 10 },
-  error: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "600" },
+  error: { marginTop: 14, color: colors.danger, ...typography.meta, fontWeight: "600", ...dangerOnSurface },
   sectionTitle: { marginTop: 28, marginBottom: 12, color: colors.ink, ...typography.section },
   pledgeCard: { marginBottom: 12, padding: 18 },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },

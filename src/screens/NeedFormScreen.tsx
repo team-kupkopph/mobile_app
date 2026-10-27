@@ -13,7 +13,7 @@ import { QuantityStepper } from "../components/QuantityStepper";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, pill, spacing, typography } from "../theme";
+import { colors, dangerOnSurface, pill, spacing, typography } from "../theme";
 import { Button, Field, ScreenHeader } from "../components/ui";
 
 // `funds` is not a wishlist category: money goes through the Donation QR, and the server refuses it (400 bad_category).
@@ -158,9 +158,9 @@ export function NeedFormScreen({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  error: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "600" },
+  error: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "600", ...dangerOnSurface },
   // Sits under the stepper as Field's own error sits under a field.
-  fieldError: { marginTop: 6, marginLeft: 6, color: colors.danger, ...typography.meta, fontWeight: "600" },
+  fieldError: { marginTop: 6, marginLeft: 6, color: colors.danger, ...typography.meta, fontWeight: "600", ...dangerOnSurface },
   groupLabel: { marginTop: 22, marginBottom: 10, color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   unitField: { marginTop: 14 },
   segments: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

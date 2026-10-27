@@ -20,7 +20,7 @@ import { appendNeedsPage, needCategoryLabel, needProgressFraction, needProgressL
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, maxFontScale, pill, radii, spacing, typography } from "../theme";
+import { colors, dangerOnSurface, maxFontScale, pill, radii, spacing, typography } from "../theme";
 import { Avatar, Button, Card, ScreenHeader } from "../components/ui";
 
 
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   pledgeBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   pledgeLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
   loadMore: { marginTop: 4 },
-  moreError: { marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "600", textAlign: "center" },
+  moreError: { marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "600", textAlign: "center", ...dangerOnSurface, alignSelf: "center" },
   myDonationsRow: { marginTop: 26, alignItems: "center" },
   myDonationsLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" }
 });

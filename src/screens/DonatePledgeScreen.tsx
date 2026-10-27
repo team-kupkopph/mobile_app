@@ -16,7 +16,7 @@ import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
-import { colors, maxFontScale, pill, spacing, squircle, typography } from "../theme";
+import { colors, dangerOnSurface, maxFontScale, pill, spacing, squircle, typography } from "../theme";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
 
 
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   dropOff: { alignSelf: "stretch", marginTop: 18, padding: 18 },
   dropOffTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   dropOffBody: { marginTop: 6, color: colors.muted, ...typography.body, lineHeight: 21 },
-  error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
+  error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700", ...dangerOnSurface },
   primaryBtn: { marginTop: 30 },
   secondaryBtn: { marginTop: 14 },
   confirmWrap: { flexGrow: 1, paddingHorizontal: spacing.lg, paddingTop: 140, paddingBottom: 60, alignItems: "center" },

@@ -14,7 +14,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { colors, pill, spacing, typography } from "../theme";
+import { colors, dangerOnSurface, pill, spacing, typography } from "../theme";
 import {
   appendShelters, helpGroups, HelpShelter, needCountLabel, TAKES_QR, WAYS_TO_HELP_EMPTY, WAYS_TO_HELP_INTRO
 } from "../waysToHelp";
@@ -128,5 +128,5 @@ const styles = StyleSheet.create({
   titles: { marginTop: 2, color: colors.muted, ...typography.meta },
   qr: { marginTop: 8, color: colors.teal, ...typography.meta, fontWeight: "700" },
   loadMore: { marginTop: 4 },
-  moreError: { marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "600", textAlign: "center" }
+  moreError: { marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "600", textAlign: "center", ...dangerOnSurface, alignSelf: "center" }
 });

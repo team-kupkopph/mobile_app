@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import { StyleProp, StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View, ViewStyle } from "react-native";
 
-import { colors, elevation, radii, spacing, typography } from "../../theme";
+import { colors, dangerOnSurface, elevation, radii, spacing, typography } from "../../theme";
 
 type FieldProps = {
   label: string;
@@ -68,6 +68,9 @@ export function Field({
             onFocus={() => setFocused(true)}
             onBlur={(e) => { setFocused(false); onBlur?.(e); }}
             placeholderTextColor={colors.muted}
+            // R3-F1 · the explicit lineHeight below (R9-F2) reaches iOS as a paragraph style that wraps words, so a value
+            // wider than the box drew only its first whole words. Truncating the tail is what a native one-line field does.
+            lineBreakModeIOS={input.multiline ? undefined : "tail"}
             style={[styles.input, input.multiline && styles.inputMultiline, readOnly && styles.inputReadOnly]}
           />
           {onToggleSecure ? (
@@ -152,6 +155,8 @@ const styles = StyleSheet.create({
     ...typography.meta,
     fontWeight: "600",
     color: colors.danger,
+    // R3-F2 · under the box means on the backdrop, where danger alone is below 4.5:1: on its own tint.
+    ...dangerOnSurface,
     marginTop: 6,
     marginLeft: 6
   }

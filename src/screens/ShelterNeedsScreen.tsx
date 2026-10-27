@@ -13,7 +13,7 @@ import {
   ChipTone, awaitingConfirmTag, needCategoryLabel, needProgressLabel, needStatusChip, NeedStatus, pledgeCountLabel
 } from "../community";
 import { RootStackParamList } from "../navigation/types";
-import { colors, spacing, typography } from "../theme";
+import { colors, dangerOnSurface, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 
@@ -178,5 +178,5 @@ const styles = StyleSheet.create({
   instructionsBody: { marginTop: 6, color: colors.muted, ...typography.meta },
   instructionsAction: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   loadMore: { marginTop: 4 },
-  moreError: { marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "600", textAlign: "center" }
+  moreError: { marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "600", textAlign: "center", ...dangerOnSurface, alignSelf: "center" }
 });
