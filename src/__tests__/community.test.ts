@@ -1,7 +1,7 @@
 import {
   appendNeedsPage, awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
   liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
-  CHIP_UI_TONE, cancelPledgeBody, cancelRefusedCopy, needPercent, PLEDGE_DELIVERY_HINT, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
+  CHIP_UI_TONE, cancelPledgeBody, pledgeNextSteps, cancelRefusedCopy, needPercent, PLEDGE_DELIVERY_HINT, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
   pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip, withoutError
 } from "../community";
 
@@ -419,5 +419,15 @@ describe("cancelPledgeBody (D3)", () => {
 describe("PLEDGE_DELIVERY_HINT (D2)", () => {
   it("is the wireframe's line", () => {
     expect(PLEDGE_DELIVERY_HINT).toBe("Deliver, then the shelter confirms");
+  });
+});
+
+describe("pledgeNextSteps (D1)", () => {
+  it("is the wireframe's three steps, naming the shelter", () => {
+    expect(pledgeNextSteps("PAWS Manila")).toEqual([
+      "Deliver or drop it off at the shelter",
+      "PAWS Manila marks it received",
+      "It counts toward the need, and you get a notification"
+    ]);
   });
 });

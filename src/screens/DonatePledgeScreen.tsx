@@ -8,7 +8,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
-import { MAX_QTY, overPledgeWarning, pledgeErrorCopy, quantityLabel, remainingAfter } from "../community";
+import { MAX_QTY, overPledgeWarning, pledgeErrorCopy, pledgeNextSteps, quantityLabel, remainingAfter } from "../community";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -110,9 +110,20 @@ export function DonatePledgeScreen({ navigation, route }: Props) {
           <View style={styles.checkTile}><Text style={styles.checkGlyph} allowFontScaling={false}>✓</Text></View>
           <Text style={styles.confirmTitle} maxFontSizeMultiplier={maxFontScale.title}>Pledge recorded</Text>
           <Text style={styles.confirmBody}>
-            You pledged {quantityLabel(qty, unit)} to “{needTitle}”. {shelterName} will confirm once it arrives —
-            you'll get a notification then. Salamat sa pagtulong!
+            You pledged {quantityLabel(qty, unit)} to “{needTitle}”. Salamat sa pagtulong!
           </Text>
+          {/* D1 (owner, 2026-10-27) · the wireframe's strip; not its summary row or Pledged chip — the sentence above names all that. */}
+          <Card style={styles.nextCard}>
+            <Text style={styles.nextTitle}>What happens next</Text>
+            {pledgeNextSteps(shelterName).map((step, i) => (
+              <View key={step} style={styles.nextRow}>
+                <View style={styles.stepNumberDisc}>
+                  <Text style={styles.stepNumber} allowFontScaling={false}>{i + 1}</Text>
+                </View>
+                <Text style={styles.nextText}>{step}</Text>
+              </View>
+            ))}
+          </Card>
           <DropOff text={need?.donation_instructions} />
           <Button
             label="See my donations"
@@ -216,5 +227,12 @@ const styles = StyleSheet.create({
   checkTile: { width: 84, height: 84, borderRadius: squircle(84), backgroundColor: colors.successBg, alignItems: "center", justifyContent: "center" },
   checkGlyph: { color: colors.success, fontSize: 44, fontWeight: "800" },
   confirmTitle: { marginTop: 22, color: colors.ink, ...typography.hero },
-  confirmBody: { marginTop: 12, color: colors.muted, ...typography.body, textAlign: "center" }
+  confirmBody: { marginTop: 12, color: colors.muted, ...typography.body, textAlign: "center" },
+  nextCard: { alignSelf: "stretch", marginTop: 24, padding: 18 },
+  nextTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
+  nextRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 12 },
+  // A fixed-shape disc (the number does not scale, like the ✓ tile); the step's own text does.
+  stepNumberDisc: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
+  stepNumber: { color: colors.tealDark, fontSize: 14, fontWeight: "800" },
+  nextText: { flex: 1, color: colors.ink, ...typography.body }
 });

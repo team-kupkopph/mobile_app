@@ -54,6 +54,15 @@ export function needStatusChip(status: NeedStatus): { label: string; tone: ChipT
   }
 }
 
+/** D1 · the "What happens next" strip on Pledge recorded (`screen-donate-pledged`), naming the shelter. */
+export function pledgeNextSteps(shelterName: string): string[] {
+  return [
+    "Deliver or drop it off at the shelter",
+    `${shelterName} marks it received`,
+    "It counts toward the need, and you get a notification"
+  ];
+}
+
 /** D2 · on a still-pledged card in My donations: why it still says Pledged after a drop-off. */
 export const PLEDGE_DELIVERY_HINT = "Deliver, then the shelter confirms";
 
