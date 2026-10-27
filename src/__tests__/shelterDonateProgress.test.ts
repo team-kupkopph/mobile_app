@@ -35,9 +35,9 @@ describe("the shelter Donate tab's need rows (D4)", () => {
     expect(row).toMatch(/style=\{styles\.barTrack\}[^>]*accessible=\{false\}|accessible=\{false\}[^>]*style=\{styles\.barTrack\}/);
   });
 
-  it("matches the artboard: 7 pt, radius 4, the sunken track", () => {
+  it("matches the artboard: 7 pt, fully rounded, the sunken track", () => {
     expect(style("barTrack")).toMatch(/height: 7/);
-    expect(style("barTrack")).toMatch(/borderRadius: 4/);
+    expect(style("barTrack")).toMatch(/borderRadius: pill\(7\)/);
     expect(style("barTrack")).toMatch(/backgroundColor: colors\.segmentTrack/);
   });
 });

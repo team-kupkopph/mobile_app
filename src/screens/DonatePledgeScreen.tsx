@@ -233,6 +233,6 @@ const styles = StyleSheet.create({
   nextRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 12 },
   // A fixed-shape disc (the number does not scale, like the ✓ tile); the step's own text does.
   stepNumberDisc: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
-  stepNumber: { color: colors.tealDark, fontSize: 14, fontWeight: "800" },
+  stepNumber: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },
   nextText: { flex: 1, color: colors.ink, ...typography.body }
 });

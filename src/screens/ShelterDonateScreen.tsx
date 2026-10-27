@@ -23,7 +23,7 @@ import { CHIP_UI_TONE, NeedStatus, needPercent, needProgressFraction, needProgre
 import { RootStackParamList } from "../navigation/types";
 import { donateSections, DonateNeedInput } from "../shelterDonate";
 import { donateChip, OwnQr, qrImageLabel } from "../ownQr";
-import { colors, gradients, maxFontScale, spacing, squircle, typography } from "../theme";
+import { colors, gradients, maxFontScale, pill, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
@@ -275,7 +275,8 @@ const styles = StyleSheet.create({
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   needMeta: { marginTop: 8, color: colors.muted, ...typography.meta },
   barRow: { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 10 },
-  barTrack: { flex: 1, height: 7, borderRadius: 4, backgroundColor: colors.segmentTrack, overflow: "hidden" },
-  barFill: { height: "100%", borderRadius: 4 },
+  // pill(7): the artboard's 4 on a 7 pt bar is the pill rule. The track clips the fill, so the fill needs no radius of its own.
+  barTrack: { flex: 1, height: 7, borderRadius: pill(7), backgroundColor: colors.segmentTrack, overflow: "hidden" },
+  barFill: { height: "100%" },
   barPct: { color: colors.ink, ...typography.meta, fontWeight: "700" }
 });
