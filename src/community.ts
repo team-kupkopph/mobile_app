@@ -137,14 +137,16 @@ export function pledgeSubtitle(
 
 /**
  * What a shelter may do to a need in each state. `fulfilled` keeps `receive` because an
- * over-pledge can still be delivered after the target flips; `closed` is final.
+ * over-pledge can still be delivered after the target flips; `closed` is final. `waiting` is how many
+ * pledges are still `pledged`: on a fulfilled need Mark complete settles them (backend#103), so it is
+ * offered only while there are some — with none it would do nothing.
  */
-export function needActions(status: NeedStatus): { edit: boolean; complete: boolean; receive: boolean } {
+export function needActions(status: NeedStatus, waiting = 0): { edit: boolean; complete: boolean; receive: boolean } {
   switch (status) {
     case "open":
       return { edit: true, complete: true, receive: true };
     case "fulfilled":
-      return { edit: false, complete: false, receive: true };
+      return { edit: false, complete: waiting > 0, receive: true };
     case "closed":
     default:
       return { edit: false, complete: false, receive: false };
@@ -161,10 +163,20 @@ export function awaitingConfirmTag(n: number | null | undefined): string | null 
   return n && n > 0 ? `${n} to confirm` : null;
 }
 
-/** Mark complete's dialog body. The cancel line appears only when open pledges will really be cancelled. */
-export function completeNeedBody(pledgeCount: number | null | undefined): string {
-  const base = "It comes off your wishlist — donors can no longer pledge to it.";
+/**
+ * Mark complete's dialog body. The cancel line appears only when open pledges will really be cancelled. On a fulfilled
+ * need it is already off the wishlist and stays fulfilled; only the pledges still waiting go.
+ */
+export function completeNeedBody(pledgeCount: number | null | undefined, status: NeedStatus = "open"): string {
   const n = pledgeCount ?? 0;
+  if (status === "fulfilled") {
+    const done = "It already has everything it asked for, and stays marked fulfilled.";
+    if (n <= 0) return done;
+    return n === 1
+      ? `${done} 1 pledge still waiting will be cancelled and the donor told.`
+      : `${done} ${n} pledges still waiting will be cancelled and the donors told.`;
+  }
+  const base = "It comes off your wishlist — donors can no longer pledge to it.";
   if (n <= 0) return base;
   return n === 1
     ? `${base} 1 open pledge will be cancelled and the donor told.`
@@ -237,8 +249,8 @@ export function needSaveError(
  * `GET /needs/{id}` request: anything but "ready" (still loading, offline, failed, gone) grants nothing, so a placeholder
  * passed in from the list, or a copy from before a failed refresh, can never drive Edit / Mark complete / Mark received.
  */
-export function liveNeedActions(kind: string, status: NeedStatus): { edit: boolean; complete: boolean; receive: boolean } {
-  return kind === "ready" ? needActions(status) : { edit: false, complete: false, receive: false };
+export function liveNeedActions(kind: string, status: NeedStatus, waiting = 0): { edit: boolean; complete: boolean; receive: boolean } {
+  return kind === "ready" ? needActions(status, waiting) : { edit: false, complete: false, receive: false };
 }
 
 // Clamped 0..1 for a progress bar; a zero/negative target never divides-by-zero.

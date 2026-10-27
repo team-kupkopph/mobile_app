@@ -6,7 +6,7 @@
 // What the shelter may do comes from `needActions(status)`, but only once the need has been read fresh
 // (`liveNeedActions`): a placeholder, or a copy from before a failed refresh, grants nothing. "Mark received" asks for the quantity that
 // ACTUALLY arrived (it can differ from the pledge) in the shared ConfirmModal; "Mark complete" takes the
-// need off the wishlist and cancels what is still pledged.
+// need off the wishlist and cancels what is still pledged — on a fulfilled need, only that cancel (backend#103).
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useState } from "react";
@@ -133,7 +133,10 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
   }
   if (!need) return null;   // unreachable: `ready` implies the need was set. Keeps the types honest.
 
-  const actions = liveNeedActions(needState.kind, need.status);
+  // backend#103 · a fulfilled need's Mark complete settles the pledges still waiting. Counted from the loaded list only, so the
+  // button appears once the shelter can see which pledges those are.
+  const waiting = pledges ? pledges.filter((p) => p.status === "pledged").length : 0;
+  const actions = liveNeedActions(needState.kind, need.status, waiting);
   const stale = needState.kind === "offline" || needState.kind === "error";
   const chip = needStatusChip(need.status);
   const pledgesState = loadState(pledgesRes, pledges?.length);
@@ -224,7 +227,7 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
       <ConfirmModal
         visible={completing}
         title="Mark this need complete?"
-        body={completeNeedBody(openPledges)}
+        body={completeNeedBody(openPledges, need.status)}
         confirmLabel={busy ? "Completing…" : "Mark complete"}
         tone="danger"
         onConfirm={doComplete}

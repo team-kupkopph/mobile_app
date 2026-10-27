@@ -85,10 +85,19 @@ describe("AW10 · NeedPledgesScreen loads the need by id", () => {
   });
 });
 
+describe("backend#103 · Mark complete on a fulfilled need settles the pledges still waiting", () => {
+  it("counts the waiting pledges from the loaded list, and only offers Mark complete once that list has loaded", () => {
+    expect(pledges).toMatch(/const waiting = pledges \? pledges\.filter\(\(p\) => p\.status === "pledged"\)\.length : 0;/);
+  });
+  it("words the dialog for the need's status", () => {
+    expect(pledges).toMatch(/completeNeedBody\(openPledges, need\.status\)/);
+  });
+});
+
 describe("AW11 · actions follow the need's state", () => {
   it("comes from needActions", () => {
     expect(pledges).toMatch(/import \{[^}]*\bliveNeedActions\b[^}]*\} from "\.\.\/community"/);
-    expect(pledges).toMatch(/liveNeedActions\(needState\.kind, need\.status\)/);
+    expect(pledges).toMatch(/liveNeedActions\(needState\.kind, need\.status, waiting\)/);
     expect(pledges).toMatch(/actions\.edit/);
     expect(pledges).toMatch(/actions\.complete/);
     expect(pledges).toMatch(/actions\.receive/);
