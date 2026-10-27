@@ -130,6 +130,14 @@ describe("needActions", () => {
   });
   it("fulfilled: receive only (late deliveries from over-pledges)", () => {
     expect(needActions("fulfilled")).toEqual({ edit: false, complete: false, receive: true });
+    expect(needActions("fulfilled", 0)).toEqual({ edit: false, complete: false, receive: true });
+  });
+  it("fulfilled with pledges still waiting: Mark complete settles them (backend#103)", () => {
+    expect(needActions("fulfilled", 2)).toEqual({ edit: false, complete: true, receive: true });
+  });
+  it("the waiting count changes nothing on an open or closed need", () => {
+    expect(needActions("open", 0)).toEqual({ edit: true, complete: true, receive: true });
+    expect(needActions("closed", 3)).toEqual({ edit: false, complete: false, receive: false });
   });
   it("closed: none", () => {
     expect(needActions("closed")).toEqual({ edit: false, complete: false, receive: false });
@@ -261,6 +269,13 @@ describe("shelter wishlist words (Task 8)", () => {
     expect(completeNeedBody(1)).toBe(`${base} 1 open pledge will be cancelled and the donor told.`);
     expect(completeNeedBody(3)).toBe(`${base} 3 open pledges will be cancelled and the donors told.`);
   });
+
+  it("completeNeedBody on a fulfilled need says it already has everything and only the waiting pledges go", () => {
+    const base = "It already has everything it asked for, and stays marked fulfilled.";
+    expect(completeNeedBody(1, "fulfilled")).toBe(`${base} 1 pledge still waiting will be cancelled and the donor told.`);
+    expect(completeNeedBody(2, "fulfilled")).toBe(`${base} 2 pledges still waiting will be cancelled and the donors told.`);
+    expect(completeNeedBody(0, "fulfilled")).toBe(base);
+  });
 });
 
 describe("needFormErrors (AW20 · each error under its own field)", () => {
@@ -333,10 +348,12 @@ describe("liveNeedActions (a placeholder or a stale need grants nothing)", () =>
     expect(liveNeedActions("ready", "open")).toEqual({ edit: true, complete: true, receive: true });
     expect(liveNeedActions("ready", "fulfilled")).toEqual({ edit: false, complete: false, receive: true });
     expect(liveNeedActions("ready", "closed")).toEqual(none);
+    expect(liveNeedActions("ready", "fulfilled", 1)).toEqual({ edit: false, complete: true, receive: true });
   });
   it.each(["loading", "offline", "error", "gone", "empty"])("grants nothing while the need is %s, whatever the status it last showed", (kind) => {
     expect(liveNeedActions(kind, "open")).toEqual(none);
     expect(liveNeedActions(kind, "fulfilled")).toEqual(none);
+    expect(liveNeedActions(kind, "fulfilled", 2)).toEqual(none);
   });
 });
 
