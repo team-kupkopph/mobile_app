@@ -27,9 +27,10 @@ import { ProfileIcon } from "../components/AppIcons";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { SectionHeader } from "../components/ui";
-import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, StoryRow, StoryRowData, StrayRow, sectionSpacing } from "../components/home/HomeSections";
+import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, ShelterHelpRow, StoryRow, StoryRowData, StrayRow, sectionSpacing } from "../components/home/HomeSections";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
+import { HelpShelter, WAYS_TO_HELP_EMPTY } from "../waysToHelp";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, pill, radii, spacing, squircle, typography } from "../theme";
@@ -38,6 +39,8 @@ import { colors, elevation, pill, radii, spacing, squircle, typography } from ".
 type Props = NativeStackScreenProps<RootStackParamList, "homeGuest">;
 
 const GUEST_CITY = "Marikina";
+// US-W4 · the city the header shows, for Ways to help's near-first order and its "Near {city}" heading.
+const GUEST_HELP_CITY = `${GUEST_CITY} City`;
 
 type WallState = { action: SignupWallAction; subject?: string } | null;
 
@@ -55,17 +58,23 @@ export function HomeGuestScreen({ navigation }: Props) {
   const [storiesRes, setStoriesRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [rescues, setRescues] = useState<MapReport[]>([]);
   const [rescuesRes, setRescuesRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [helpers, setHelpers] = useState<HelpShelter[]>([]);
+  const [helpRes, setHelpRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [wall, setWall] = useState<WallState>(null);
 
-  // ⚠️ THE SAME THREE SECTIONS THE SIGNED-IN HOME SHOWS, from the same three endpoints — all
-  // three are AllowAny on GET. For two sprints the guest Home showed one of them, drawn the V1
+  // ⚠️ THE SAME SECTIONS THE SIGNED-IN HOME SHOWS (four, with US-W4's Ways to help), from the same endpoints — all
+  // AllowAny on GET. For two sprints the guest Home showed one of them, drawn the V1
   // way, and a "See nearby strays" row the signed-in Home had already replaced with the
   // "Nearby rescues" section. HomeSections.tsx says why that is not allowed to happen again.
   const load = useCallback(() => {
-    setListingsRes(null); setStoriesRes(null); setRescuesRes(null);
+    setListingsRes(null); setStoriesRes(null); setRescuesRes(null); setHelpRes(null);
     api.get(`/listings?city=${GUEST_CITY}`).then((r) => {
       setListingsRes({ ok: r.ok, status: r.status });
       if (r.ok) setListings((r.data?.results ?? []).slice(0, 5));
+    });
+    api.get(`/shelters/ways-to-help?city=${encodeURIComponent(GUEST_HELP_CITY)}`).then((r) => {
+      setHelpRes({ ok: r.ok, status: r.status });
+      if (r.ok) setHelpers((r.data?.results ?? []).slice(0, 3));
     });
     api.get("/stories").then((r) => {
       setStoriesRes({ ok: r.ok, status: r.status });
@@ -97,6 +106,7 @@ export function HomeGuestScreen({ navigation }: Props) {
   const listingsPanel = loadState(listingsRes, listings.length);
   const storiesPanel = loadState(storiesRes, stories.length);
   const rescuesPanel = loadState(rescuesRes, rescues.length);
+  const helpPanel = loadState(helpRes, helpers.length);
 
   return (
     <View style={styles.screen} testID="screen.homeGuest">
@@ -163,6 +173,25 @@ export function HomeGuestScreen({ navigation }: Props) {
             testID={`card.homeGuest.listing.${i}`}
             listing={listing}
             onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
+          />
+        ))}
+
+        {/* US-W4 · Ways to help — verified shelters asking for help, Marikina first. Open to guests (the Donate screen walls a pledge). */}
+        <SectionHeader
+          title="Ways to help"
+          actionLabel="See all ›"
+          onPress={() => navigation.navigate("waysToHelp", { city: GUEST_HELP_CITY })}
+          style={sectionSpacing.next}
+        />
+        {helpPanel.kind !== "ready" && helpPanel.kind !== "empty" ? (
+          <LoadStateView state={helpPanel} onRetry={load} />
+        ) : helpPanel.kind === "empty" ? (
+          <EmptyNote>{WAYS_TO_HELP_EMPTY}</EmptyNote>
+        ) : helpers.map((s) => (
+          <ShelterHelpRow
+            key={s.account_id}
+            shelter={s}
+            onPress={() => navigation.navigate("donate", { accountId: s.account_id, orgName: s.org_name, city: s.city })}
           />
         ))}
 

@@ -64,7 +64,8 @@ const CONVERTED = [
   "RescueUpdateScreen.tsx",
   "ShelterContactScreen.tsx",
   "SigninScreen.tsx",
-  "WaiverScreen.tsx"
+  "WaiverScreen.tsx",
+  "WaysToHelpScreen.tsx"
 ];
 
 describe("design system · converted screens stay converted", () => {

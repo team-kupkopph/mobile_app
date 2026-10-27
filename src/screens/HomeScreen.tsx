@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { Card, PressScale, SectionHeader } from "../components/ui";
-import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, StoryRow, StrayRow, sectionSpacing } from "../components/home/HomeSections";
+import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, ShelterHelpRow, StoryRow, StrayRow, sectionSpacing } from "../components/home/HomeSections";
 import type { StoryCard } from "./StoriesScreen";
 import { loadState } from "../net";
 import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
@@ -26,6 +26,7 @@ import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { RootStackParamList } from "../navigation/types";
 import { pickSpotlight } from "../sagip";
 import { MySignupItem, shiftHeadline, shiftTimeRange, todayShift } from "../volunteer";
+import { HelpShelter, WAYS_TO_HELP_EMPTY } from "../waysToHelp";
 
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { useLargeText } from "../useLargeText";
@@ -64,6 +65,8 @@ export function HomeScreen({ navigation, route }: Props) {
   const [hasUnread, setHasUnread] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [rescues, setRescues] = useState<MapReport[]>([]);
+  // US-W4 · verified shelters asking for help, the viewer's city first (three on Home; See all for the rest).
+  const [helpers, setHelpers] = useState<HelpShelter[]>([]);
   // US-X1 redesign · the spotlight's two sources. They are deliberately NOT tracked with a
   // `{ ok, status }` the way the two panels below are: the spotlight makes no statement when
   // it has nothing, so a failed fetch and an empty account both land on `null` and render
@@ -87,6 +90,7 @@ export function HomeScreen({ navigation, route }: Props) {
   // time, on a screen far more people see.
   const [listingsRes, setListingsRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [rescuesRes, setRescuesRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const [helpRes, setHelpRes] = useState<{ ok: boolean; status: number } | null>(null);
   // US-T2 · the stories row used to be a bare link with nothing under it, while both of its
   // sibling sections showed content. It now asks, so it can say "No stories yet" when that is
   // true — which a link row can never do.
@@ -167,6 +171,11 @@ export function HomeScreen({ navigation, route }: Props) {
         setListingsRes({ ok: r.ok, status: r.status });
         if (r.ok) setListings((r.data?.results ?? []).slice(0, 5));
       });
+      // US-W4 · Ways to help — page 1 of the shelters asking for help, near first; the slice is the limit (as above).
+      api.get(`/shelters/ways-to-help?city=${encodeURIComponent(city ?? "")}`).then((r) => {
+        setHelpRes({ ok: r.ok, status: r.status });
+        if (r.ok) setHelpers((r.data?.results ?? []).slice(0, 3));
+      });
       // Nearby rescues — first 2 reported strays near the user's city.
       const rescueCity = city ?? "Marikina";
       api.get(`/reports/map?city=${encodeURIComponent(rescueCity)}&status=reported`).then((r) => {
@@ -207,6 +216,7 @@ export function HomeScreen({ navigation, route }: Props) {
   const listingsPanel = loadState(listingsRes, listings.length);
   const rescuesPanel = loadState(rescuesRes, rescues.length);
   const storiesPanel = loadState(storiesRes, stories.length);
+  const helpPanel = loadState(helpRes, helpers.length);
 
   /**
    * ⚠️ ONE NOTICE, NOT THREE. US-R2's per-panel rule exists for panels that DISAGREE — the
@@ -218,7 +228,7 @@ export function HomeScreen({ navigation, route }: Props) {
    * no connection at all, and the trail pills navigate. Only the three data sections — which
    * genuinely have nothing to show — collapse into the single notice.
    */
-  const dataPanels = [listingsPanel, storiesPanel, rescuesPanel];
+  const dataPanels = [listingsPanel, helpPanel, storiesPanel, rescuesPanel];
   const allOffline = dataPanels.every((panel) => panel.kind === "offline");
 
   // US-A1b resume: SignupSuccessScreen's "Start exploring" resets to Home with
@@ -417,6 +427,26 @@ export function HomeScreen({ navigation, route }: Props) {
             key={listing.listing_id}
             listing={listing}
             onPress={() => navigation.navigate("listingDetail", { listingId: listing.listing_id })}
+          />
+        ))}
+
+        {/* US-W4 · Ways to help — the generic donate landing the 2026-09-09 redesign found missing (header comment). */}
+        <SectionHeader
+          title="Ways to help"
+          actionLabel="See all ›"
+          onPress={() => navigation.navigate("waysToHelp")}
+          style={sectionSpacing.next}
+        />
+
+        {helpPanel.kind !== "ready" && helpPanel.kind !== "empty" ? (
+          <LoadStateView state={helpPanel} onRetry={loadCityPanels} />
+        ) : helpPanel.kind === "empty" ? (
+          <EmptyNote>{WAYS_TO_HELP_EMPTY}</EmptyNote>
+        ) : helpers.map((s) => (
+          <ShelterHelpRow
+            key={s.account_id}
+            shelter={s}
+            onPress={() => navigation.navigate("donate", { accountId: s.account_id, orgName: s.org_name, city: s.city })}
           />
         ))}
 

@@ -26,6 +26,7 @@ import { TAP_SLOP } from "../../touch";
 import { useLargeText } from "../../useLargeText";
 import { Avatar } from "../ui";
 import { listingTitle } from "../../shelterAnimals";
+import { HelpShelter, helpRowMeta } from "../../waysToHelp";
 
 const paw = require("../../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -102,6 +103,21 @@ export function ReportStrayCard({ onPress, testID }: { onPress: () => void; test
       </View>
       <Image source={paw} resizeMode="contain" style={[styles.reportPaw, large && styles.reportPawLarge]} />
     </LinearGradient>
+  );
+}
+
+/** US-W4 · a shelter asking for help, on Home's "Ways to help" section — ListingRow's layout, with the org's initials. */
+export function ShelterHelpRow({ shelter, onPress }: { shelter: HelpShelter; onPress: () => void }) {
+  const large = useLargeText();
+  return (
+    <TouchableOpacity activeOpacity={0.75} style={[styles.row, large && styles.rowLarge]} onPress={onPress}
+      accessibilityRole="button" accessibilityLabel={`${shelter.org_name}, ${helpRowMeta(shelter)}`}>
+      <Avatar initials={shelter.org_name} tinted size={52} />
+      <View style={[styles.copy, large && styles.copyLarge]}>
+        <Text style={styles.name}>{shelter.org_name}</Text>
+        <Text style={styles.details}>{helpRowMeta(shelter)}</Text>
+      </View>
+    </TouchableOpacity>
   );
 }
 
