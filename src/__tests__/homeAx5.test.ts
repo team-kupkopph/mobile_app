@@ -65,8 +65,8 @@ describe("the shared Home rows and chips grow with their text", () => {
 
 describe("the shared Home rows stack at a large font scale", () => {
   const rowUses = [...sections.matchAll(/style=\{\[styles\.row[^\]]*\]\}|style=\{styles\.row\}/g)].map((m) => m[0]);
-  it("found the three row components", () => {
-    expect(rowUses.length).toBe(3);
+  it("found the four row components (+ ShelterHelpRow, US-W4 Ways to help)", () => {
+    expect(rowUses.length).toBe(4);
   });
   it("each row component reads useLargeText and applies rowLarge", () => {
     for (const u of rowUses) expect(u).toMatch(/large && styles\.rowLarge/);

@@ -115,6 +115,9 @@ const KAWANG_GAWA_V3 = [
 /** Adoption poster loop (plan 2026-10-06) — V3 from birth. */
 const ADOPTION_POSTER = ["ApplicantScreen", "MyListingsScreen", "PetFormScreen", "PosterListingScreen"] as const;   // PetFormScreen: AQ8
 
+/** US-W4 · Ways to help (design 2026-10-27) — V3 from birth. */
+const WAYS_TO_HELP = ["WaysToHelpScreen"] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -125,7 +128,9 @@ export const V3_SCOPE: readonly string[] = [
   ...SAGIP_RESCUER,
   ...KAWANG_GAWA_V3,
   // Adoption poster loop (plan 2026-10-06) — V3 from birth.
-  ...ADOPTION_POSTER
+  ...ADOPTION_POSTER,
+  // US-W4 · Ways to help — V3 from birth.
+  ...WAYS_TO_HELP
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */
