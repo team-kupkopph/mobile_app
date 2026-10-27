@@ -26,8 +26,6 @@ import { donateChip, OwnQr, qrImageLabel } from "../ownQr";
 import { colors, gradients, maxFontScale, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
-/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterDonate">;

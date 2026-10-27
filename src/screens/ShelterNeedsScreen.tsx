@@ -17,8 +17,6 @@ import { colors, dangerOnSurface, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 
-/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-
 // The owner's list row (GET /shelters/{me}/needs): every status, with the counts the screens used to fan out for.
 type Need = {
   need_id: string; title: string; category: string; description: string;

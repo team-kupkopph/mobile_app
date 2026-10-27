@@ -27,8 +27,6 @@ import { RootStackParamList, ShelterNeedShape } from "../navigation/types";
 import { colors, dangerOnSurface, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
-/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-
 type Pledge = {
   pledge_id: string; quantity: number; status: PledgeStatus; pledger_name: string;
   created_at?: string; note?: string | null; quantity_received?: number | null;

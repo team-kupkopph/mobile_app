@@ -54,6 +54,18 @@ export function needStatusChip(status: NeedStatus): { label: string; tone: ChipT
   }
 }
 
+/** D2 · on a still-pledged card in My donations: why it still says Pledged after a drop-off. */
+export const PLEDGE_DELIVERY_HINT = "Deliver, then the shelter confirms";
+
+/**
+ * D3 · the body of the Cancel pledge modal — the wireframe's, kept true to the app: cancelling notifies the
+ * shelter (`pledge_cancelled`) and does not reopen anything (the need was open all along).
+ */
+export function cancelPledgeBody(shelterName: string, quantity: string, needTitle: string): string {
+  return `${shelterName} is expecting ${quantity} for “${needTitle}”. Cancelling tells them not to expect it. ` +
+    "No penalty — just pledge what you can deliver.";
+}
+
 // A cancel is honest and always allowed while pledged (D-S6-7); a delivered pledge is a
 // recorded fact and shows no action.
 export function pledgeIsCancellable(status: PledgeStatus): boolean {
