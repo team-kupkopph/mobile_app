@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+
 import {
   appendNeedsPage, awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
   liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
@@ -376,8 +378,6 @@ describe("CHIP_UI_TONE (D5)", () => {
     expect(CHIP_UI_TONE).toEqual({ ok: "success", warn: "warning", muted: "neutral", teal: "info" });
   });
   it("is the one map: no wishlist screen keeps its own copy", () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { readFileSync } = require("fs") as typeof import("fs");
     const screens = ["ShelterNeedsScreen", "NeedPledgesScreen", "ShelterDonateScreen", "MyDonationsScreen"];
     for (const name of screens) {
       const src = readFileSync(`${__dirname}/../screens/${name}.tsx`, "utf8");
