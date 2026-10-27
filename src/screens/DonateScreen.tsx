@@ -16,12 +16,12 @@ import { loadState } from "../net";
 import { qrImageLabel } from "../ownQr";
 import { saveQrImage } from "../saveQr";
 import { donateLoadState } from "../donateState";
-import { needCategoryLabel, needProgressFraction, needProgressLabel, quantityLabel } from "../community";
+import { appendNeedsPage, needCategoryLabel, needProgressFraction, needProgressLabel, quantityLabel } from "../community";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { RootStackParamList } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { colors, maxFontScale, pill, radii, spacing, typography } from "../theme";
-import { Avatar, Card, ScreenHeader } from "../components/ui";
+import { Avatar, Button, Card, ScreenHeader } from "../components/ui";
 
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
@@ -83,17 +83,38 @@ export function DonateScreen({ navigation, route }: Props) {
   // AW14a · the wishlist's own result, so a failed request says so (offline / error + retry) instead of the
   // section quietly not being there.
   const [needsRes, setNeedsRes] = useState<{ ok: boolean; status: number } | null>(null);
+  // DW-N4 · the list is 20 a page, newest first; `next` is the next page number, or null on the last. Without it a
+  // donor never saw a shelter's 21st open need.
+  const [next, setNext] = useState<number | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreFailed, setMoreFailed] = useState(false);
 
   // US-W2 · the shelter's open wishlist, shown beside the QR block (both live on Donate). Refetched on focus
-  // (AW13): coming back from a pledge shows the new progress and "You pledged …".
+  // (AW13): coming back from a pledge shows the new progress and "You pledged …". A refetch starts again at page 1,
+  // as the shelter's own list does: a later page kept from before would show stale "You pledged" lines.
   const loadNeeds = useCallback(() => {
     api.get(`/shelters/${accountId}/needs?status=open`).then((r) => {
       setNeedsRes({ ok: r.ok, status: r.status });
-      if (r.ok) setNeeds(r.data.results);
+      if (r.ok) {
+        setNeeds(r.data.results);
+        setNext(r.data.next ?? null);
+        setMoreFailed(false);
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- api changes with the tokens, which also change what comes back
   }, [accountId, api]);
   useFocusEffect(loadNeeds);
+
+  async function loadMore() {
+    if (next === null || loadingMore) return;
+    setLoadingMore(true);
+    setMoreFailed(false);
+    const r = await api.get(`/shelters/${accountId}/needs?status=open&page=${next}`);
+    setLoadingMore(false);
+    if (!r.ok) { setMoreFailed(true); return; }
+    setNeeds((prev) => appendNeedsPage(prev, r.data.results));
+    setNext(r.data.next ?? null);
+  }
 
   // AT14 · a guest may open Donate (public), but "My donations" is the pledger's own list (401 for a guest): the wall, not a dead-end error.
   const { tokens } = useAuth();
@@ -197,6 +218,12 @@ export function DonateScreen({ navigation, route }: Props) {
                 </TouchableOpacity>
               </Card>
             ))}
+            {next !== null ? (
+              <>
+                {moreFailed ? <Text style={styles.moreError} accessibilityRole="alert">Couldn't load more. Try again.</Text> : null}
+                <Button label="Load more" variant="secondary" onPress={loadMore} loading={loadingMore} style={styles.loadMore} />
+              </>
+            ) : null}
           </View>
         ) : null}
 
@@ -251,6 +278,8 @@ const styles = StyleSheet.create({
   needMeta: { marginTop: 6, color: colors.muted, ...typography.meta },
   pledgeBtn: { marginTop: 14, alignSelf: "flex-start", minHeight: 38, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.teal },
   pledgeLabel: { color: colors.white, ...typography.strong, fontWeight: "700" },
+  loadMore: { marginTop: 4 },
+  moreError: { marginBottom: 10, color: colors.danger, ...typography.meta, fontWeight: "600", textAlign: "center" },
   myDonationsRow: { marginTop: 26, alignItems: "center" },
   myDonationsLabel: { color: colors.teal, ...typography.subtitle, fontWeight: "700" }
 });

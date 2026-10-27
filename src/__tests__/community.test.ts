@@ -1,5 +1,5 @@
 import {
-  awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
+  appendNeedsPage, awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
   liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
   cancelRefusedCopy, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
   pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip, withoutError
@@ -337,5 +337,18 @@ describe("liveNeedActions (a placeholder or a stale need grants nothing)", () =>
   it.each(["loading", "offline", "error", "gone", "empty"])("grants nothing while the need is %s, whatever the status it last showed", (kind) => {
     expect(liveNeedActions(kind, "open")).toEqual(none);
     expect(liveNeedActions(kind, "fulfilled")).toEqual(none);
+  });
+});
+
+describe("appendNeedsPage (DW-N4 · the donor wishlist's Load more)", () => {
+  const n = (id: string) => ({ need_id: id, title: id });
+  it("appends the next page after the rows already shown", () => {
+    expect(appendNeedsPage([n("a"), n("b")], [n("c")]).map((x) => x.need_id)).toEqual(["a", "b", "c"]);
+  });
+  it("drops a row the first page already showed (a need posted between the fetches shifts the pages)", () => {
+    expect(appendNeedsPage([n("a"), n("b")], [n("b"), n("c")]).map((x) => x.need_id)).toEqual(["a", "b", "c"]);
+  });
+  it("starts from nothing when nothing is shown yet", () => {
+    expect(appendNeedsPage(null, [n("a")]).map((x) => x.need_id)).toEqual(["a"]);
   });
 });
