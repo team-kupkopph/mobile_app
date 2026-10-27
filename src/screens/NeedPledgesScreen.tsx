@@ -14,7 +14,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import {
-  ChipTone, completeNeedBody, liveNeedActions, needActionErrorCopy, needCategoryLabel, needProgressLabel,
+  CHIP_UI_TONE, completeNeedBody, liveNeedActions, needActionErrorCopy, needCategoryLabel, needProgressLabel,
   needStatusChip, pledgeStatusChip, pledgeWhen, quantityLabel, receivedPreview, CancelReason, PledgeStatus
 } from "../community";
 import { ConfirmModal } from "../components/ConfirmModal";
@@ -26,13 +26,6 @@ import { loadState } from "../net";
 import { RootStackParamList, ShelterNeedShape } from "../navigation/types";
 import { colors, dangerOnSurface, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
-
-/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
-  ok: "success",
-  warn: "warning",
-  muted: "neutral"
-};
 
 type Pledge = {
   pledge_id: string; quantity: number; status: PledgeStatus; pledger_name: string;
@@ -154,7 +147,7 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
             <Text style={styles.progress}>
               {needProgressLabel(need.quantity_received, need.quantity_needed, unit, need.quantity_pledged)}
             </Text>
-            <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
+            <Chip tone={CHIP_UI_TONE[chip.tone]} dot={false} label={chip.label} />
           </View>
           <Text style={styles.meta}>{needCategoryLabel(need.category)}</Text>
           {need.description ? <Text style={styles.description}>{need.description}</Text> : null}
@@ -195,7 +188,7 @@ export function NeedPledgesScreen({ navigation, route }: Props) {
               <Card key={p.pledge_id} style={styles.pledgeCard}>
                 <View style={[styles.row, large && styles.rowLarge]}>
                   <Text style={[styles.pledger, large && styles.pledgerLarge]}>{p.pledger_name}</Text>
-                  <Chip tone={CHIP_TONE[pChip.tone]} dot={false} label={pChip.label} />
+                  <Chip tone={CHIP_UI_TONE[pChip.tone]} dot={false} label={pChip.label} />
                 </View>
                 <Text style={styles.meta}>{when ? `${head} · ${when}` : head}</Text>
                 {p.note ? <Text style={styles.note}>“{p.note}”</Text> : null}

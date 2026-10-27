@@ -1,7 +1,9 @@
+import { readFileSync } from "fs";
+
 import {
   appendNeedsPage, awaitingConfirmTag, completeNeedBody, INSTRUCTIONS_MAX, NEED_DETAILS_MAX, NEED_TITLE_MAX, NEED_UNIT_MAX, needFormErrors, needSaveError,
   liveNeedActions, needActionErrorCopy, pledgeCountLabel, impactTiles, matchReasons, matchStrength, MAX_QTY, needActions, needProgressFraction,
-  cancelRefusedCopy, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
+  CHIP_UI_TONE, cancelPledgeBody, pledgeNextSteps, cancelRefusedCopy, needPercent, PLEDGE_DELIVERY_HINT, needProgressLabel, needStatusChip, overPledgeWarning, pledgeErrorCopy, pledgeIsCancellable,
   pledgeStatusChip, pledgeSubtitle, pledgeWhen, quantityLabel, receivedPreview, remainingAfter, storyTypeChip, withoutError
 } from "../community";
 
@@ -154,8 +156,9 @@ describe("receivedPreview", () => {
 });
 
 describe("needStatusChip", () => {
-  it("maps need status: open=amber, fulfilled=green, closed=grey", () => {
-    expect(needStatusChip("open").tone).toBe("warn");
+  // D5 (owner, 2026-10-27) · an open need is teal: on the wishlist amber means "act on this" (Pledged, "N to confirm").
+  it("maps need status: open=teal, fulfilled=green, closed=grey", () => {
+    expect(needStatusChip("open")).toEqual({ label: "Open", tone: "teal" });
     expect(needStatusChip("fulfilled").tone).toBe("ok");
     expect(needStatusChip("closed").tone).toBe("muted");
   });
@@ -367,5 +370,64 @@ describe("appendNeedsPage (DW-N4 · the donor wishlist's Load more)", () => {
   });
   it("starts from nothing when nothing is shown yet", () => {
     expect(appendNeedsPage(null, [n("a")]).map((x) => x.need_id)).toEqual(["a"]);
+  });
+});
+
+describe("CHIP_UI_TONE (D5)", () => {
+  it("draws an open need with the shared teal `info` tone, and the rest as before", () => {
+    expect(CHIP_UI_TONE).toEqual({ ok: "success", warn: "warning", muted: "neutral", teal: "info" });
+  });
+  it("is the one map: no wishlist screen keeps its own copy", () => {
+    const screens = ["ShelterNeedsScreen", "NeedPledgesScreen", "ShelterDonateScreen", "MyDonationsScreen"];
+    for (const name of screens) {
+      const src = readFileSync(`${__dirname}/../screens/${name}.tsx`, "utf8");
+      expect(src).toMatch(/CHIP_UI_TONE\[/);
+      expect(src).not.toMatch(/const CHIP_TONE\b/);
+    }
+  });
+});
+
+describe("needPercent (D4)", () => {
+  it("rounds the received share of the target, like the artboard (5 of 8 → 63)", () => {
+    expect(needPercent(5, 8)).toBe(63);
+    expect(needPercent(3, 10)).toBe(30);
+  });
+  it("reads 100 only once the target is met, and never more", () => {
+    expect(needPercent(8, 8)).toBe(100);
+    expect(needPercent(9, 8)).toBe(100);
+    expect(needPercent(199, 200)).toBe(99);
+  });
+  it("reads 0 only when nothing has arrived", () => {
+    expect(needPercent(0, 8)).toBe(0);
+    expect(needPercent(1, 1000)).toBe(1);
+  });
+  it("a zero or negative target is 0, not a division by zero", () => {
+    expect(needPercent(3, 0)).toBe(0);
+    expect(needPercent(3, -1)).toBe(0);
+  });
+});
+
+describe("cancelPledgeBody (D3)", () => {
+  it("names the shelter, what they expect and the need, and says there is no penalty", () => {
+    expect(cancelPledgeBody("PAWS Manila", "10 kg", "Dog food")).toBe(
+      "PAWS Manila is expecting 10 kg for “Dog food”. Cancelling tells them not to expect it. " +
+      "No penalty — just pledge what you can deliver."
+    );
+  });
+});
+
+describe("PLEDGE_DELIVERY_HINT (D2)", () => {
+  it("is the wireframe's line", () => {
+    expect(PLEDGE_DELIVERY_HINT).toBe("Deliver, then the shelter confirms");
+  });
+});
+
+describe("pledgeNextSteps (D1)", () => {
+  it("is the wireframe's three steps, naming the shelter", () => {
+    expect(pledgeNextSteps("PAWS Manila")).toEqual([
+      "Deliver or drop it off at the shelter",
+      "PAWS Manila marks it received",
+      "It counts toward the need, and you get a notification"
+    ]);
   });
 });

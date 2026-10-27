@@ -10,11 +10,12 @@ import {
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import {
-  cancelRefusedCopy,
-  CancelReason, ChipTone, pledgeIsCancellable, pledgeStatusChip, PledgeStatus, pledgeSubtitle, quantityLabel
+  cancelPledgeBody, cancelRefusedCopy,
+  CancelReason, CHIP_UI_TONE, PLEDGE_DELIVERY_HINT, pledgeIsCancellable, pledgeStatusChip, PledgeStatus, pledgeSubtitle, quantityLabel
 } from "../community";
 import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
@@ -24,13 +25,6 @@ import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, pill, spacing, typography } from "../theme";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
-
-/** Maps community.ts's own tone vocabulary onto the shared Chip primitive's tones. */
-const CHIP_TONE: Record<ChipTone, "success" | "warning" | "neutral"> = {
-  ok: "success",
-  warn: "warning",
-  muted: "neutral"
-};
 
 type Pledge = {
   pledge_id: string; quantity: number; status: PledgeStatus;
@@ -55,6 +49,8 @@ export function MyDonationsScreen({ navigation }: Props) {
   const [loadingMore, setLoadingMore] = useState(false);
   // B4 · why a card changed under the donor: their cancel found the pledge already settled (or gone). Cleared by the next action.
   const [notice, setNotice] = useState<string | null>(null);
+  // D3 · the pledge whose Cancel pledge modal is open.
+  const [cancelTarget, setCancelTarget] = useState<Pledge | null>(null);
 
   // Page 1, replacing the list. Run on focus (AW13), so a pledge the shelter settled, or one made on the way
   // here, is what you see. It does not blank the list first: only the first load shows the spinner.
@@ -84,13 +80,10 @@ export function MyDonationsScreen({ navigation }: Props) {
     }
   }
 
+  // D3 (owner, 2026-10-27) · asks in the shared ConfirmModal, like Mark received and Mark complete.
   function confirmCancel(p: Pledge) {
     setNotice(null);
-    Alert.alert("Cancel this pledge?",
-      `You pledged ${quantityLabel(p.quantity, p.need.unit)} to “${p.need.title}”. Cancelling is fine — it just lets the ` +
-      "shelter know not to expect it.",
-      [{ text: "Keep pledge", style: "cancel" },
-       { text: "Cancel pledge", style: "destructive", onPress: () => doCancel(p) }]);
+    setCancelTarget(p);
   }
 
   async function doCancel(p: Pledge) {
@@ -136,17 +129,21 @@ export function MyDonationsScreen({ navigation }: Props) {
                 <Card key={p.pledge_id} style={styles.pledgeCard}>
                   <View style={[styles.row, large && styles.rowLarge]}>
                     <Text style={[styles.needTitle, large && styles.needTitleLarge]} maxFontSizeMultiplier={maxFontScale.title}>{p.need.title}</Text>
-                    <Chip tone={CHIP_TONE[chip.tone]} dot={false} label={chip.label} />
+                    <Chip tone={CHIP_UI_TONE[chip.tone]} dot={false} label={chip.label} />
                   </View>
                   <Text style={styles.qtyLine}>{quantityLabel(p.quantity, p.need.unit)}</Text>
                   <Text style={styles.meta}>{pledgeSubtitle(p.need.shelter_name, p.decided_at, p.created_at)}</Text>
                   {pledgeIsCancellable(p.status) ? (
+                    <>
+                    {/* D2 (owner, 2026-10-27) · why it still says Pledged after a drop-off. */}
+                    <Text style={styles.hint}>{PLEDGE_DELIVERY_HINT}</Text>
                     <TouchableOpacity hitSlop={TAP_SLOP} style={styles.cancelBtn} onPress={() => confirmCancel(p)}
                       disabled={busyId === p.pledge_id}>
                       <Text style={styles.cancelLabel}>
                         {busyId === p.pledge_id ? "Cancelling…" : "Cancel pledge"}
                       </Text>
                     </TouchableOpacity>
+                    </>
                   ) : null}
                 </Card>
               );
@@ -159,6 +156,17 @@ export function MyDonationsScreen({ navigation }: Props) {
         {/* DW4 / OQ6 · a gift sent by QR leaves no record here. Said in both the empty and the list state, so a donor who gave by QR is not left wondering. */}
         <Text style={styles.qrNote}>Gifts you send by QR go straight to the shelter and don't appear here.</Text>
       </ScrollView>
+      <ConfirmModal
+        visible={cancelTarget !== null}
+        title="Cancel this pledge?"
+        body={cancelTarget ? cancelPledgeBody(cancelTarget.need.shelter_name,
+          quantityLabel(cancelTarget.quantity, cancelTarget.need.unit), cancelTarget.need.title) : ""}
+        confirmLabel="Yes, cancel pledge"
+        tone="danger"
+        onConfirm={() => { const p = cancelTarget; setCancelTarget(null); if (p) doCancel(p); }}
+        cancelLabel="Keep pledge"
+        onCancel={() => setCancelTarget(null)}
+      />
       <SignupWall
         visible={wallOpen}
         action="donate"
@@ -182,6 +190,7 @@ const styles = StyleSheet.create({
   needTitle: { flex: 1, color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   qtyLine: { marginTop: 8, color: colors.ink, ...typography.strong, fontWeight: "700" },
   meta: { marginTop: 4, color: colors.muted, ...typography.body },
+  hint: { marginTop: 10, color: colors.muted, ...typography.meta, lineHeight: 20 },
   loadMore: { marginTop: 4 },
   notice: { marginBottom: 12, color: colors.ink, ...typography.meta, lineHeight: 20 },
   guestBtn: { marginTop: 24 },

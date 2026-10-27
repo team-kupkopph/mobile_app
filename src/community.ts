@@ -5,8 +5,18 @@ export type PledgeStatus = "pledged" | "delivered" | "cancelled";
 export type NeedStatus = "open" | "fulfilled" | "closed";
 
 // Status chips follow the shared mapping (ui-ux-pro-max): green = delivered/done,
-// amber = pledged/open (still needs action), grey = cancelled/closed.
-export type ChipTone = "ok" | "warn" | "muted";
+// amber = pledged (still needs action), grey = cancelled/closed. D5 (owner, 2026-10-27): an
+// open need is teal, so on the wishlist amber means "act on this" (Pledged, the shelter's
+// "N to confirm") rather than every open need. Wishlist only — elsewhere Open stays amber.
+export type ChipTone = "ok" | "warn" | "muted" | "teal";
+
+/** The shared `Chip` tone each wishlist tone draws with. One map, not a copy per screen. */
+export const CHIP_UI_TONE: Record<ChipTone, "success" | "warning" | "neutral" | "info"> = {
+  ok: "success",
+  warn: "warning",
+  muted: "neutral",
+  teal: "info"
+};
 
 export type CancelReason = "donor" | "need_closed";
 
@@ -40,8 +50,29 @@ export function needStatusChip(status: NeedStatus): { label: string; tone: ChipT
       return { label: "Closed", tone: "muted" };
     case "open":
     default:
-      return { label: "Open", tone: "warn" };
+      return { label: "Open", tone: "teal" };
   }
+}
+
+/** D1 · the "What happens next" strip on Pledge recorded (`screen-donate-pledged`), naming the shelter. */
+export function pledgeNextSteps(shelterName: string): string[] {
+  return [
+    "Deliver or drop it off at the shelter",
+    `${shelterName} marks it received`,
+    "It counts toward the need, and you get a notification"
+  ];
+}
+
+/** D2 · on a still-pledged card in My donations: why it still says Pledged after a drop-off. */
+export const PLEDGE_DELIVERY_HINT = "Deliver, then the shelter confirms";
+
+/**
+ * D3 · the body of the Cancel pledge modal — the wireframe's, kept true to the app: cancelling notifies the
+ * shelter (`pledge_cancelled`) and does not reopen anything (the need was open all along).
+ */
+export function cancelPledgeBody(shelterName: string, quantity: string, needTitle: string): string {
+  return `${shelterName} is expecting ${quantity} for “${needTitle}”. Cancelling tells them not to expect it. ` +
+    "No penalty — just pledge what you can deliver.";
 }
 
 // A cancel is honest and always allowed while pledged (D-S6-7); a delivered pledge is a
@@ -257,6 +288,16 @@ export function liveNeedActions(kind: string, status: NeedStatus, waiting = 0): 
 export function needProgressFraction(received: number, needed: number): number {
   if (needed <= 0) return 0;
   return Math.max(0, Math.min(1, received / needed));
+}
+
+/**
+ * D4 · the percentage beside a need's progress bar. Rounded like the artboard (5 of 8 → 63), but honest at the
+ * ends: 100 only once the target is met (199 of 200 reads 99) and 0 only when nothing has arrived (1 of 1000 reads 1).
+ */
+export function needPercent(received: number, needed: number): number {
+  if (needed <= 0 || received <= 0) return 0;
+  if (received >= needed) return 100;
+  return Math.min(99, Math.max(1, Math.round((received / needed) * 100)));
 }
 
 // DW-N4 · the donor wishlist's Load more. Pages are newest first, so a need posted between two fetches pushes a row

@@ -45,6 +45,11 @@ type ButtonProps = {
 
 const HEIGHT = 54;
 const SMALL_HEIGHT = 38;
+/**
+ * D6 (owner, 2026-10-27) · the small button keeps its 38 pt look and reaches the 44 pt target through slop.
+ * Only 3 pt a side: small buttons sit in rows, and wider slop would overlap a neighbour's (see `touch.ts`).
+ */
+const SMALL_SLOP = { top: 3, bottom: 3, left: 0, right: 0 } as const;
 
 export function Button({ label, onPress, variant = "primary", size = "regular", loading, style, accessibilityLabel, accessibilityHint, testID }: ButtonProps) {
   const small = size === "small";
@@ -72,6 +77,7 @@ export function Button({ label, onPress, variant = "primary", size = "regular", 
       accessibilityHint={accessibilityHint}
       accessibilityState={{ busy: !!loading }}
       testID={testID}
+      hitSlop={small ? SMALL_SLOP : undefined}
       style={[styles.wrap, variant === "primary" && elevation.cta, small && styles.smallWrap, style]}
     >
       {variant === "primary" ? (

@@ -136,3 +136,27 @@ describe("every text-only control declares a 44 pt target", () => {
     expect(offenders(file)).toBe(0);
   });
 });
+
+/**
+ * D6 (owner, 2026-10-27) · the shared small `Button` is 38 pt tall — the canvas's "Label, small button" — and
+ * Run 3 measured Edit, Mark complete and Mark received at 38 pt with no slop. The scan above never sees them: a
+ * `Button` is not a bare <Text> in a touchable. The look stays; the tap area reaches 44 through `hitSlop`.
+ */
+describe("the small Button reaches a 44 pt target", () => {
+  const button = stripComments(readFileSync(join(SRC, "components", "ui", "Button.tsx"), "utf8"));
+  const height = Number(/const SMALL_HEIGHT = (\d+);/.exec(button)?.[1]);
+  const slop = /const SMALL_SLOP = \{([^}]*)\}/.exec(button)?.[1] ?? "";
+  const side = (key: string) => Number(new RegExp(`\\b${key}\\s*:\\s*(\\d+)`).exec(slop)?.[1] ?? 0);
+
+  it("the scan found the small height (a guard that matches nothing proves nothing)", () => {
+    expect(height).toBe(38);
+  });
+
+  it("height plus vertical slop is at least 44", () => {
+    expect(height + side("top") + side("bottom")).toBeGreaterThanOrEqual(MIN_TARGET);
+  });
+
+  it("the slop is applied to the small size only", () => {
+    expect(button).toMatch(/hitSlop=\{small \? SMALL_SLOP : undefined\}/);
+  });
+});
