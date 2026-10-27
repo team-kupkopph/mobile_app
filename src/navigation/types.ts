@@ -45,6 +45,9 @@ export type RootStackParamList = {
   signup: { accountType: "personal" | "shelter"; tier?: ShelterTier };
   otp: { email: string; mode: "signup" | "unverified"; tier?: ShelterTier };
   otpLocked: { email: string };
+  // AS1 · a deleted account still inside its 30 days, offered a restore. `purgeOn` is the
+  // server's YYYY-MM-DD ("" if it sent none); the token is single-use and lasts ten minutes.
+  restoreAccount: { restoreToken: string; purgeOn: string };
   signupSuccess: undefined;
   signin: undefined;
   forgotPassword: undefined;

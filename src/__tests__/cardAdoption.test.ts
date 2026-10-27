@@ -70,7 +70,8 @@ describe("V3 screens adopt Card instead of a raw elevation spread", () => {
     // 42 -> 43: MyListingsScreen, an individual poster's listings (spec §3), born V3.
     // 43 -> 44: PetFormScreen, an owner adding a pet to rehome later (AQ8), born V3.
     // 47 -> 48: WaysToHelpScreen, US-W4 Ways to help (design 2026-10-27), born V3.
-    expect(V3_SCOPE.length).toBe(48);
+    // 48 -> 49: RestoreAccountScreen, AS1 restore a deleted account (backend#108), born V3.
+    expect(V3_SCOPE.length).toBe(49);
   });
 
   it("every in-scope screen not in the holdout list no longer spreads ...elevation.*", () => {

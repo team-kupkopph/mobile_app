@@ -118,6 +118,9 @@ const ADOPTION_POSTER = ["ApplicantScreen", "MyListingsScreen", "PetFormScreen",
 /** US-W4 · Ways to help (design 2026-10-27) — V3 from birth. */
 const WAYS_TO_HELP = ["WaysToHelpScreen"] as const;
 
+/** AS1 · Restore a deleted account (backend#108) — V3 from birth. */
+const ACCOUNT_RESTORE = ["RestoreAccountScreen"] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -130,7 +133,9 @@ export const V3_SCOPE: readonly string[] = [
   // Adoption poster loop (plan 2026-10-06) — V3 from birth.
   ...ADOPTION_POSTER,
   // US-W4 · Ways to help — V3 from birth.
-  ...WAYS_TO_HELP
+  ...WAYS_TO_HELP,
+  // AS1 · Restore a deleted account — V3 from birth.
+  ...ACCOUNT_RESTORE
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */

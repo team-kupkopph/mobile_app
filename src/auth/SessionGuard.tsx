@@ -17,6 +17,7 @@ const AUTH_SCREENS: Array<keyof RootStackParamList> = [
   "accountType",
   "otp",
   "otpLocked",
+  "restoreAccount",   // AS1 · tokens are null while the offer is on screen
   "forgotPassword",
   "resetOtp",
   "resetPassword",

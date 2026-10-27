@@ -35,6 +35,7 @@ import { MemberSubmittedScreen } from "../screens/MemberSubmittedScreen";
 import { MemberUpgradeScreen } from "../screens/MemberUpgradeScreen";
 import { MemberVerifyScreen } from "../screens/MemberVerifyScreen";
 import { OtpLockedScreen } from "../screens/OtpLockedScreen";
+import { RestoreAccountScreen } from "../screens/RestoreAccountScreen";
 import { OtpScreen } from "../screens/OtpScreen";
 import { PasswordChangedScreen } from "../screens/PasswordChangedScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
@@ -128,6 +129,7 @@ export function RootNavigator() {
       <Stack.Screen name="signup" component={SignupScreen} />
       <Stack.Screen name="otp" component={OtpScreen} />
       <Stack.Screen name="otpLocked" component={OtpLockedScreen} />
+      <Stack.Screen name="restoreAccount" component={RestoreAccountScreen} />
       <Stack.Screen name="signupSuccess" component={SignupSuccessScreen} />
       <Stack.Screen name="signin" component={SigninScreen} />
       <Stack.Screen name="inquiry" component={InquiryScreen} />

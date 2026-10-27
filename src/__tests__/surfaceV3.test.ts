@@ -49,6 +49,8 @@
 //
 // Wishlist refactor Task 8 (WD9) puts NeedFormScreen and NeedPledgesScreen on <ScreenBackdrop> and adds
 // DonationInstructionsScreen (V3 from birth): the baseline grows from 50 to 53 here.
+//
+// AS1 (restore a deleted account, backend#108) adds RestoreAccountScreen, V3 from birth: one more on the backdrop.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -99,6 +101,7 @@ describe("surface, re-derived", () => {
       "RescuePlaceScreen",
       "RescuePlaceSentScreen",
       "RescueUpdateScreen",
+      "RestoreAccountScreen",
       "ShelterAnimalsScreen",
       "ShelterDashboardScreen",
       "ShelterDonateScreen",
