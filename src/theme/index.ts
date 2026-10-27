@@ -12,3 +12,4 @@ export { typography, maxFontScale, type TypeToken } from "./typography";
 export { elevation } from "./elevation";
 export { gradients, heroDirection } from "./gradients";
 export { motion } from "./motion";
+export { dangerOnSurface } from "./surfaces";
