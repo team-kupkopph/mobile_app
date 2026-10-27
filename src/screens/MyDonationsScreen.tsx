@@ -164,8 +164,7 @@ export function MyDonationsScreen({ navigation }: Props) {
         confirmLabel="Yes, cancel pledge"
         tone="danger"
         onConfirm={() => { const p = cancelTarget; setCancelTarget(null); if (p) doCancel(p); }}
-        secondaryLabel="Keep pledge"
-        onSecondary={() => setCancelTarget(null)}
+        cancelLabel="Keep pledge"
         onCancel={() => setCancelTarget(null)}
       />
       <SignupWall

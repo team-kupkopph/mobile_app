@@ -23,13 +23,17 @@ export type ConfirmModalProps = {
   // visible label changes. Omitted by every other caller, so their rendering is unchanged.
   secondaryLabel?: string;
   onSecondary?: () => void;
+  // The quiet way out's label ("Never mind" unless named, e.g. My donations' "Keep pledge"). Unlike
+  // `secondaryLabel` it keeps the muted style: it is the safe choice, not a destructive alternative.
+  cancelLabel?: string;
   // Opt-in content between the body and the buttons (e.g. the shelter's received-quantity stepper).
   // Omitted by every other caller, so their rendering is unchanged.
   children?: ReactNode;
 };
 
 export function ConfirmModal({
-  visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel, secondaryLabel, onSecondary, children
+  visible, title, body, confirmLabel, tone = "neutral", onConfirm, onCancel, secondaryLabel, onSecondary, children,
+  cancelLabel = "Never mind"
 }: ConfirmModalProps) {
   // P5 · Task 4 moves the whole component onto theme tokens.
   const confirmColor =
@@ -63,7 +67,7 @@ export function ConfirmModal({
             </TouchableOpacity>
           ) : (
             <TouchableOpacity activeOpacity={0.75} style={styles.cancelButton} onPress={onCancel}>
-              <Text style={styles.cancelText}>Never mind</Text>
+              <Text style={styles.cancelText}>{cancelLabel}</Text>
             </TouchableOpacity>
           )}
           </ScrollView>

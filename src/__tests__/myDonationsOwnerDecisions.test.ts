@@ -25,7 +25,10 @@ describe("My donations · Cancel pledge in the shared modal (D3)", () => {
     expect(modal).toMatch(/title="Cancel this pledge\?"/);
     expect(modal).toMatch(/tone="danger"/);
     expect(modal).toMatch(/confirmLabel="Yes, cancel pledge"/);
-    expect(modal).toMatch(/secondaryLabel="Keep pledge"/);
+    // "Keep pledge" is the safe way out, so it is the modal's quiet cancel, not its red secondary action (which
+    // exists for a destructive alternative like "Decline instead"). Seen red on the simulator; fixed with cancelLabel.
+    expect(modal).toMatch(/cancelLabel="Keep pledge"/);
+    expect(modal).not.toMatch(/secondaryLabel=/);
     expect(modal).toMatch(/cancelPledgeBody\(/);
   });
 
@@ -39,5 +42,14 @@ describe("My donations · the delivery hint (D2)", () => {
     const hint = cancellable.indexOf("{PLEDGE_DELIVERY_HINT}");
     expect(hint).toBeGreaterThan(-1);
     expect(hint).toBeLessThan(cancellable.indexOf("confirmCancel(p)"));
+  });
+});
+
+describe("ConfirmModal's cancel label", () => {
+  const confirm = readFileSync(join(__dirname, "..", "components", "ConfirmModal.tsx"), "utf8");
+  it("can be named by the caller, and still reads \"Never mind\" for everyone else", () => {
+    expect(confirm).toMatch(/cancelLabel\?: string;/);
+    expect(confirm).toMatch(/cancelLabel = "Never mind"/);
+    expect(confirm).toMatch(/<Text style=\{styles\.cancelText\}>\{cancelLabel\}<\/Text>/);
   });
 });
