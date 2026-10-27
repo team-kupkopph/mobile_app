@@ -230,9 +230,11 @@ const styles = StyleSheet.create({
   confirmBody: { marginTop: 12, color: colors.muted, ...typography.body, textAlign: "center" },
   nextCard: { alignSelf: "stretch", marginTop: 24, padding: 18 },
   nextTitle: { color: colors.ink, ...typography.strong, fontWeight: "800" },
-  nextRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 12 },
+  // Top-anchored, so at AX5 the number sits by a step's first line, not halfway down a wrapped one.
+  nextRow: { flexDirection: "row", alignItems: "flex-start", gap: 12, marginTop: 12 },
   // A fixed-shape disc (the number does not scale, like the ✓ tile); the step's own text does.
   stepNumberDisc: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.soft, alignItems: "center", justifyContent: "center" },
   stepNumber: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },
-  nextText: { flex: 1, color: colors.ink, ...typography.body }
+  // paddingTop 3.5: (28 pt disc − the body's 21 pt line) / 2, so a one-line step still centres on its disc.
+  nextText: { flex: 1, paddingTop: 3.5, color: colors.ink, ...typography.body }
 });
