@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { StyleProp, StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View, ViewStyle } from "react-native";
+import { PixelRatio, StyleProp, StyleSheet, Text, TextInput, TextInputProps, TouchableOpacity, View, ViewStyle } from "react-native";
 
 import { colors, dangerOnSurface, elevation, radii, spacing, typography } from "../../theme";
 
@@ -46,6 +46,7 @@ export function Field({
   label, value, onChangeText, error, errorTestID, readOnly, secure, onToggleSecure, accessory, style, onBlur, ...input
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
+  const [placeholderDrop, setPlaceholderDrop] = useState(0);
   const state = error ? "error" : focused ? "focused" : readOnly ? "readOnly" : "rest";
 
   return (
@@ -59,20 +60,43 @@ export function Field({
           {label.toUpperCase()}
         </Text>
         <View style={styles.row}>
-          <TextInput
-            {...input}
-            value={value}
-            secureTextEntry={secure}
-            onChangeText={onChangeText}
-            editable={!readOnly}
-            onFocus={() => setFocused(true)}
-            onBlur={(e) => { setFocused(false); onBlur?.(e); }}
-            placeholderTextColor={colors.muted}
-            // R3-F1 · the explicit lineHeight below (R9-F2) reaches iOS as a paragraph style that wraps words, so a value
-            // wider than the box drew only its first whole words. Truncating the tail is what a native one-line field does.
-            lineBreakModeIOS={input.multiline ? undefined : "tail"}
-            style={[styles.input, input.multiline && styles.inputMultiline, readOnly && styles.inputReadOnly]}
-          />
+          <View style={styles.inputSlot}>
+            <TextInput
+              {...input}
+              value={value}
+              secureTextEntry={secure}
+              onChangeText={onChangeText}
+              editable={!readOnly}
+              onFocus={() => setFocused(true)}
+              onBlur={(e) => { setFocused(false); onBlur?.(e); }}
+              // ⚠️ iOS shrinks a one-line field's placeholder until it fits the width, so at AX5 a long one drew small
+              // at the bottom of a box sized for the full-size text. The native one stays, invisible: it still sizes
+              // the box and is what VoiceOver reads. The Text below is the one people see.
+              placeholderTextColor={input.multiline ? colors.muted : "transparent"}
+              // R3-F1 · the explicit lineHeight below (R9-F2) reaches iOS as a paragraph style that wraps words, so a value
+              // wider than the box drew only its first whole words. Truncating the tail is what a native one-line field does.
+              lineBreakModeIOS={input.multiline ? undefined : "tail"}
+              style={[styles.input, input.multiline && styles.inputMultiline, readOnly && styles.inputReadOnly]}
+            />
+            {!value && input.placeholder && !input.multiline ? (
+              <Text
+                accessible={false}
+                pointerEvents="none"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                // iOS centres the font's own line in the input, then sets the glyphs at the foot of the taller
+                // explicit line: half the difference lower than a line pinned to the bottom. Measured, because it
+                // scales with Dynamic Type; without it the words jumped down when the first letter was typed.
+                onTextLayout={(e) => {
+                  const line = e.nativeEvent.lines[0];
+                  if (line) setPlaceholderDrop((INPUT_LINE_HEIGHT * PixelRatio.getFontScale() - line.height) / 2);
+                }}
+                style={[styles.placeholder, { bottom: -placeholderDrop }]}
+              >
+                {input.placeholder}
+              </Text>
+            ) : null}
+          </View>
           {onToggleSecure ? (
             <TouchableOpacity
               activeOpacity={0.7}
@@ -130,8 +154,9 @@ const styles = StyleSheet.create({
   labelFocused: { color: colors.teal },
   labelError: { color: colors.danger },
   row: { flexDirection: "row", alignItems: "center" },
+  // The input's width lives here, not on the input: flex: 1 inside this column would collapse the input to nothing.
+  inputSlot: { flex: 1 },
   input: {
-    flex: 1,
     marginTop: 2,
     padding: 0,
     ...typography.subtitle,
@@ -139,6 +164,7 @@ const styles = StyleSheet.create({
     color: colors.ink
   },
   inputReadOnly: { color: colors.muted },
+  placeholder: { position: "absolute", bottom: 0, left: 0, right: 0, padding: 0, ...typography.subtitle, color: colors.muted },
   inputMultiline: { minHeight: 66, textAlignVertical: "top", lineHeight: 22 },
   accessory: { marginLeft: spacing.sm, width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   eye: {
@@ -161,6 +187,9 @@ const styles = StyleSheet.create({
     marginLeft: 6
   }
 });
+
+/** The input's explicit line height (R9-F2), which the drawn placeholder lines up with. */
+const INPUT_LINE_HEIGHT = StyleSheet.flatten(styles.input).lineHeight ?? 0;
 
 // Kept out of the StyleSheet map above so `error` can name both a box style and the message.
 const boxState = {
