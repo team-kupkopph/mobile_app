@@ -213,7 +213,13 @@ export type MeNotification = {
 };
 
 // Track H — the recipient's owned pets (US-H3). GET /me/pets, newest first, owner-scoped.
-export type MyPet = { pet_id: string; name: string; species: string; photo_url: string | null };
+/** PP14 · the pet's open rehoming listing; `removed` = moderation took it down. */
+export type PetListingState = { listing_id: string; status: string; removed: boolean };
+
+export type MyPet = {
+  pet_id: string; name: string; species: string; photo_url: string | null;
+  open_listing: PetListingState | null; lost_report_id: string | null;
+};
 
 /** PQ2 · a pet this account rehomed through Kupkop, frozen at the transfer. No id: nothing to open. */
 export type RehomedPet = { name: string; photo_url: string | null; rehomed_at: string };
@@ -224,7 +230,7 @@ export type PetDetail = {
   birthdate: string | null; color_markings: string | null; size_category: string | null;
   spayed_neutered: boolean | null; temperament: string | null; medical_conditions: string | null;
   vet_contact: string | null; photos: string[];
-  open_listing: { listing_id: string; status: string } | null;
+  open_listing: PetListingState | null; lost_report_id: string | null;
 };
 
 // K27/G12 (backend) · the volunteer-facing summary on the shelter dashboard — pending

@@ -15,7 +15,9 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Chip, ScreenHeader, SegmentedControl } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { LIST_PET_LABEL, REMOVE_PET_BODY, REMOVE_REASONS, RemoveReason, ageLabel, petActionError } from "../petForm";
+import {
+  LIST_PET_LABEL, REMOVE_PET_BODY, REMOVE_REASONS, RemoveReason, VIEW_LISTING_LABEL, ageLabel, petActionError, petChips
+} from "../petForm";
 import { colors, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "petDetail">;
@@ -90,9 +92,10 @@ export function PetDetailScreen({ navigation, route }: Props) {
           ) : null}
           <Text style={styles.title}>{pet.name}</Text>
           <Text style={styles.sub}>{[cap(pet.species), age].filter(Boolean).join(" · ")}</Text>
-          {listing ? (
-            <Chip style={styles.chip} tone={listing.status === "draft" ? "neutral" : "info"}
-              label={listing.status === "draft" ? "Listing draft" : "Listed for adoption"} />
+          {petChips(pet).length ? (
+            <View style={styles.chipRow}>
+              {petChips(pet).map((ch) => <Chip key={ch.label} label={ch.label} tone={ch.tone} />)}
+            </View>
           ) : null}
         </Card>
 
@@ -112,14 +115,20 @@ export function PetDetailScreen({ navigation, route }: Props) {
         <Button label="Edit details" variant="secondary" style={styles.action} testID="btn.petDetail.edit"
           onPress={() => navigation.navigate("petForm", { petId })} />
         {listing ? (
-          <Button label="View listing" variant="secondary" style={styles.action} testID="btn.petDetail.listing"
+          <Button label={VIEW_LISTING_LABEL} variant="secondary" style={styles.action} testID="btn.petDetail.listing"
             onPress={() => navigation.navigate("posterListing", { listingId: listing.listing_id })} />
         ) : (
           <Button label={LIST_PET_LABEL} variant="secondary" style={styles.action} testID="btn.petDetail.list"
             onPress={() => navigation.navigate("listingForm", { petId })} />
         )}
-        <Button label="Report lost" variant="secondary" style={styles.action} testID="btn.petDetail.lost"
-          onPress={() => navigation.navigate("reportStray", { mode: "lost", petId })} />
+        {/* PP14 · a pet already reported lost opens that report; offering a second one would file a duplicate. */}
+        {pet.lost_report_id ? (
+          <Button label="View lost report" variant="secondary" style={styles.action} testID="btn.petDetail.lostReport"
+            onPress={() => navigation.navigate("reportDetail", { reportId: pet.lost_report_id! })} />
+        ) : (
+          <Button label="Report lost" variant="secondary" style={styles.action} testID="btn.petDetail.lost"
+            onPress={() => navigation.navigate("reportStray", { mode: "lost", petId })} />
+        )}
         <Button label="Remove from My pets" variant="destructive" style={styles.action} testID="btn.petDetail.remove"
           onPress={() => { setError(undefined); setRemoving(true); }} />
       </ScrollView>
@@ -141,7 +150,7 @@ const styles = StyleSheet.create({
   photo: { width: "100%", height: 220, borderRadius: squircle(56), backgroundColor: colors.soft, marginBottom: 16 },
   title: { color: colors.ink, ...typography.title },
   sub: { marginTop: 4, color: colors.muted, ...typography.subtitle },
-  chip: { marginTop: 12, alignSelf: "flex-start" },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 12 },
   fact: { paddingVertical: 10 },
   factLabel: { color: colors.muted, ...typography.meta, fontWeight: "600" },
   factValue: { marginTop: 2, color: colors.ink, ...typography.strong },

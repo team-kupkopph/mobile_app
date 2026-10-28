@@ -147,3 +147,48 @@ describe("errors that say what is wrong, under the field (PP9/PP10, My Pets revi
     }
   });
 });
+
+describe("what a pet is in the middle of (PP14, My Pets review 2026-10-28)", () => {
+  const { petChips, petCardAction, myPetsHint, VIEW_LISTING_LABEL } = require("../petForm");
+  const pet = (open_listing: object | null = null, lost_report_id: string | null = null) =>
+    ({ pet_id: "p1", open_listing, lost_report_id });
+  const listing = (status: string, removed = false) => ({ listing_id: "l1", status, removed });
+
+  it("names each listing state and a lost report, with the shared status tones", () => {
+    expect(petChips(pet())).toEqual([]);
+    expect(petChips(pet(listing("draft")))).toEqual([{ label: "Listing draft", tone: "neutral" }]);
+    expect(petChips(pet(listing("available")))).toEqual([{ label: "Listed for adoption", tone: "info" }]);
+    expect(petChips(pet(listing("pending")))).toEqual([{ label: "Adoption pending", tone: "warning" }]);
+    expect(petChips(pet(listing("available", true)))).toEqual([{ label: "Listing removed", tone: "danger" }]);
+    expect(petChips(pet(null, "r1"))).toEqual([{ label: "Reported lost", tone: "warning" }]);
+    expect(petChips(pet(listing("draft"), "r1")).map((c: { label: string }) => c.label))
+      .toEqual(["Listing draft", "Reported lost"]);
+  });
+
+  it("the card's action is its listing when it has one, else the way to list it", () => {
+    expect(petCardAction(pet(listing("draft")))).toEqual(
+      { label: VIEW_LISTING_LABEL, route: "posterListing", params: { listingId: "l1" } });
+    expect(petCardAction(pet())).toEqual(
+      { label: "List for adoption", route: "listingForm", params: { petId: "p1" } });
+  });
+
+  it("the Profile hint counts listed pets, not drafts or removed ones", () => {
+    expect(myPetsHint([pet(listing("available")), pet(listing("pending")), pet(listing("draft"))]))
+      .toBe("2 listed for adoption");
+    expect(myPetsHint([pet(listing("available", true)), pet()])).toBe("2 pets");
+    expect(myPetsHint([pet()])).toBe("1 pet");
+    expect(myPetsHint([])).toBe("Add your pets");
+  });
+
+  it("is wired: the card's chips and action, the pet screen's chips, the Profile hint", () => {
+    const list = read("screens/MyPetsScreen.tsx");
+    expect(list).toMatch(/petChips\(p\)/);
+    expect(list).toMatch(/petCardAction\(p\)/);
+    expect(list).toMatch(/testID=\{`btn\.myPets\.action\.\$\{p\.pet_id\}`\}/);
+    expect(read("screens/PetDetailScreen.tsx")).toMatch(/petChips\(pet\)/);
+    expect(read("screens/PetDetailScreen.tsx")).toMatch(/navigate\("reportDetail", \{ reportId: pet\.lost_report_id! \}\)/);
+    const profile = read("screens/ProfileScreen.tsx");
+    expect(profile).toMatch(/api\.get\("\/me\/pets"\)/);
+    expect(profile).toMatch(/myPetsHint\(/);
+  });
+});
