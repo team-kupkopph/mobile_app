@@ -106,8 +106,11 @@ describe("every registered route can be navigated to", () => {
 
   /** Every route name any screen actually navigates/replaces to, plus the initial routes. */
   function destinations(): Set<string> {
+    // `settings.ts` is read too: Settings' rows are DATA now (`{ type: "navigate", name: "deleteAccount" }`),
+    // so its navigation edges are no longer literal `navigate("…")` calls inside a screen file. Without
+    // this, five routes it reaches would be reported as orphans.
     const all = allScreens(SRC)
-      .concat([NAV, join(APP_ROOT, "App.tsx")])
+      .concat([NAV, join(APP_ROOT, "App.tsx"), join(SRC, "settings.ts")])
       .map((f) => readFileSync(f, "utf8"))
       .join("\n");
     const out = new Set<string>();

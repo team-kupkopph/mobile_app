@@ -4,7 +4,7 @@
 // in AuthContext/SecureStore by LocationPickerScreen and read from there instead of /me.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,9 +14,10 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { Me } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
+import { cityToCache } from "../auth/cityFromMe";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { useOutbox } from "../outbox/OutboxProvider";
-import { confirmSignOutWithQueue } from "../outbox/signOutGuard";
+import { confirmLogout } from "../auth/confirmLogout";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { RootStackParamList } from "../navigation/types";
@@ -33,7 +34,7 @@ function initialsOf(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function ProfileScreen({ navigation }: Props) {
+export function ProfileScreen({ navigation, route }: Props) {
   // O6-17: at Dynamic Type AX5 the verify card's icon | text | chip row left the text a sliver, so it stacks instead.
   const { fontScale } = useWindowDimensions();
   const large = fontScale > 1.5;
@@ -49,7 +50,7 @@ export function ProfileScreen({ navigation }: Props) {
    */
   const insets = useSafeAreaInsets();
   const api = useApi();
-  const { city, signOut, tokens } = useAuth();
+  const { city, isReady, setCity, signOut, tokens } = useAuth();
   const { queue, discardAllFor } = useOutbox();
   const [me, setMe] = useState<Me | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -71,6 +72,16 @@ export function ProfileScreen({ navigation }: Props) {
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
     }, []);
   useFocusEffect(load);
+
+  // X11 · the server returns the user's city in /me, but the app only knew the one cached on THIS phone, so a new phone
+  // or a reinstall said "Set your city" while the server had it. Fill an EMPTY cache from /me — and only once the cache
+  // has finished loading, or a city already saved on the phone could be overwritten while that read is still in flight.
+  useEffect(() => {
+    if (!isReady || !me) return;
+    const seed = cityToCache(me, city);
+    if (seed) void setCity(seed);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setCity is recreated each render; the guard is `city`
+  }, [isReady, me, city]);
 
   const pendingMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "pending") ?? false;
   const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
@@ -106,10 +117,26 @@ export function ProfileScreen({ navigation }: Props) {
     navigation.reset({ index: 0, routes: [{ name: "welcome" }] });
   }
 
-  // C16 · D14 — unsent reports are kept for this account's next sign-in, or discarded.
+  // Task 10 · Settings → Edit profile comes BACK here with `editing` (React Navigation 7's `navigate`
+  // would have pushed a second copy of this tab). Open the inline editor once `me` has loaded, then
+  // clear the param so a later focus does not reopen it.
+  useEffect(() => {
+    if (route.params?.editing && me) {
+      startEdit();
+      navigation.setParams({ editing: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the param arrives or `me` first loads
+  }, [route.params?.editing, me]);
+
+  // One log-out rule everywhere (confirmLogout) — C16 · D14: unsent reports are kept for this
+  // account's next sign-in, or discarded, and that prompt is the only question when there are any.
   function handleLogout() {
-    confirmSignOutWithQueue(queue.length, () => { void signOutAndLeave(); }, () => {
-      void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOutAndLeave());
+    confirmLogout({
+      queueCount: queue.length,
+      onConfirm: () => { void signOutAndLeave(); },
+      onDiscard: () => {
+        void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOutAndLeave());
+      },
     });
   }
 

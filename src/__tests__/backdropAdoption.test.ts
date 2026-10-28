@@ -60,7 +60,8 @@ describe("V3 screens sit on the backdrop", () => {
     // 43 -> 44: PetFormScreen, an owner adding a pet to rehome later (AQ8), born V3.
     // 47 -> 48: WaysToHelpScreen, US-W4 Ways to help (design 2026-10-27), born V3.
     // 48 -> 49: RestoreAccountScreen, AS1 restore a deleted account (backend#108), born V3.
-    expect(V3_SCOPE.length).toBe(49);
+    // 49 -> 50: ChangePasswordScreen, Task 10 change password (backend#112), born V3.
+    expect(V3_SCOPE.length).toBe(50);
   });
 
   it("every in-scope screen not in the holdout list renders ScreenBackdrop", () => {

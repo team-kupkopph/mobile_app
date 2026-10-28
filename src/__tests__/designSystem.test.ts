@@ -36,6 +36,7 @@ const HEX = /#[0-9A-Fa-f]{6}\b/;
 const CONVERTED = [
   "AdjustPinScreen.tsx",
   "AdoptScreen.tsx",
+  "ChangePasswordScreen.tsx",
   "ListingDetailScreen.tsx",
   "ListingFormScreen.tsx",
   "LocationPickerScreen.tsx",

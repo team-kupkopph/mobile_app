@@ -61,7 +61,9 @@ export type RootStackParamList = {
   home: { justSignedUp?: boolean } | undefined;
   homeGuest: undefined;
   adopt: undefined;
-  profile: undefined;
+  // Task 10 · Settings → Edit profile sends the user BACK to this tab with `editing`, which opens the
+  // inline name editor (React Navigation 7's `navigate` would push a second copy — the old loop).
+  profile: { editing?: boolean } | undefined;
   locationPicker: undefined;
   memberUpgrade: undefined;
   memberVerify: undefined;
@@ -177,6 +179,7 @@ export type RootStackParamList = {
   // SMS-verified official_phone). Optional, so the owner's navigate("settings") is unchanged.
   settings: { shelter?: boolean } | undefined;
   settingsPrivacy: undefined;
+  changePassword: undefined;
   deleteAccount: undefined;
   exportData: undefined;
   // US-B2 · My impact: the badge grid + a single badge's detail.

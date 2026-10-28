@@ -51,6 +51,8 @@
 // DonationInstructionsScreen (V3 from birth): the baseline grows from 50 to 53 here.
 //
 // AS1 (restore a deleted account, backend#108) adds RestoreAccountScreen, V3 from birth: one more on the backdrop.
+//
+// Task 10 (change password, backend#112) adds ChangePasswordScreen, V3 from birth: one more on the backdrop.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -64,6 +66,7 @@ describe("surface, re-derived", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "ApplicantScreen",
+      "ChangePasswordScreen",
       "DonatePledgeScreen",
       "DonateScreen",
       "DonationInstructionsScreen",

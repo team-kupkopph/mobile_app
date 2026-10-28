@@ -121,6 +121,9 @@ const WAYS_TO_HELP = ["WaysToHelpScreen"] as const;
 /** AS1 · Restore a deleted account (backend#108) — V3 from birth. */
 const ACCOUNT_RESTORE = ["RestoreAccountScreen"] as const;
 
+/** Task 10 · Change password (backend#112) — V3 from birth. */
+const ACCOUNT_SETTINGS = ["ChangePasswordScreen"] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -135,7 +138,9 @@ export const V3_SCOPE: readonly string[] = [
   // US-W4 · Ways to help — V3 from birth.
   ...WAYS_TO_HELP,
   // AS1 · Restore a deleted account — V3 from birth.
-  ...ACCOUNT_RESTORE
+  ...ACCOUNT_RESTORE,
+  // Task 10 · Change password — V3 from birth.
+  ...ACCOUNT_SETTINGS
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */

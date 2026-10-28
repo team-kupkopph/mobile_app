@@ -22,7 +22,11 @@ import { useAuth } from "../auth/AuthContext";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
-import { Blocker, blockerCopy, blockerHeadline, confirmationMatches, CONFIRM_WORD } from "../settings";
+import {
+  Blocker, DELETE_ENDS_NOTE, DELETE_KEPT, DELETE_LEDE, DELETE_REMOVED, DELETE_TITLE,
+  blockerCopy, blockerHeadline, blockerRoute, confirmationMatches, CONFIRM_WORD,
+} from "../settings";
+import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, maxFontScale, radii, typography } from "../theme";
 import { Button, Field, ScreenHeader } from "../components/ui";
@@ -31,8 +35,8 @@ const card = {
   backgroundColor: colors.white, ...elevation.soft,
 };
 
-const REMOVED = ["Your name and photo", "Phone, email and address", "Your pets and listings", "Saved places"];
-const KEPT = ["Rescues you resolved", "Adoptions completed", "Shifts you volunteered", "Shown as “Deleted user”"];
+// The copy lives in src/settings.ts (DELETE_*), pinned by settingsAccount.test.ts: it has to promise
+// exactly what the purge does — pets and linked sign-ins are deleted, listings are kept (hidden).
 
 type Props = NativeStackScreenProps<RootStackParamList, "deleteAccount">;
 
@@ -56,7 +60,8 @@ export function DeleteAccountScreen({ navigation }: Props) {
     }
     setBusy(true);
     setError(undefined);
-    const res = await api.del("/me");
+    // The server refuses to delete without an explicit {confirm: true}. This used to send no body at all.
+    const res = await api.del("/me", { confirm: true });
     setBusy(false);
 
     if (res.status === 204) {
@@ -81,20 +86,18 @@ export function DeleteAccountScreen({ navigation }: Props) {
     <View style={styles.screen} testID="screen.deleteAccount">
       <Header title="Delete account" navigation={navigation} />
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.h1} accessibilityRole="header" maxFontSizeMultiplier={maxFontScale.title}>This can't be undone</Text>
-        <Text style={styles.lede}>
-          You have 30 days to change your mind. After that, your personal details are erased
-          for good.
-        </Text>
+        <Text style={styles.h1} accessibilityRole="header" maxFontSizeMultiplier={maxFontScale.title}>{DELETE_TITLE}</Text>
+        <Text style={styles.lede}>{DELETE_LEDE}</Text>
 
         <View style={[styles.columns, large && styles.columnsLarge]}>
-          <Column heading="REMOVED" headingColor={colors.danger} dot={colors.danger} items={REMOVED} large={large} />
-          <Column heading="KEPT, ANONYMOUS" headingColor={colors.success} dot={colors.success} items={KEPT} large={large} />
+          <Column heading="REMOVED" headingColor={colors.danger} dot={colors.danger} items={DELETE_REMOVED} large={large} />
+          <Column heading="KEPT, ANONYMOUS" headingColor={colors.success} dot={colors.success} items={DELETE_KEPT} large={large} />
         </View>
 
         <Text style={styles.reason}>
           These stay so the animals' records stay whole. Nothing in them points back to you.
         </Text>
+        <Text style={styles.reason}>{DELETE_ENDS_NOTE}</Text>
 
         {/* The instruction is the field's own label; Field renders the error under the box, live. */}
         <Field
@@ -154,12 +157,30 @@ function Blocked({
         <Text style={styles.groupTitle}>OPEN COMMITMENTS</Text>
         {blockers.map((blocker) => {
           const copy = blockerCopy(blocker);
-          return (
-            <View key={blocker.id} style={styles.blockerCard} accessible
-                  accessibilityLabel={`${copy.title}. ${blocker.detail ?? ""}. ${copy.action}`}>
+          // Task 10 · where this blocker is closed. A blocker you can read but not reach is a dead end;
+          // an unknown kind (blockerRoute -> null) still renders, just not as a button.
+          const to = blockerRoute(blocker.kind);
+          const body = (
+            <>
               <Text style={styles.blockerTitle}>{copy.title}</Text>
               {blocker.detail ? <Text style={styles.blockerDetail}>{blocker.detail}</Text> : null}
               <Text style={styles.blockerAction}>{copy.action}</Text>
+              {to ? <Text style={styles.blockerGo}>Open ›</Text> : null}
+            </>
+          );
+          const label = `${copy.title}. ${blocker.detail ?? ""}. ${copy.action}`;
+          return to ? (
+            <TouchableOpacity key={blocker.id} activeOpacity={0.75} style={styles.blockerCard}
+                              hitSlop={TAP_SLOP} accessibilityRole="button"
+                              accessibilityLabel={`${label} Opens it.`}
+                              onPress={() => (navigation as unknown as {
+                                navigate: (name: string, params?: object) => void;
+                              }).navigate(to.name, to.params)}>
+              {body}
+            </TouchableOpacity>
+          ) : (
+            <View key={blocker.id} style={styles.blockerCard} accessible accessibilityLabel={label}>
+              {body}
             </View>
           );
         })}
@@ -218,6 +239,7 @@ const styles = StyleSheet.create({
   warnBody: { ...typography.meta, color: colors.warning, marginTop: 6, lineHeight: 20 },
   groupTitle: { ...typography.meta, fontWeight: "700", color: colors.muted, letterSpacing: 1.4, marginTop: 24, marginBottom: 8 },
   blockerCard: { borderRadius: radii.tile, padding: 16, marginBottom: 12, ...card },
+  blockerGo: { marginTop: 8, color: colors.teal, ...typography.meta, fontWeight: "800" },
   blockerTitle: { ...typography.subtitle, fontWeight: "800", color: colors.ink },
   blockerDetail: { ...typography.meta, color: colors.muted, marginTop: 4 },
   blockerAction: { ...typography.meta, fontWeight: "700", color: colors.teal, marginTop: 8 }

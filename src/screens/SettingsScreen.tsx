@@ -1,18 +1,24 @@
 // US-N5 · Settings. Four grouped cards: ACCOUNT · PRIVACY · YOUR DATA · SUPPORT.
 //
+// Task 10 · the rows are DATA (`settingsGroups` in src/settings.ts) and this screen only maps a
+// row's action to a handler, so what is listed — and which account type sees what — is testable.
+//
 // This screen did not exist before Sprint 7 despite being designed since Sprint 1, which is
 // how `GET/PATCH /me/settings` shipped with zero callers and how §12.6's in-app data rights
 // had no surface at all. YOUR DATA is the pair of RA 10173 rights (§12.7): export and delete.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScreenHeader } from "../components/ui";
 
+import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { confirmLogout } from "../auth/confirmLogout";
 import { accountIdFromAccessToken } from "../auth/idToken";
+import { signOutEverywhere } from "../auth/logoutAll";
+import { privacyPolicyUrl } from "../launchGates";
 import { useOutbox } from "../outbox/OutboxProvider";
-import { confirmSignOutWithQueue } from "../outbox/signOutGuard";
 import { RootStackParamList } from "../navigation/types";
-import { privacySummary } from "../settings";
+import { RowAction, settingsGroups } from "../settings";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, typography } from "../theme";
 
@@ -21,62 +27,73 @@ const card = {
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, "settings">;
-type Row = { label: string; value?: string; danger?: boolean; onPress?: () => void };
-
 export function SettingsScreen({ navigation, route }: Props) {
   // At Dynamic Type AX3 and up a row's label and its value + chevron cannot share a line, so the value drops below the label.
   const large = useLargeText();
+  const api = useApi();
   const { signOut, tokens } = useAuth();
   const { queue, discardAllFor } = useOutbox();
   // F-R3-4 · reached from ShelterProfileScreen. See the param's note in navigation/types.ts.
   const shelter = route.params?.shelter === true;
 
+  const discardThen = (then: () => Promise<void>) =>
+    discardAllFor(accountIdFromAccessToken(tokens?.access)).then(then);
+
   function handleLogout() {
-    // C16 · D14 — unsent reports are kept for this account's next sign-in, or discarded.
-    // PR3-F8 · that prompt is the only question when there are any (it has its own Cancel) —
-    // never "Log out?" first and then a second alert from its button.
+    // One log-out rule for every screen (confirmLogout): with unsent reports the keep-or-discard
+    // prompt is the only question; otherwise a plain "Log out?".
+    confirmLogout({
+      queueCount: queue.length,
+      onConfirm: () => { void signOut(); },
+      onDiscard: () => { void discardThen(signOut); },
+    });
+  }
+
+  function runLogoutAll(discardQueue: boolean) {
+    // The server revokes first; only on success does this phone sign out (signOutEverywhere).
+    const wipe = discardQueue ? () => discardThen(signOut) : signOut;
+    void signOutEverywhere(api, wipe).then((result) => {
+      if (result === "offline") {
+        Alert.alert("You're offline", "Nothing changed. Try again when you're connected.");
+      } else if (result === "failed") {
+        Alert.alert("That didn't work", "Nothing changed. Try again.");
+      }
+    });
+  }
+
+  function handleLogoutAll() {
     if (queue.length > 0) {
-      confirmSignOutWithQueue(queue.length, () => { void signOut(); }, () => {
-        void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOut());
-      });
+      confirmLogout({ queueCount: queue.length, onConfirm: () => runLogoutAll(false),
+                      onDiscard: () => runLogoutAll(true) });
       return;
     }
-    Alert.alert("Log out?", "You can sign back in any time.", [
+    Alert.alert("Sign out of all devices?", "You'll be signed out everywhere, including this phone.", [
       { text: "Cancel", style: "cancel" },
-      { text: "Log out", style: "destructive", onPress: () => { void signOut(); } },
+      { text: "Sign out everywhere", style: "destructive", onPress: () => runLogoutAll(false) },
     ]);
   }
 
-  const groups: { title: string; rows: Row[] }[] = [
-    // ACCOUNT is owner-only: both rows open owner screens (see `shelter` above).
-    ...(shelter ? [] : [{
-      title: "ACCOUNT",
-      rows: [
-        { label: "Edit profile", onPress: () => navigation.navigate("profile") },
-        { label: "Phone number", onPress: () => navigation.navigate("verifyPhone") },
-      ],
-    }]),
-    {
-      title: "PRIVACY",
-      rows: [
-        {
-          label: "Privacy controls",
-          value: privacySummary(),
-          onPress: () => navigation.navigate("settingsPrivacy"),
-        },
-        { label: "Notifications", onPress: () => navigation.navigate("notifications") },
-      ],
-    },
-    {
-      // §12.6 promises these two in-app. Named the way a person would name them, not
-      // "portability" and "erasure" — those are the regulation's words, not theirs.
-      title: "YOUR DATA",
-      rows: [
-        { label: "Export my data", onPress: () => navigation.navigate("exportData") },
-        { label: "Delete account", danger: true, onPress: () => navigation.navigate("deleteAccount") },
-      ],
-    },
-  ];
+  // Route names come from `settingsGroups` as data, so the navigator's per-route generics cannot
+  // check them here; settingsAccount.test.ts pins every name instead.
+  const nav = navigation as unknown as {
+    navigate: (name: string, params?: object) => void;
+    popTo: (name: string, params?: object) => void;
+  };
+
+  function perform(action: RowAction) {
+    switch (action.type) {
+      case "navigate": nav.navigate(action.name, action.params); return;
+      // Back to the EXISTING screen (React Navigation 7: `navigate` would push a second copy).
+      case "popTo": nav.popTo(action.name, action.params); return;
+      case "logoutAll": handleLogoutAll(); return;
+      case "link": void Linking.openURL(action.url); return;
+    }
+  }
+
+  const groups = settingsGroups({
+    shelter,
+    privacyUrl: privacyPolicyUrl(),
+  });
 
   return (
     <View style={styles.screen} testID="screen.settings">
@@ -94,7 +111,7 @@ export function SettingsScreen({ navigation, route }: Props) {
                   testID={`row.settings.${row.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
                   key={row.label}
                   activeOpacity={0.75}
-                  onPress={row.onPress}
+                  onPress={() => perform(row.action)}
                   accessibilityRole="button"
                   accessibilityLabel={row.value ? `${row.label}, ${row.value}` : row.label}
                   style={[styles.row, large && styles.rowLarge, i < group.rows.length - 1 && styles.rowDivided]}

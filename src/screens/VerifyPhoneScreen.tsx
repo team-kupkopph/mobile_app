@@ -15,6 +15,8 @@ import {
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { normalizePhMobile, phoneError } from "../phone";
+import { PrefillWarning } from "../components/PrefillWarning";
+import { phoneRowValue } from "../settings";
 import { FormField, PrimaryButton, SimpleHeader, authColors } from "./AuthFormKit";
 import { maxFontScale, radii, spacing, typography } from "../theme";
 
@@ -35,6 +37,22 @@ export function VerifyPhoneScreen({ navigation }: Props) {
   const [verifying, setVerifying] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [resendNotice, setResendNotice] = useState<string | undefined>(undefined);
+  // Task 10 · the number already on file, so this screen can say which one it is about to replace and
+  // whether it was ever verified. T6 (backend#111) keeps it until the new one is PROVEN, so showing
+  // it is honest: abandoning the change loses nothing.
+  const [onFile, setOnFile] = useState<{ phone: string | null; verifiedAt: string | null } | null>(null);
+  const [prefillFailed, setPrefillFailed] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    api.get("/me").then((r) => {
+      if (!alive) return;
+      if (r.ok) setOnFile({ phone: r.data.phone ?? null, verifiedAt: r.data.phone_verified_at ?? null });
+      else setPrefillFailed(true);          // told below: never silently treated as "no number on file"
+    });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on open
+  }, []);
+  const changing = !!onFile?.phone && !!onFile.verifiedAt;
   const inputRefs = useRef<Array<TextInput | null>>([]);
   const submittedRef = useRef(false);
 
@@ -49,7 +67,10 @@ export function VerifyPhoneScreen({ navigation }: Props) {
   // F12 · what is sent (and resent) is the E.164 form — the same number the server dedupes on.
   const e164 = normalizePhMobile(phone);
 
-  async function sendCode() {
+  async function submit() {
+    // The account lookup behind "On file" failed, so the connection (or the session) is unusable:
+    // refuse rather than send a billable SMS blind. The warning above says why (US-R5 rule 3).
+    if (prefillFailed) { setEnterError("Couldn't check your account. Check your connection and try again."); return; }
     const bad = phoneError(phone);
     if (bad) { setEnterError(bad); return; }
     if (sending) return;
@@ -111,7 +132,8 @@ export function VerifyPhoneScreen({ navigation }: Props) {
       if (res.status === 410) { setCodeError("That code expired. Send a new one."); return; }
       if (res.status === 423) { setCodeError("Too many attempts. Send a new code."); return; }
       if (res.ok) {
-        Alert.alert("Phone verified", "You're all set — you can inquire now.");
+        Alert.alert(changing ? "Number updated" : "Phone verified",
+                    changing ? "Your new number is verified." : "You're all set — you can inquire now.");
         navigation.goBack();
         return;
       }
@@ -146,7 +168,15 @@ export function VerifyPhoneScreen({ navigation }: Props) {
       >
         {step === "enter" ? (
           <>
-            <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Add your mobile number</Text>
+            <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>{changing ? "Change your mobile number" : "Add your mobile number"}</Text>
+            {prefillFailed ? (
+              <PrefillWarning message="Couldn't check the number on file. Check your connection, then reopen this screen." />
+            ) : null}
+            {onFile?.phone ? (
+              <Text style={styles.caption} testID="text.verifyPhone.onFile">
+                On file: {phoneRowValue(onFile.phone, onFile.verifiedAt)}. It stays until the new one is confirmed.
+              </Text>
+            ) : null}
             <Text style={styles.caption}>
               We'll text a code to confirm it. It's how a shelter or poster reaches you about an
               adoption — your number stays private until you inquire.
@@ -164,7 +194,7 @@ export function VerifyPhoneScreen({ navigation }: Props) {
             </View>
             <PrimaryButton
               label="Send code"
-              onPress={sendCode}
+              onPress={submit}
               loading={sending}
               style={styles.actionButton}
             />
