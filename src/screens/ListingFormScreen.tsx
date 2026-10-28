@@ -95,7 +95,11 @@ export function ListingFormScreen({ navigation, route }: Props) {
    */
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   const loading = isEdit && res === null;
-  const prefillFailed = isEdit && res !== null && !res.ok;
+  // PP3 (review 2026-10-28) · "List one of my pets" prefills from the pet the same way, and a failed
+  // load left the defaults (a dog, no breed) on a listing linked to the owner's cat.
+  const [petRes, setPetRes] = useState<{ ok: boolean; status: number } | null>(null);
+  const petPrefillFailed = !isEdit && !!petId && petRes !== null && !petRes.ok;
+  const prefillFailed = (isEdit && res !== null && !res.ok) || petPrefillFailed;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
@@ -130,6 +134,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
   useEffect(() => {
     if (isEdit || !petId) return;
     api.get(`/me/pets/${petId}`).then((r) => {
+      setPetRes({ ok: r.ok, status: r.status });
       if (!r.ok) return;
       const d = r.data;
       setName(d.name); setSpecies(d.species); setBreed(d.breed ?? ""); setSex(d.sex ?? "unknown");
@@ -153,8 +158,10 @@ export function ListingFormScreen({ navigation, route }: Props) {
     // Rule 3: the banner is information, not enforcement — a person can and will tap Save
     // anyway. This is the line that stops the blanks from reaching the server.
     if (prefillFailed) {
-      setError("We couldn't load this listing, so saving now would overwrite it with blanks. "
-        + "Check your connection and reopen this form.");
+      setError(petPrefillFailed
+        ? "We couldn't load your pet's details. Check your connection and reopen this form."
+        : "We couldn't load this listing, so saving now would overwrite it with blanks. "
+          + "Check your connection and reopen this form.");
       return;
     }
     if (!name.trim()) { setError("Give the listing a name."); return; }
@@ -188,6 +195,10 @@ export function ListingFormScreen({ navigation, route }: Props) {
       setError("That pet already has a listing. Withdraw it first to list again.");
       return;
     }
+    if (code === "pet_species_mismatch") {
+      setError("The animal has to match your pet. Reopen this form from My pets.");
+      return;
+    }
     if (code === "listing_removed") {
       setError("Our moderators removed this listing, so it can't be edited.");
       return;
@@ -218,9 +229,12 @@ export function ListingFormScreen({ navigation, route }: Props) {
         {/* Rule 1: ABOVE the fields, on load. Learning the form can't save only after
             filling it in has already cost the person their time. */}
         {prefillFailed ? (
-          <PrefillWarning message={"We couldn't load this listing. Saving now would overwrite "
-            + "it with blanks, so this form can't be saved yet — check your connection and "
-            + "reopen it."} />
+          <PrefillWarning message={petPrefillFailed
+            ? "We couldn't load your pet's details, so this form can't be saved yet — check your "
+              + "connection and reopen it."
+            : "We couldn't load this listing. Saving now would overwrite "
+              + "it with blanks, so this form can't be saved yet — check your connection and "
+              + "reopen it."} />
         ) : null}
         {!isEdit && verifiedPoster === false ? (
           <View style={styles.visibilityNote} accessibilityRole="text">
