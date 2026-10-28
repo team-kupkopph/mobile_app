@@ -7,11 +7,12 @@
 // how `GET/PATCH /me/settings` shipped with zero callers and how §12.6's in-app data rights
 // had no surface at all. YOUR DATA is the pair of RA 10173 rights (§12.7): export and delete.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { ScreenHeader } from "../components/ui";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { useAppLock } from "../auth/useAppLock";
 import { confirmLogout } from "../auth/confirmLogout";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { signOutEverywhere } from "../auth/logoutAll";
@@ -33,6 +34,8 @@ export function SettingsScreen({ navigation, route }: Props) {
   const api = useApi();
   const { signOut, tokens } = useAuth();
   const { queue, discardAllFor } = useOutbox();
+  // Plan Task 14b · the biometric lock is a switch on THIS phone; `available` is false/null until the device says it has biometrics enrolled.
+  const appLock = useAppLock();
   // F-R3-4 · reached from ShelterProfileScreen. See the param's note in navigation/types.ts.
   const shelter = route.params?.shelter === true;
 
@@ -87,6 +90,8 @@ export function SettingsScreen({ navigation, route }: Props) {
       case "popTo": nav.popTo(action.name, action.params); return;
       case "logoutAll": handleLogoutAll(); return;
       case "link": void Linking.openURL(action.url); return;
+      // Turning it ON asks for one successful scan first (useAppLock); OFF just turns it off.
+      case "appLock": void appLock.setEnabled(!appLock.enabled); return;
     }
   }
 
@@ -100,11 +105,29 @@ export function SettingsScreen({ navigation, route }: Props) {
       <ScreenHeader title="Settings" onBack={() => navigation.goBack()} align="center" />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {groups.map((group) => (
+        {groups.map((group) => {
+          // The App lock switch is only offered where the device has biometrics enrolled: never a switch that does nothing.
+          const rows = group.rows.filter((row) => row.action.type !== "appLock" || appLock.available === true);
+          return (
           <View key={group.title}>
             <Text style={styles.groupTitle}>{group.title}</Text>
             <View style={styles.card}>
-              {group.rows.map((row, i) => (
+              {rows.map((row, i) => row.action.type === "appLock" ? (
+                <View
+                  key={row.label}
+                  testID="row.settings.app-lock"
+                  style={[styles.row, large && styles.rowLarge, i < rows.length - 1 && styles.rowDivided]}
+                >
+                  <Text style={styles.rowLabel}>{row.label}</Text>
+                  <Switch
+                    testID="switch.settings.appLock"
+                    value={appLock.enabled}
+                    onValueChange={() => perform(row.action)}
+                    accessibilityLabel="App lock"
+                    trackColor={{ true: colors.teal }}
+                  />
+                </View>
+              ) : (
                 <TouchableOpacity
                   // Slugged from the label so a flow can reach a row without depending on
                   // its position in a list that grows — `row.settings.delete-account`.
@@ -114,7 +137,7 @@ export function SettingsScreen({ navigation, route }: Props) {
                   onPress={() => perform(row.action)}
                   accessibilityRole="button"
                   accessibilityLabel={row.value ? `${row.label}, ${row.value}` : row.label}
-                  style={[styles.row, large && styles.rowLarge, i < group.rows.length - 1 && styles.rowDivided]}
+                  style={[styles.row, large && styles.rowLarge, i < rows.length - 1 && styles.rowDivided]}
                 >
                   <Text style={[styles.rowLabel, row.danger && styles.rowLabelDanger]}>
                     {row.label}
@@ -127,7 +150,8 @@ export function SettingsScreen({ navigation, route }: Props) {
               ))}
             </View>
           </View>
-        ))}
+          );
+        })}
 
         <TouchableOpacity
           activeOpacity={0.75}

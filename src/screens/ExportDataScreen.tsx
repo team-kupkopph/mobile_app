@@ -15,6 +15,7 @@ import {
 
 import { EXPORT_TIMEOUT_MS } from "../api/client";
 import { useApi } from "../api/useApi";
+import { useStepUp } from "../auth/useStepUp";
 import { RootStackParamList } from "../navigation/types";
 import { exportErrorMessage, exportFilename, humanSize } from "../settings";
 import { Button, ScreenHeader } from "../components/ui";
@@ -37,6 +38,7 @@ type Ready = { name: string; size: number; uri: string };
 
 export function ExportDataScreen({ navigation }: Props) {
   const api = useApi();
+  const { run, prompt } = useStepUp();
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState<Ready | null>(null);
   const [error, setError] = useState<string | undefined>();
@@ -63,7 +65,14 @@ export function ExportDataScreen({ navigation }: Props) {
     setError(undefined);
 
     // P1 · its own, longer time limit — the document is built on request.
-    const res = await api.get("/me/export", { timeoutMs: EXPORT_TIMEOUT_MS });
+    // Plan Task 14c · with two-step verification on, the server asks for a code first; `run` asks once and retries once.
+    const out = await run((headers) => api.get("/me/export", { timeoutMs: EXPORT_TIMEOUT_MS, headers }));
+    if (out.kind !== "result") {
+      setBusy(false);
+      if (out.kind === "unavailable") setError(out.message);          // cancelled: nothing to say
+      return;
+    }
+    const res = out.res;
     if (!res.ok) {
       setBusy(false);
       // 429 is a real outcome here (throttled to 3/day), and a timeout is not "offline" (P1).
@@ -107,6 +116,7 @@ export function ExportDataScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.exportData">
+      {prompt}
       <ScreenHeader title="Export my data" onBack={() => navigation.goBack()} align="center" />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

@@ -330,7 +330,7 @@ describe("the wiring", () => {
     // DELETE /me answers 400 confirmation_required without {confirm: true}. The screen called
     // `api.del("/me")` with no body, so deleting an account never worked from the app (device walk).
     const src = read("screens", "DeleteAccountScreen.tsx");
-    expect(src).toContain('api.del("/me", { confirm: true })');
+    expect(src).toContain('api.del("/me", { confirm: true }, { headers })');
   });
 
   it("the delete screen is driven by the shared copy and its blockers are tappable", () => {

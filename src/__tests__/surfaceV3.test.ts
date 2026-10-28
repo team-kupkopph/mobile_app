@@ -57,6 +57,8 @@
 // Plan Task 9 (shelter Organization profile, backend#113) adds OrganizationProfileScreen, V3 from birth: one more on the backdrop.
 //
 // Plan Task 13 (change email) adds ChangeEmailScreen, V3 from birth: one more on the backdrop.
+//
+// Plan Task 14 (two-step verification) adds TwoStepScreen, V3 from birth: one more on the backdrop.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -125,6 +127,7 @@ describe("surface, re-derived", () => {
       "ShelterVolunteerEditScreen",
       "ShelterVolunteerScreen",
       "SigninScreen",
+      "TwoStepScreen",
       "WaiverScreen",
       "WaysToHelpScreen"
     ]);

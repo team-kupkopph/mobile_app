@@ -19,6 +19,7 @@ import {
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { useStepUp } from "../auth/useStepUp";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { RootStackParamList } from "../navigation/types";
@@ -44,6 +45,7 @@ export function DeleteAccountScreen({ navigation }: Props) {
   // At Dynamic Type AX3 and up the two side-by-side cards are about 150 pt wide each, so they stack.
   const large = useLargeText();
   const api = useApi();
+  const { run, prompt } = useStepUp();
   const { signOut, tokens } = useAuth();
   const { discardAllFor } = useOutbox();
   const [typed, setTyped] = useState("");
@@ -61,8 +63,12 @@ export function DeleteAccountScreen({ navigation }: Props) {
     setBusy(true);
     setError(undefined);
     // The server refuses to delete without an explicit {confirm: true}. This used to send no body at all.
-    const res = await api.del("/me", { confirm: true });
+    // Plan Task 14c · with two-step verification on, the server asks for a code first; `run` asks once and retries once.
+    const out = await run((headers) => api.del("/me", { confirm: true }, { headers }));
     setBusy(false);
+    if (out.kind === "cancelled") return;
+    if (out.kind === "unavailable") { setError(out.message); return; }
+    const res = out.res;
 
     if (res.status === 204) {
       // Every token is already dead server-side; clearing them locally drops us straight to
@@ -84,6 +90,7 @@ export function DeleteAccountScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.deleteAccount">
+      {prompt}
       <Header title="Delete account" navigation={navigation} />
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.h1} accessibilityRole="header" maxFontSizeMultiplier={maxFontScale.title}>{DELETE_TITLE}</Text>

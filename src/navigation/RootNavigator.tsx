@@ -21,6 +21,7 @@ import { ExportDataScreen } from "../screens/ExportDataScreen";
 import { SettingsPrivacyScreen } from "../screens/SettingsPrivacyScreen";
 import { ChangeEmailScreen } from "../screens/ChangeEmailScreen";
 import { ChangePasswordScreen } from "../screens/ChangePasswordScreen";
+import { TwoStepScreen } from "../screens/TwoStepScreen";
 import { OrganizationProfileScreen } from "../screens/OrganizationProfileScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { BadgeComparisonScreen } from "../screens/BadgeComparisonScreen";
@@ -205,6 +206,7 @@ export function RootNavigator() {
       <Stack.Screen name="settings" component={SettingsScreen} />
       <Stack.Screen name="changePassword" component={ChangePasswordScreen} />
       <Stack.Screen name="changeEmail" component={ChangeEmailScreen} />
+      <Stack.Screen name="twoStep" component={TwoStepScreen} />
       <Stack.Screen name="organizationProfile" component={OrganizationProfileScreen} />
       <Stack.Screen name="settingsPrivacy" component={SettingsPrivacyScreen} />
       <Stack.Screen name="deleteAccount" component={DeleteAccountScreen} />

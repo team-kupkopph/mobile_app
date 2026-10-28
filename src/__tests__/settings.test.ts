@@ -130,6 +130,6 @@ describe("exportErrorMessage", () => {
 
 test("P1 · the export screen asks for the export time limit and uses the helper", () => {
   const src = require("fs").readFileSync("src/screens/ExportDataScreen.tsx", "utf8");
-  expect(src).toContain('api.get("/me/export", { timeoutMs: EXPORT_TIMEOUT_MS })');
+  expect(src).toContain('api.get("/me/export", { timeoutMs: EXPORT_TIMEOUT_MS, headers })');
   expect(src).toContain("exportErrorMessage(res)");
 });
