@@ -10,7 +10,7 @@
 // size, vaccinated, spayed/neutered, walkable, temperament, requirements.
 // AQ8 · opened with a `petId` it prefills from that pet and links the listing to it.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View
 } from "react-native";
@@ -25,6 +25,8 @@ import {
   removePhoto, triAt, triFromBool, triIndex
 } from "../listingForm";
 import { TAP_SLOP } from "../touch";
+import { FieldErrors, FormField, birthdateError, serverFieldErrors } from "../petForm";
+import { uploadErrorMessage } from "../upload";
 import { RootStackParamList } from "../navigation/types";
 import { Me } from "../api/types";
 import { colors, radii, spacing, typography } from "../theme";
@@ -102,6 +104,23 @@ export function ListingFormScreen({ navigation, route }: Props) {
   const prefillFailed = (isEdit && res !== null && !res.ok) || petPrefillFailed;
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  // PP9/PP10 (My Pets review 2026-10-28) · a refusal sits under the field it is about, and the
+  // form scrolls to it; a photo that fails to upload says why under Photos.
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const scroll = useRef<InstanceType<typeof ScrollView>>(null);
+  const fieldY = useRef<Partial<Record<FormField, number>>>({});
+  const at = (field: FormField) => ({ onLayout: (e: { nativeEvent: { layout: { y: number } } }) => {
+    fieldY.current[field] = e.nativeEvent.layout.y;
+  } });
+  const edit = (field: FormField, set: (v: string) => void) => (v: string) => {
+    set(v);
+    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }));
+  };
+  function show(found: FieldErrors) {
+    setErrors(found);
+    const ys = Object.keys(found).map((f) => fieldY.current[f as FormField]).filter((y): y is number => y !== undefined);
+    if (ys.length) scroll.current?.scrollTo({ y: Math.max(0, Math.min(...ys) - 24), animated: true });
+  }
 
   useEffect(() => {
     if (!isEdit) return;
@@ -148,9 +167,11 @@ export function ListingFormScreen({ navigation, route }: Props) {
   async function pickPhoto() {
     if (uploadingPhoto) return;
     setUploadingPhoto(true);
+    setErrors((e) => ({ ...e, photos: undefined }));
     const res = await pickAndUpload(api, "listing_photo");
     setUploadingPhoto(false);
     if (res?.ok) setPhotos((p) => addPhoto(p, res.fileUrl));
+    else if (res) setErrors((e) => ({ ...e, photos: uploadErrorMessage(res.reason) }));   // null = cancelled
   }
 
   async function submit() {
@@ -164,12 +185,17 @@ export function ListingFormScreen({ navigation, route }: Props) {
           + "Check your connection and reopen this form.");
       return;
     }
-    if (!name.trim()) { setError("Give the listing a name."); return; }
+    setError(undefined);
+    const found: FieldErrors = {};
+    if (!name.trim()) found.name = "Give the listing a name.";
+    const dateProblem = birthdateError(birthdate);
+    if (dateProblem) found.birthdate = dateProblem;
     // Run 8 · the server answers a blank city with a bare "This field may not be blank." that names no field, and the
     // City field's grey placeholder ("Marikina") reads as a value when the person has no home city set.
-    if (!city.trim()) { setError("Add the city where the animal is."); return; }
+    if (!city.trim()) found.city = "Add the city where the animal is.";
+    if (Object.keys(found).length) { show(found); return; }
+    setErrors({});
     setSubmitting(true);
-    setError(undefined);
 
     const form: FormState = {
       name, species, breed, sex, birthdate, description, requirements, fee, city, size,
@@ -188,7 +214,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
     }
     const code = res.data?.error?.code;
     if (code === "fee_over_cap") {
-      setError(`The adoption fee can't exceed ₱${res.data.error.details?.cap ?? 500}.`);
+      show({ fee: `The adoption fee can't exceed ₱${res.data.error.details?.cap ?? 500}.` });
       return;
     }
     if (code === "pet_already_listed") {
@@ -207,7 +233,9 @@ export function ListingFormScreen({ navigation, route }: Props) {
       Alert.alert("Not your listing", "Only the poster can edit this listing.");
       return;
     }
-    setError(res.data?.error?.message ?? "Couldn't save. Try again.");
+    const refused = serverFieldErrors(res);
+    show(refused.fields);
+    setError(refused.form ?? undefined);
   }
 
   if (loading) {
@@ -225,7 +253,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title={isEdit ? "Edit listing" : "List an animal"} onBack={() => navigation.goBack()} />
 
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Rule 1: ABOVE the fields, on load. Learning the form can't save only after
             filling it in has already cost the person their time. */}
         {prefillFailed ? (
@@ -260,7 +288,10 @@ export function ListingFormScreen({ navigation, route }: Props) {
             </Text>
           </View>
         ) : null}
-        <Field label="Name" value={name} onChangeText={setName} placeholder="Bantay" />
+        <View {...at("name")}>
+          <Field label="Name" value={name} onChangeText={edit("name", setName)} placeholder="Bantay"
+            error={errors.name} errorTestID="error.listingForm.name" />
+        </View>
 
         <Text style={styles.label}>Animal</Text>
         <Segmented options={SPECIES} value={species} onChange={setSpecies} />
@@ -270,13 +301,17 @@ export function ListingFormScreen({ navigation, route }: Props) {
         <Text style={styles.label}>Sex</Text>
         <Segmented options={SEX} value={sex} onChange={setSex} />
 
-        <Field
-          label="Birthdate (optional)"
-          value={birthdate}
-          onChangeText={setBirthdate}
-          placeholder="YYYY-MM-DD"
-          keyboardType="numbers-and-punctuation"
-        />
+        <View {...at("birthdate")}>
+          <Field
+            label="Birthdate (optional)"
+            value={birthdate}
+            onChangeText={edit("birthdate", setBirthdate)}
+            placeholder="YYYY-MM-DD"
+            keyboardType="numbers-and-punctuation"
+            error={errors.birthdate}
+            errorTestID="error.listingForm.birthdate"
+          />
+        </View>
 
         <Field
           label="Description (optional)"
@@ -319,20 +354,27 @@ export function ListingFormScreen({ navigation, route }: Props) {
         <Field label="Temperament (optional)" value={temperament} onChangeText={setTemperament}
           placeholder="Calm, good with kids" />
 
-        <Field
-          label="Adoption fee (₱)"
-          value={fee}
-          onChangeText={setFee}
-          keyboardType="decimal-pad"
-          placeholder="0"
-        />
+        <View {...at("fee")}>
+          <Field
+            label="Adoption fee (₱)"
+            value={fee}
+            onChangeText={edit("fee", setFee)}
+            keyboardType="decimal-pad"
+            placeholder="0"
+            error={errors.fee}
+            errorTestID="error.listingForm.fee"
+          />
+        </View>
         <Text style={styles.fine}>
           Tier-1 rescues and individual Verified Members are capped at ₱500. Registered NGOs aren't capped.
         </Text>
 
-        <Field label="City" value={city} onChangeText={setCity} placeholder="Marikina" />
+        <View {...at("city")}>
+          <Field label="City" value={city} onChangeText={edit("city", setCity)} placeholder="Marikina"
+            error={errors.city} errorTestID="error.listingForm.city" />
+        </View>
 
-        <Text style={styles.label}>Photos (optional)</Text>
+        <Text style={styles.label} {...at("photos")}>Photos (optional)</Text>
         <Text style={styles.fine}>Up to {MAX_PHOTOS}. The first is the one adopters see on the deck.</Text>
         <View style={styles.photoGrid}>
           {photos.map((url, i) => (
@@ -362,8 +404,11 @@ export function ListingFormScreen({ navigation, route }: Props) {
               : <Text style={styles.photoText}>{photos.length ? "Add another photo" : "Add a photo"}</Text>}
           </TouchableOpacity>
         ) : null}
+        {errors.photos ? (
+          <Text style={styles.fieldError} accessibilityRole="alert" testID="error.listingForm.photos">{errors.photos}</Text>
+        ) : null}
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={styles.error} accessibilityRole="alert">{error}</Text> : null}
 
         <Button
           label={isEdit ? "Save changes" : "Save draft"}
@@ -416,5 +461,6 @@ const styles = StyleSheet.create({
   photoBtn: { marginTop: 12, minHeight: 90, paddingVertical: 12, paddingHorizontal: 12, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
+  fieldError: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "600" },
   submit: { marginTop: 26 }
 });

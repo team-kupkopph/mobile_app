@@ -83,6 +83,8 @@ describe("the form screen", () => {
 
 describe("a blank city (Run 8, R8-F1)", () => {
   it("is caught before the request, in words, instead of the server's nameless 'may not be blank'", () => {
-    expect(read("screens/ListingFormScreen.tsx")).toMatch(/if \(!city\.trim\(\)\) \{ setError\("Add the city where the animal is\."\); return; \}/);
+    // PP9 · the refusal now sits under the City field instead of at the foot of the form.
+    expect(read("screens/ListingFormScreen.tsx")).toMatch(/if \(!city\.trim\(\)\) found\.city = "Add the city where the animal is\.";/);
+    expect(read("screens/ListingFormScreen.tsx")).toMatch(/error=\{errors\.city\}/);
   });
 });
