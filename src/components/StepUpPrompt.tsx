@@ -2,7 +2,8 @@
 // A code went to the account's verified email; typing it here trades it for a short-lived step-up token (the
 // logic is src/stepUp.ts). Wrong codes show their error and the prompt stays; only Cancel closes it empty-handed.
 import { useState } from "react";
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
 import { requestStepUpCode, verifyStepUp } from "../stepUp";
@@ -15,6 +16,7 @@ export function StepUpPrompt({ sentTo, onToken, onCancel }: {
   onCancel: () => void;
 }) {
   const api = useApi();
+  const insets = useSafeAreaInsets();
   const [code, setCode] = useState("");
   const [message, setMessage] = useState<string | undefined>(undefined);
   const [sentNote, setSentNote] = useState<string | undefined>(undefined);
@@ -50,7 +52,15 @@ export function StepUpPrompt({ sentTo, onToken, onCancel }: {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onCancel}>
-      <View style={styles.scrim}>
+      {/* At the largest text size the card is taller than the screen. It scrolls, clears the notch and the home
+          indicator, and follows the keyboard, so Cancel is always reachable (the AX5 walk found it cut off). */}
+      <ScrollView
+        style={styles.scrim}
+        contentContainerStyle={[styles.scroller, { paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.lg }]}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        showsVerticalScrollIndicator={false}
+      >
         <Card style={styles.card} testID="prompt.stepUp">
           <Text style={styles.title} accessibilityRole="header" maxFontSizeMultiplier={maxFontScale.title}>
             Confirm it&apos;s you
@@ -77,13 +87,15 @@ export function StepUpPrompt({ sentTo, onToken, onCancel }: {
           <Button testID="btn.stepUp.cancel" label="Cancel" variant="secondary" onPress={onCancel}
                   style={styles.secondary} />
         </Card>
-      </View>
+      </ScrollView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  scrim: { flex: 1, backgroundColor: "rgba(18,33,58,0.45)", justifyContent: "center", padding: spacing.lg },
+  scrim: { flex: 1, backgroundColor: "rgba(18,33,58,0.45)" },
+  // flexGrow, not flex: the card is centred when it fits and the content simply grows (and scrolls) when it does not.
+  scroller: { flexGrow: 1, justifyContent: "center", paddingHorizontal: spacing.lg },
   card: { borderRadius: radii.card },
   title: { color: colors.ink, ...typography.title },
   body: { color: colors.muted, ...typography.body, marginTop: 6 },
