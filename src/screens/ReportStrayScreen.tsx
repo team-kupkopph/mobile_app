@@ -166,7 +166,13 @@ export function ReportStrayScreen({ navigation, route }: Props) {
     setPetsRes(null);
     api.get("/me/pets").then((r) => {
       setPetsRes({ ok: r.ok, status: r.status });
-      if (r.ok) setPets(r.data?.results ?? []);
+      if (r.ok) {
+        const results: MyPet[] = r.data?.results ?? [];
+        setPets(results);
+        // PP12 · opened from a pet's screen: that pet is the one that's lost.
+        const from = results.find((p) => p.pet_id === route.params?.petId);
+        if (from) choosePet(from);
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- stable api
   }, []);

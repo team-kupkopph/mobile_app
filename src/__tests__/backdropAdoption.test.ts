@@ -64,7 +64,8 @@ describe("V3 screens sit on the backdrop", () => {
     // 50 -> 51: OrganizationProfileScreen, plan Task 9 shelter profile (backend#113), born V3.
     // 51 -> 52: ChangeEmailScreen, plan Task 13 change email (backend: POST /me/email), born V3.
     // 52 -> 53: TwoStepScreen, plan Task 14 two-step verification (backend: /me/2fa/*), born V3.
-    expect(V3_SCOPE.length).toBe(53);
+    // 53 -> 54: PetDetailScreen, PP12 one pet and its actions (My Pets review 2026-10-28), born V3.
+    expect(V3_SCOPE.length).toBe(54);
   });
 
   it("every in-scope screen not in the holdout list renders ScreenBackdrop", () => {
