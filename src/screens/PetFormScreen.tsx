@@ -1,10 +1,12 @@
 // AQ8 · add a pet you already have. Before this, the only way a Pet existed was by adopting one,
 // so an owner had no pet to rehome and no place to keep its details. POST /me/pets.
 // PP12 · opened with a `petId` it edits that pet instead (GET, then PATCH /me/pets/{id}).
+// PP9/PP10 · a refusal is shown under the field it is about (and the form scrolls to it); a photo
+// that fails to upload says why under Photos instead of silently doing nothing.
 // The vet contact and medical notes travel with the pet if it is later rehomed (the new owner
 // keeps them), which is why they are asked here.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { PetDetail } from "../api/types";
@@ -15,8 +17,9 @@ import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui"
 import { MAX_PHOTOS, TRI_LABELS, Tri, addPhoto, removePhoto, triAt, triFromBool, triIndex, triToBool } from "../listingForm";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { PetFormState, petBody, petFormError, petPatchBody } from "../petForm";
+import { FieldErrors, FormField, PetFormState, birthdateError, petBody, petPatchBody, serverFieldErrors } from "../petForm";
 import { TAP_SLOP } from "../touch";
+import { uploadErrorMessage } from "../upload";
 import { colors, radii, spacing, typography } from "../theme";
 
 const SPECIES = ["dog", "cat", "other"] as const;
@@ -41,6 +44,22 @@ export function PetFormScreen({ navigation, route }: Props) {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const scroll = useRef<InstanceType<typeof ScrollView>>(null);
+  const fieldY = useRef<Partial<Record<FormField, number>>>({});
+  const at = (field: FormField) => ({ onLayout: (e: { nativeEvent: { layout: { y: number } } }) => {
+    fieldY.current[field] = e.nativeEvent.layout.y;
+  } });
+  /** A field's setter that also clears that field's error: the person is fixing it. */
+  const edit = (field: FormField, set: (v: string) => void) => (v: string) => {
+    set(v);
+    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }));
+  };
+  function show(found: FieldErrors) {
+    setErrors(found);
+    const ys = Object.keys(found).map((f) => fieldY.current[f as FormField]).filter((y): y is number => y !== undefined);
+    if (ys.length) scroll.current?.scrollTo({ y: Math.max(0, Math.min(...ys) - 24), animated: true });
+  }
   // Rule 3 (prefillGuards): an edit whose load failed would PATCH blanks over the pet's real
   // details, so keep the result and refuse to save on a failure.
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -63,9 +82,11 @@ export function PetFormScreen({ navigation, route }: Props) {
   async function pickPhoto() {
     if (uploading) return;
     setUploading(true);
+    setErrors((e) => ({ ...e, photos: undefined }));
     const res = await pickAndUpload(api, "listing_photo");
     setUploading(false);
     if (res?.ok) setPhotos((p) => addPhoto(p, res.fileUrl));
+    else if (res) setErrors((e) => ({ ...e, photos: uploadErrorMessage(res.reason) }));   // null = cancelled
   }
 
   async function submit() {
@@ -75,9 +96,14 @@ export function PetFormScreen({ navigation, route }: Props) {
         + "Check your connection and reopen this form.");
       return;
     }
-    if (!name.trim()) { setError("Give your pet a name."); return; }
-    setSubmitting(true);
     setError(undefined);
+    const found: FieldErrors = {};
+    if (!name.trim()) found.name = "Give your pet a name.";
+    const dateProblem = birthdateError(birthdate);
+    if (dateProblem) found.birthdate = dateProblem;
+    if (Object.keys(found).length) { show(found); return; }
+    setErrors({});
+    setSubmitting(true);
     const state: PetFormState = { name, species, breed, sex, birthdate, size: "", spayed: triToBool(spayed),
       temperament, medical, vet, photos };
     const saved = isEdit
@@ -85,42 +111,53 @@ export function PetFormScreen({ navigation, route }: Props) {
       : await api.post("/me/pets", petBody(state));
     setSubmitting(false);
     if (saved.ok) { navigation.goBack(); return; }
-    setError(petFormError(saved.data?.error?.code) ?? saved.data?.error?.message ?? "Couldn't save. Try again.");
+    const refused = serverFieldErrors(saved);
+    show(refused.fields);
+    setError(refused.form ?? undefined);
   }
 
   return (
     <View style={styles.screen} testID="screen.petForm">
       <ScreenBackdrop />
       <ScreenHeader title={isEdit ? "Edit pet" : "Add a pet"} onBack={() => navigation.goBack()} />
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
+      <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
         contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {prefillFailed ? (
           <PrefillWarning message={"We couldn't load this pet, so this form can't be saved yet — check your "
             + "connection and reopen it."} />
         ) : null}
-        <Field label="Name" value={name} onChangeText={setName} placeholder="Mochi" testID="field.petForm.name" />
+        <View {...at("name")}>
+          <Field label="Name" value={name} onChangeText={edit("name", setName)} placeholder="Mochi"
+            testID="field.petForm.name" error={errors.name} errorTestID="error.petForm.name" />
+        </View>
 
         <Text style={styles.label}>Animal</Text>
         <Seg options={SPECIES} value={species} onChange={setSpecies} />
 
-        <Field label="Breed (optional)" value={breed} onChangeText={setBreed} placeholder="Puspin" />
+        <Field label="Breed (optional)" value={breed} onChangeText={edit("breed", setBreed)} placeholder="Puspin"
+          error={errors.breed} />
 
         <Text style={styles.label}>Sex</Text>
         <Seg options={SEX} value={sex} onChange={setSex} />
 
-        <Field label="Birthdate (optional)" value={birthdate} onChangeText={setBirthdate}
-          placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
+        <View {...at("birthdate")}>
+          <Field label="Birthdate (optional)" value={birthdate} onChangeText={edit("birthdate", setBirthdate)}
+            placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" testID="field.petForm.birthdate"
+            error={errors.birthdate} errorTestID="error.petForm.birthdate" />
+        </View>
 
         <Text style={styles.label}>Spayed / neutered</Text>
         <SegmentedControl segments={[...TRI_LABELS]} index={triIndex(spayed)} onChange={(i) => setSpayed(triAt(i))} />
 
-        <Field label="Temperament (optional)" value={temperament} onChangeText={setTemperament} placeholder="Lap cat" />
-        <Field label="Medical notes (optional)" value={medical} onChangeText={setMedical} multiline
-          placeholder="Allergies, conditions, medication" />
-        <Field label="Vet contact (optional)" value={vet} onChangeText={setVet} placeholder="Dr Reyes, 0917…" />
+        <Field label="Temperament (optional)" value={temperament} onChangeText={edit("temperament", setTemperament)}
+          placeholder="Lap cat" error={errors.temperament} />
+        <Field label="Medical notes (optional)" value={medical} onChangeText={edit("medical", setMedical)} multiline
+          placeholder="Allergies, conditions, medication" error={errors.medical} />
+        <Field label="Vet contact (optional)" value={vet} onChangeText={edit("vet", setVet)} placeholder="Dr Reyes, 0917…"
+          error={errors.vet} />
         <Text style={styles.fine}>If you rehome this pet, the next owner keeps these notes.</Text>
 
-        <Text style={styles.label}>Photos (optional)</Text>
+        <Text style={styles.label} {...at("photos")}>Photos (optional)</Text>
         <View style={styles.photoGrid}>
           {photos.map((url, i) => (
             <View key={url} style={styles.photoCell}>
@@ -138,8 +175,11 @@ export function PetFormScreen({ navigation, route }: Props) {
               : <Text style={styles.photoText}>{photos.length ? "Add another photo" : "Add a photo"}</Text>}
           </TouchableOpacity>
         ) : null}
+        {errors.photos ? (
+          <Text style={styles.fieldError} accessibilityRole="alert" testID="error.petForm.photos">{errors.photos}</Text>
+        ) : null}
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={styles.error} accessibilityRole="alert">{error}</Text> : null}
         <Button label="Save pet" onPress={submit} loading={submitting} testID="btn.petForm.save" style={styles.submit} />
       </ScrollView>
     </View>
@@ -171,5 +211,6 @@ const styles = StyleSheet.create({
   photoBtn: { marginTop: 12, minHeight: 90, paddingVertical: 12, paddingHorizontal: 12, borderRadius: radii.field, borderWidth: 2, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" },
   photoText: { color: colors.teal, ...typography.subtitle, fontWeight: "700" },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },
+  fieldError: { marginTop: 8, color: colors.danger, ...typography.meta, fontWeight: "600" },
   submit: { marginTop: 26 }
 });
