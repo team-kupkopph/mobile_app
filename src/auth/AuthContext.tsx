@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
 import { clearCache } from "../cache";
+import { clearAppLockPreference } from "./appLockStore";
 import { signOutWithRevoke } from "./logout";
 import { createContext, useContext, useEffect, useState } from "react";
 
@@ -57,6 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // the next person to sign in would open the app to someone else's feeds. Hooked HERE
       // rather than in signOut() because the silent expiry path bypasses signOut entirely.
       await clearCache();
+      // Plan Task 14b · the app-lock preference is per signed-in account on this phone: forgotten here for the
+      // same reason as the city and the cache (a silent expiry bypasses signOut).
+      await clearAppLockPreference();
     }
   }
 

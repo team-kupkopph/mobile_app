@@ -145,6 +145,8 @@ export type RowAction =
   | { type: "navigate"; name: RouteName; params?: object }
   | { type: "popTo"; name: RouteName; params?: object }
   | { type: "logoutAll" }
+  /** Plan Task 14b · a switch, not a destination; the screen hides it on a device without biometrics. */
+  | { type: "appLock" }
   | { type: "link"; url: string };
 export type SettingsRow = { key: string; label: string; value?: string; danger?: boolean; action: RowAction };
 export type SettingsGroup = { title: string; rows: SettingsRow[] };
@@ -202,9 +204,11 @@ export function settingsGroups(opts: {
   return [
     { title: "ACCOUNT", rows: account },
     // Plan Task 14 · the one place a person decides how hard their account is to take over or empty out.
-    // (App lock joins this group when the native module lands.) No value on the row: Settings has no load.
+    // No value on the rows: Settings has no load. App lock is a switch the screen only shows when the device has
+    // biometrics enrolled.
     { title: "SECURITY", rows: [
       { key: "twoStep", label: "Two-step verification", action: { type: "navigate", name: "twoStep" } },
+      { key: "appLock", label: "App lock", action: { type: "appLock" } },
     ] },
     { title: "PRIVACY", rows: [
       { key: "privacyControls", label: "Privacy controls", value: privacySummary(),

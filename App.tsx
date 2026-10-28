@@ -3,6 +3,7 @@ import { LogBox } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { AppLockGate } from "./src/auth/AppLockGate";
 import { AuthProvider } from "./src/auth/AuthContext";
 import { SessionGuard } from "./src/auth/SessionGuard";
 import { OfflineBanner } from "./src/components/OfflineBanner";
@@ -50,7 +51,10 @@ export default function App() {
           {/* US-E4 · registers this install's push token and routes a tapped
               notification through the type whitelist. Renders nothing. */}
           <PushBridge navRef={navRef} />
-          <RootNavigator />
+          {/* Plan Task 14b · the opt-in biometric lock; above every screen, inert for a guest. */}
+          <AppLockGate>
+            <RootNavigator />
+          </AppLockGate>
           {/* Above the floating tab bar, never covering a primary action. */}
           <OfflineBanner />
         </NavigationContainer>

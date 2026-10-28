@@ -82,6 +82,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       NSCameraUsageDescription:
         "Kupkop uses your camera to photograph an animal you're reporting or listing. " +
         "Photos are stripped of location data before anyone else can see them.",
+      // Plan Task 14b · required for Face ID; without it iOS refuses the prompt (it would fall back to the passcode).
+      NSFaceIDUsageDescription:
+        "Kupkop uses Face ID only if you turn on App lock, to unlock the app. Your face data never leaves your phone.",
       NSPhotoLibraryUsageDescription:
         "Kupkop needs your photo library to attach pictures to a report, listing or story. " +
         "Only the photos you pick are uploaded.",
@@ -108,6 +111,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     "expo-asset",
     "expo-secure-store",
     "expo-web-browser",        // the auth sheet Google sign-in opens (US-A2 / S0-06)
+    [
+      "expo-local-authentication",   // Plan Task 14b · the opt-in biometric App lock
+      {
+        faceIDPermission:
+          "Kupkop uses Face ID only if you turn on App lock, to unlock the app. Your face data never leaves your phone.",
+      },
+    ],
     [
       "expo-location",
       {
