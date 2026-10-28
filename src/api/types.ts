@@ -228,7 +228,8 @@ export type ShelterDashboard = {
     status: VerificationStatus | null;
     docs: { doc_type: string; status: string }[];
   };
-  counts: { draft_listings: number; adopted: number; donations: number; live_listings?: number };
+  // `volunteers` (backend#113): distinct people who took part in the shelter's shifts. Optional: an older server omits it.
+  counts: { draft_listings: number; adopted: number; donations: number; live_listings?: number; volunteers?: number };
   gates: { can_publish: boolean; donations_enabled: boolean };
   volunteer: ShelterDashboardVolunteer;
   // S16 · the Rescue card. needs_help is null (never 0) when the map can't search the city.

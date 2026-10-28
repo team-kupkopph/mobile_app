@@ -180,6 +180,8 @@ export type RootStackParamList = {
   settings: { shelter?: boolean } | undefined;
   settingsPrivacy: undefined;
   changePassword: undefined;
+  // Plan Task 9 · the shelter's own profile: name, logo, description, hours and its private contacts.
+  organizationProfile: undefined;
   deleteAccount: undefined;
   exportData: undefined;
   // US-B2 · My impact: the badge grid + a single badge's detail.

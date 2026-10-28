@@ -12,7 +12,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { OwnQr, youRowValue } from "../ownQr";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Me, ShelterDashboard, ShelterTier } from "../api/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -68,6 +68,10 @@ export function ShelterProfileScreen({ navigation }: Props) {
     });
   }
   const [me, setMe] = useState<Me | null>(null);
+  // Plan Task 9 · the ORGANISATION's name and logo (GET /shelter/profile). The header used to show the account's display
+  // name and a glyph. Until this loads (or if it fails) the header falls back to those — a stand-in, never a blank.
+  const [org, setOrg] = useState<{ name: string; logoUrl: string | null } | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   // DW2 (backend#93) · the shelter's own QRs, so the Donation QR row says On only when a QR is live (AT5).
   const [ownQr, setOwnQr] = useState<OwnQr[] | null>(null);
@@ -90,6 +94,9 @@ export function ShelterProfileScreen({ navigation }: Props) {
       api.get("/me").then((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setMe(r.data);
+      });
+      api.get("/shelter/profile").then((r) => {
+        if (r.ok) { setOrg({ name: r.data.org_name, logoUrl: r.data.logo_url ?? null }); setLogoFailed(false); }
       });
       api.get("/shelter/dashboard").then((r) => { if (r.ok) setDash(r.data); });
       api.get("/shelter/donation-qr").then((r) => { if (r.ok) setOwnQr(r.data.donation_qrs ?? []); });
@@ -128,7 +135,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
     || me?.shelter?.verification_status === "needs_info");
   const badge = isTier1 ? "Verified Rescue" : "Verified Shelter";
   const sub = isTier1 ? "Community rescue" : "Registered NGO";
-  const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
+  const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0, volunteers: 0 };
 
   // US-R1 · when the load FAILED and we have nothing, say so instead of rendering the
   // `?? ` fallbacks below as fact. Those fallbacks are correct defaults for a shelter that
@@ -169,10 +176,17 @@ export function ShelterProfileScreen({ navigation }: Props) {
         <Text style={styles.pageTitle} maxFontSizeMultiplier={maxFontScale.title}>Profile</Text>
 
         <Card tone="hero" style={styles.identityCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarGlyph} allowFontScaling={false}>{isTier1 ? "♥" : "▦"}</Text>
-          </View>
-          <Text style={styles.orgName} maxFontSizeMultiplier={maxFontScale.title}>{me?.display_name ?? "Your shelter"}</Text>
+          {org?.logoUrl && !logoFailed ? (
+            <Image source={{ uri: org.logoUrl }} style={styles.avatarImage} accessibilityLabel="Your organization's logo"
+                   onError={() => setLogoFailed(true)} />
+          ) : (
+            <View style={styles.avatar}>
+              <Text style={styles.avatarGlyph} allowFontScaling={false}>{isTier1 ? "♥" : "▦"}</Text>
+            </View>
+          )}
+          <Text style={styles.orgName} maxFontSizeMultiplier={maxFontScale.title}>
+            {org?.name ?? me?.display_name ?? "Your shelter"}
+          </Text>
 
           {gated ? (
             // F13 · the chip told the card's lie too: "Under review" with nothing sent.
@@ -192,15 +206,16 @@ export function ShelterProfileScreen({ navigation }: Props) {
         <View style={[styles.statRow, large && styles.statRowLarge]}>
           <Stat n={counts.draft_listings} label={gated ? (isTier1 ? "Draft" : "Drafts") : "Listings"} large={large} />
           <Stat n={counts.adopted} label="Adopted" large={large} />
-          <Stat n={0} label="Volunteers" large={large} />
+          <Stat n={counts.volunteers ?? 0} label="Volunteers" large={large} />
         </View>
 
         <Text style={styles.groupTitle} maxFontSizeMultiplier={maxFontScale.title}>Organization</Text>
         <Card style={styles.group}>
-          {/* F-R3-4 · "Organization details" was a row here with a chevron and no onPress.
-              There is no screen to edit an existing org (ShelterSetup is POST-only and 409s
-              once the profile exists), so the row is gone rather than left as a dead tap.
-              Bring it back WITH its screen. */}
+          {/* F-R3-4 removed a dead "Organization details" row until its screen existed. Plan Task 9 brought it
+              back WITH its screen: name, logo, description, hours and the private contacts. */}
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("organizationProfile")}>
+            <Row label="Organization profile" />
+          </TouchableOpacity>
           {/* US-Q1 · was a dead row (no onPress at all, same shape as the "+ List an
               animal" dead button US-A2 found) — upload works pre-approval (decision 2's
               draft-first pattern), donations just stay off until the org is approved. */}
@@ -358,6 +373,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors.teal
   },
+  avatarImage: { width: 96, height: 96, borderRadius: squircle(96) },
   avatarGlyph: { color: "#FFFFFF", fontSize: 40, fontWeight: "900" },
   orgName: { marginTop: 16, color: colors.ink, ...typography.hero },
   chip: {
