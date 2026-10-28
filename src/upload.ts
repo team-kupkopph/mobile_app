@@ -50,7 +50,9 @@ export type UploadPurpose =
   | "stray_photo" | "listing_photo" | "rescue_outcome_photo"
   | "donation_qr" | "verification_doc" | "story_photo"
   // Plan Task 9 · a shelter's logo, shown to donors on its public wishlist (backend#113 added the purpose).
-  | "shelter_logo";
+  | "shelter_logo"
+  // A person's own avatar, shown to others on stories and comments.
+  | "profile_photo";
 
 export type UploadDeps = {
   /** Strip EXIF + downscale. Returns the processed file's uri. */

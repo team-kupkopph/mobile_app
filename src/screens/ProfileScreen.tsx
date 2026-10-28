@@ -20,7 +20,9 @@ import { useOutbox } from "../outbox/OutboxProvider";
 import { confirmLogout } from "../auth/confirmLogout";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
+import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
+import { changeProfilePhoto, removeProfilePhoto } from "../profilePhoto";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
@@ -58,6 +60,10 @@ export function ProfileScreen({ navigation, route }: Props) {
   const [draftName, setDraftName] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | undefined>(undefined);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  // A photo that will not load shows the initials, not an empty tile; a new address gets a fresh try.
+  const [photoBroken, setPhotoBroken] = useState(false);
+  const [photoError, setPhotoError] = useState<string | undefined>(undefined);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
@@ -83,6 +89,8 @@ export function ProfileScreen({ navigation, route }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- setCity is recreated each render; the guard is `city`
   }, [isReady, me, city]);
 
+  useEffect(() => { setPhotoBroken(false); }, [me?.photo_url]);
+
   const pendingMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "pending") ?? false;
   const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
 
@@ -107,6 +115,20 @@ export function ProfileScreen({ navigation, route }: Props) {
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  // The avatar is an upload, not a link: pick -> `profile_photo` upload -> PATCH /me (profilePhoto.ts).
+  async function runPhoto(action: () => ReturnType<typeof removeProfilePhoto>) {
+    if (photoBusy) return;
+    setPhotoBusy(true);
+    setPhotoError(undefined);
+    try {
+      const out = await action();
+      if (out.kind === "saved") setMe(out.me);
+      else if (out.kind === "failed") setPhotoError(out.message);      // cancelled: nothing to say
+    } finally {
+      setPhotoBusy(false);
     }
   }
 
@@ -172,8 +194,9 @@ export function ProfileScreen({ navigation, route }: Props) {
 
         <View style={styles.card}>
           <View style={styles.avatar}>
-            {me?.photo_url ? (
-              <Image source={{ uri: me.photo_url } as ImageSourcePropType} style={styles.avatarImage} />
+            {me?.photo_url && !photoBroken ? (
+              <Image source={{ uri: me.photo_url } as ImageSourcePropType} style={styles.avatarImage}
+                     onError={() => setPhotoBroken(true)} />
             ) : (
               <Text style={styles.avatarInitials} allowFontScaling={false}>{initialsOf(me?.display_name ?? "")}</Text>
             )}
@@ -205,6 +228,19 @@ export function ProfileScreen({ navigation, route }: Props) {
               <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={startEdit} style={styles.editLinkWrap}>
                 <Text style={styles.editLink}>Edit profile</Text>
               </TouchableOpacity>
+              <View style={styles.photoLinks}>
+                <TouchableOpacity testID="btn.profile.changePhoto" hitSlop={TAP_SLOP} activeOpacity={0.75}
+                                  onPress={() => runPhoto(() => changeProfilePhoto(api, () => pickAndUpload(api, "profile_photo")))}>
+                  <Text style={styles.editLink}>{photoBusy ? "Saving…" : me?.photo_url ? "Change photo" : "Add a photo"}</Text>
+                </TouchableOpacity>
+                {me?.photo_url && !photoBusy ? (
+                  <TouchableOpacity testID="btn.profile.removePhoto" hitSlop={TAP_SLOP} activeOpacity={0.75}
+                                    onPress={() => runPhoto(() => removeProfilePhoto(api))}>
+                    <Text style={styles.removePhoto}>Remove</Text>
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+              {!!photoError && <Text style={styles.saveError} accessibilityRole="alert">{photoError}</Text>}
             </>
           )}
 
@@ -350,6 +386,19 @@ const styles = StyleSheet.create({
   },
   editLinkWrap: {
     marginTop: 10
+  },
+  photoLinks: {
+    marginTop: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    columnGap: 20,
+    rowGap: 8
+  },
+  removePhoto: {
+    color: colors.muted,
+    ...typography.meta,
+    fontWeight: "800"
   },
   editLink: {
     color: colors.teal,
