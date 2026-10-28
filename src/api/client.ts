@@ -29,7 +29,9 @@ export const REQUEST_TIMEOUT_MS = 20000;
 // P1 · GET /me/export builds the whole document synchronously and can legitimately take longer than
 // the 20 s every other call gets; it opts into this limit per call so a slow build is not a "timeout".
 export const EXPORT_TIMEOUT_MS = 120000;
-export type RequestOptions = { timeoutMs?: number };
+// Plan Task 14c · `headers` carries per-call extras; today that is `X-Step-Up` (src/stepUp.ts). They ride on the
+// refresh retry too, because that retry is the same logical call.
+export type RequestOptions = { timeoutMs?: number; headers?: Record<string, string> };
 const TIMEOUT: ApiResult = {
   ok: false, status: 0,
   data: { error: { code: "timeout", message: "The server took too long to answer." } }
@@ -60,7 +62,7 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
   ): Promise<ApiResult> {
     const tokens = getTokens();
     const access = accessOverride ?? tokens?.access;
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = { "Content-Type": "application/json", ...opts?.headers };
     if (access) headers.Authorization = `Bearer ${access}`;
 
     const first = await fetchWithTimeout(`${BASE}${path}`, {

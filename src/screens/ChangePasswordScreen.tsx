@@ -10,6 +10,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { useStepUp } from "../auth/useStepUp";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
 import {
@@ -25,6 +26,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "changePassword">;
 
 export function ChangePasswordScreen({ navigation }: Props) {
   const api = useApi();
+  const { run, prompt } = useStepUp();
   const { setTokens } = useAuth();
 
   const [current, setCurrent] = useState("");
@@ -46,7 +48,11 @@ export function ChangePasswordScreen({ navigation }: Props) {
 
     setBusy(true);
     try {
-      const res = await api.post("/me/password", { current_password: current, new_password: next });
+      // Plan Task 14c · with two-step verification on, the server asks for a code first; `run` asks once and retries once.
+      const out = await run((headers) => api.post("/me/password", { current_password: current, new_password: next }, { headers }));
+      if (out.kind === "cancelled") return;
+      if (out.kind === "unavailable") { setFormError(out.message); return; }
+      const res = out.res;
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
         Alert.alert("Password changed", "You've been signed out on your other devices.");
@@ -64,6 +70,7 @@ export function ChangePasswordScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.changePassword">
+      {prompt}
       <ScreenBackdrop />
       <ScreenHeader title="Change password" onBack={() => navigation.goBack()} align="center" />
 

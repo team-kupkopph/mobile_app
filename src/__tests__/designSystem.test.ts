@@ -38,6 +38,7 @@ const CONVERTED = [
   "AdoptScreen.tsx",
   "ChangePasswordScreen.tsx",
   "ChangeEmailScreen.tsx",
+  "TwoStepScreen.tsx",
   "OrganizationProfileScreen.tsx",
   "ListingDetailScreen.tsx",
   "ListingFormScreen.tsx",

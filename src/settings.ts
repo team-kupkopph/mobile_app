@@ -201,6 +201,11 @@ export function settingsGroups(opts: {
 
   return [
     { title: "ACCOUNT", rows: account },
+    // Plan Task 14 · the one place a person decides how hard their account is to take over or empty out.
+    // (App lock joins this group when the native module lands.) No value on the row: Settings has no load.
+    { title: "SECURITY", rows: [
+      { key: "twoStep", label: "Two-step verification", action: { type: "navigate", name: "twoStep" } },
+    ] },
     { title: "PRIVACY", rows: [
       { key: "privacyControls", label: "Privacy controls", value: privacySummary(),
         action: { type: "navigate", name: "settingsPrivacy" } },

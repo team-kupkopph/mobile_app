@@ -17,6 +17,8 @@ export type Me = {
   account_id: string; account_type: "personal" | "shelter" | "admin";
   display_name: string; email: string; email_verified_at: string | null;
   phone: string | null; phone_verified_at?: string | null; photo_url: string | null;
+  /** Plan Task 14: opt-in OTP step-up for the sensitive actions. Absent from an older server. */
+  two_factor_enabled?: boolean;
   capabilities: Capability[];
   shelter: { tier: ShelterTier; verification_status: VerificationStatus | null } | null;
   // The GATE, served: may this account's listings be shown (backend `public_poster_q` —

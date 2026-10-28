@@ -12,6 +12,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
+import { useStepUp } from "../auth/useStepUp";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Field, ScreenHeader } from "../components/ui";
 import {
@@ -29,6 +30,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "changeEmail">;
 
 export function ChangeEmailScreen({ navigation }: Props) {
   const api = useApi();
+  const { run, prompt } = useStepUp();
   const { setTokens } = useAuth();
 
   const [step, setStep] = useState<"enter" | "code">("enter");
@@ -51,7 +53,11 @@ export function ChangeEmailScreen({ navigation }: Props) {
 
     setBusy(true);
     try {
-      const res = await api.post("/me/email", { new_email: newEmail.trim(), password });
+      // Plan Task 14c · with two-step verification on, the server asks for a code first; `run` asks once and retries once.
+      const out = await run((headers) => api.post("/me/email", { new_email: newEmail.trim(), password }, { headers }));
+      if (out.kind === "cancelled") return;
+      if (out.kind === "unavailable") { setFormError(out.message); return; }
+      const res = out.res;
       if (res.ok) {
         setCode("");
         setCodeMessage(undefined);
@@ -92,6 +98,7 @@ export function ChangeEmailScreen({ navigation }: Props) {
 
   return (
     <View style={styles.screen} testID="screen.changeEmail">
+      {prompt}
       <ScreenBackdrop />
       <ScreenHeader title="Change email" onBack={() => navigation.goBack()} align="center" />
 

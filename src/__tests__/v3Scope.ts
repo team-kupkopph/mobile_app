@@ -122,7 +122,7 @@ const WAYS_TO_HELP = ["WaysToHelpScreen"] as const;
 const ACCOUNT_RESTORE = ["RestoreAccountScreen"] as const;
 
 /** Task 10 · Change password (backend#112) — V3 from birth. */
-const ACCOUNT_SETTINGS = ["ChangePasswordScreen", "ChangeEmailScreen"] as const;
+const ACCOUNT_SETTINGS = ["ChangePasswordScreen", "ChangeEmailScreen", "TwoStepScreen"] as const;
 
 /** Plan Task 9 · the shelter's Organization profile (backend#113) — V3 from birth. */
 const ORGANIZATION_PROFILE = ["OrganizationProfileScreen"] as const;
