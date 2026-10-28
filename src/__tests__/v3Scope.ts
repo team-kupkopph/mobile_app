@@ -124,6 +124,9 @@ const ACCOUNT_RESTORE = ["RestoreAccountScreen"] as const;
 /** Task 10 · Change password (backend#112) — V3 from birth. */
 const ACCOUNT_SETTINGS = ["ChangePasswordScreen"] as const;
 
+/** Plan Task 9 · the shelter's Organization profile (backend#113) — V3 from birth. */
+const ORGANIZATION_PROFILE = ["OrganizationProfileScreen"] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -140,7 +143,9 @@ export const V3_SCOPE: readonly string[] = [
   // AS1 · Restore a deleted account — V3 from birth.
   ...ACCOUNT_RESTORE,
   // Task 10 · Change password — V3 from birth.
-  ...ACCOUNT_SETTINGS
+  ...ACCOUNT_SETTINGS,
+  // Plan Task 9 · Organization profile — V3 from birth.
+  ...ORGANIZATION_PROFILE
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */

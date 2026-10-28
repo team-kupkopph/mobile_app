@@ -72,7 +72,8 @@ describe("V3 screens adopt Card instead of a raw elevation spread", () => {
     // 47 -> 48: WaysToHelpScreen, US-W4 Ways to help (design 2026-10-27), born V3.
     // 48 -> 49: RestoreAccountScreen, AS1 restore a deleted account (backend#108), born V3.
     // 49 -> 50: ChangePasswordScreen, Task 10 change password (backend#112), born V3.
-    expect(V3_SCOPE.length).toBe(50);
+    // 50 -> 51: OrganizationProfileScreen, plan Task 9 shelter profile (backend#113), born V3.
+    expect(V3_SCOPE.length).toBe(51);
   });
 
   it("every in-scope screen not in the holdout list no longer spreads ...elevation.*", () => {

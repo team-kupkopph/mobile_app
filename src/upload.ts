@@ -48,7 +48,9 @@ export function resizeTarget(width: number, height: number): { width: number } |
 /** Presign `purpose` for each upload site, so a typo is a compile error rather than a 422. */
 export type UploadPurpose =
   | "stray_photo" | "listing_photo" | "rescue_outcome_photo"
-  | "donation_qr" | "verification_doc" | "story_photo";
+  | "donation_qr" | "verification_doc" | "story_photo"
+  // Plan Task 9 · a shelter's logo, shown to donors on its public wishlist (backend#113 added the purpose).
+  | "shelter_logo";
 
 export type UploadDeps = {
   /** Strip EXIF + downscale. Returns the processed file's uri. */

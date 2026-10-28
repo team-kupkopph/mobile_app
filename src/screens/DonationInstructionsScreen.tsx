@@ -2,9 +2,10 @@
 // field, saved to the shelter profile (PATCH /shelter/profile). A giver reads it on the pledge form and again
 // on the confirmation, so it is the shelter's own words, not ours.
 //
-// The current text comes from the wishlist list response (`donation_instructions`). If that load fails the
-// form warns (PrefillWarning) and refuses to save: an empty field over real instructions invites overwriting
-// them with blanks (the rule in PrefillWarning.tsx).
+// The current text comes from the shelter's OWN profile (GET /shelter/profile, backend#113). It used to be read back
+// through the PUBLIC wishlist route, which only works while the shelter is live. If that load fails the form warns
+// (PrefillWarning) and refuses to save: an empty field over real instructions invites overwriting them with blanks
+// (the rule in PrefillWarning.tsx).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -33,15 +34,11 @@ export function DonationInstructionsScreen({ navigation }: Props) {
 
   useEffect(() => {
     let alive = true;
-    api.get("/me").then((me) => {
+    api.get("/shelter/profile").then((r) => {
       if (!alive) return;
-      if (!me.ok) { setPrefillFailed(true); return; }
-      api.get(`/shelters/${me.data.account_id}/needs`).then((r) => {
-        if (!alive) return;
-        if (!r.ok) { setPrefillFailed(true); return; }
-        setText(r.data.donation_instructions ?? "");
-        setLoaded(true);
-      });
+      if (!r.ok) { setPrefillFailed(true); return; }
+      setText(r.data.donation_instructions ?? "");
+      setLoaded(true);
     });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on open
