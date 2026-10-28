@@ -19,6 +19,7 @@ import { ImpactScreen } from "../screens/ImpactScreen";
 import { DeleteAccountScreen } from "../screens/DeleteAccountScreen";
 import { ExportDataScreen } from "../screens/ExportDataScreen";
 import { SettingsPrivacyScreen } from "../screens/SettingsPrivacyScreen";
+import { ChangeEmailScreen } from "../screens/ChangeEmailScreen";
 import { ChangePasswordScreen } from "../screens/ChangePasswordScreen";
 import { OrganizationProfileScreen } from "../screens/OrganizationProfileScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
@@ -203,6 +204,7 @@ export function RootNavigator() {
       <Stack.Screen name="needPledges" component={NeedPledgesScreen} />
       <Stack.Screen name="settings" component={SettingsScreen} />
       <Stack.Screen name="changePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="changeEmail" component={ChangeEmailScreen} />
       <Stack.Screen name="organizationProfile" component={OrganizationProfileScreen} />
       <Stack.Screen name="settingsPrivacy" component={SettingsPrivacyScreen} />
       <Stack.Screen name="deleteAccount" component={DeleteAccountScreen} />

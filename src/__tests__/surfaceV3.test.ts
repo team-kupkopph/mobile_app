@@ -55,6 +55,8 @@
 // Task 10 (change password, backend#112) adds ChangePasswordScreen, V3 from birth: one more on the backdrop.
 //
 // Plan Task 9 (shelter Organization profile, backend#113) adds OrganizationProfileScreen, V3 from birth: one more on the backdrop.
+//
+// Plan Task 13 (change email) adds ChangeEmailScreen, V3 from birth: one more on the backdrop.
 import { surfaceV3 } from "../../scripts/surface-v3.cjs";
 
 describe("surface, re-derived", () => {
@@ -68,6 +70,7 @@ describe("surface, re-derived", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "ApplicantScreen",
+      "ChangeEmailScreen",
       "ChangePasswordScreen",
       "DonatePledgeScreen",
       "DonateScreen",

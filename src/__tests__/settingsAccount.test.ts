@@ -176,7 +176,7 @@ describe("settingsGroups", () => {
   it("gives an owner the whole ACCOUNT group", () => {
     const groups = settingsGroups({ shelter: false, privacyUrl: null });
 
-    expect(keys(groups, "ACCOUNT")).toEqual(["editProfile", "phone", "changePassword", "logoutAll"]);
+    expect(keys(groups, "ACCOUNT")).toEqual(["editProfile", "phone", "changeEmail", "changePassword", "logoutAll"]);
   });
 
   it("gives a shelter the account-shaped rows only", () => {
@@ -184,7 +184,7 @@ describe("settingsGroups", () => {
     // `official_phone`; changing the ACCOUNT phone here would desync the two (Task 9 owns that).
     const groups = settingsGroups({ shelter: true, privacyUrl: null });
 
-    expect(keys(groups, "ACCOUNT")).toEqual(["changePassword", "logoutAll"]);
+    expect(keys(groups, "ACCOUNT")).toEqual(["changeEmail", "changePassword", "logoutAll"]);
   });
 
   it("keeps PRIVACY and YOUR DATA for everyone, in the order the screen reads", () => {
