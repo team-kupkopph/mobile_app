@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
-import { Me } from "../api/types";
+import { Me, MyPet } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { cityToCache } from "../auth/cityFromMe";
 import { accountIdFromAccessToken } from "../auth/idToken";
@@ -23,6 +23,7 @@ import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
 import { changeProfilePhoto, removeProfilePhoto } from "../profilePhoto";
+import { myPetsHint } from "../petForm";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
@@ -55,6 +56,9 @@ export function ProfileScreen({ navigation, route }: Props) {
   const { city, isReady, setCity, signOut, tokens } = useAuth();
   const { queue, discardAllFor } = useOutbox();
   const [me, setMe] = useState<Me | null>(null);
+  // PP14 · the My pets row's hint (the You artboard: "2 listed for adoption"). Null until it loads,
+  // and on a failed load: a hint is a nicety, and a wrong count is worse than none.
+  const [petsHint, setPetsHint] = useState<string | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState("");
@@ -74,6 +78,9 @@ export function ProfileScreen({ navigation, route }: Props) {
       api.get("/me").then((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setMe(r.data);
+      });
+      api.get("/me/pets").then((r) => {
+        setPetsHint(r.ok ? myPetsHint((r.data?.results ?? []) as MyPet[]) : null);
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
     }, []);
@@ -288,8 +295,14 @@ export function ProfileScreen({ navigation, route }: Props) {
             activeOpacity={0.75}
             style={[styles.accountRow, styles.accountRowDivided]}
             onPress={() => navigation.navigate("myPets")}
+            testID="row.profile.myPets"
+            accessibilityRole="button"
+            accessibilityLabel={petsHint ? `My pets, ${petsHint}` : "My pets"}
           >
-            <Text style={styles.accountRowLabel}>My pets</Text>
+            <View style={styles.accountRowText}>
+              <Text style={styles.accountRowLabel}>My pets</Text>
+              {petsHint ? <Text style={styles.accountRowHint} testID="text.profile.myPetsHint">{petsHint}</Text> : null}
+            </View>
             <Text style={styles.accountRowChevron} allowFontScaling={false}>›</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -541,6 +554,8 @@ const styles = StyleSheet.create({
     ...typography.strong,
     fontWeight: "800"
   },
+  accountRowText: { flex: 1 },
+  accountRowHint: { marginTop: 2, color: colors.muted, ...typography.meta },
   accountRowChevron: {
     color: "#B9B5AA",
     fontSize: 19, fontWeight: "700",

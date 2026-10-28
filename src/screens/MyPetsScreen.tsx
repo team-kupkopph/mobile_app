@@ -2,6 +2,9 @@
 // they adopted. Reference: sibling list screens (MyReportsScreen, MyOffersScreen). GET /me/pets.
 // PP12 · a row opens the pet's own screen, where its actions live. PQ2 · below the list, the pets
 // this account rehomed through Kupkop, read-only, as they were when they left.
+// PP14 · each card says what the pet is in the middle of (listed, a draft, removed, lost) and
+// carries one action: its listing, or the way to list it. The action is its own button below the
+// row, not nested in it, so VoiceOver reaches both.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -15,8 +18,8 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, ScreenHeader } from "../components/ui";
-import { MY_PETS_EMPTY, REHOMED_TITLE, rehomedLine } from "../petForm";
+import { Button, Chip, ScreenHeader } from "../components/ui";
+import { MY_PETS_EMPTY, REHOMED_TITLE, petCardAction, petChips, rehomedLine } from "../petForm";
 
 
 function capitalize(s: string): string {
@@ -61,23 +64,42 @@ export function MyPetsScreen({ navigation }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {pets.map((p) => (
-            <TouchableOpacity key={p.pet_id} style={styles.card} activeOpacity={0.85} hitSlop={TAP_SLOP}
-              accessibilityRole="button" accessibilityLabel={`${p.name}, ${p.species}`}
-              testID={`row.myPets.${p.pet_id}`}
-              onPress={() => navigation.navigate("petDetail", { petId: p.pet_id })}>
-              {p.photo_url ? (
-                <Image source={{ uri: p.photo_url }} style={styles.thumb} resizeMode="cover" />
-              ) : (
-                <View style={styles.thumb} />
-              )}
-              <View style={{ flex: 1 }}>
-                <Text style={styles.cardTitle}>{p.name}</Text>
-                <Text style={styles.cardMeta}>{capitalize(p.species)}</Text>
+          {pets.map((p) => {
+            const chips = petChips(p);
+            const action = petCardAction(p);
+            return (
+              <View key={p.pet_id} style={styles.cardBox}>
+                <TouchableOpacity style={styles.cardRow} activeOpacity={0.85}
+                  accessibilityRole="button"
+                  accessibilityLabel={[p.name, p.species, ...chips.map((ch) => ch.label)].join(", ")}
+                  testID={`row.myPets.${p.pet_id}`}
+                  onPress={() => navigation.navigate("petDetail", { petId: p.pet_id })}>
+                  {p.photo_url ? (
+                    <Image source={{ uri: p.photo_url }} style={styles.thumb} resizeMode="cover" />
+                  ) : (
+                    <View style={styles.thumb} />
+                  )}
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.cardTitle}>{p.name}</Text>
+                    <Text style={styles.cardMeta}>{capitalize(p.species)}</Text>
+                    {chips.length ? (
+                      <View style={styles.chips}>
+                        {chips.map((ch) => <Chip key={ch.label} label={ch.label} tone={ch.tone} />)}
+                      </View>
+                    ) : null}
+                  </View>
+                  <Text style={styles.chevron} allowFontScaling={false}>›</Text>
+                </TouchableOpacity>
+                <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.cardAction}
+                  testID={`btn.myPets.action.${p.pet_id}`}
+                  onPress={() => action.route === "posterListing"
+                    ? navigation.navigate("posterListing", action.params)
+                    : navigation.navigate("listingForm", action.params)}>
+                  <Text style={styles.cardActionLabel}>{action.label} ›</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.chevron} allowFontScaling={false}>›</Text>
-            </TouchableOpacity>
-          ))}
+            );
+          })}
           {rehomed.length ? (
             <>
               <Text style={styles.section} accessibilityRole="header">{REHOMED_TITLE}</Text>
@@ -113,6 +135,11 @@ const styles = StyleSheet.create({
   card: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: radii.field, marginBottom: 12, ...card },
   thumb: { width: 64, height: 64, borderRadius: squircle(64), backgroundColor: colors.border },
   chevron: { color: colors.muted, ...typography.section },
+  cardBox: { padding: 14, borderRadius: radii.field, marginBottom: 12, ...card },
+  cardRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
+  cardAction: { alignSelf: "flex-start", marginTop: 6, marginLeft: 78, minHeight: 44, justifyContent: "center" },
+  cardActionLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" },
   section: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.section },
   rehomed: { opacity: 0.85 },
   cardTitle: { color: colors.ink, ...typography.section },

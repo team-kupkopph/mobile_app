@@ -166,3 +166,42 @@ export function rehomedLine(isoDate: string): string {
   const d = new Date(isoDate);
   return `Found a new home · ${d.toLocaleDateString("en-PH", { month: "short", year: "numeric" })}`;
 }
+
+
+// ── PP14 (My Pets review 2026-10-28) · what a pet is in the middle of, on its card and its screen ──
+
+export type PetChip = { label: string; tone: "info" | "warning" | "neutral" | "danger" };
+
+/** The chips a pet shows, listing first. Tones follow the shared status mapping (Chip.tsx). */
+export function petChips(p: { open_listing: { status: string; removed: boolean } | null; lost_report_id: string | null }): PetChip[] {
+  const chips: PetChip[] = [];
+  const l = p.open_listing;
+  if (l) {
+    if (l.removed) chips.push({ label: "Listing removed", tone: "danger" });
+    else if (l.status === "draft") chips.push({ label: "Listing draft", tone: "neutral" });
+    else if (l.status === "pending") chips.push({ label: "Adoption pending", tone: "warning" });
+    else chips.push({ label: "Listed for adoption", tone: "info" });
+  }
+  if (p.lost_report_id) chips.push({ label: "Reported lost", tone: "warning" });
+  return chips;
+}
+
+export const VIEW_LISTING_LABEL = "View listing";
+
+/** The card's one action: its listing if it has one, else the way to make one. */
+export function petCardAction(p: { pet_id: string; open_listing: { listing_id: string } | null }):
+  { label: string; route: "posterListing"; params: { listingId: string } }
+  | { label: string; route: "listingForm"; params: { petId: string } } {
+  return p.open_listing
+    ? { label: VIEW_LISTING_LABEL, route: "posterListing", params: { listingId: p.open_listing.listing_id } }
+    : { label: LIST_PET_LABEL, route: "listingForm", params: { petId: p.pet_id } };
+}
+
+/** The Profile row's hint (the You artboard: "2 listed for adoption"). A draft isn't listed yet. */
+export function myPetsHint(pets: { open_listing: { status: string; removed: boolean } | null }[]): string {
+  const listed = pets.filter((p) => p.open_listing && !p.open_listing.removed
+    && (p.open_listing.status === "available" || p.open_listing.status === "pending")).length;
+  if (listed) return `${listed} listed for adoption`;
+  if (pets.length) return `${pets.length} ${pets.length === 1 ? "pet" : "pets"}`;
+  return "Add your pets";
+}
