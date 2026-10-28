@@ -98,6 +98,8 @@ export type RootStackParamList = {
   reportStray: {
     adjustedLat?: number; adjustedLng?: number;
     mode?: "stray" | "lost" | "found"; sightingOf?: string; sightingSpecies?: string; sightingName?: string;
+    /** PP12 · "Report lost" from a pet's screen preselects that pet. */
+    petId?: string;
   } | undefined;
   // US-S2 · refine the report's precise pin on a map. Seeded with the current GPS coords.
   adjustPin: { lat: number; lng: number };
@@ -147,7 +149,8 @@ export type RootStackParamList = {
   // Track H — the owner's own pets (US-H3): what a rescuer/shelter placed with them, or what
   // they adopted. Reachable from ProfileScreen; GET /me/pets.
   myPets: undefined;
-  petForm: undefined;   // AQ8 · add a pet
+  petForm: { petId?: string } | undefined;   // AQ8 · add a pet; PP12 · petId = edit that pet
+  petDetail: { petId: string };   // PP12 · one pet: its details and what can be done with it
   // US-X1 — the bell
   notifications: undefined;
   // Track A — adoption (US-A3/A4)

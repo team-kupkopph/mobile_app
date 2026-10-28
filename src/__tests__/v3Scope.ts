@@ -113,7 +113,7 @@ const KAWANG_GAWA_V3 = [
 ] as const;
 
 /** Adoption poster loop (plan 2026-10-06) — V3 from birth. */
-const ADOPTION_POSTER = ["ApplicantScreen", "MyListingsScreen", "PetFormScreen", "PosterListingScreen"] as const;   // PetFormScreen: AQ8
+const ADOPTION_POSTER = ["ApplicantScreen", "MyListingsScreen", "PetDetailScreen", "PetFormScreen", "PosterListingScreen"] as const;   // PetFormScreen: AQ8 · PetDetailScreen: PP12
 
 /** US-W4 · Ways to help (design 2026-10-27) — V3 from birth. */
 const WAYS_TO_HELP = ["WaysToHelpScreen"] as const;
