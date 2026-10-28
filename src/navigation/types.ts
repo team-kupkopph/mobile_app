@@ -180,6 +180,7 @@ export type RootStackParamList = {
   settings: { shelter?: boolean } | undefined;
   settingsPrivacy: undefined;
   changePassword: undefined;
+  changeEmail: undefined;
   // Plan Task 9 · the shelter's own profile: name, logo, description, hours and its private contacts.
   organizationProfile: undefined;
   deleteAccount: undefined;

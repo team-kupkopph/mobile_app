@@ -62,7 +62,8 @@ describe("V3 screens sit on the backdrop", () => {
     // 48 -> 49: RestoreAccountScreen, AS1 restore a deleted account (backend#108), born V3.
     // 49 -> 50: ChangePasswordScreen, Task 10 change password (backend#112), born V3.
     // 50 -> 51: OrganizationProfileScreen, plan Task 9 shelter profile (backend#113), born V3.
-    expect(V3_SCOPE.length).toBe(51);
+    // 51 -> 52: ChangeEmailScreen, plan Task 13 change email (backend: POST /me/email), born V3.
+    expect(V3_SCOPE.length).toBe(52);
   });
 
   it("every in-scope screen not in the holdout list renders ScreenBackdrop", () => {

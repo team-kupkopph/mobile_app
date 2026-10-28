@@ -183,6 +183,8 @@ export function settingsGroups(opts: {
     { key: "phone", label: "Phone number", action: { type: "navigate", name: "verifyPhone" } },
   ];
   account.push(
+    // Task 13 · the sign-in email. Everyone has one, so the shelter sees it too.
+    { key: "changeEmail", label: "Change email", action: { type: "navigate", name: "changeEmail" } },
     { key: "changePassword", label: "Change password", action: { type: "navigate", name: "changePassword" } },
     { key: "logoutAll", label: "Sign out of all devices", action: { type: "logoutAll" } },
   );
