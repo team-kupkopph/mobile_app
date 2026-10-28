@@ -22,6 +22,10 @@ import {
   verifyStepUp,
 } from "../stepUp";
 import { settingsGroups } from "../settings";
+import { STEP_UP_TOKEN_TTL_MS, clearStepUpCache, getCachedStepUp, setCachedStepUp } from "../stepUpCache";
+
+// Every test starts with no remembered proof: the cache is module-level on purpose (it outlives a screen).
+beforeEach(() => clearStepUpCache());
 
 const read = (...p: string[]) => readFileSync(join(__dirname, "..", ...p), "utf8");
 
@@ -93,6 +97,83 @@ describe("runWithStepUp", () => {
     expect(ask).toHaveBeenCalledTimes(1);
     expect(call).toHaveBeenCalledTimes(2);
     expect(out).toEqual({ kind: "result", res: NEEDS });
+  });
+});
+
+describe("keeping the proof for its life (N5)", () => {
+  const sendsOk = { post: jest.fn(async () => ({ ok: true, status: 202, data: { sent_to: "o***@example.com" } })) };
+
+  it("a proof earned by one action covers the next one: no second prompt, no second code", async () => {
+    const ask = jest.fn(async () => "tok-1");
+    const call = jest.fn(async (token?: string) => (token ? DONE : NEEDS));
+
+    await runWithStepUp({ call, api: sendsOk, ask });
+    sendsOk.post.mockClear();
+    const out = await runWithStepUp({ call, api: sendsOk, ask });
+
+    expect(out).toEqual({ kind: "result", res: DONE });
+    expect(ask).toHaveBeenCalledTimes(1);                    // only the first action prompted
+    expect(sendsOk.post).not.toHaveBeenCalled();             // and no second code was sent
+    expect(call.mock.calls.map((c) => c[0]).slice(-1)).toEqual(["tok-1"]);   // the second went straight out with it
+  });
+
+  it("the remembered proof expires before the server's five minutes do", () => {
+    expect(STEP_UP_TOKEN_TTL_MS).toBeLessThan(300_000);
+    setCachedStepUp("tok", 1_000);
+
+    expect(getCachedStepUp(1_000 + STEP_UP_TOKEN_TTL_MS - 1)).toBe("tok");
+    expect(getCachedStepUp(1_000 + STEP_UP_TOKEN_TTL_MS)).toBeUndefined();
+  });
+
+  it("once it has expired the next action asks again", async () => {
+    setCachedStepUp("old", 0);
+    const ask = jest.fn(async () => "fresh");
+    const call = jest.fn(async (token?: string) => (token === "fresh" ? DONE : NEEDS));
+
+    const out = await runWithStepUp({ call, api: sendsOk, ask, now: () => STEP_UP_TOKEN_TTL_MS + 5 });
+
+    expect(ask).toHaveBeenCalledTimes(1);
+    expect(out).toEqual({ kind: "result", res: DONE });
+  });
+
+  it("a token the server no longer accepts is dropped and the person is asked once", async () => {
+    setCachedStepUp("stale", 0);
+    const ask = jest.fn(async () => "fresh");
+    const call = jest.fn(async (token?: string) => (token === "fresh" ? DONE : NEEDS));
+
+    const out = await runWithStepUp({ call, api: sendsOk, ask, now: () => 10 });
+
+    expect(call.mock.calls.map((c) => c[0])).toEqual(["stale", "fresh"]);
+    expect(ask).toHaveBeenCalledTimes(1);
+    expect(out).toEqual({ kind: "result", res: DONE });
+    expect(getCachedStepUp(10)).toBe("fresh");
+  });
+
+  it("a refused token stays dropped even if the person then cancels", async () => {
+    setCachedStepUp("stale", 0);
+
+    const out = await runWithStepUp({ call: async () => NEEDS, api: sendsOk, ask: async () => null, now: () => 10 });
+
+    expect(out).toEqual({ kind: "cancelled" });
+    expect(getCachedStepUp(10)).toBeUndefined();
+  });
+
+  it("cancelling remembers nothing", async () => {
+    await runWithStepUp({ call: async () => NEEDS, api: sendsOk, ask: async () => null });
+
+    expect(getCachedStepUp(Date.now())).toBeUndefined();
+  });
+
+  it("a proof that still gets refused is not kept", async () => {
+    await runWithStepUp({ call: async () => NEEDS, api: sendsOk, ask: async () => "tok" });
+
+    expect(getCachedStepUp(Date.now())).toBeUndefined();
+  });
+
+  it("signing out forgets it, whatever ended the session", () => {
+    const auth = readFileSync(join(__dirname, "..", "auth", "AuthContext.tsx"), "utf8");
+    const nullBranch = auth.slice(auth.indexOf("} else {", auth.indexOf("async function setTokens")));
+    expect(nullBranch).toContain("clearStepUpCache()");
   });
 });
 

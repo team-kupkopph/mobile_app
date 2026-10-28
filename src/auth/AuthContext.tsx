@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
 import { clearCache } from "../cache";
+import { clearStepUpCache } from "../stepUpCache";
 import { clearAppLockPreference } from "./appLockStore";
 import { signOutWithRevoke } from "./logout";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -61,6 +62,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Plan Task 14b · the app-lock preference is per signed-in account on this phone: forgotten here for the
       // same reason as the city and the cache (a silent expiry bypasses signOut).
       await clearAppLockPreference();
+      // N5 · a remembered step-up proof is as personal as the app-lock preference: gone on any session end.
+      clearStepUpCache();
     }
   }
 
