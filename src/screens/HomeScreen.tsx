@@ -6,7 +6,7 @@
 // lands in a later sprint.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +19,7 @@ import type { StoryCard } from "./StoriesScreen";
 import { loadState } from "../net";
 import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
+import { cityToCache } from "../auth/cityFromMe";
 import { OwnerTabs } from "../components/OwnerTabs";
 import { CheckIcon, ClockIcon } from "../components/AppIcons";
 import { NotificationBell } from "../components/NotificationBell";
@@ -60,8 +61,18 @@ export function HomeScreen({ navigation, route }: Props) {
   // put the greeting under the clock once it was not.
   const insets = useSafeAreaInsets();
   const api = useApi();
-  const { city, isReady } = useAuth();
+  const { city, isReady, setCity } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
+  // X11 · the server returns the user's city in /me, but the app only knew the one cached on THIS phone, so a new phone
+  // or a reinstall said "Set your city" while the server had it. Fill an EMPTY cache from /me — and only once the cache
+  // has finished loading, or a city already saved on the phone could be overwritten while that read is still in flight.
+  useEffect(() => {
+    if (!isReady || !me) return;
+    const seed = cityToCache(me, city);
+    if (seed) void setCity(seed);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setCity is recreated each render; the guard is `city`
+  }, [isReady, me, city]);
+
   const [hasUnread, setHasUnread] = useState(false);
   const [listings, setListings] = useState<Listing[]>([]);
   const [rescues, setRescues] = useState<MapReport[]>([]);

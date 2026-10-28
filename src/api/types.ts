@@ -16,7 +16,7 @@ export type MeVerification = {
 export type Me = {
   account_id: string; account_type: "personal" | "shelter" | "admin";
   display_name: string; email: string; email_verified_at: string | null;
-  phone: string | null; photo_url: string | null;
+  phone: string | null; phone_verified_at?: string | null; photo_url: string | null;
   capabilities: Capability[];
   shelter: { tier: ShelterTier; verification_status: VerificationStatus | null } | null;
   // The GATE, served: may this account's listings be shown (backend `public_poster_q` —
@@ -24,6 +24,9 @@ export type Me = {
   // is the LATEST request for display; a tier-1 mid-upgrade is pending there and true here.
   is_verified_rescuer: boolean;
   settings: Record<string, boolean>;
+  // X11 (backend#112) · the city the user picked, from the server. City + barangay only (§12.5).
+  // Optional: an older server does not send it.
+  location?: { city: string; barangay: string | null } | null;
 };
 export type ApiError = { code: string; message: string; field?: string; details?: any };
 

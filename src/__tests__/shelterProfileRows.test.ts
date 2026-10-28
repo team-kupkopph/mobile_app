@@ -14,6 +14,7 @@
  * value (`locked={gated}`) — so EVERY `<Row` counts, and each must sit directly inside a
  * touchable that has an onPress.
  */
+import { settingsGroups } from "../settings";
 import { readFileSync } from "fs";
 import { join } from "path";
 
@@ -152,10 +153,15 @@ describe("the shelter shell reaches its notification feed and settings (F-R3-4)"
 
   it("Settings hides the owner-only ACCOUNT rows for a shelter", () => {
     // Edit profile → the OWNER ProfileScreen and Phone number → the owner verifyPhone are
-    // the wrong surfaces for an org; the shelter variant must gate that group.
+    // the wrong surfaces for an org. Task 10 gave a shelter the account-shaped rows (Change password,
+    // Sign out of all devices) and kept those two owner rows off its list.
     const settings = stripComments(read("SettingsScreen.tsx"));
     expect(settings).toMatch(/route\.params\?\.shelter/);
-    expect(settings).toMatch(/\.\.\.\(shelter \? \[\] : \[\{\s*title: "ACCOUNT"/);
+    const rows = settingsGroups({ shelter: true, privacyUrl: null })
+      .find((g) => g.title === "ACCOUNT")!.rows.map((r) => r.key);
+    expect(rows.length).toBeGreaterThan(0);                 // the scan found the group
+    expect(rows).not.toContain("editProfile");
+    expect(rows).not.toContain("phone");
   });
 });
 

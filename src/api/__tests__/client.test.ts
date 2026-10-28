@@ -29,6 +29,35 @@ test("del sends DELETE and treats 204 as an empty-body success (US-O2 withdraw)"
   expect(res.data).toEqual({});
 });
 
+test("del can carry a JSON body, in the same position as post/patch/put (DELETE /me needs {confirm: true})", async () => {
+  // Found on a device walk (Task 10): `del` could not send a body at all, so DELETE /me always answered
+  // 400 confirmation_required and deleting an account never worked from the app.
+  let seen: { method?: string; body?: unknown } = {};
+  global.fetch = jest.fn(async (_url: any, init: any) => {
+    seen = { method: init?.method, body: init?.body };
+    return { status: 204, ok: true, json: async () => ({}) } as unknown as Response;
+  });
+  const api = createApi(() => null, async () => {});
+
+  await api.del("/me", { confirm: true });
+
+  expect(seen.method).toBe("DELETE");
+  expect(JSON.parse(seen.body as string)).toEqual({ confirm: true });
+});
+
+test("del with no body still sends none (the existing callers)", async () => {
+  let body: unknown = "unset";
+  global.fetch = jest.fn(async (_url: any, init: any) => {
+    body = init?.body;
+    return { status: 204, ok: true, json: async () => ({}) } as unknown as Response;
+  });
+  const api = createApi(() => null, async () => {});
+
+  await api.del("/stories/s1/reactions");
+
+  expect(body).toBeUndefined();
+});
+
 test("refreshes once on 401 then retries with the refreshed access token", async () => {
   const responses = [
     { status: 401, body: { error: { code: "token_not_valid" } } },

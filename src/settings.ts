@@ -1,11 +1,12 @@
 // US-N5 · pure helpers for the settings / data-rights surfaces. Kept out of the screens so
 // the rules that matter (what counts as a confirmation, how a refusal is worded) are
 // testable without rendering anything.
+import type { RootStackParamList } from "./navigation/types";
 
+// AS8 (backend#112) · `approximate_location` and `masked_contact` are no longer served: they
+// changed nothing. The three switches below are the ones that do something.
 export type Settings = {
   marketing_emails: boolean;
-  approximate_location: boolean;
-  masked_contact: boolean;
   push_enabled: boolean;
   analytics_consent: boolean;
   analytics_consent_at: string | null;
@@ -104,8 +105,10 @@ export function privacyRows(settings: Settings) {
         note: "We never store your exact address or coordinates — only the city you pick.",
       },
       {
+        // X9 · this used to say "shared only with a shelter you sign up to volunteer for", which was
+        // untrue: a Sagip report, offer or claim shares contact on consent too.
         label: "Your number stays hidden",
-        note: "Shared only with a shelter you sign up to volunteer for, and only for that shift.",
+        note: "It's shared only when you choose to — with a shelter you volunteer for, or with a rescuer on a report you share it on.",
       },
     ],
   };
@@ -133,4 +136,110 @@ export function humanSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+// ------------------------------------------------------------------ the Settings rows (Task 10)
+
+type RouteName = keyof RootStackParamList;
+export type RowAction =
+  | { type: "navigate"; name: RouteName; params?: object }
+  | { type: "popTo"; name: RouteName; params?: object }
+  | { type: "logoutAll" }
+  | { type: "link"; url: string };
+export type SettingsRow = { key: string; label: string; value?: string; danger?: boolean; action: RowAction };
+export type SettingsGroup = { title: string; rows: SettingsRow[] };
+
+/**
+ * The number on file as the phone screen shows it: masked, or the honest reason there is none.
+ * Never the full number — a screen is shoulder-surfed, and the person knows their own number.
+ */
+export function phoneRowValue(phone: string | null | undefined, verifiedAt: string | null | undefined): string {
+  if (!phone) return "Not added";
+  if (!verifiedAt) return "Not verified";
+  const ph = /^\+63(\d{3})\d{3}(\d{4})$/.exec(phone);
+  if (ph) return `+63 ${ph[1]} ••• ${ph[2]}`;
+  return `••••${phone.replace(/\D/g, "").slice(-4)}`;
+}
+
+/**
+ * Every row Settings shows, as data. The screen only maps an action to a handler, so what is on
+ * the list — and which account type sees what — is testable without rendering.
+ *
+ * A SHELTER gets the account-shaped rows only. "Edit profile" and "Phone number" are owner
+ * screens, and a shelter's phone is its SMS-verified `official_phone`: changing the ACCOUNT phone
+ * from here would desync the two. The organisation profile screen (plan Task 9) owns those.
+ */
+export function settingsGroups(opts: {
+  shelter: boolean;
+  privacyUrl: string | null;
+}): SettingsGroup[] {
+  const account: SettingsRow[] = opts.shelter ? [] : [
+    // Back to the EXISTING You tab with its inline editor open. `navigate("profile")` pushes a
+    // second copy of the tab in React Navigation 7 — the loop the review found.
+    { key: "editProfile", label: "Edit profile",
+      action: { type: "popTo", name: "profile", params: { editing: true } } },
+    // No value on the row: Settings has no load of its own to hang the lookup on (and a failed one
+    // must never read as "Not added"). The phone screen shows the number on file and its status.
+    { key: "phone", label: "Phone number", action: { type: "navigate", name: "verifyPhone" } },
+  ];
+  account.push(
+    { key: "changePassword", label: "Change password", action: { type: "navigate", name: "changePassword" } },
+    { key: "logoutAll", label: "Sign out of all devices", action: { type: "logoutAll" } },
+  );
+
+  const support: SettingsRow[] = [
+    { key: "help", label: "Help & contact", action: { type: "navigate", name: "support" } },
+  ];
+  // Launch gate 4: a "Privacy & terms" row that opens nothing is worse than no row. It exists
+  // only once EXPO_PUBLIC_PRIVACY_POLICY_URL does.
+  if (opts.privacyUrl) {
+    support.push({ key: "privacy", label: "Privacy & terms",
+                   action: { type: "link", url: opts.privacyUrl } });
+  }
+
+  return [
+    { title: "ACCOUNT", rows: account },
+    { title: "PRIVACY", rows: [
+      { key: "privacyControls", label: "Privacy controls", value: privacySummary(),
+        action: { type: "navigate", name: "settingsPrivacy" } },
+      { key: "notifications", label: "Notifications", action: { type: "navigate", name: "notifications" } },
+    ] },
+    // §12.6 promises these two in-app. Named the way a person would name them.
+    { title: "YOUR DATA", rows: [
+      { key: "export", label: "Export my data", action: { type: "navigate", name: "exportData" } },
+      { key: "delete", label: "Delete account", danger: true, action: { type: "navigate", name: "deleteAccount" } },
+    ] },
+    { title: "SUPPORT", rows: support },
+  ];
+}
+
+// ------------------------------------------------------------- the delete screen (AS2, Task 10)
+
+export const DELETE_TITLE = "Delete your account?";
+export const DELETE_LEDE =
+  "You have 30 days to restore it by signing in. After that, your personal details are erased for good.";
+
+// Exactly what the purge does (backend accounts/data_map.py): a person's own pets and linked
+// sign-ins are DELETED; their listings are kept as hidden records, so they are not "removed".
+export const DELETE_REMOVED = [
+  "Your name and photo", "Phone, email and address", "Your pets", "Saved places",
+  "Linked Google or Apple sign-in",
+];
+export const DELETE_KEPT = [
+  "Rescues you resolved", "Adoptions completed", "Shifts you volunteered",
+  "Animals you listed (hidden)", "Shown as “Deleted user”",
+];
+/** What leaving does to other people: the screen must say it, because they are told too. */
+export const DELETE_ENDS_NOTE =
+  "Pledges you made end, and a shelter's open wishlist closes. The people involved are told.";
+
+/** Where a blocker's owner goes to close it. `null` for a kind this app does not know yet. */
+export function blockerRoute(kind: string): { name: RouteName; params?: object } | null {
+  switch (kind) {
+    case "rescue_claim": return { name: "myRescues" };
+    case "volunteer_shift": return { name: "kawanggawa", params: { tab: "mine" } };
+    case "adoption_inquiry": return { name: "myInquiries" };
+    case "hosted_shift": return { name: "shelterVolunteer" };
+    default: return null;
+  }
 }

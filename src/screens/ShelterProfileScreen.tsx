@@ -21,7 +21,7 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { useOutbox } from "../outbox/OutboxProvider";
-import { confirmSignOutWithQueue } from "../outbox/signOutGuard";
+import { confirmLogout } from "../auth/confirmLogout";
 import { useAuth } from "../auth/AuthContext";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { LockIcon } from "../components/AppIcons";
@@ -58,14 +58,14 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
   // P1 · same as Settings (C16 · D14): unsent reports are kept for this account's next sign-in or
   // discarded — and that prompt is the only question when there are any (it has its own Cancel).
+  // Task 10 · the same question as Settings and the owner's You tab (confirmLogout). This screen used to
+  // sign out with no confirmation at all unless reports were unsent.
   function handleLogout() {
-    if (queue.length > 0) {
-      confirmSignOutWithQueue(queue.length, () => { void signOut(); }, () => {
-        void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOut());
-      });
-      return;
-    }
-    void signOut();
+    confirmLogout({
+      queueCount: queue.length,
+      onConfirm: () => { void signOut(); },
+      onDiscard: () => { void discardAllFor(accountIdFromAccessToken(tokens?.access)).then(() => signOut()); },
+    });
   }
   const [me, setMe] = useState<Me | null>(null);
   const [dash, setDash] = useState<ShelterDashboard | null>(null);

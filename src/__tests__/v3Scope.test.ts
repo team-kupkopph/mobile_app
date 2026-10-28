@@ -18,7 +18,8 @@ describe("v3Scope", () => {
     + "into the listing form — 41 -> 40 — plus ApplicantScreen, the adoption poster loop's "
     + "(plan 2026-10-06) first screen, born V3 — 40 -> 41 — plus PosterListingScreen — 41 -> 42 — plus MyListingsScreen — 42 -> 43 — plus PetFormScreen (AQ8) — 43 -> 44 — plus NeedFormScreen and NeedPledgesScreen, moved from V3_EXCLUDED when the wishlist refactor (Task 8) rewrote them on ScreenBackdrop + Card + Chip + Button — 44 -> 46 — plus DonationInstructionsScreen, born V3 in the same task — 46 -> 47 — plus WaysToHelpScreen, US-W4 Ways to help, born V3 — 47 -> 48", () => {
     // 48 -> 49: RestoreAccountScreen, AS1 restore a deleted account (backend#108), born V3.
-    expect(V3_SCOPE.length).toBe(49);
+    // 49 -> 50: ChangePasswordScreen, Task 10 change password (backend#112), born V3.
+    expect(V3_SCOPE.length).toBe(50);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {

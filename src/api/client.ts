@@ -108,6 +108,8 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
     post: (p: string, b?: any, o?: RequestOptions) => raw("POST", p, b, o),
     patch: (p: string, b?: any, o?: RequestOptions) => raw("PATCH", p, b, o),
     put: (p: string, b?: any, o?: RequestOptions) => raw("PUT", p, b, o),
-    del: (p: string, o?: RequestOptions) => raw("DELETE", p, undefined, o),
+    // The body is in the same position as post/patch/put. DELETE /me requires {confirm: true}, and `del` could not
+    // send one, so deleting an account answered 400 confirmation_required for ever (found on a device walk).
+    del: (p: string, b?: any, o?: RequestOptions) => raw("DELETE", p, b, o),
   };
 }

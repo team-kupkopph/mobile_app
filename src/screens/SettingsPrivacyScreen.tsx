@@ -101,8 +101,8 @@ export function SettingsPrivacyScreen({ navigation }: Props) {
         {/* The right to WITHDRAW is half of what consent means under RA 10173, and it
             belongs on the screen rather than in a policy nobody opens. */}
         <Text style={styles.footnote}>
-          Off by default. Turn it on or off any time — switching it off stops collection
-          straight away.
+          Nothing is collected yet. If that changes, it stays off unless you turn it on — and you
+          can switch it off any time.
         </Text>
 
         {/* M4 gate 4 · a "Read our privacy policy" link renders ONLY when the URL is set
