@@ -6,6 +6,7 @@
 // prompt and exactly one retry. The UI (StepUpPrompt, useStepUp) is a thin shell around this.
 import { ApiResult } from "./api/client";
 import { codeError } from "./changeEmail";
+import { clearStepUpCache, getCachedStepUp, setCachedStepUp } from "./stepUpCache";
 
 export const STEP_UP_HEADER = "X-Step-Up";
 
@@ -68,6 +69,9 @@ export type StepUpOutcome =
 /**
  * Run `call`; if the server wants a proof, ask once and retry once.
  *
+ * A proof earned a moment ago is sent first (stepUpCache.ts), so a second sensitive action inside its life does
+ * not ask again; if the server no longer accepts it the cache is dropped and the person is asked once.
+ *
  * `call(undefined)` is the plain attempt (a server with two-step off, or an account that never turned it on,
  * answers it directly, so nobody is ever prompted who did not opt in). `ask(sentTo)` shows the prompt and
  * resolves a token, or `null` when the person cancels. A SECOND refusal is handed back as the result:
@@ -77,14 +81,22 @@ export async function runWithStepUp(opts: {
   call: (stepUpToken?: string) => Promise<ApiResult>;
   api: Api;
   ask: (sentTo: string) => Promise<string | null>;
+  /** Injected for tests; the clock that decides whether a remembered proof is still good. */
+  now?: () => number;
 }): Promise<StepUpOutcome> {
-  const first = await opts.call(undefined);
+  const clock = opts.now ?? Date.now;
+  const remembered = getCachedStepUp(clock());
+  const first = await opts.call(remembered);
   if (!isStepUpRequired(first)) return { kind: "result", res: first };
+  if (remembered) clearStepUpCache();                  // the server refused it: it is not good any more
 
   const sent = await requestStepUpCode(opts.api);
   if (!sent.ok) return { kind: "unavailable", message: sent.message };
 
   const token = await opts.ask(sent.sentTo);
   if (token === null) return { kind: "cancelled" };
-  return { kind: "result", res: await opts.call(token) };
+  const res = await opts.call(token);
+  if (isStepUpRequired(res)) clearStepUpCache();       // refused even now: never keep a proof that does not work
+  else setCachedStepUp(token, clock());
+  return { kind: "result", res };
 }
