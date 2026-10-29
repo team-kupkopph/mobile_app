@@ -1,30 +1,30 @@
 // US-H3 · the recipient's own pets — the ones a rescuer/shelter placed with them, or that
-// they adopted. Reference: sibling list screens (MyReportsScreen, MyOffersScreen). GET /me/pets.
+// they adopted. GET /me/pets.
 // PP12 · a row opens the pet's own screen, where its actions live. PQ2 · below the list, the pets
 // this account rehomed through Kupkop, read-only, as they were when they left.
 // PP14 · each card says what the pet is in the middle of (listed, a draft, removed, lost) and
 // carries one action: its listing, or the way to list it. The action is its own button below the
 // row, not nested in it, so VoiceOver reaches both.
+// Step 11 · V3, following the "My pets" artboard (design/mobile-v3/MyPets.dc.html, approved
+// 2026-10-29): the mesh backdrop, one Card per pet with its action under a hairline, a quieter
+// Rehomed card, and a first-run Empty card whose one primary is Add a pet (the header's + Add
+// appears once there are pets).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { TAP_SLOP } from "../touch";
-
 import { MyPet, RehomedPet } from "../api/types";
 import { useApi } from "../api/useApi";
+import { AdoptIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
-import { colors, elevation, radii, spacing, squircle, typography } from "../theme";
-import { Button, Chip, ScreenHeader } from "../components/ui";
-import { MY_PETS_EMPTY, REHOMED_TITLE, petCardAction, petChips, rehomedLine } from "../petForm";
-
-
-function capitalize(s: string): string {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
-}
+import { MY_PETS_EMPTY, REHOMED_TITLE, ageLabel, capitalize, petCardAction, petChips, rehomedLine } from "../petForm";
+import { TAP_SLOP } from "../touch";
+import { colors, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "myPets">;
 
@@ -33,7 +33,6 @@ export function MyPetsScreen({ navigation }: Props) {
   const [pets, setPets] = useState<MyPet[]>([]);
   const [rehomed, setRehomed] = useState<RehomedPet[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
-
 
   const load = useCallback(() => {
     setRes(null);
@@ -46,42 +45,50 @@ export function MyPetsScreen({ navigation }: Props) {
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  return (
-    <View style={styles.screen}>
-      <ScreenHeader title="My pets" onBack={() => navigation.goBack()}
-        right={<Button size="small" label="+ Add" testID="btn.myPets.add" onPress={() => navigation.navigate("petForm")} />} />
+  // US-R3 · loading, offline and a server refusal stay LoadStateView's; an empty list is this
+  // screen's own designed state (the artboard's Empty), so it is not passed a count.
+  const state = loadState(res);
+  const addPet = () => navigation.navigate("petForm");
 
-      {/* US-R3 · this screen already split loading / error / empty by hand, and got it right.
-          Consolidating onto LoadStateView keeps that and adds the one distinction its own
-          `error` boolean could not make: offline vs the server refusing. */}
-      {loadState(res, pets.length + rehomed.length).kind !== "ready" ? (
+  return (
+    <View style={styles.screen} testID="screen.myPets">
+      <ScreenBackdrop />
+      <ScreenHeader title="My pets" onBack={() => navigation.goBack()}
+        right={pets.length ? <Button size="small" label="+ Add" testID="btn.myPets.add" onPress={addPet} /> : undefined} />
+
+      {state.kind !== "ready" ? (
         <View style={styles.centerFill}>
-          <LoadStateView
-            state={loadState(res, pets.length + rehomed.length)}
-            emptyTitle={MY_PETS_EMPTY}
-            onRetry={load}
-          />
+          <LoadStateView state={state} onRetry={load} />
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {pets.length === 0 ? (
+            <Card style={styles.emptyCard} testID="card.myPets.empty">
+              <View style={styles.emptyIcon}><AdoptIcon color={colors.teal} size={32} /></View>
+              <Text style={styles.emptyText}>{MY_PETS_EMPTY}</Text>
+              <Button label="Add a pet" onPress={addPet} testID="btn.myPets.addFirst" style={styles.emptyButton} />
+            </Card>
+          ) : null}
+
           {pets.map((p) => {
             const chips = petChips(p);
             const action = petCardAction(p);
+            const meta = [capitalize(p.species), ageLabel(p.birthdate)].filter(Boolean).join(" · ");
             return (
-              <View key={p.pet_id} style={styles.cardBox}>
-                <TouchableOpacity style={styles.cardRow} activeOpacity={0.85}
+              <Card key={p.pet_id} style={styles.petCard}>
+                <TouchableOpacity style={styles.petRow} activeOpacity={0.85}
                   accessibilityRole="button"
-                  accessibilityLabel={[p.name, p.species, ...chips.map((ch) => ch.label)].join(", ")}
+                  accessibilityLabel={[p.name, meta, ...chips.map((ch) => ch.label)].join(", ")}
                   testID={`row.myPets.${p.pet_id}`}
                   onPress={() => navigation.navigate("petDetail", { petId: p.pet_id })}>
                   {p.photo_url ? (
                     <Image source={{ uri: p.photo_url }} style={styles.thumb} resizeMode="cover" />
                   ) : (
-                    <View style={styles.thumb} />
+                    <View style={[styles.thumb, styles.thumbEmpty]}><AdoptIcon color={colors.teal} size={30} /></View>
                   )}
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{p.name}</Text>
-                    <Text style={styles.cardMeta}>{capitalize(p.species)}</Text>
+                  <View style={styles.petText}>
+                    <Text style={styles.petName}>{p.name}</Text>
+                    <Text style={styles.petMeta}>{meta}</Text>
                     {chips.length ? (
                       <View style={styles.chips}>
                         {chips.map((ch) => <Chip key={ch.label} label={ch.label} tone={ch.tone} />)}
@@ -90,6 +97,7 @@ export function MyPetsScreen({ navigation }: Props) {
                   </View>
                   <Text style={styles.chevron} allowFontScaling={false}>›</Text>
                 </TouchableOpacity>
+                <View style={styles.hairline} />
                 <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.cardAction}
                   testID={`btn.myPets.action.${p.pet_id}`}
                   onPress={() => action.route === "posterListing"
@@ -97,25 +105,28 @@ export function MyPetsScreen({ navigation }: Props) {
                     : navigation.navigate("listingForm", action.params)}>
                   <Text style={styles.cardActionLabel}>{action.label} ›</Text>
                 </TouchableOpacity>
-              </View>
+              </Card>
             );
           })}
+
           {rehomed.length ? (
             <>
               <Text style={styles.section} accessibilityRole="header">{REHOMED_TITLE}</Text>
-              {rehomed.map((h, i) => (
-                <View key={`${h.rehomed_at}-${i}`} style={[styles.card, styles.rehomed]} testID="row.myPets.rehomed">
-                  {h.photo_url ? (
-                    <Image source={{ uri: h.photo_url }} style={styles.thumb} resizeMode="cover" />
-                  ) : (
-                    <View style={styles.thumb} />
-                  )}
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cardTitle}>{h.name}</Text>
-                    <Text style={styles.cardMeta}>{rehomedLine(h.rehomed_at)}</Text>
+              <Card style={styles.rehomedCard} testID="card.myPets.rehomed">
+                {rehomed.map((h, i) => (
+                  <View key={`${h.rehomed_at}-${i}`} style={styles.rehomedRow} testID="row.myPets.rehomed">
+                    {h.photo_url ? (
+                      <Image source={{ uri: h.photo_url }} style={styles.rehomedThumb} resizeMode="cover" />
+                    ) : (
+                      <View style={[styles.rehomedThumb, styles.rehomedThumbEmpty]}><AdoptIcon color={colors.muted} size={22} /></View>
+                    )}
+                    <View style={styles.petText}>
+                      <Text style={styles.rehomedName}>{h.name}</Text>
+                      <Text style={styles.petMeta}>{rehomedLine(h.rehomed_at)}</Text>
+                    </View>
                   </View>
-                </View>
-              ))}
+                ))}
+              </Card>
             </>
           ) : null}
         </ScrollView>
@@ -124,24 +135,30 @@ export function MyPetsScreen({ navigation }: Props) {
   );
 }
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
-  content: { paddingHorizontal: spacing.lg, paddingTop: 16, paddingBottom: 60 },
+  content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   centerFill: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 40 },
-  card: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14, borderRadius: radii.field, marginBottom: 12, ...card },
-  thumb: { width: 64, height: 64, borderRadius: squircle(64), backgroundColor: colors.border },
-  chevron: { color: colors.muted, ...typography.section },
-  cardBox: { padding: 14, borderRadius: radii.field, marginBottom: 12, ...card },
-  cardRow: { flexDirection: "row", alignItems: "center", gap: 14 },
+  petCard: { marginBottom: 14, paddingHorizontal: 6, paddingTop: 6, paddingBottom: 4 },
+  petRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 10 },
+  thumb: { width: 62, height: 62, borderRadius: squircle(62), backgroundColor: colors.soft },
+  thumbEmpty: { alignItems: "center", justifyContent: "center" },
+  petText: { flex: 1, minWidth: 0 },
+  petName: { color: colors.ink, ...typography.section },
+  petMeta: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
-  cardAction: { alignSelf: "flex-start", marginTop: 6, marginLeft: 78, minHeight: 44, justifyContent: "center" },
-  cardActionLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" },
-  section: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.section },
-  rehomed: { opacity: 0.85 },
-  cardTitle: { color: colors.ink, ...typography.section },
-  cardMeta: { marginTop: 6, color: colors.muted, ...typography.meta }
+  chevron: { color: colors.muted, ...typography.section },
+  hairline: { height: 1, marginHorizontal: 10, backgroundColor: colors.border },
+  cardAction: { alignSelf: "flex-start", minHeight: 44, justifyContent: "center", paddingHorizontal: 10 },
+  cardActionLabel: { color: colors.teal, ...typography.strong, fontWeight: "800" },
+  section: { marginTop: 12, marginBottom: 12, color: colors.ink, ...typography.section },
+  rehomedCard: { padding: 6, opacity: 0.86 },
+  rehomedRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 10 },
+  rehomedThumb: { width: 48, height: 48, borderRadius: squircle(48), backgroundColor: colors.greyPill },
+  rehomedThumbEmpty: { alignItems: "center", justifyContent: "center" },
+  rehomedName: { color: colors.muted, ...typography.subtitle, fontWeight: "800" },
+  emptyCard: { marginTop: 10, paddingVertical: 28, paddingHorizontal: 20, alignItems: "center", backgroundColor: colors.soft },
+  emptyIcon: { width: 64, height: 64, borderRadius: squircle(64), alignItems: "center", justifyContent: "center", backgroundColor: colors.white },
+  emptyText: { marginTop: 14, color: colors.muted, ...typography.subtitle, fontWeight: "700", textAlign: "center" },
+  emptyButton: { marginTop: 18, alignSelf: "stretch" }
 });

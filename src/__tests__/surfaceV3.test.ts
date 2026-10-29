@@ -68,7 +68,7 @@ describe("surface, re-derived", () => {
     expect(s.screens.length).toBeGreaterThan(80);
   });
 
-  it("found the fifty-five V3 screens on the backdrop (+ 3 wishlist refactor Task 8: NeedForm, NeedPledges, DonationInstructions; 5 adoption poster loop (Applicant, PosterListing, MyListings, plan 2026-10-06; PetForm, AQ8; PetDetail, PP12) + 7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 11 Sagip rescuer (RescueListedScreen deleted by C15) + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root + 6 P5 Task 3 KawangGawa/Waiver + 1 US-W4 Ways to help)", () => {
+  it("found the fifty-six V3 screens on the backdrop (+ 3 wishlist refactor Task 8: NeedForm, NeedPledges, DonationInstructions; 6 adoption poster loop (Applicant, PosterListing, MyListings, plan 2026-10-06; PetForm, AQ8; PetDetail, PP12; MyPets, step 11) + 7 owner + 2 shell roots + 4 listings/needs + 4 donations + 7 volunteer + 3 verified member + 11 Sagip rescuer (RescueListedScreen deleted by C15) + 1 Task B1 Donate root + 1 Task B2 Animals root + 1 Task B3 Requests root + 6 P5 Task 3 KawangGawa/Waiver + 1 US-W4 Ways to help)", () => {
     expect(s.backdrop.sort()).toEqual([
       "AdoptScreen",
       "ApplicantScreen",
@@ -95,6 +95,7 @@ describe("surface, re-derived", () => {
       "MyInquiriesScreen",
       "MyListingsScreen",
       "MyOffersScreen",
+      "MyPetsScreen",
       "MyRescuesScreen",
       "NeedFormScreen",
       "NeedPledgesScreen",

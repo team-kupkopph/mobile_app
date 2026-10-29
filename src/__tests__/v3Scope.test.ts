@@ -23,7 +23,8 @@ describe("v3Scope", () => {
     // 51 -> 52: ChangeEmailScreen, plan Task 13 change email (backend: POST /me/email), born V3.
     // 52 -> 53: TwoStepScreen, plan Task 14 two-step verification (backend: /me/2fa/*), born V3.
     // 53 -> 54: PetDetailScreen, PP12 one pet and its actions (My Pets review 2026-10-28), born V3.
-    expect(V3_SCOPE.length).toBe(54);
+    // 54 -> 55: MyPetsScreen, moved from V3_EXCLUDED when My Pets review step 11 converted it (artboards approved 2026-10-29).
+    expect(V3_SCOPE.length).toBe(55);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {

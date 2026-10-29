@@ -113,7 +113,7 @@ const KAWANG_GAWA_V3 = [
 ] as const;
 
 /** Adoption poster loop (plan 2026-10-06) — V3 from birth. */
-const ADOPTION_POSTER = ["ApplicantScreen", "MyListingsScreen", "PetDetailScreen", "PetFormScreen", "PosterListingScreen"] as const;   // PetFormScreen: AQ8 · PetDetailScreen: PP12
+const ADOPTION_POSTER = ["ApplicantScreen", "MyListingsScreen", "MyPetsScreen", "PetDetailScreen", "PetFormScreen", "PosterListingScreen"] as const;   // PetFormScreen: AQ8 · PetDetailScreen: PP12 · MyPetsScreen: step 11
 
 /** US-W4 · Ways to help (design 2026-10-27) — V3 from birth. */
 const WAYS_TO_HELP = ["WaysToHelpScreen"] as const;
@@ -169,7 +169,8 @@ const OWNER_V3 = [
   "SigninScreen"
 ] as const;
 
-/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 33 names */
+/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 32 names
+ *  (MyPetsScreen moved to ADOPTION_POSTER when My Pets review step 11 converted it) */
 const OTHER_OWNER_SCREENS = [
   "AccountTypeScreen",
   "AdjustPinScreen",
@@ -181,7 +182,6 @@ const OTHER_OWNER_SCREENS = [
   "ImpactScreen",
   "LocationPickerScreen",
   "MatchDetailScreen",
-  "MyPetsScreen",
   "MyReportsScreen",
   "NotificationsScreen",
   "OtpLockedScreen",

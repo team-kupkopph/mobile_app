@@ -218,6 +218,8 @@ export type PetListingState = { listing_id: string; status: string; removed: boo
 
 export type MyPet = {
   pet_id: string; name: string; species: string; photo_url: string | null;
+  /** Step 11 · for the card's "Cat · 3 years"; absent from servers before backend's step 11. */
+  birthdate?: string | null;
   open_listing: PetListingState | null; lost_report_id: string | null;
 };
 
