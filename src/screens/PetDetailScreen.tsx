@@ -2,6 +2,7 @@
 // with it — edit, list it for adoption (or open the listing it has), report it lost, or remove it.
 // Before this, My pets rows were a dead end and GET /me/pets/{id} only prefilled a listing.
 // Removing archives the pet (PQ1); the server refuses while a listing describes it.
+// Step 11 · laid out to the "Pet" artboard (design/mobile-v3/Pet.dc.html, approved 2026-10-29).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
@@ -16,29 +17,12 @@ import { Button, Card, Chip, ScreenHeader, SegmentedControl } from "../component
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import {
-  LIST_PET_LABEL, REMOVE_PET_BODY, REMOVE_REASONS, RemoveReason, VIEW_LISTING_LABEL, ageLabel, petActionError, petChips
+  LIST_PET_LABEL, PET_ACTIONS, REMOVE_PET_BODY, REMOVE_REASONS, RemoveReason, VIEW_LISTING_LABEL, ageLabel, capitalize,
+  petActionError, petChips, petFactRows
 } from "../petForm";
 import { colors, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "petDetail">;
-
-const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-
-/** The facts the owner entered, in reading order; a blank one is left out rather than shown empty.
- *  The age is not one of them: it already sits under the name. */
-function facts(p: PetDetail): [string, string][] {
-  const rows: [string, string | null][] = [
-    ["Breed", p.breed],
-    ["Sex", p.sex && p.sex !== "unknown" ? cap(p.sex) : null],
-    ["Size", p.size_category ? cap(p.size_category) : null],
-    ["Colour and markings", p.color_markings],
-    ["Spayed / neutered", p.spayed_neutered === null ? null : p.spayed_neutered ? "Yes" : "No"],
-    ["Temperament", p.temperament],
-    ["Medical notes", p.medical_conditions],
-    ["Vet", p.vet_contact]
-  ];
-  return rows.filter((r): r is [string, string] => !!r[1]);
-}
 
 export function PetDetailScreen({ navigation, route }: Props) {
   const api = useApi();
@@ -91,7 +75,7 @@ export function PetDetailScreen({ navigation, route }: Props) {
               accessibilityLabel={`Photo of ${pet.name}`} />
           ) : null}
           <Text style={styles.title}>{pet.name}</Text>
-          <Text style={styles.sub}>{[cap(pet.species), age].filter(Boolean).join(" · ")}</Text>
+          <Text style={styles.sub}>{[capitalize(pet.species), age].filter(Boolean).join(" · ")}</Text>
           {petChips(pet).length ? (
             <View style={styles.chipRow}>
               {petChips(pet).map((ch) => <Chip key={ch.label} label={ch.label} tone={ch.tone} />)}
@@ -99,10 +83,10 @@ export function PetDetailScreen({ navigation, route }: Props) {
           ) : null}
         </Card>
 
-        {facts(pet).length ? (
+        {petFactRows(pet).length ? (
           <Card style={styles.card}>
-            {facts(pet).map(([label, value]) => (
-              <View key={label} style={styles.fact}>
+            {petFactRows(pet).map(([label, value], i) => (
+              <View key={label} style={[styles.fact, i > 0 && styles.factDivided]}>
                 <Text style={styles.factLabel}>{label}</Text>
                 <Text style={styles.factValue}>{value}</Text>
               </View>
@@ -112,7 +96,7 @@ export function PetDetailScreen({ navigation, route }: Props) {
 
         {error ? <Text style={styles.error} testID="text.petDetail.error">{error}</Text> : null}
 
-        <Button label="Edit details" variant="secondary" style={styles.action} testID="btn.petDetail.edit"
+        <Button label={PET_ACTIONS.edit} variant="secondary" style={styles.action} testID="btn.petDetail.edit"
           onPress={() => navigation.navigate("petForm", { petId })} />
         {listing ? (
           <Button label={VIEW_LISTING_LABEL} variant="secondary" style={styles.action} testID="btn.petDetail.listing"
@@ -123,13 +107,13 @@ export function PetDetailScreen({ navigation, route }: Props) {
         )}
         {/* PP14 · a pet already reported lost opens that report; offering a second one would file a duplicate. */}
         {pet.lost_report_id ? (
-          <Button label="View lost report" variant="secondary" style={styles.action} testID="btn.petDetail.lostReport"
+          <Button label={PET_ACTIONS.viewLost} variant="secondary" style={styles.action} testID="btn.petDetail.lostReport"
             onPress={() => navigation.navigate("reportDetail", { reportId: pet.lost_report_id! })} />
         ) : (
-          <Button label="Report lost" variant="secondary" style={styles.action} testID="btn.petDetail.lost"
+          <Button label={PET_ACTIONS.reportLost} variant="secondary" style={styles.action} testID="btn.petDetail.lost"
             onPress={() => navigation.navigate("reportStray", { mode: "lost", petId })} />
         )}
-        <Button label="Remove from My pets" variant="destructive" style={styles.action} testID="btn.petDetail.remove"
+        <Button label={PET_ACTIONS.remove} variant="destructive" style={styles.action} testID="btn.petDetail.remove"
           onPress={() => { setError(undefined); setRemoving(true); }} />
       </ScrollView>
 
@@ -147,11 +131,12 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 48 },
   card: { marginTop: 14, padding: spacing.lg },
-  photo: { width: "100%", height: 220, borderRadius: squircle(56), backgroundColor: colors.soft, marginBottom: 16 },
+  photo: { width: "100%", height: 210, borderRadius: squircle(62), backgroundColor: colors.soft, marginBottom: 14 },
   title: { color: colors.ink, ...typography.title },
   sub: { marginTop: 4, color: colors.muted, ...typography.subtitle },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 12 },
-  fact: { paddingVertical: 10 },
+  fact: { paddingVertical: 11 },
+  factDivided: { borderTopWidth: 1, borderTopColor: colors.border },
   factLabel: { color: colors.muted, ...typography.meta, fontWeight: "600" },
   factValue: { marginTop: 2, color: colors.ink, ...typography.strong },
   error: { marginTop: 18, color: colors.danger, ...typography.strong, fontWeight: "700" },

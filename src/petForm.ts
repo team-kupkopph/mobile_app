@@ -205,3 +205,35 @@ export function myPetsHint(pets: { open_listing: { status: string; removed: bool
   if (pets.length) return `${pets.length} ${pets.length === 1 ? "pet" : "pets"}`;
   return "Add your pets";
 }
+
+
+// ── Step 11 · the pet screen's words, shared with the parity guard against the Pet artboard ──
+
+export const capitalize = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+/** The pet screen's actions, in order (the second follows the listing: VIEW_LISTING_LABEL or
+ *  LIST_PET_LABEL; the third follows a lost report: viewLost or reportLost). */
+export const PET_ACTIONS = {
+  edit: "Edit details", viewLost: "View lost report", reportLost: "Report lost", remove: "Remove from My pets"
+} as const;
+
+type PetFactsSource = {
+  breed: string | null; sex: string | null; size_category: string | null; color_markings: string | null;
+  spayed_neutered: boolean | null; temperament: string | null; medical_conditions: string | null; vet_contact: string | null;
+};
+
+/** The facts the owner entered, in reading order; a blank one is left out rather than shown empty.
+ *  The age is not one of them: it already sits under the name. */
+export function petFactRows(p: PetFactsSource): [string, string][] {
+  const rows: [string, string | null][] = [
+    ["Breed", p.breed],
+    ["Sex", p.sex && p.sex !== "unknown" ? capitalize(p.sex) : null],
+    ["Size", p.size_category ? capitalize(p.size_category) : null],
+    ["Colour and markings", p.color_markings],
+    ["Spayed / neutered", p.spayed_neutered === null ? null : p.spayed_neutered ? "Yes" : "No"],
+    ["Temperament", p.temperament],
+    ["Medical notes", p.medical_conditions],
+    ["Vet", p.vet_contact]
+  ];
+  return rows.filter((r): r is [string, string] => !!r[1]);
+}
