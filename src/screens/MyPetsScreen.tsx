@@ -12,12 +12,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { MyPet, RehomedPet } from "../api/types";
 import { useApi } from "../api/useApi";
 import { AdoptIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
+import { PetPhoto } from "../components/PetPhoto";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Chip, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
@@ -81,11 +82,7 @@ export function MyPetsScreen({ navigation }: Props) {
                   accessibilityLabel={[p.name, meta, ...chips.map((ch) => ch.label)].join(", ")}
                   testID={`row.myPets.${p.pet_id}`}
                   onPress={() => navigation.navigate("petDetail", { petId: p.pet_id })}>
-                  {p.photo_url ? (
-                    <Image source={{ uri: p.photo_url }} style={styles.thumb} resizeMode="cover" />
-                  ) : (
-                    <View style={[styles.thumb, styles.thumbEmpty]}><AdoptIcon color={colors.teal} size={30} /></View>
-                  )}
+                  <PetPhoto uri={p.photo_url} style={styles.thumb} iconColor={colors.teal} iconSize={30} />
                   <View style={styles.petText}>
                     <Text style={styles.petName}>{p.name}</Text>
                     <Text style={styles.petMeta}>{meta}</Text>
@@ -115,11 +112,7 @@ export function MyPetsScreen({ navigation }: Props) {
               <Card style={styles.rehomedCard} testID="card.myPets.rehomed">
                 {rehomed.map((h, i) => (
                   <View key={`${h.rehomed_at}-${i}`} style={styles.rehomedRow} testID="row.myPets.rehomed">
-                    {h.photo_url ? (
-                      <Image source={{ uri: h.photo_url }} style={styles.rehomedThumb} resizeMode="cover" />
-                    ) : (
-                      <View style={[styles.rehomedThumb, styles.rehomedThumbEmpty]}><AdoptIcon color={colors.muted} size={22} /></View>
-                    )}
+                    <PetPhoto uri={h.photo_url} style={styles.rehomedThumb} iconColor={colors.muted} iconSize={22} />
                     <View style={styles.petText}>
                       <Text style={styles.rehomedName}>{h.name}</Text>
                       <Text style={styles.petMeta}>{rehomedLine(h.rehomed_at)}</Text>
@@ -142,7 +135,6 @@ const styles = StyleSheet.create({
   petCard: { marginBottom: 14, paddingHorizontal: 6, paddingTop: 6, paddingBottom: 4 },
   petRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 10 },
   thumb: { width: 62, height: 62, borderRadius: squircle(62), backgroundColor: colors.soft },
-  thumbEmpty: { alignItems: "center", justifyContent: "center" },
   petText: { flex: 1, minWidth: 0 },
   petName: { color: colors.ink, ...typography.section },
   petMeta: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
@@ -155,7 +147,6 @@ const styles = StyleSheet.create({
   rehomedCard: { padding: 6, opacity: 0.86 },
   rehomedRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 10 },
   rehomedThumb: { width: 48, height: 48, borderRadius: squircle(48), backgroundColor: colors.greyPill },
-  rehomedThumbEmpty: { alignItems: "center", justifyContent: "center" },
   rehomedName: { color: colors.muted, ...typography.subtitle, fontWeight: "800" },
   emptyCard: { marginTop: 10, paddingVertical: 28, paddingHorizontal: 20, alignItems: "center", backgroundColor: colors.soft },
   emptyIcon: { width: 64, height: 64, borderRadius: squircle(64), alignItems: "center", justifyContent: "center", backgroundColor: colors.white },

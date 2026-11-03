@@ -121,7 +121,11 @@ export function serverFieldErrors(res: Res): { fields: FieldErrors; form: string
   };
   if (details && typeof details === "object" && error?.code === "invalid") walk(details);
   if (!Object.keys(fields).length && !form) {
-    form = petActionError(error?.code) ?? error?.message ?? (isOffline(res) ? "You're offline. Try again when you're connected." : "Couldn't save. Try again.");
+    // NT-11 · offline is decided before the message: the client's network failure carries a message of its own
+    // ("Couldn't reach the server."), which used to win. A timeout keeps its own words: it may have saved (NT-7).
+    const offline = isOffline(res) && error?.code !== "timeout";
+    form = petActionError(error?.code)
+      ?? (offline ? "You're offline. Try again when you're connected." : error?.message ?? "Couldn't save. Try again.");
   }
   return { fields, form };
 }

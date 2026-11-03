@@ -9,11 +9,12 @@
 // microchip, feeding routine, allergies, medications and an emergency contact, in three groups.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { PetDetail } from "../api/types";
 import { useApi } from "../api/useApi";
 import { BirthdatePicker } from "../components/BirthdatePicker";
+import { PetPhoto } from "../components/PetPhoto";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
@@ -212,7 +213,7 @@ export function PetFormScreen({ navigation, route }: Props) {
         <View style={styles.photoGrid}>
           {photos.map((url, i) => (
             <View key={`${i}-${url}`} style={styles.photoCell}>
-              <Image source={{ uri: url }} style={styles.thumb} resizeMode="cover" />
+              <PetPhoto uri={url} style={styles.thumb} iconColor={colors.muted} iconSize={30} />
               <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.photoAct}
                 onPress={() => setPhotos((p) => removePhoto(p, i))}>
                 <Text style={styles.photoRemove}>Remove</Text>
