@@ -73,7 +73,7 @@ export function MyPetsScreen({ navigation }: Props) {
           {pets.map((p) => {
             const chips = petChips(p);
             const action = petCardAction(p);
-            const meta = [capitalize(p.species), ageLabel(p.birthdate)].filter(Boolean).join(" · ");
+            const meta = [capitalize(p.species), ageLabel(p.birthdate, undefined, !!p.dob_approximate)].filter(Boolean).join(" · ");
             return (
               <Card key={p.pet_id} style={styles.petCard}>
                 <TouchableOpacity style={styles.petRow} activeOpacity={0.85}
