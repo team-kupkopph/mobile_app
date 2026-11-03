@@ -264,3 +264,20 @@ describe("the rest of Feature Spec §3.2 (step 12 / PQ4)", () => {
     expect(read("screens/PetDetailScreen.tsx")).toMatch(/ageLabel\(pet\.birthdate, undefined, !!pet\.dob_approximate\)/);
   });
 });
+
+describe("step 14 cleanups (PP11)", () => {
+  const f = require("../petForm");
+  it("the pet form has a size, and sends and clears it", () => {
+    expect(f.petBody({ ...state, size: "small" }).size_category).toBe("small");
+    expect(f.petBody({ ...state, size: "" }).size_category).toBeUndefined();
+    expect(f.petPatchBody({ ...state, size: "" }).size_category).toBe("");
+    expect(read("screens/PetFormScreen.tsx")).toMatch(/testID="seg\.petForm\.size"/);
+    expect(read("screens/PetFormScreen.tsx")).not.toMatch(/size: ""/);
+  });
+  it("photo rows are keyed by position too, so a repeated URL can't collide", () => {
+    for (const f2 of ["screens/PetFormScreen.tsx", "screens/ListingFormScreen.tsx"]) {
+      expect(read(f2)).not.toMatch(/key=\{url\}/);
+      expect(read(f2)).toMatch(/key=\{`\$\{i\}-\$\{url\}`\}/);
+    }
+  });
+});

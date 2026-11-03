@@ -131,7 +131,7 @@ export function serverFieldErrors(res: Res): { fields: FieldErrors; form: string
 export function petPatchBody(s: PetFormState) {
   return {
     name: s.name.trim(), species: s.species, breed: s.breed.trim(), sex: s.sex,
-    birthdate: s.birthdate.trim() || null, spayed_neutered: s.spayed, temperament: s.temperament.trim(),
+    birthdate: s.birthdate.trim() || null, size_category: s.size, spayed_neutered: s.spayed, temperament: s.temperament.trim(),
     medical_conditions: s.medical.trim(), vet_contact: s.vet.trim(),
     dob_approximate: !!s.birthdate.trim() && !!s.approximate,
     weight_kg: s.weight?.trim() || null, microchip_no: (s.microchip ?? "").trim(),

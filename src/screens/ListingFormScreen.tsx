@@ -378,7 +378,7 @@ export function ListingFormScreen({ navigation, route }: Props) {
         <Text style={styles.fine}>Up to {MAX_PHOTOS}. The first is the one adopters see on the deck.</Text>
         <View style={styles.photoGrid}>
           {photos.map((url, i) => (
-            <View key={url} style={styles.photoCell} testID={`photo.listingForm.${i}`}>
+            <View key={`${i}-${url}`} style={styles.photoCell} testID={`photo.listingForm.${i}`}>
               <Image source={{ uri: url }} style={styles.thumb} resizeMode="cover" />
               {i === 0 ? (
                 <View style={styles.photoAct}>
