@@ -6,12 +6,13 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { PetDetail } from "../api/types";
 import { useApi } from "../api/useApi";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
+import { PetPhoto } from "../components/PetPhoto";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Chip, ScreenHeader, SegmentedControl } from "../components/ui";
 import { loadState } from "../net";
@@ -71,7 +72,7 @@ export function PetDetailScreen({ navigation, route }: Props) {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card tone="hero" style={styles.card}>
           {pet.photos[0] ? (
-            <Image source={{ uri: pet.photos[0] }} style={styles.photo} resizeMode="cover"
+            <PetPhoto uri={pet.photos[0]} style={styles.photo} iconColor={colors.teal} iconSize={44}
               accessibilityLabel={`Photo of ${pet.name}`} />
           ) : null}
           <Text style={styles.title}>{pet.name}</Text>

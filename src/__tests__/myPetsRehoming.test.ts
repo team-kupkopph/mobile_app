@@ -127,6 +127,16 @@ describe("errors that say what is wrong, under the field (PP9/PP10, My Pets revi
       .toBe("Boom.");
   });
 
+  it("says offline for the client's real network failure, but not for a timeout (NT-11)", () => {
+    // The shapes `client.ts` actually returns. Its network failure carries a message of its own, which used to
+    // win over the offline sentence, so a Save without a connection said "Couldn't reach the server."
+    const network = { ok: false, status: 0, data: { error: { code: "network_error", message: "Couldn't reach the server." } } };
+    expect(serverFieldErrors(network).form).toBe("You're offline. Try again when you're connected.");
+    // A timeout may have saved on the server (NT-7): it keeps its own words rather than inviting a second Save.
+    const timeout = { ok: false, status: 0, data: { error: { code: "timeout", message: "The server took too long to answer." } } };
+    expect(serverFieldErrors(timeout).form).toBe("The server took too long to answer.");
+  });
+
   it("checks a birthdate before it is sent", () => {
     expect(birthdateError("", today)).toBeNull();
     expect(birthdateError("2026-10-28", today)).toBeNull();        // today is fine
