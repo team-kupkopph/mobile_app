@@ -21,7 +21,7 @@ import {
   LIST_PET_LABEL, PET_ACTIONS, REMOVE_PET_BODY, REMOVE_REASONS, RemoveReason, VIEW_LISTING_LABEL, ageLabel, capitalize,
   petActionError, petChips, petFactRows
 } from "../petForm";
-import { colors, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "petDetail">;
 
@@ -75,7 +75,7 @@ export function PetDetailScreen({ navigation, route }: Props) {
             <PetPhoto uri={pet.photos[0]} style={styles.photo} iconColor={colors.teal} iconSize={44}
               accessibilityLabel={`Photo of ${pet.name}`} />
           ) : null}
-          <Text style={styles.title}>{pet.name}</Text>
+          <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>{pet.name}</Text>
           <Text style={styles.sub}>{[capitalize(pet.species), age].filter(Boolean).join(" · ")}</Text>
           {petChips(pet).length ? (
             <View style={styles.chipRow}>

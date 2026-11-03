@@ -25,12 +25,16 @@ import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { MY_PETS_EMPTY, REHOMED_TITLE, ageLabel, capitalize, petCardAction, petChips, rehomedLine } from "../petForm";
 import { TAP_SLOP } from "../touch";
-import { colors, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
+import { useLargeText } from "../useLargeText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "myPets">;
 
 export function MyPetsScreen({ navigation }: Props) {
   const api = useApi();
+  // NT-13 · at Dynamic Type AX3 and up the thumbnail beside the text leaves a long name a narrow column that breaks mid-word, so
+  // the card stacks (thumbnail above, text full width), as MyRescuesScreen does. The whole card stays the button; the chevron goes.
+  const large = useLargeText();
   const [pets, setPets] = useState<MyPet[]>([]);
   const [rehomed, setRehomed] = useState<RehomedPet[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
@@ -77,14 +81,14 @@ export function MyPetsScreen({ navigation }: Props) {
             const meta = [capitalize(p.species), ageLabel(p.birthdate, undefined, !!p.dob_approximate)].filter(Boolean).join(" · ");
             return (
               <Card key={p.pet_id} style={styles.petCard}>
-                <TouchableOpacity style={styles.petRow} activeOpacity={0.85}
+                <TouchableOpacity style={[styles.petRow, large && styles.petRowLarge]} activeOpacity={0.85}
                   accessibilityRole="button"
                   accessibilityLabel={[p.name, meta, ...chips.map((ch) => ch.label)].join(", ")}
                   testID={`row.myPets.${p.pet_id}`}
                   onPress={() => navigation.navigate("petDetail", { petId: p.pet_id })}>
                   <PetPhoto uri={p.photo_url} style={styles.thumb} iconColor={colors.teal} iconSize={30} />
-                  <View style={styles.petText}>
-                    <Text style={styles.petName}>{p.name}</Text>
+                  <View style={large ? styles.petTextLarge : styles.petText}>
+                    <Text style={styles.petName} maxFontSizeMultiplier={maxFontScale.title}>{p.name}</Text>
                     <Text style={styles.petMeta}>{meta}</Text>
                     {chips.length ? (
                       <View style={styles.chips}>
@@ -92,7 +96,7 @@ export function MyPetsScreen({ navigation }: Props) {
                       </View>
                     ) : null}
                   </View>
-                  <Text style={styles.chevron} allowFontScaling={false}>›</Text>
+                  {large ? null : <Text style={styles.chevron} allowFontScaling={false}>›</Text>}
                 </TouchableOpacity>
                 <View style={styles.hairline} />
                 <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.cardAction}
@@ -136,6 +140,9 @@ const styles = StyleSheet.create({
   petRow: { flexDirection: "row", alignItems: "center", gap: 14, padding: 10 },
   thumb: { width: 62, height: 62, borderRadius: squircle(62), backgroundColor: colors.soft },
   petText: { flex: 1, minWidth: 0 },
+  // large: stacked. `flex: 1` survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
+  petRowLarge: { flexDirection: "column", alignItems: "flex-start" },
+  petTextLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   petName: { color: colors.ink, ...typography.section },
   petMeta: { marginTop: 2, color: colors.muted, ...typography.meta, fontWeight: "700" },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
