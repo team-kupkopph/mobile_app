@@ -29,6 +29,9 @@ import { colors, radii, spacing, typography } from "../theme";
 
 const SPECIES = ["dog", "cat", "other"] as const;
 const SEX = ["male", "female", "unknown"] as const;
+// Step 14 (PP11) · the size the pet screen shows and a rehoming listing inherits; it had no input.
+const SIZE_OPTIONS = ["", "small", "medium", "large"] as const;
+const SIZE_LABELS = ["Not sure", "Small", "Medium", "Large"];
 
 type Props = NativeStackScreenProps<RootStackParamList, "petForm">;
 
@@ -42,6 +45,7 @@ export function PetFormScreen({ navigation, route }: Props) {
   const [sex, setSex] = useState<string>("unknown");
   const [birthdate, setBirthdate] = useState("");
   const [approximate, setApproximate] = useState(false);
+  const [size, setSize] = useState<string>("");
   const [weight, setWeight] = useState("");
   const [microchip, setMicrochip] = useState("");
   const [feeding, setFeeding] = useState("");
@@ -87,7 +91,7 @@ export function PetFormScreen({ navigation, route }: Props) {
       setBirthdate(d.birthdate ?? ""); setSpayed(triFromBool(d.spayed_neutered));
       setTemperament(d.temperament ?? ""); setMedical(d.medical_conditions ?? "");
       setVet(d.vet_contact ?? ""); setPhotos((d.photos ?? []).slice(0, MAX_PHOTOS));
-      setApproximate(!!d.dob_approximate); setWeight(d.weight_kg ? String(Number(d.weight_kg)) : "");
+      setApproximate(!!d.dob_approximate); setSize(d.size_category ?? ""); setWeight(d.weight_kg ? String(Number(d.weight_kg)) : "");
       setMicrochip(d.microchip_no ?? ""); setFeeding(d.feeding_routine ?? ""); setAllergies(d.allergies ?? "");
       setMedications(d.medications ?? ""); setEmergency(d.emergency_contact ?? "");
     });
@@ -123,7 +127,7 @@ export function PetFormScreen({ navigation, route }: Props) {
     if (Object.keys(found).length) { show(found); return; }
     setErrors({});
     setSubmitting(true);
-    const state: PetFormState = { name, species, breed, sex, birthdate, size: "", spayed: triToBool(spayed),
+    const state: PetFormState = { name, species, breed, sex, birthdate, size, spayed: triToBool(spayed),
       temperament, medical, vet, photos, approximate, weight, microchip, feeding, allergies, medications, emergency };
     const saved = isEdit
       ? await api.patch(`/me/pets/${petId}`, petPatchBody(state))
@@ -173,6 +177,10 @@ export function PetFormScreen({ navigation, route }: Props) {
           <Field label="Weight in kg (optional)" value={weight} onChangeText={edit("weight", setWeight)} placeholder="4.2"
             keyboardType="decimal-pad" testID="field.petForm.weight" error={errors.weight} errorTestID="error.petForm.weight" />
         </View>
+        <Text style={styles.label}>Size</Text>
+        <SegmentedControl testID="seg.petForm.size" segments={SIZE_LABELS}
+          index={Math.max(0, SIZE_OPTIONS.indexOf(size as (typeof SIZE_OPTIONS)[number]))}
+          onChange={(i) => setSize(SIZE_OPTIONS[i])} />
         <Text style={styles.label}>Spayed / neutered</Text>
         <SegmentedControl segments={[...TRI_LABELS]} index={triIndex(spayed)} onChange={(i) => setSpayed(triAt(i))} />
         <View {...at("microchip")}>
@@ -203,7 +211,7 @@ export function PetFormScreen({ navigation, route }: Props) {
         <Text style={styles.label} {...at("photos")}>Photos (optional)</Text>
         <View style={styles.photoGrid}>
           {photos.map((url, i) => (
-            <View key={url} style={styles.photoCell}>
+            <View key={`${i}-${url}`} style={styles.photoCell}>
               <Image source={{ uri: url }} style={styles.thumb} resizeMode="cover" />
               <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" style={styles.photoAct}
                 onPress={() => setPhotos((p) => removePhoto(p, i))}>
