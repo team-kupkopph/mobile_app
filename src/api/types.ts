@@ -220,6 +220,8 @@ export type MyPet = {
   pet_id: string; name: string; species: string; photo_url: string | null;
   /** Step 11 · for the card's "Cat · 3 years"; absent from servers before backend's step 11. */
   birthdate?: string | null;
+  /** Step 12 · the card says "About 3 years" when the birthdate is approximate. */
+  dob_approximate?: boolean;
   open_listing: PetListingState | null; lost_report_id: string | null;
 };
 
@@ -233,6 +235,10 @@ export type PetDetail = {
   spayed_neutered: boolean | null; temperament: string | null; medical_conditions: string | null;
   vet_contact: string | null; photos: string[];
   open_listing: PetListingState | null; lost_report_id: string | null;
+  // Step 12 / PQ4 · every §3.2 field the pet table has (optional: absent from older servers).
+  dob_approximate?: boolean; weight_kg?: string | null; microchip_no?: string | null;
+  feeding_routine?: string | null; allergies?: string | null; medications?: string | null;
+  emergency_contact?: string | null;
 };
 
 // K27/G12 (backend) · the volunteer-facing summary on the shelter dashboard — pending

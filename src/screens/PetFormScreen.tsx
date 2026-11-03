@@ -5,19 +5,24 @@
 // that fails to upload says why under Photos instead of silently doing nothing.
 // The vet contact and medical notes travel with the pet if it is later rehomed (the new owner
 // keeps them), which is why they are asked here.
+// Step 12 / PQ4 · the rest of Feature Spec §3.2: a picked birthdate (or an approximate one), weight,
+// microchip, feeding routine, allergies, medications and an emergency contact, in three groups.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { PetDetail } from "../api/types";
 import { useApi } from "../api/useApi";
+import { BirthdatePicker } from "../components/BirthdatePicker";
 import { PrefillWarning } from "../components/PrefillWarning";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Field, ScreenHeader, SegmentedControl } from "../components/ui";
 import { MAX_PHOTOS, TRI_LABELS, Tri, addPhoto, removePhoto, triAt, triFromBool, triIndex, triToBool } from "../listingForm";
 import { pickAndUpload } from "../media/pickAndUpload";
 import { RootStackParamList } from "../navigation/types";
-import { FieldErrors, FormField, PetFormState, birthdateError, petBody, petPatchBody, serverFieldErrors } from "../petForm";
+import {
+  FieldErrors, FormField, PetFormState, birthdateError, microchipError, petBody, petPatchBody, serverFieldErrors, weightError
+} from "../petForm";
 import { TAP_SLOP } from "../touch";
 import { uploadErrorMessage } from "../upload";
 import { colors, radii, spacing, typography } from "../theme";
@@ -36,6 +41,13 @@ export function PetFormScreen({ navigation, route }: Props) {
   const [breed, setBreed] = useState("");
   const [sex, setSex] = useState<string>("unknown");
   const [birthdate, setBirthdate] = useState("");
+  const [approximate, setApproximate] = useState(false);
+  const [weight, setWeight] = useState("");
+  const [microchip, setMicrochip] = useState("");
+  const [feeding, setFeeding] = useState("");
+  const [allergies, setAllergies] = useState("");
+  const [medications, setMedications] = useState("");
+  const [emergency, setEmergency] = useState("");
   const [spayed, setSpayed] = useState<Tri>("unknown");
   const [temperament, setTemperament] = useState("");
   const [medical, setMedical] = useState("");
@@ -75,6 +87,9 @@ export function PetFormScreen({ navigation, route }: Props) {
       setBirthdate(d.birthdate ?? ""); setSpayed(triFromBool(d.spayed_neutered));
       setTemperament(d.temperament ?? ""); setMedical(d.medical_conditions ?? "");
       setVet(d.vet_contact ?? ""); setPhotos((d.photos ?? []).slice(0, MAX_PHOTOS));
+      setApproximate(!!d.dob_approximate); setWeight(d.weight_kg ? String(Number(d.weight_kg)) : "");
+      setMicrochip(d.microchip_no ?? ""); setFeeding(d.feeding_routine ?? ""); setAllergies(d.allergies ?? "");
+      setMedications(d.medications ?? ""); setEmergency(d.emergency_contact ?? "");
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, keyed by petId
   }, [petId]);
@@ -101,11 +116,15 @@ export function PetFormScreen({ navigation, route }: Props) {
     if (!name.trim()) found.name = "Give your pet a name.";
     const dateProblem = birthdateError(birthdate);
     if (dateProblem) found.birthdate = dateProblem;
+    const weightProblem = weightError(weight);
+    if (weightProblem) found.weight = weightProblem;
+    const chipProblem = microchipError(microchip);
+    if (chipProblem) found.microchip = chipProblem;
     if (Object.keys(found).length) { show(found); return; }
     setErrors({});
     setSubmitting(true);
     const state: PetFormState = { name, species, breed, sex, birthdate, size: "", spayed: triToBool(spayed),
-      temperament, medical, vet, photos };
+      temperament, medical, vet, photos, approximate, weight, microchip, feeding, allergies, medications, emergency };
     const saved = isEdit
       ? await api.patch(`/me/pets/${petId}`, petPatchBody(state))
       : await api.post("/me/pets", petBody(state));
@@ -141,20 +160,44 @@ export function PetFormScreen({ navigation, route }: Props) {
         <Seg options={SEX} value={sex} onChange={setSex} />
 
         <View {...at("birthdate")}>
-          <Field label="Birthdate (optional)" value={birthdate} onChangeText={edit("birthdate", setBirthdate)}
-            placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" testID="field.petForm.birthdate"
-            error={errors.birthdate} errorTestID="error.petForm.birthdate" />
+          <Text style={styles.label}>Birthdate (optional)</Text>
+          <BirthdatePicker value={birthdate} approximate={approximate} error={errors.birthdate}
+            onChange={(v) => {
+              setBirthdate(v.birthdate); setApproximate(v.approximate);
+              if (errors.birthdate) setErrors((e) => ({ ...e, birthdate: undefined }));
+            }} />
         </View>
 
+        <Text style={styles.group} accessibilityRole="header">Body</Text>
+        <View {...at("weight")}>
+          <Field label="Weight in kg (optional)" value={weight} onChangeText={edit("weight", setWeight)} placeholder="4.2"
+            keyboardType="decimal-pad" testID="field.petForm.weight" error={errors.weight} errorTestID="error.petForm.weight" />
+        </View>
         <Text style={styles.label}>Spayed / neutered</Text>
         <SegmentedControl segments={[...TRI_LABELS]} index={triIndex(spayed)} onChange={(i) => setSpayed(triAt(i))} />
+        <View {...at("microchip")}>
+          <Field label="Microchip number (optional)" value={microchip} onChangeText={edit("microchip", setMicrochip)}
+            placeholder="985112009" autoCapitalize="characters" testID="field.petForm.microchip"
+            error={errors.microchip} errorTestID="error.petForm.microchip" />
+        </View>
 
+        <Text style={styles.group} accessibilityRole="header">Care</Text>
         <Field label="Temperament (optional)" value={temperament} onChangeText={edit("temperament", setTemperament)}
           placeholder="Lap cat" error={errors.temperament} />
+        <Field label="Feeding routine (optional)" value={feeding} onChangeText={edit("feeding", setFeeding)} multiline
+          placeholder="Twice a day, wet food at night" testID="field.petForm.feeding" error={errors.feeding} />
+        <Field label="Allergies (optional)" value={allergies} onChangeText={edit("allergies", setAllergies)} multiline
+          placeholder="Chicken" testID="field.petForm.allergies" error={errors.allergies} />
+        <Field label="Medications (optional)" value={medications} onChangeText={edit("medications", setMedications)} multiline
+          placeholder="Inhaler, twice a day" testID="field.petForm.medications" error={errors.medications} />
         <Field label="Medical notes (optional)" value={medical} onChangeText={edit("medical", setMedical)} multiline
-          placeholder="Allergies, conditions, medication" error={errors.medical} />
+          placeholder="Conditions or special needs" error={errors.medical} />
+
+        <Text style={styles.group} accessibilityRole="header">Contacts</Text>
         <Field label="Vet contact (optional)" value={vet} onChangeText={edit("vet", setVet)} placeholder="Dr Reyes, 0917…"
           error={errors.vet} />
+        <Field label="Emergency contact (optional)" value={emergency} onChangeText={edit("emergency", setEmergency)}
+          placeholder="Ana, 0918…" testID="field.petForm.emergency" error={errors.emergency} />
         <Text style={styles.fine}>If you rehome this pet, the next owner keeps these notes.</Text>
 
         <Text style={styles.label} {...at("photos")}>Photos (optional)</Text>
@@ -203,6 +246,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   label: { marginTop: 20, marginBottom: 10, color: colors.ink, ...typography.strong, fontWeight: "700" },
   fine: { marginTop: 8, color: colors.muted, ...typography.meta, lineHeight: 18 },
+  group: { marginTop: 28, marginBottom: 2, color: colors.ink, ...typography.section },
   photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 4 },
   photoCell: { width: "47%" },
   thumb: { width: "100%", height: 110, borderRadius: radii.field, backgroundColor: colors.border },

@@ -192,3 +192,75 @@ describe("what a pet is in the middle of (PP14, My Pets review 2026-10-28)", () 
     expect(profile).toMatch(/myPetsHint\(/);
   });
 });
+
+describe("the rest of Feature Spec §3.2 (step 12 / PQ4)", () => {
+  const f = require("../petForm");
+  const today = new Date(2026, 9, 29);   // 29 Oct 2026
+
+  it("checks weight and microchip before sending, with the column's limits", () => {
+    for (const ok of ["", "4", "4.2", "4.25", "0.01", "999.99"]) expect(f.weightError(ok)).toBeNull();
+    for (const bad of ["0", "-1", "1000", "4.123", "heavy", "4,2"]) expect(f.weightError(bad)).toBe(f.WEIGHT_ERROR);
+    for (const ok of ["", "985-112009", "A".repeat(40)]) expect(f.microchipError(ok)).toBeNull();
+    for (const bad of ["985 112", "98#5", "A".repeat(41)]) expect(f.microchipError(bad)).toBe(f.MICROCHIP_ERROR);
+    expect(f.weightLabel("4.20")).toBe("4.2 kg");
+    expect(f.weightLabel(null)).toBeNull();
+  });
+
+  it("a picked birthdate is blank until complete; approximate needs only the month", () => {
+    expect(f.birthdateValue(2023, 3, 9, false)).toBe("2023-03-09");
+    expect(f.birthdateValue(2023, 3, null, false)).toBe("");
+    expect(f.birthdateValue(2023, 3, 9, true)).toBe("2023-03-01");
+    expect(f.birthdateValue(2023, null, null, true)).toBe("");
+    expect(f.birthdateParts("2023-03-09")).toEqual({ year: 2023, month: 3, day: 9 });
+    expect(f.birthdateParts("")).toEqual({ year: null, month: null, day: null });
+    expect(f.daysIn(2024, 2)).toBe(29);
+    expect(f.daysIn(2023, 2)).toBe(28);
+    expect(f.birthdateSummary(2023, 3, null, true)).toBe("Born around March 2023");
+    expect(f.birthdateSummary(2023, 3, 9, false)).toBe("Born 9 March 2023");
+    expect(f.birthdateSummary(2023, 3, null, false)).toMatch(/pick the day, or choose Approximate/);
+    expect(f.birthdateSummary(null, null, null, false)).toMatch(/Not set/);
+  });
+
+  it("an approximate age says so", () => {
+    expect(f.ageLabel("2023-03-01", today, true)).toBe("About 3 years");
+    expect(f.ageLabel("2023-03-01", today)).toBe("3 years");
+    expect(f.ageLabel("2026-10-15", today, true)).toBe("Under a month");
+  });
+
+  it("sends every new field, and clears them on an edit", () => {
+    const base = { ...state, birthdate: "2023-03-01", approximate: true, weight: " 4.2 ", microchip: "985",
+      feeding: "Twice", allergies: "Chicken", medications: "", emergency: "Ana" };
+    expect(f.petBody(base)).toMatchObject({ dob_approximate: true, weight_kg: "4.2", microchip_no: "985",
+      feeding_routine: "Twice", allergies: "Chicken", emergency_contact: "Ana" });
+    expect(f.petBody(base).medications).toBeUndefined();
+    const cleared = f.petPatchBody({ ...base, birthdate: "", weight: "", allergies: "" });
+    expect(cleared).toMatchObject({ dob_approximate: false, weight_kg: null, allergies: "", medications: "" });
+  });
+
+  it("puts each server refusal under its new field", () => {
+    const r = f.serverFieldErrors({ ok: false, status: 400, data: { error: { code: "invalid", message: "x",
+      details: { weight_kg: ["Ensure this value is greater than or equal to 0.01."], microchip_no: ["bad"],
+        emergency_contact: ["Ensure this field has no more than 160 characters."] } } } });
+    expect(r.fields).toEqual({ weight: f.WEIGHT_ERROR, microchip: "bad",
+      emergency: "Ensure this field has no more than 160 characters." });
+  });
+
+  it("the pet screen lists the new facts, grouped as §3.2 groups them", () => {
+    const rows = f.petFactRows({ breed: "Puspin", sex: "female", size_category: "small", color_markings: null,
+      spayed_neutered: true, temperament: "Lap cat", medical_conditions: "Asthma", vet_contact: "Dr Reyes",
+      weight_kg: "4.20", microchip_no: "985", feeding_routine: "Twice", allergies: "Chicken", medications: "Inhaler",
+      emergency_contact: "Ana" }).map(([k]: [string]) => k);
+    expect(rows).toEqual(["Breed", "Sex", "Size", "Weight", "Spayed / neutered", "Microchip", "Temperament",
+      "Feeding routine", "Allergies", "Medications", "Medical notes", "Vet", "Emergency contact"]);
+  });
+
+  it("the form uses the picker, not a typed date, and the card and screen say About", () => {
+    const form = read("screens/PetFormScreen.tsx");
+    expect(form).toMatch(/<BirthdatePicker /);
+    expect(form).not.toMatch(/placeholder="YYYY-MM-DD"/);
+    for (const id of ["field.petForm.weight", "field.petForm.microchip", "field.petForm.feeding",
+      "field.petForm.allergies", "field.petForm.medications", "field.petForm.emergency"]) expect(form).toContain(id);
+    expect(read("screens/MyPetsScreen.tsx")).toMatch(/ageLabel\(p\.birthdate, undefined, !!p\.dob_approximate\)/);
+    expect(read("screens/PetDetailScreen.tsx")).toMatch(/ageLabel\(pet\.birthdate, undefined, !!pet\.dob_approximate\)/);
+  });
+});

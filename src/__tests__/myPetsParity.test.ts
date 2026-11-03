@@ -71,8 +71,10 @@ describeParity("My pets and Pet match their anchor artboards", () => {
   });
 
   it("the pet screen's facts follow the artboard's order", () => {
+    // Every field set, so every fact the app can show is in the list the artboard's must follow.
     const all = petFactRows({ breed: "b", sex: "male", size_category: "small", color_markings: "c",
-      spayed_neutered: true, temperament: "t", medical_conditions: "m", vet_contact: "v" }).map(([k]) => k);
+      spayed_neutered: true, temperament: "t", medical_conditions: "m", vet_contact: "v", weight_kg: "4.20",
+      microchip_no: "985", feeding_routine: "f", allergies: "a", medications: "md", emergency_contact: "e" }).map(([k]) => k);
     expect(isSubsequence(pet().facts.split(","), all)).toBe(true);
   });
 

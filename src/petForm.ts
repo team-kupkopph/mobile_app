@@ -8,6 +8,9 @@ export type PetFormState = {
   name: string; species: string; breed: string; sex: string; birthdate: string;
   size: string; spayed: boolean | null; temperament: string; medical: string; vet: string;
   photos: string[];
+  // Step 12 / PQ4 · the rest of Feature Spec §3.2 (optional so older callers still type-check).
+  approximate?: boolean; weight?: string; microchip?: string; feeding?: string; allergies?: string;
+  medications?: string; emergency?: string;
 };
 
 export function petBody(s: PetFormState) {
@@ -16,6 +19,10 @@ export function petBody(s: PetFormState) {
     birthdate: s.birthdate.trim() || undefined, size_category: s.size || undefined,
     spayed_neutered: s.spayed, temperament: s.temperament.trim() || undefined,
     medical_conditions: s.medical.trim() || undefined, vet_contact: s.vet.trim() || undefined,
+    dob_approximate: !!s.birthdate.trim() && !!s.approximate,
+    weight_kg: s.weight?.trim() || undefined, microchip_no: s.microchip?.trim() || undefined,
+    feeding_routine: s.feeding?.trim() || undefined, allergies: s.allergies?.trim() || undefined,
+    medications: s.medications?.trim() || undefined, emergency_contact: s.emergency?.trim() || undefined,
     photos: s.photos.slice(0, MAX_PHOTOS).map((file_url, i) => ({ file_url, is_primary: i === 0 }))
   };
 }
@@ -38,14 +45,17 @@ export function petFormError(code: string | undefined): string | null {
 /** The form fields an error can sit under, across the pet form and the listing form. */
 export type FormField =
   | "name" | "species" | "breed" | "sex" | "birthdate" | "size" | "spayed" | "temperament"
-  | "medical" | "vet" | "markings" | "photos" | "fee" | "city" | "description" | "requirements";
+  | "medical" | "vet" | "markings" | "photos" | "fee" | "city" | "description" | "requirements"
+  | "weight" | "microchip" | "feeding" | "allergies" | "medications" | "emergency";
 export type FieldErrors = Partial<Record<FormField, string>>;
 
 const SERVER_FIELD: Record<string, FormField> = {
   name: "name", species: "species", breed: "breed", sex: "sex", birthdate: "birthdate",
   size_category: "size", spayed_neutered: "spayed", temperament: "temperament",
   medical_conditions: "medical", vet_contact: "vet", color_markings: "markings", photos: "photos",
-  adoption_fee: "fee", city: "city", description: "description", requirements: "requirements"
+  adoption_fee: "fee", city: "city", description: "description", requirements: "requirements",
+  dob_approximate: "birthdate", weight_kg: "weight", microchip_no: "microchip", feeding_routine: "feeding",
+  allergies: "allergies", medications: "medications", emergency_contact: "emergency"
 };
 
 export const BIRTHDATE_FORMAT = "Use the date format YYYY-MM-DD, like 2023-03-01.";
@@ -84,6 +94,7 @@ function friendly(field: FormField, message: string): string {
   if (field === "name" && /blank|required|empty/i.test(message)) return "Give your pet a name.";
   if (field === "photos" && /uploaded/i.test(message)) return "One of the photos can't be used. Remove it and add it again.";
   if (field === "fee" && /valid number|decimal/i.test(message)) return "Enter the fee as a number, like 250.";
+  if (field === "weight") return WEIGHT_ERROR;
   return message;
 }
 
@@ -122,13 +133,23 @@ export function petPatchBody(s: PetFormState) {
     name: s.name.trim(), species: s.species, breed: s.breed.trim(), sex: s.sex,
     birthdate: s.birthdate.trim() || null, spayed_neutered: s.spayed, temperament: s.temperament.trim(),
     medical_conditions: s.medical.trim(), vet_contact: s.vet.trim(),
+    dob_approximate: !!s.birthdate.trim() && !!s.approximate,
+    weight_kg: s.weight?.trim() || null, microchip_no: (s.microchip ?? "").trim(),
+    feeding_routine: (s.feeding ?? "").trim(), allergies: (s.allergies ?? "").trim(),
+    medications: (s.medications ?? "").trim(), emergency_contact: (s.emergency ?? "").trim(),
     photos: s.photos.slice(0, MAX_PHOTOS).map((file_url, i) => ({ file_url, is_primary: i === 0 }))
   };
 }
 
-/** "3 years", "8 months", "Under a month". Null when there is no birthdate or it is in the future
- *  (a typo, not a pet that isn't born yet). */
-export function ageLabel(birthdate: string | null | undefined, today: Date = new Date()): string | null {
+/** "3 years", "8 months", "Under a month" ("About 3 years" when the birthdate is approximate). Null
+ *  when there is no birthdate or it is in the future (a typo, not a pet that isn't born yet). */
+export function ageLabel(birthdate: string | null | undefined, today: Date = new Date(), approximate = false): string | null {
+  const exact = exactAge(birthdate, today);
+  if (!exact || !approximate || exact === "Under a month") return exact;
+  return `About ${exact}`;
+}
+
+function exactAge(birthdate: string | null | undefined, today: Date): string | null {
   if (!birthdate || !/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) return null;
   const [y, m, d] = birthdate.split("-").map(Number);
   let months = (today.getFullYear() - y) * 12 + (today.getMonth() + 1 - m);
@@ -220,6 +241,9 @@ export const PET_ACTIONS = {
 type PetFactsSource = {
   breed: string | null; sex: string | null; size_category: string | null; color_markings: string | null;
   spayed_neutered: boolean | null; temperament: string | null; medical_conditions: string | null; vet_contact: string | null;
+  // Step 12 / PQ4 (optional: a server before step 12 doesn't send them)
+  weight_kg?: string | null; microchip_no?: string | null; feeding_routine?: string | null; allergies?: string | null;
+  medications?: string | null; emergency_contact?: string | null;
 };
 
 /** The facts the owner entered, in reading order; a blank one is left out rather than shown empty.
@@ -230,10 +254,72 @@ export function petFactRows(p: PetFactsSource): [string, string][] {
     ["Sex", p.sex && p.sex !== "unknown" ? capitalize(p.sex) : null],
     ["Size", p.size_category ? capitalize(p.size_category) : null],
     ["Colour and markings", p.color_markings],
+    ["Weight", weightLabel(p.weight_kg)],
     ["Spayed / neutered", p.spayed_neutered === null ? null : p.spayed_neutered ? "Yes" : "No"],
+    ["Microchip", p.microchip_no ?? null],
     ["Temperament", p.temperament],
+    ["Feeding routine", p.feeding_routine ?? null],
+    ["Allergies", p.allergies ?? null],
+    ["Medications", p.medications ?? null],
     ["Medical notes", p.medical_conditions],
-    ["Vet", p.vet_contact]
+    ["Vet", p.vet_contact],
+    ["Emergency contact", p.emergency_contact ?? null]
   ];
   return rows.filter((r): r is [string, string] => !!r[1]);
+}
+
+
+// ── Step 12 / PQ4 · the rest of Feature Spec §3.2 ──
+
+export const WEIGHT_ERROR = "Enter the weight in kilograms, like 4.2.";
+export const MICROCHIP_ERROR = "A microchip number has only letters, digits and dashes.";
+
+/** Blank is fine; otherwise above zero, at most 999.99, two decimals at most (the column's limits). */
+export function weightError(value: string): string | null {
+  const v = value.trim();
+  if (!v) return null;
+  if (!/^\d{1,3}(\.\d{1,2})?$/.test(v) || Number(v) <= 0) return WEIGHT_ERROR;
+  return null;
+}
+
+export function microchipError(value: string): string | null {
+  const v = value.trim();
+  if (!v) return null;
+  return /^[A-Za-z0-9-]{1,40}$/.test(v) ? null : MICROCHIP_ERROR;
+}
+
+/** "4.20" -> "4.2 kg"; null stays null. */
+export function weightLabel(kg: string | null | undefined): string | null {
+  if (!kg) return null;
+  return `${Number(kg)} kg`;
+}
+
+/** The birthdate picker's two modes; the second stores the 1st of the month with `dob_approximate`. */
+export const BIRTHDATE_MODES = ["Exact date", "Approximate"] as const;
+
+export const daysIn = (year: number, month: number) => new Date(year, month, 0).getDate();
+
+export function birthdateParts(value: string | null | undefined): { year: number | null; month: number | null; day: number | null } {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((value ?? "").trim());
+  return m ? { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) } : { year: null, month: null, day: null };
+}
+
+/** The value a picked date stores: blank until it is complete. */
+export function birthdateValue(year: number | null, month: number | null, day: number | null, approximate: boolean): string {
+  if (!year || !month) return "";
+  if (!approximate && !day) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${year}-${pad(month)}-${pad(approximate ? 1 : (day as number))}`;
+}
+
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+  "October", "November", "December"];
+
+/** What the picker says it holds, in words. */
+export function birthdateSummary(year: number | null, month: number | null, day: number | null, approximate: boolean): string {
+  if (!year) return "Not set. Leave it if you don't know.";
+  if (!month) return `${year}: now pick the month.`;
+  if (approximate) return `Born around ${MONTH_NAMES[month - 1]} ${year}`;
+  if (!day) return `${MONTH_NAMES[month - 1]} ${year}: now pick the day, or choose Approximate.`;
+  return `Born ${day} ${MONTH_NAMES[month - 1]} ${year}`;
 }

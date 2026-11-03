@@ -62,7 +62,7 @@ export function PetDetailScreen({ navigation, route }: Props) {
     );
   }
 
-  const age = ageLabel(pet.birthdate);
+  const age = ageLabel(pet.birthdate, undefined, !!pet.dob_approximate);
   const listing = pet.open_listing;
   return (
     <View style={styles.screen} testID="screen.petDetail">
