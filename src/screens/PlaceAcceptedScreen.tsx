@@ -9,6 +9,7 @@ import { RootStackParamList } from "../navigation/types";
 import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card } from "../components/ui";
+import { openShelterTab } from "../shelterTabs";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "placeAccepted">;
@@ -30,7 +31,7 @@ export function PlaceAcceptedScreen({ navigation, route }: Props) {
             <Button label="Finish the listing" testID="btn.placeAccepted.finish"
               onPress={() => navigation.replace("listingForm", { listingId: draftId })} style={styles.primary} />
             <Button label="Later" variant="secondary"
-              onPress={() => navigation.navigate("shelterAnimals")} style={styles.secondary} />
+              onPress={() => openShelterTab(navigation, "animals")} style={styles.secondary} />
           </Card>
         </ScrollView>
       </View>

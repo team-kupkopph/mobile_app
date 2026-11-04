@@ -28,7 +28,7 @@ describe("F8 · Try again on the owner Home re-runs the /me routing", () => {
   it("the shelter redirect lives in loadAccount", () => {
     expect(loadAccount).toMatch(/api\.get\("\/me"\)/);
     expect(loadAccount).toMatch(/account_type === "shelter"/);
-    expect(loadAccount).toMatch(/navigation\.reset\(\{ index: 0, routes: \[\{ name: "shelterDashboard" \}\] \}\)/);
+    expect(loadAccount).toMatch(/enterShelterShell\(navigation\)/);
   });
   it("focus and Try again both run it", () => {
     expect(home).toMatch(/useFocusEffect\(loadAccount\);/);

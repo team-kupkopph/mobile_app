@@ -18,6 +18,7 @@ import { authColors } from "./AuthFormKit";
 import { TAP_SLOP } from "../touch";
 import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { Avatar, Button, Field, ScreenHeader } from "../components/ui";
+import { enterShelterShell } from "../shelterTabs";
 
 const MIN_PHOTOS = 3;
 
@@ -112,7 +113,7 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
         return;
       }
       if (res.ok) {
-        navigation.reset({ index: 0, routes: [{ name: "shelterDashboard" }] });
+        enterShelterShell(navigation);
         return;
       }
       setError(res.data?.error?.message ?? "Couldn't submit for review. Try again.");
@@ -123,7 +124,7 @@ export function ShelterVerifyScreen({ navigation, route }: Props) {
 
   function onDefer() {
     // Deferral persists NO verification_request — the dashboard derives "Documents not sent yet".
-    navigation.reset({ index: 0, routes: [{ name: "shelterDashboard" }] });
+    enterShelterShell(navigation);
   }
 
   return (

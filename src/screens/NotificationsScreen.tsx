@@ -18,6 +18,7 @@ import { notificationTarget } from "../notifications";
 import { relTime } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
+import { openShelterTab } from "../shelterTabs";
 
 
 // US-V8 · the four volunteer notification types get a dedicated icon + tone, matching the
@@ -110,7 +111,7 @@ export function NotificationsScreen({ navigation }: Props) {
         navigation.navigate("needPledges", { needId: target.needId });
         return;
       case "shelterRequests":
-        navigation.navigate("shelterRequests");
+        openShelterTab(navigation, "requests");
         return;
       case "applicant":
         navigation.navigate("applicant", { inquiryId: target.inquiryId });
