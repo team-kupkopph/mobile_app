@@ -11,6 +11,7 @@ import { Me, ShelterDashboard, ShelterProfileSummary } from "../api/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
+import { createLatestOnly } from "../latestOnly";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { AlertIcon, CheckIcon, ClockIcon, LocationPinIcon, VolunteerIcon } from "../components/AppIcons";
@@ -57,6 +58,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   // put the dashboard heading under the clock once it was not.
   const insets = useSafeAreaInsets();
   const api = useApi();
+  const [latest] = useState(createLatestOnly);
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [me, setMe] = useState<Me | null>(null);
   const [profile, setProfile] = useState<ShelterProfileSummary | null>(null);
@@ -65,6 +67,8 @@ export function ShelterDashboardScreen({ navigation }: Props) {
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
+      // NT-4 · only the latest focus's answers apply: a slow answer from an earlier visit is dropped.
+      const only = latest.begin();
       // US-R2 · PRIMARY. This screen is about the counts, so a failed /shelter/dashboard
       // takes the whole screen. /me below is SECONDARY (name and tier, not substance) and
       // is allowed to fail quietly rather than blank a dashboard that otherwise loaded.
@@ -73,22 +77,22 @@ export function ShelterDashboardScreen({ navigation }: Props) {
       // community_rescue tier as FACT — a verified shelter shown its own work as zero.
       // Same class as the rescue map's "No strays reported": a failed request rendered as
       // a confident statement about the world.
-      api.get("/shelter/dashboard").then((r) => {
+      api.get("/shelter/dashboard").then(only((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setDash(r.data);
-      });
-      api.get("/me").then((r) => { if (r.ok) setMe(r.data); });
+      }));
+      api.get("/me").then(only((r) => { if (r.ok) setMe(r.data); }));
       // SH13 · the ORGANISATION's name and tier, the same source You reads. Secondary like /me: a 404
       // (no profile yet, SH9) or a failure leaves `profile` null and /me answers instead.
-      api.get("/shelter/profile").then((r) => {
+      api.get("/shelter/profile").then(only((r) => {
         if (r.ok) setProfile({ org_name: r.data.org_name, tier: r.data.tier });
-      });
+      }));
       // F-R3-4 · the bell's dot, same query and same focus refetch as HomeScreen's — so it
       // clears on return from NotificationsScreen (which marks everything read on open).
       // SH12 · one count, not the whole feed.
-      api.get("/me/notifications/unread-count").then((r) => {
+      api.get("/me/notifications/unread-count").then(only((r) => {
         if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
-      });
+      }));
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, []);
   useFocusEffect(load);
