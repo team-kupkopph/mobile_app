@@ -22,7 +22,6 @@
 // ⚠️ WHAT THE DATA WILL NOT SUPPORT. `_shift_repr` carries no location, description or photo
 // (volunteer/views.py), so "shelters near you", distance and imagery are not available here
 // without backend work. Everything below is derived from the two endpoints that already exist.
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -45,6 +44,8 @@ import {
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, spacing, typography } from "../theme";
 import { Card, Chip, SegmentedControl } from "../components/ui";
+import { keepGoodRes } from "../refreshState";
+import { useRefreshWithKey } from "../useRefreshOnFocus";
 
 const SHIFT_TYPES: ShiftType[] = ["walking", "feeding", "visitor", "event", "facility", "transport"];
 const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
@@ -105,30 +106,32 @@ export function KawangGawaScreen({ navigation, route }: Props) {
     if (type) params.set("type", type);
     if (city && !allCities) params.set("city", city);
     const qs = params.toString();
-    loadFeed(`/shifts${qs ? `?${qs}` : ""}`);
+    return loadFeed(`/shifts${qs ? `?${qs}` : ""}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter/city change
   }, [type, city, allCities]);
 
+  // SQ5 follow-up · not blanked to a spinner on a refresh (`setMineRes(null)` used to): a failed refresh keeps My shifts.
   const loadMine = useCallback(() => {
-    setMineRes(null);
-    api.get("/me/signups").then((r) => {
-      setMineRes({ ok: r.ok, status: r.status });
+    return api.get("/me/signups").then((r) => {
+      setMineRes((prev) => keepGoodRes(prev, r));
       if (r.ok) setMine(r.data);
+      return r.ok;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus
   }, []);
 
-  // ⚠️ Gated on `isReady` for the same cold-start reason HomeScreen's `loadCityPanels`
-  // documents: AuthContext reads the cached city out of SecureStore ASYNCHRONOUSLY, so on a
-  // cold start `city` is still null on the first render. Firing before `isReady` would query
-  // every city once, then re-query on the city landing — a visible flash from "all cities" to
-  // scoped. Waiting for `isReady` means it fires exactly once, with the real answer.
-  useFocusEffect(useCallback(() => {
-    if (!isReady) return;
-    load();
-    if (!isGuest) loadMine();
+  // ⚠️ Gated on `isReady` for the same cold-start reason HomeScreen's `loadCityPanels` documents: AuthContext reads the cached
+  // city out of SecureStore ASYNCHRONOUSLY, so on a cold start `city` is still null on the first render. Firing before `isReady`
+  // would query every city once, then re-query on the city landing — a visible flash from "all cities" to scoped. A null key
+  // makes the focus load wait; a change of key (the filters, the city landing, a guest signing in) loads by itself.
+  // SQ5 follow-up · Browse and, for a member, My shifts load together, under the shelter story's focus policy.
+  const loadAll = useCallback(() => {
+    const feed = load();
+    return Promise.all([feed, isGuest ? Promise.resolve(true) : loadMine()]).then((all) => all.every((ok) => ok !== false));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable per render
-  }, [load, loadMine, isReady, isGuest]));
+  }, [load, loadMine, isGuest]);
+  const loadKey = isReady ? `${type ?? ""}|${city ?? ""}|${allCities}|${isGuest}` : null;
+  useRefreshWithKey(loadAll, loadKey);
 
   const totalsLabel = volunteerTotalsLabel(volunteerTotals(mine));
   const next = nextBookedShift(mine);

@@ -11,7 +11,6 @@
 //
 // It was written against a V1 mock and then not kept up with Home for two sprints; the header
 // of HomeSections.tsx records what that looked like and why the pieces are now shared.
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -32,6 +31,8 @@ import { HelpShelter, WAYS_TO_HELP_EMPTY } from "../waysToHelp";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, pill, radii, spacing, squircle, typography } from "../theme";
+import { keepGoodRes } from "../refreshState";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 
 
 type Props = GuestTabScreenProps<"homeGuest">;
@@ -65,26 +66,32 @@ export function HomeGuestScreen({ navigation }: Props) {
   // way, and a "See nearby strays" row the signed-in Home had already replaced with the
   // "Nearby rescues" section. HomeSections.tsx says why that is not allowed to happen again.
   const load = useCallback(() => {
-    setListingsRes(null); setStoriesRes(null); setRescuesRes(null); setHelpRes(null);
-    api.get(`/listings?city=${GUEST_CITY}`).then((r) => {
-      setListingsRes({ ok: r.ok, status: r.status });
+    // SQ5 follow-up · not blanked to spinners on a refresh (the four `set…Res(null)` calls are gone): a panel that had loaded
+    // keeps its rows through a failed refresh (`keepGoodRes`).
+    const listingsP = api.get(`/listings?city=${GUEST_CITY}`).then((r) => {
+      setListingsRes((prev) => keepGoodRes(prev, r));
       if (r.ok) setListings((r.data?.results ?? []).slice(0, 5));
+      return r.ok;
     });
-    api.get(`/shelters/ways-to-help?city=${encodeURIComponent(GUEST_HELP_CITY)}`).then((r) => {
-      setHelpRes({ ok: r.ok, status: r.status });
+    const helpP = api.get(`/shelters/ways-to-help?city=${encodeURIComponent(GUEST_HELP_CITY)}`).then((r) => {
+      setHelpRes((prev) => keepGoodRes(prev, r));
       if (r.ok) setHelpers((r.data?.results ?? []).slice(0, 3));
+      return r.ok;
     });
-    api.get("/stories").then((r) => {
-      setStoriesRes({ ok: r.ok, status: r.status });
+    const storiesP = api.get("/stories").then((r) => {
+      setStoriesRes((prev) => keepGoodRes(prev, r));
       if (r.ok) setStories((r.data?.results ?? []).slice(0, 2));
+      return r.ok;
     });
-    api.get(`/reports/map?city=${GUEST_CITY}&status=reported`).then((r) => {
-      setRescuesRes({ ok: r.ok, status: r.status });
+    const rescuesP = api.get(`/reports/map?city=${GUEST_CITY}&status=reported`).then((r) => {
+      setRescuesRes((prev) => keepGoodRes(prev, r));
       if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
+      return r.ok;
     });
+    return Promise.all([listingsP, helpP, storiesP, rescuesP]).then((all) => all.every(Boolean));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
   }, []);
-  useFocusEffect(load);
+  useRefreshOnFocus(load);
 
   function openWall(action: SignupWallAction, subject?: string) {
     setWall({ action, subject });

@@ -31,7 +31,8 @@ describe("F8 · Try again on the owner Home re-runs the /me routing", () => {
     expect(loadAccount).toMatch(/enterShelterShell\(navigation\.getParent<NativeStackNavigationProp<RootStackParamList>>\(\)!\)/);
   });
   it("focus and Try again both run it", () => {
-    expect(home).toMatch(/useFocusEffect\(loadAccount\);/);
+    // SQ5 follow-up PR 4: focus goes through the policy (first focus and after a pushed screen, never a plain tab switch).
+    expect(home).toMatch(/useRefreshOnFocus\(loadAccount, Infinity\);/);
     const reload = /const reloadPanels = useCallback\(\(\) => \{([\s\S]*?)\}, \[/.exec(home)?.[1] ?? "";
     expect(reload).toMatch(/loadAccount\(\);/);
   });

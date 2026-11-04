@@ -3,7 +3,7 @@
 // The rule: load on first focus; after that load only when the data is older than `staleMs`, or when the shell has just
 // come back from a pushed screen (that is where the shelter changes things). Adopted by the five shelter tab roots (PR 4).
 import { useFocusEffect } from "@react-navigation/native";
-import { createContext, useCallback, useContext, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef } from "react";
 
 /** Bumped by ShelterTabNavigator each time the shell regains focus after a pushed screen covered it. */
 export const ShelterReturnContext = createContext(0);
@@ -35,7 +35,7 @@ export function shouldRefresh({ lastLoadAt, now, staleMs, returns, returnsAtLast
 }
 
 /** `load` may return a promise resolving to `false` when it failed: the next focus then loads again. */
-export function useRefreshOnFocus(load: () => void | Promise<boolean | void>, staleMs: number = DEFAULT_STALE_MS) {
+export function useRefreshOnFocus(load: () => void | boolean | Promise<boolean | void>, staleMs: number = DEFAULT_STALE_MS) {
   const returns = useContext(ShelterReturnContext);
   const lastLoadAt = useRef<number | null>(null);
   const returnsAtLastLoad = useRef(returns);
@@ -54,9 +54,35 @@ export function useRefreshOnFocus(load: () => void | Promise<boolean | void>, st
       lastLoadAt.current = now;
       returnsAtLastLoad.current = returns;
       const done = loadRef.current();
-      if (done && typeof (done as Promise<unknown>).then === "function") {
+      if (done === false) lastLoadAt.current = null; // not ready / nothing was asked: try again at the next focus
+      else if (done && typeof (done as Promise<unknown>).then === "function") {
         (done as Promise<boolean | void>).then((ok) => { if (ok === false) lastLoadAt.current = null; });
       }
     }, [returns, staleMs])
   );
+}
+
+/**
+ * `useRefreshOnFocus` for a load that depends on something that can change while the tab is mounted: the filters of a feed, the
+ * cached city landing after a cold start. `key` identifies those inputs; `null` means "not ready yet".
+ * - the FOCUS load reports failure while `key` is null, so it retries on the next focus instead of waiting out the window;
+ * - a CHANGE of `key` loads by itself (the focus policy only decides about focus, and reads `load` through a ref), but the
+ *   key a screen first mounts with does not: its first focus loads.
+ */
+export function useRefreshWithKey(load: () => void | boolean | Promise<boolean | void>, key: string | null, staleMs: number = DEFAULT_STALE_MS) {
+  const loadRef = useRef(load);
+  loadRef.current = load;
+  const keyRef = useRef(key);
+  keyRef.current = key;
+  useRefreshOnFocus(() => {
+    if (keyRef.current === null) return false;
+    return loadRef.current();
+  }, staleMs);
+  const prevKey = useRef(key);
+  useEffect(() => {
+    if (prevKey.current !== key) {
+      prevKey.current = key;
+      if (key !== null) loadRef.current();
+    }
+  }, [key]);
 }

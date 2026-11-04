@@ -1,7 +1,6 @@
 // US-A3 · the Adopt tab — browse public listings. GET /listings?city=&species=&page=.
 // Reference: design/mobile-v3/Adopt.dc.html (the V3 deck; screens/user/screen-adopt.png was the
 // V2 list it replaced). Replaces the M8 placeholder.
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AdoptDeck } from "../components/AdoptDeck";
@@ -24,6 +23,7 @@ import { colors } from "../theme";
 
 
 import { SEGMENTS, SEG_INQUIRIES, SEG_SAVED } from "../savedList";
+import { useRefreshWithKey } from "../useRefreshOnFocus";
 
 const SPECIES: Array<{ key: string; label: string }> = [
   { key: "", label: "All" }, { key: "dog", label: "Dogs" },
@@ -58,7 +58,7 @@ export function AdoptScreen({ navigation }: Props) {
     if (species) params.set("species", species);
     query.current = params.toString();
     setMore([]);
-    loadFeed(`/listings?${query.current}`);
+    return loadFeed(`/listings?${query.current}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + filter change
   }, [city, species]);
 
@@ -79,7 +79,8 @@ export function AdoptScreen({ navigation }: Props) {
 
   const [segment, setSegment] = useState(0);
 
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  // SQ5 follow-up · this tab stays mounted: a visit inside 30 s keeps the deck where it is, and a filter or city change loads itself.
+  useRefreshWithKey(load, `${city ?? ""}|${species ?? ""}`);
 
   const state = feedState(res, listings, stale);
 

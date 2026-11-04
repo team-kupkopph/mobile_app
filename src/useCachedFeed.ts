@@ -102,6 +102,8 @@ export function useCachedFeed<T>(api: Api, pick: (data: any) => T[]) {
         setData(r.data);
         await writeCache(path, r.data);
       }
+      // SQ5 follow-up · whether the request succeeded, for `useRefreshOnFocus` (a failed load retries on the next focus).
+      return r.ok;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `pick` is inline at every call site
     [],

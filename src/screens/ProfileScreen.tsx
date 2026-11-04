@@ -2,7 +2,6 @@
 // Fetches /me on focus (avatar, name, email, Verified Member status). City has no GET endpoint
 // (only PUT /me/location — see accounts/views.py MeLocationView) so the last-picked city is cached
 // in AuthContext/SecureStore by LocationPickerScreen and read from there instead of /me.
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
 
@@ -26,6 +25,8 @@ import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { keepGoodRes } from "../refreshState";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 
 type Props = OwnerTabScreenProps<"profile">;
 
@@ -74,16 +75,20 @@ export function ProfileScreen({ navigation, route }: Props) {
       // `me?.capabilities.some(...) ?? false` — so a failed /me showed a Verified Member
       // their own account as unverified, with a blank name and no photo. The account was
       // fine; only the request had failed.
-      api.get("/me").then((r) => {
-        setRes({ ok: r.ok, status: r.status });
+      // SQ5 follow-up · resolves to /me's outcome (a failure retries on the next focus); `me` is never cleared, so a failed
+      // refresh leaves the last good profile.
+      const primary = api.get("/me").then((r) => {
+        setRes((prev) => keepGoodRes(prev, r));
         if (r.ok) setMe(r.data);
+        return r.ok;
       });
       api.get("/me/pets").then((r) => {
-        setPetsHint(r.ok ? myPetsHint((r.data?.results ?? []) as MyPet[]) : null);
+        if (r.ok) setPetsHint(myPetsHint((r.data?.results ?? []) as MyPet[]));
       });
+      return primary;
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
     }, []);
-  useFocusEffect(load);
+  useRefreshOnFocus(load);
 
   // X11 · the server returns the user's city in /me, but the app only knew the one cached on THIS phone, so a new phone
   // or a reinstall said "Set your city" while the server had it. Fill an EMPTY cache from /me — and only once the cache
