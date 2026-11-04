@@ -30,7 +30,7 @@ import { ShelterTabs } from "../components/ShelterTabs";
 import { shelterTabNavigate } from "../shelterTabs";
 import { Card, Chip } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
-import { shelterListingsTile, shelterShellState } from "../shelterDashboard";
+import { activeShiftsLabel, shelterListingsTile, shelterShellState } from "../shelterDashboard";
 import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
@@ -77,11 +77,6 @@ export function ShelterProfileScreen({ navigation }: Props) {
   // DW2 (backend#93) · the shelter's own QRs, so the Donation QR row says On only when a QR is live (AT5).
   const [ownQr, setOwnQr] = useState<OwnQr[] | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
-  // US-C1 · a REAL count, not the hardcoded "3 active". Active = shifts still open or full.
-  const [activeShifts, setActiveShifts] = useState<number | null>(null);
-  // Task 10 (K8) · the count above is only page 1 (20 rows) of ?when=upcoming — true whenever
-  // the response's own `next` says there's more, whatever the exact count would have been.
-  const [moreActive, setMoreActive] = useState(false);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
@@ -101,25 +96,13 @@ export function ShelterProfileScreen({ navigation }: Props) {
       });
       api.get("/shelter/dashboard").then((r) => { if (r.ok) setDash(r.data); });
       api.get("/shelter/donation-qr").then((r) => { if (r.ok) setOwnQr(r.data.donation_qrs ?? []); });
-      // Task 10 (K8) · `?when=upcoming` — the same query the manage list and calendar use,
-      // so "active" means the same set of shifts everywhere it's counted.
-      api.get("/shelter/shifts?when=upcoming").then((r) => {
-        if (r.ok) {
-          const rows: Array<{ status: string }> = r.data.results ?? [];
-          setActiveShifts(rows.filter((s) => s.status === "open" || s.status === "full").length);
-          setMoreActive(!!r.data.next);
-        }
-      });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, []);
   useFocusEffect(load);
 
-  const volunteerValue = activeShifts === null
-    ? undefined
-    // Task 10 (K8) · beyond page 1 there could be any number of additional open/full rows,
-    // so a precise count would be a lie past 20 — "20+ active" says what's actually known.
-    : moreActive ? "20+ active"
-    : activeShifts === 0 ? "None" : `${activeShifts} active`;
+  // SH12 · the dashboard's exact `active_shifts` (the same set the manage list and calendar call upcoming, open or
+  // full). It used to page /shelter/shifts and say "20+" past the first page.
+  const volunteerValue = activeShiftsLabel(dash?.volunteer?.active_shifts);
 
   const tier: ShelterTier = me?.shelter?.tier ?? "community_rescue";
   const isTier1 = tier === "community_rescue";

@@ -85,8 +85,9 @@ export function ShelterDashboardScreen({ navigation }: Props) {
       });
       // F-R3-4 · the bell's dot, same query and same focus refetch as HomeScreen's — so it
       // clears on return from NotificationsScreen (which marks everything read on open).
-      api.get("/me/notifications").then((r) => {
-        if (r.ok) setHasUnread((r.data?.notifications ?? []).some((n: { read: boolean }) => !n.read));
+      // SH12 · one count, not the whole feed.
+      api.get("/me/notifications/unread-count").then((r) => {
+        if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, []);

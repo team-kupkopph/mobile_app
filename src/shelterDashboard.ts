@@ -111,3 +111,10 @@ export function wishlistSummary(w: ShelterDashboardWishlist | undefined | null):
   const n = w?.pledges_awaiting_confirm ?? 0;
   return n > 0 ? `${pledgeCountLabel(n)} to confirm` : null;
 }
+
+// SH12 · You's "Volunteer program" value from the dashboard's exact `active_shifts`. It used to page
+// /shelter/shifts and say "20+" past the first page. Undefined (no value shown) while unknown.
+export function activeShiftsLabel(n: number | undefined): string | undefined {
+  if (n === undefined) return undefined;
+  return n === 0 ? "None" : `${n} active`;
+}

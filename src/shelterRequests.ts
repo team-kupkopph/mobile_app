@@ -98,3 +98,20 @@ export function requestCountLine(count: number | null, segment: string): string 
 export function requestsEmptyCopy(segment: string): { title: string; body: string } {
   return { title: `No ${segment.toLowerCase()} requests`, body: "New requests land here as they come in." };
 }
+
+// SQ4 (shelter home review step 12) · a suspended counterparty's request stays in the inbox, chipped, so the shelter
+// is not left wondering where it went. The server refuses its forward actions; declining still works.
+export function requestChip(item: ShelterRequest): { label: string; tone: ChipTone } {
+  if (item.counterparty_suspended) return { label: "Suspended", tone: "danger" };
+  return REQUEST_STATUS_TONE[item.status] ?? DEFAULT_STATUS_TONE;
+}
+
+// SH18 · a volunteer row's date in the phone's locale and clock (the server's subtitle used a glibc-only format in
+// server time). Other kinds, and an older server without `shift_starts_at`, keep the server's subtitle.
+export function requestSubtitle(item: ShelterRequest): string {
+  if (item.kind !== "volunteer" || !item.shift_starts_at) return item.subtitle;
+  const d = new Date(item.shift_starts_at);
+  if (Number.isNaN(d.getTime())) return item.subtitle;
+  const day = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  return item.shift_title ? `${day} · ${item.shift_title}` : day;
+}

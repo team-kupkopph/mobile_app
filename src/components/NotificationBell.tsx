@@ -6,8 +6,9 @@
  * dismissed push (or a denied permission) meant the shelter never saw it. One component so
  * the two headers can't drift into two different controls.
  *
- * `hasUnread` is the caller's — each Home refetches GET /me/notifications on focus, which is
- * what clears the dot on return from NotificationsScreen (it marks everything read on open).
+ * `hasUnread` is the caller's — each Home refetches GET /me/notifications/unread-count on focus
+ * (SH12: one count, not the whole feed), which is what clears the dot on return from
+ * NotificationsScreen (it marks everything read on open).
  */
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 

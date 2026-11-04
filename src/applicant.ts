@@ -164,8 +164,10 @@ export function listingStatusChip(status: string, removed = false): { label: str
 
 const CHANGED = new Set(["already_screening", "inquiry_closed", "already_reserved", "reserved_for_another",
                          "not_reserved", "not_screening", "listing_unavailable"]);
-export function applicantRefusal(code: string | undefined): "changed" | "phone" | "badge" | "other" {
+export function applicantRefusal(code: string | undefined): "changed" | "phone" | "badge" | "suspended" | "other" {
   if (code && CHANGED.has(code)) return "changed";
+  // SQ4 · the adopter's account is suspended: decline is the only way forward, so "try again" would be wrong.
+  if (code === "counterparty_suspended") return "suspended";
   if (code === "poster_phone_required") return "phone";
   if (code === "adopter_badge_required") return "badge";
   return "other";
