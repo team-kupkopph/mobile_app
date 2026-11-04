@@ -104,6 +104,7 @@ import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen"
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
 import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
+import { ShelterTabNavigator } from "./ShelterTabNavigator";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
 import { typography } from "../theme";
@@ -160,6 +161,9 @@ export function RootNavigator() {
       <Stack.Screen name="shelterPhoneVerify" component={ShelterPhoneVerifyScreen} />
       <Stack.Screen name="shelterVerify" component={ShelterVerifyScreen} />
       <Stack.Screen name="shelterVerifyNgo" component={ShelterVerifyNgoScreen} />
+      {/* SQ5 · the tab navigator for the shelter shell. Registered, but nothing navigates to it until the switch PR;
+          until then the five stack routes below are the live ones. */}
+      <Stack.Screen name="shelterTabs" component={ShelterTabNavigator} />
       <Stack.Screen name="shelterDashboard" component={ShelterDashboardScreen} />
       <Stack.Screen name="shelterProfile" component={ShelterProfileScreen} />
       <Stack.Screen name="shelterAnimals" component={ShelterAnimalsScreen} />

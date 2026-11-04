@@ -1,3 +1,5 @@
+import type { NavigatorScreenParams } from "@react-navigation/native";
+
 import { ShelterTier } from "../api/types";
 import { SocialIdentity } from "../auth/socialAuth";
 import type { QueuedReason } from "../sagip";
@@ -35,7 +37,19 @@ export type ShelterNeedShape = {
   unit?: string; quantity_pledged?: number; pledge_count?: number; awaiting_confirm?: number;
 };
 
+// SQ5 · the five tabs of the shelter shell. Names are the stack routes' names, kept so `screen.shelter*` ids and the
+// screens' file names do not move; only the container changes (`shelterTabs` below).
+export type ShelterTabParamList = {
+  shelterDashboard: undefined;
+  shelterAnimals: undefined;
+  shelterDonate: undefined;
+  shelterRequests: undefined;
+  shelterProfile: undefined;
+};
+
 export type RootStackParamList = {
+  // SQ5 · PR 1 registers the container; nothing navigates to it until the switch PR.
+  shelterTabs: NavigatorScreenParams<ShelterTabParamList> | undefined;
   welcome: undefined;
   // A social identity rides through account-type (US-A2): the provider already asserted a
   // verified email, so the owner path needs no form and no code.
