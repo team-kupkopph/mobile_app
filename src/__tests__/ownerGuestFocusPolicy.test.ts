@@ -41,6 +41,26 @@ describe("an Infinity window means: first focus and after a pushed screen only (
   });
 });
 
+// NT-O3 · a key change (the city) that happens while the tab is NOT focused (a picker pushed over it, or another tab) must not load in
+// the background and then load AGAIN when the tab comes back: it marks the tab invalidated, and the next focus loads once,
+// whatever the window says.
+describe("an invalidated tab loads at its next focus", () => {
+  const base = { lastLoadAt: 1_000_000, now: 1_000_001, staleMs: 30_000, returns: 0, returnsAtLastLoad: 0 };
+  it("loads even inside the window and with nothing returned", () => {
+    expect(shouldRefresh({ ...base, invalidated: true })).toBe(true);
+    expect(shouldRefresh({ ...base, invalidated: false })).toBe(false);
+  });
+  it("an Infinity window (Home's account) is untouched by it: only the key-driven loads pass `invalidated`", () => {
+    const src = strip(read("useRefreshOnFocus.ts"));
+    expect(src).toMatch(/useRefreshOnFocus\(\(\) => \{[\s\S]*?\}, staleMs, invalid\);/);
+  });
+  it("useRefreshWithKey loads a key change at once only while focused, and otherwise invalidates", () => {
+    const src = strip(read("useRefreshOnFocus.ts"));
+    expect(src).toMatch(/const focused = useIsFocused\(\);/);
+    expect(src).toMatch(/if \(focused\) loadRef\.current\(\);\s*else invalid\.current = true;/);
+  });
+});
+
 describe("Home", () => {
   const src = strip(read("screens/HomeScreen.tsx"));
   it("no longer refetches through useFocusEffect(load…); the one-shot intent takeover stays a param-driven focus effect", () => {

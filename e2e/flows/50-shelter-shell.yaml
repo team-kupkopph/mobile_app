@@ -59,13 +59,8 @@ appId: ph.kupkop.app
       id: "screen.shelterRequests"
     timeout: 20000
 
-# ...then the iOS back swipe on a root. Before SQ5 it popped to whichever tab came before (here: Donate). Now there is
-# nothing to pop: the screen must not change.
-- swipe:
-    start: "1%, 50%"
-    end: "80%, 50%"
-- assertVisible:
-    id: "screen.shelterRequests"
+# NT-O1 · the "back swipe on a root changes nothing" step that stood here could not fail (under Maestro the swipe does not trigger
+# iOS's interactive back gesture), so it is gone; the manual OS edge swipe, with a positive control, is the check.
 - tapOn:
     id: "tab.shelter.home"
 - assertVisible:
