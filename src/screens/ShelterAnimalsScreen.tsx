@@ -12,6 +12,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button } from "../components/ui";
 import { ShelterTabScreenProps } from "../navigation/types";
 import { draftRoute } from "../shelterAnimals";
+import { DEFAULT_STALE_MS } from "../useRefreshOnFocus";
 import { colors, maxFontScale, spacing, typography } from "../theme";
 
 type Props = ShelterTabScreenProps<"shelterAnimals">;
@@ -32,6 +33,7 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
 
         <ListingsByStatus
           segmentTestID="seg.shelterAnimals"
+          refreshStaleMs={DEFAULT_STALE_MS}
           onOpen={(listingId) => navigation.navigate("posterListing", { listingId })}
           onOpenDraft={(listingId) => { const to = draftRoute(listingId); navigation.navigate(to.name, to.params); }}
           actions={<Button label="+  List an animal" onPress={() => navigation.navigate("listingForm", undefined)} style={styles.primaryButton} />}

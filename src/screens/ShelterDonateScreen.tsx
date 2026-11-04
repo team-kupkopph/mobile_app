@@ -4,8 +4,7 @@
 // (US-Q2) shows a stranger: the same Donation QR two-key gate, plus the Abot-tulong
 // wishlist with pledged/received per need. Payments stay off-platform in the payment app —
 // Kupkop never touches the money, same as DonateScreen.
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +18,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Button, Card, Chip, SectionHeader } from "../components/ui";
 import { CHIP_UI_TONE, NeedStatus, needPercent, needProgressFraction, needProgressLabel, needStatusChip } from "../community";
 import { ShelterTabScreenProps } from "../navigation/types";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 import { donateSections, DonateNeedInput } from "../shelterDonate";
 import { donateChip, OwnQr, qrImageLabel } from "../ownQr";
 import { colors, gradients, maxFontScale, pill, spacing, squircle, typography } from "../theme";
@@ -54,34 +54,39 @@ export function ShelterDonateScreen({ navigation }: Props) {
   const [orgName, setOrgName] = useState<string | null>(null);
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
+  // SQ5 · this tab stays mounted, so a blur no longer ends the load (it used to, through the effect's cleanup); an answer
+  // is dropped only when a NEWER load has begun. `load` resolves to the PRIMARY request's outcome for `useRefreshOnFocus`.
+  const loads = useRef(0);
   const load = useCallback(() => {
-    let alive = true;
+    const mine = ++loads.current;
+    const alive = () => mine === loads.current;
     // US-R2 · PRIMARY. This screen is ABOUT whether donations are on — `/shelter/dashboard`'s
     // `gates.donations_enabled` is the whole gate, so its failure takes the whole screen.
     // The QR preview and the wishlist below are SECONDARY: they only fill in once /me also
     // answers with the account_id, and either can degrade on its own without blanking the
     // gate state the screen is actually about.
-    api.get("/shelter/dashboard").then((r) => {
-      if (!alive) return;
+    const primary = api.get("/shelter/dashboard").then((r) => {
+      if (!alive()) return r.ok;
       setDashRes({ ok: r.ok, status: r.status });
       if (r.ok) setDash(r.data);
+      return r.ok;
     });
     api.get("/shelter/donation-qr").then((r) => {
-      if (!alive) return;
+      if (!alive()) return;
       setOwnQrFailed(!r.ok);
       if (r.ok) setOwnQr(r.data.donation_qrs ?? []);
     });
     api.get("/me").then((me) => {
-      if (!alive) return;
+      if (!alive()) return;
       // A failed /me is the wishlist's failure too: without this its spinner never ended.
       if (!me.ok) { setNeedsRes({ ok: false, status: me.status }); return; }
       setVerifiedRescuer(!!me.data.is_verified_rescuer);
       const accountId = me.data.account_id;
-      if (alive) setOrgName(me.data.display_name ?? null);
+      if (alive()) setOrgName(me.data.display_name ?? null);
 
 
       api.get(`/shelters/${accountId}/needs`).then((r) => {
-        if (!alive) return;
+        if (!alive()) return;
         setNeedsRes({ ok: r.ok, status: r.status });
         if (r.ok) {
           setNeeds(r.data.results ?? []);
@@ -89,10 +94,10 @@ export function ShelterDonateScreen({ navigation }: Props) {
         }
       });
     });
-    return () => { alive = false; };
+    return primary;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
   }, []);
-  useFocusEffect(load);
+  useRefreshOnFocus(load);
 
   const sections = donateSections(dash, ownQr ? { donation_qrs: ownQr.filter((r) => r.status === "live") } : null, needs);
   const gated = verifiedRescuer !== true;

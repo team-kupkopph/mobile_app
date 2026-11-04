@@ -8,6 +8,9 @@ import { ApiResult } from "./api/client";
 // - `more()` appends page `next`. One at a time: a second tap while a page is in flight asks for nothing.
 //   A failed page keeps the rows already shown and the same `next`, and sets `moreFailed` for an inline retry;
 //   it never turns a list that loaded into a failed load.
+// - `refresh()` (SQ5) re-reads the pages already loaded for the same path and swaps the rows in one step, so a tab that stays
+//   mounted keeps its rows, its "Load more" progress and its place on screen while it updates. A failed or superseded
+//   refresh leaves what is showing alone and resolves false.
 // - Nothing pages on its own, so an empty page with a non-null `next` cannot loop.
 export type PagedState<T> = {
   items: T[] | null;
@@ -32,6 +35,9 @@ export function createPagedList<T>(
   let generation = 0;
   let base = "";
   let loadingMore = false;
+  let refreshing = false;
+  /** Pages read for `base` so far (1 after a reset, the last appended page after a "Load more"). */
+  let pages = 0;
   let state: PagedState<T> = EMPTY_PAGED;
   const set = (patch: Partial<PagedState<T>>) => {
     state = { ...state, ...patch };
@@ -39,24 +45,29 @@ export function createPagedList<T>(
   };
 
   return {
-    reset(path: string): Promise<void> {
+    /** Resolves true when page 1 loaded, false when it failed or a later reset/refresh superseded it. */
+    reset(path: string): Promise<boolean> {
       const gen = ++generation;
       base = path;
       loadingMore = false;
+      refreshing = false;
+      pages = 0;
       set({ ...EMPTY_PAGED });
       return get(withPage(path, 1)).then((r) => {
-        if (gen !== generation) return;
+        if (gen !== generation) return false;
+        pages = r.ok ? 1 : 0;
         set({
           res: { ok: r.ok, status: r.status },
           items: r.ok ? (r.data?.results ?? []) : null,
           next: r.ok ? (r.data?.next ?? null) : null,
           count: r.ok && typeof r.data?.count === "number" ? r.data.count : null
         });
+        return r.ok;
       });
     },
     more(): Promise<void> {
       const page = state.next;
-      if (!page || loadingMore) return Promise.resolve();
+      if (!page || loadingMore || refreshing) return Promise.resolve();
       const gen = generation;
       loadingMore = true;
       set({ moreFailed: false });
@@ -67,8 +78,33 @@ export function createPagedList<T>(
           set({ moreFailed: true });
           return;
         }
+        pages = page;
         set({ items: [...(state.items ?? []), ...(r.data?.results ?? [])], next: r.data?.next ?? null });
       });
+    },
+    async refresh(): Promise<boolean> {
+      if (!base || pages === 0) return false;
+      const gen = ++generation;
+      loadingMore = false;
+      refreshing = true;
+      const items: T[] = [];
+      let next: number | null = null;
+      let count: number | null = null;
+      let last = 0;
+      for (let page = 1; page <= pages; page++) {
+        const r = await get(withPage(base, page));
+        if (gen !== generation) return false;
+        if (!r.ok) { refreshing = false; return false; }
+        items.push(...(r.data?.results ?? []));
+        next = r.data?.next ?? null;
+        if (page === 1) count = typeof r.data?.count === "number" ? r.data.count : null;
+        last = page;
+        if (next === null) break;
+      }
+      refreshing = false;
+      pages = last;
+      set({ res: { ok: true, status: 200 }, items, next, count, moreFailed: false });
+      return true;
     }
   };
 }

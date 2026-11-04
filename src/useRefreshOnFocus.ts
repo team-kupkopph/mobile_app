@@ -1,7 +1,7 @@
 // SQ5 (spec §5.3) · when a mounted shelter tab refetches. `useFocusEffect(load)` fires on EVERY focus of a mounted tab,
 // so on a real tab navigator it would refetch on every switch and, on Requests, throw away "Load more" progress.
 // The rule: load on first focus; after that load only when the data is older than `staleMs`, or when the shell has just
-// come back from a pushed screen (that is where the shelter changes things). Not adopted by any screen yet (PR 4).
+// come back from a pushed screen (that is where the shelter changes things). Adopted by the five shelter tab roots (PR 4).
 import { useFocusEffect } from "@react-navigation/native";
 import { createContext, useCallback, useContext, useRef } from "react";
 
@@ -31,6 +31,10 @@ export function useRefreshOnFocus(load: () => void | Promise<boolean | void>, st
   const returns = useContext(ShelterReturnContext);
   const lastLoadAt = useRef<number | null>(null);
   const returnsAtLastLoad = useRef(returns);
+  // The latest `load`, read through a ref: a screen's `load` changes identity with its segment, and a changed callback
+  // must not make the focus effect fire again. A segment change loads itself; this hook only decides about FOCUS.
+  const loadRef = useRef(load);
+  loadRef.current = load;
 
   useFocusEffect(
     useCallback(() => {
@@ -38,10 +42,10 @@ export function useRefreshOnFocus(load: () => void | Promise<boolean | void>, st
       if (!shouldRefresh({ lastLoadAt: lastLoadAt.current, now, staleMs, returns, returnsAtLastLoad: returnsAtLastLoad.current })) return;
       lastLoadAt.current = now;
       returnsAtLastLoad.current = returns;
-      const done = load();
+      const done = loadRef.current();
       if (done && typeof (done as Promise<unknown>).then === "function") {
         (done as Promise<boolean | void>).then((ok) => { if (ok === false) lastLoadAt.current = null; });
       }
-    }, [load, returns, staleMs])
+    }, [returns, staleMs])
   );
 }

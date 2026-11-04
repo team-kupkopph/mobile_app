@@ -7,9 +7,12 @@ export function createLatestOnly() {
   return {
     begin() {
       const mine = ++generation;
-      return <A extends unknown[]>(handle: (...args: A) => void) =>
-        (...args: A) => {
-          if (mine === generation) handle(...args);
+      // SQ5 · the handler's result is passed through (undefined when the answer is dropped), so a load can resolve to its
+      // primary request's outcome for `useRefreshOnFocus` while still going through `only`.
+      return <A extends unknown[], R = void>(handle: (...args: A) => R) =>
+        (...args: A): R | undefined => {
+          if (mine === generation) return handle(...args);
+          return undefined;
         };
     }
   };
