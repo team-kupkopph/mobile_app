@@ -29,21 +29,12 @@ import {
 import { TAP_SLOP } from "../touch";
 import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
+import { timeAgo } from "../timeAgo";
 
 /** The canvas's Requests artboard: ["Adoption", "Volunteer", "Placement"] — see
  * shelterRequests.ts's SEGMENT_KIND for the kind each maps onto on the wire. */
 const SEGMENTS = ["Adoption", "Volunteer", "Placement"];
 
-function timeAgo(iso: string, nowMs: number = Date.now()): string {
-  const mins = Math.max(0, Math.floor((nowMs - new Date(iso).getTime()) / 60000));
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterRequests">;
 
