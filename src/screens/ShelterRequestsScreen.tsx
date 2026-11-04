@@ -8,7 +8,7 @@
 // on the Pending section (Task 9 folded the old standalone requests queue into it).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -16,11 +16,13 @@ import { ShelterRequest } from "../api/types";
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
+import { EMPTY_PAGED, PagedState, createPagedList } from "../pagedList";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { Card, Chip, SegmentedControl } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { DEFAULT_STATUS_TONE, REQUEST_STATUS_TONE, SEGMENT_KIND, requestRoute } from "../shelterRequests";
+import { TAP_SLOP } from "../touch";
 import { colors, maxFontScale, spacing, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
@@ -48,24 +50,24 @@ export function ShelterRequestsScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const api = useApi();
   const [segment, setSegment] = useState(0);
-  const [requests, setRequests] = useState<ShelterRequest[] | null>(null);
-  const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
+  // SH3 / SH6 · B-be2 pages at 20, newest first, so page 1 alone hid the OLDEST requests (the people waiting longest);
+  // and a slow answer for the previous segment could overwrite the current one. createPagedList reads every page
+  // ("Load more") and drops any answer for a segment that is no longer showing.
+  const [paged, setPaged] = useState<PagedState<ShelterRequest>>(EMPTY_PAGED);
+  const apiRef = useRef(api);
+  apiRef.current = api;
+  const [list] = useState(() => createPagedList<ShelterRequest>((path) => apiRef.current.get(path), setPaged));
+  const requests = paged.items;
 
   // Named so the same function serves the focus refetch AND the retry button — same shape
   // as ShelterAnimalsScreen's `load`. Re-derived on every segment change too.
   const load = useCallback(() => {
-      setRes(null);
-      setRequests(null);
       const kind = SEGMENT_KIND[segment as keyof typeof SEGMENT_KIND];
-      api.get(`/shelter/requests?kind=${kind}&status=open`).then((r) => {
-        setRes({ ok: r.ok, status: r.status });
-        if (r.ok) setRequests(r.data?.results ?? []);
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + segment change
-    }, [segment]);
+      list.reset(`/shelter/requests?kind=${kind}&status=open`);
+    }, [segment, list]);
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  const state = loadState(res, requests?.length);
+  const state = loadState(paged.res, requests?.length);
 
   return (
     <View style={styles.screen} testID="screen.shelterRequests">
@@ -137,6 +139,13 @@ export function ShelterRequestsScreen({ navigation }: Props) {
             );
           })
         )}
+
+        {state.kind === "ready" && paged.next ? (
+          <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.shelterRequests.loadMore"
+            style={styles.more} onPress={() => list.more()}>
+            <Text style={styles.moreLabel}>{paged.moreFailed ? "Couldn't load more. Try again" : "Load more"}</Text>
+          </TouchableOpacity>
+        ) : null}
       </ScrollView>
 
       <ShelterTabs
@@ -165,5 +174,7 @@ const styles = StyleSheet.create({
   rowCopyLarge: { marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   rowTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   rowSub: { marginTop: 4, color: colors.muted, ...typography.meta },
-  rowTime: { marginTop: 4, color: colors.muted, ...typography.meta }
+  rowTime: { marginTop: 4, color: colors.muted, ...typography.meta },
+  more: { alignSelf: "center", marginTop: 12, minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
+  moreLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" }
 });
