@@ -18,6 +18,7 @@ import { Me, ShelterDashboard, ShelterTier } from "../api/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
+import { createLatestOnly } from "../latestOnly";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { useOutbox } from "../outbox/OutboxProvider";
@@ -54,6 +55,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
   // put the profile heading under the clock once it was not.
   const insets = useSafeAreaInsets();
   const api = useApi();
+  const [latest] = useState(createLatestOnly);
   const { signOut, tokens } = useAuth();
   const { queue, discardAllFor } = useOutbox();
 
@@ -80,6 +82,8 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   const load = useCallback(() => {
+      // NT-4 · only the latest focus's answers apply: a slow answer from an earlier visit is dropped.
+      const only = latest.begin();
       // US-R2 · PRIMARY. This screen is about the shelter's own identity and gating, both
       // derived from /me — so /me failing takes the whole screen, while the dashboard
       // counts below are SECONDARY and degrade on their own.
@@ -87,15 +91,15 @@ export function ShelterProfileScreen({ navigation }: Props) {
       // as `!me?.is_verified_rescuer` — so a failed /me showed an
       // APPROVED shelter its own account as unverified and gated, with every capability
       // apparently revoked. The counts fell back to zero on the same failure.
-      api.get("/me").then((r) => {
+      api.get("/me").then(only((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setMe(r.data);
-      });
-      api.get("/shelter/profile").then((r) => {
+      }));
+      api.get("/shelter/profile").then(only((r) => {
         if (r.ok) { setOrg({ name: r.data.org_name, logoUrl: r.data.logo_url ?? null }); setLogoFailed(false); }
-      });
-      api.get("/shelter/dashboard").then((r) => { if (r.ok) setDash(r.data); });
-      api.get("/shelter/donation-qr").then((r) => { if (r.ok) setOwnQr(r.data.donation_qrs ?? []); });
+      }));
+      api.get("/shelter/dashboard").then(only((r) => { if (r.ok) setDash(r.data); }));
+      api.get("/shelter/donation-qr").then(only((r) => { if (r.ok) setOwnQr(r.data.donation_qrs ?? []); }));
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, []);
   useFocusEffect(load);
