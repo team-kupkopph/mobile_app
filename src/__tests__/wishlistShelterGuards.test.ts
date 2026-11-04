@@ -258,12 +258,13 @@ describe("AW17 · ShelterDonateScreen", () => {
 });
 
 describe("US-W3 · the dashboard's Wishlist line", () => {
-  it("is gated on /me's is_verified_rescuer (the Profile tab's gate), not on the latest request's banner state", () => {
+  // SH1 · was /me's is_verified_rescuer; now the shell's ONE verified flag (shelterShellState), which is the same
+  // "any approved" gate the Profile tab reads — still never the latest request's banner state.
+  it("is gated on the shell's 'any approved' flag (the Profile tab's gate), not on the latest request's banner state", () => {
     const m = /\{(\S[^\n]*)\? \(\(\) => \{\s*const summary = wishlistSummary/.exec(dash);
     expect(m).not.toBeNull();   // the scan found the Wishlist block's condition
-    expect(m![1]).toMatch(/me\?\.is_verified_rescuer/);
-    expect(m![1]).not.toMatch(/\bverified\b/);
-    expect(m![1]).not.toMatch(/\bstate\b/);
+    expect(m![1]).toMatch(/^shell\.verified && /);
+    expect(m![1]).not.toMatch(/\bstate\b|\bbanner\b/);
   });
   it("comes from wishlistSummary and opens the wishlist", () => {
     expect(dash).toMatch(/import \{[^}]*\bwishlistSummary\b[^}]*\} from "\.\.\/shelterDashboard"/);

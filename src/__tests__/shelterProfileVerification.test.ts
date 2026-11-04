@@ -8,7 +8,10 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 import { Me, ShelterDashboard, VerificationStatus } from "../api/types";
-import { shelterVerificationCard } from "../shelterDashboard";
+import { shelterShellState } from "../shelterDashboard";
+
+// SH1 · the card is now the gated half of shelterShellState's banner.
+const shelterVerificationCard = (d: ShelterDashboard | null, m: Me | null) => shelterShellState(d, m).banner;
 
 function dash(submitted: boolean, status: ShelterDashboard["verification"]["status"]): ShelterDashboard {
   return {
@@ -28,7 +31,7 @@ function me(verification_status: VerificationStatus | null): Me {
   };
 }
 
-describe("shelterVerificationCard (F13 — the profile card is derived, not gated)", () => {
+describe("shelterShellState banner for a gated shelter (F13 — the profile card is derived, not gated)", () => {
   it("is 'incomplete' when nothing was submitted, even though the account is gated", () => {
     expect(shelterVerificationCard(dash(false, null), me(null))).toBe("incomplete");
   });
@@ -62,7 +65,7 @@ describe("ShelterProfileScreen's verification card", () => {
   const screen = readFileSync(join(__dirname, "..", "screens", "ShelterProfileScreen.tsx"), "utf8");
 
   it("reads the derived card state, not `gated` alone", () => {
-    expect(screen).toMatch(/shelterVerificationCard\(/);
+    expect(screen).toMatch(/shelterShellState\(dash, me\)/);
   });
 
   it("offers the not-submitted shelter an upload, routed to the verify form", () => {
@@ -79,7 +82,7 @@ describe("ShelterProfileScreen's verification card", () => {
     expect(screen).toMatch(/Not verified/);
   });
 
-  it("still gates rows on the served gate (US-R1 / decision 16 untouched)", () => {
-    expect(screen).toMatch(/const gated = !me\?\.is_verified_rescuer/);
+  it("still gates rows on the served gate (\"any approved\", via shelterShellState)", () => {
+    expect(screen).toMatch(/const gated = !shell\.verified/);
   });
 });

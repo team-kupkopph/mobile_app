@@ -18,7 +18,7 @@ import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterBannerState, rescueSummary, shelterBannerState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
+import { rescueSummary, shelterShellState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
@@ -85,9 +85,13 @@ export function ShelterDashboardScreen({ navigation }: Props) {
     }, []);
   useFocusEffect(load);
 
-  const state: ShelterBannerState = dash ? shelterBannerState(dash) : "incomplete";
-  const verified = state === "verified";
-  const banner = verified ? null : BANNER[state];
+  // SH1 · the shell's ONE verified state (shared with You and the Rescue card): "any approved"
+  // from the server's gates, not the latest request's status — an approved tier-1 rescue with a
+  // tier-2 upgrade in review is verified, and sees a quiet "Upgrade under review" accent.
+  const shell = shelterShellState(dash, me);
+  const verified = shell.verified;
+  const state = shell.banner;
+  const banner = state === "pending" || state === "rejected" || state === "incomplete" ? BANNER[state] : null;
   const tier: ShelterTier = me?.shelter?.tier ?? "community_rescue";
   const badge = tier === "community_rescue" ? "Verified Rescue" : "Verified Shelter";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
@@ -172,7 +176,17 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             </View>
             <View style={[styles.bannerCopy, large && styles.bannerCopyLarge]}>
               <Text style={styles.verifiedHeroTitle} maxFontSizeMultiplier={maxFontScale.title}>You're verified</Text>
-              <Text style={styles.verifiedHeroBody}>Your listings are live and donations are on.</Text>
+              <Text style={styles.verifiedHeroBody}>Your listings are live.</Text>
+              {/* SH2 · donations are a two-key gate (approved AND a live QR, US-X3): never say they are on
+                  for an approved shelter with no QR yet. */}
+              {shell.donationsOn ? (
+                <Text style={styles.verifiedHeroBody}>Donations are on.</Text>
+              ) : (
+                <TouchableOpacity testID="btn.shelterDashboard.addQr" accessibilityRole="button" hitSlop={TAP_SLOP}
+                  activeOpacity={0.8} onPress={() => navigation.navigate("donationQr")}>
+                  <Text style={[styles.verifiedHeroBody, styles.verifiedHeroLink]}>Add a donation QR to turn donations on ›</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         ) : banner ? (
@@ -189,6 +203,21 @@ export function ShelterDashboardScreen({ navigation }: Props) {
               <Text style={styles.bannerCta}>{banner.cta}</Text>
             </Card>
           </TouchableOpacity>
+        ) : null}
+
+        {state === "upgrade_in_review" ? (
+          // SH1 · an approved org whose LATEST request is still with the reviewer: the upgrade (US-X4), not a gate.
+          // Same accent and destination as You's.
+          <Card accent={colors.teal} style={[styles.footCard, large && styles.stackLarge]}>
+            <View style={[styles.footCopy, large && styles.footCopyLarge]}>
+              <Text style={styles.footTitle}>Upgrade under review</Text>
+              <Text style={styles.footBody}>You stay verified while we check your new documents.</Text>
+            </View>
+            <TouchableOpacity testID="btn.shelterDashboard.trackUpgrade" hitSlop={TAP_SLOP} activeOpacity={0.8}
+              onPress={() => navigation.navigate("verifyDocuments")}>
+              <Text style={styles.footCta}>Track ›</Text>
+            </TouchableOpacity>
+          </Card>
         ) : null}
 
         <View style={[styles.statRow, large && styles.statRowLarge]}>
@@ -225,10 +254,10 @@ export function ShelterDashboardScreen({ navigation }: Props) {
 
         {/* US-W3 · the Wishlist line — what is waiting on the shelter (pledges a giver says arrived). Only for a shelter
             with an approved org, and only once the dashboard has loaded, so a failed request never reads as
-            "nothing to confirm". The gate is /me's `is_verified_rescuer` ("any approved"), the SAME source as the Profile
-            tab's Wishlist row, NOT the banner state (the latest request's status): an approved tier-1 shelter with an
+            "nothing to confirm". The gate is the shell's `verified` ("any approved"), the SAME source as the Profile
+            tab's Wishlist row, NOT the latest request's status: an approved tier-1 shelter with an
             upgrade in review is pending there and must keep its wishlist. */}
-        {me?.is_verified_rescuer && dash?.wishlist ? (() => {
+        {shell.verified && dash?.wishlist ? (() => {
           const summary = wishlistSummary(dash.wishlist);
           return (
             <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate("shelterNeeds")}
@@ -248,7 +277,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             the screen. Same load rule as Volunteers: only once `dash` has loaded, and the copy
             never states a count the server didn't make (rescueSummary). */}
         {dash?.rescue ? (() => {
-          const rescue = rescueSummary(dash.rescue, verified);
+          const rescue = rescueSummary(dash.rescue, shell.verified);
           return (
             <Card style={styles.volunteerCard}>
               <View style={styles.volunteerHeaderRow}>
@@ -281,7 +310,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           );
         })() : null}
 
-        {!verified ? (
+        {!verified && banner ? (
           <Card accent={colors.teal} style={[styles.footCard, large && styles.stackLarge]}>
             <View style={[styles.footCopy, large && styles.footCopyLarge]}>
               <Text style={styles.footTitle}>{state === "pending" ? "Draft your listings while you wait" : "Finish verifying to go live"}</Text>
@@ -364,6 +393,7 @@ const styles = StyleSheet.create({
   },
   verifiedHeroTitle: { color: "#FFFFFF", ...typography.title },
   verifiedHeroBody: { marginTop: 4, color: "#DCEDEB", ...typography.body },
+  verifiedHeroLink: { fontWeight: "700", textDecorationLine: "underline" },
   subLabel: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   banner: {
     minHeight: 108,

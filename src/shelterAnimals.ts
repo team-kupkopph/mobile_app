@@ -4,7 +4,7 @@
 // OWN listings, from GET /listings?mine=true&status=<available|pending|adopted> (B-be1).
 //
 // Kept pure and separate from the screen — same shape as shelterDashboard.ts's
-// shelterBannerState / shelterDonate.ts's donateSections — so the segment→status mapping is
+// shelterShellState / shelterDonate.ts's donateSections — so the segment→status mapping is
 // testable without React Native at all.
 import { ChipTone } from "./components/ui";
 

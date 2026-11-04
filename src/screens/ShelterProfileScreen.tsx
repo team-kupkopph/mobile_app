@@ -29,7 +29,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { Card, Chip } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
-import { ShelterVerificationCard, shelterVerificationCard } from "../shelterDashboard";
+import { shelterShellState } from "../shelterDashboard";
 import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
@@ -39,7 +39,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
 // shelter that chose "I'll upload these later" — it has NO request, so "Under review" was
 // a lie the dashboard didn't tell ("Documents not sent yet · Upload ›" on the same account).
 // "rejected" reuses US-V4's title from VerifyDocumentsScreen; it routes there for the note.
-const CARD: Record<ShelterVerificationCard, { title: string; body: string }> = {
+const CARD: Record<"incomplete" | "pending" | "rejected", { title: string; body: string }> = {
   incomplete: { title: "Documents not sent yet", body: "Upload your documents to get approved" },
   pending: { title: "Under review", body: "Track your documents" },
   rejected: { title: "Not verified", body: "Fix the flagged files and resubmit" }
@@ -122,17 +122,19 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
   const tier: ShelterTier = me?.shelter?.tier ?? "community_rescue";
   const isTier1 = tier === "community_rescue";
-  // Gated until APPROVED — pending, needs_info, rejected and "never submitted" all gate.
-  // Read from /me's served gate ("any approved", decision 16), not the LATEST request's
-  // status: a tier-1 mid-upgrade is pending there and must NOT read as gated here.
-  const gated = !me?.is_verified_rescuer;
-  // F13 · WHICH gated state — never from `gated` alone (see shelterVerificationCard).
-  const card = shelterVerificationCard(dash, me);
+  // SH1 · the SAME state Home reads. Gated until APPROVED — pending, needs_info, rejected and
+  // "never submitted" all gate. "Any approved" (the dashboard's gates.can_publish, else /me's
+  // is_verified_rescuer, decision 16), never the LATEST request's status: a tier-1 mid-upgrade
+  // is pending there and must NOT read as gated here.
+  const shell = shelterShellState(dash, me);
+  const gated = !shell.verified;
+  // F13 · WHICH gated state — never from `gated` alone. ("none" only while nothing has answered,
+  // and this screen renders only once /me has.)
+  const card = shell.banner === "incomplete" || shell.banner === "rejected" ? shell.banner : "pending";
   // An approved org whose LATEST request is still with the reviewer has an upgrade in flight
   // (US-X4 files it as a new shelter_org request). The server doesn't refuse a second one, so
   // the accent must stop offering the form and track the first.
-  const upgradeInReview = !gated && (me?.shelter?.verification_status === "pending"
-    || me?.shelter?.verification_status === "needs_info");
+  const upgradeInReview = shell.banner === "upgrade_in_review";
   const badge = isTier1 ? "Verified Rescue" : "Verified Shelter";
   const sub = isTier1 ? "Community rescue" : "Registered NGO";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0, volunteers: 0 };

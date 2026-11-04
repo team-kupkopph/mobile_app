@@ -2,7 +2,7 @@
 //
 // `donateSections` is kept pure and separate from the screen so the QR-state derivation and
 // the needs → row mapping are testable without React Native at all — same shape as
-// `shelterDashboard.ts`'s `shelterBannerState`/`shelterVerificationCard`.
+// `shelterDashboard.ts`'s `shelterShellState`.
 import { readFileSync } from "fs";
 import { join } from "path";
 import { donateSections } from "../shelterDonate";
