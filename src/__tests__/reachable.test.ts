@@ -122,6 +122,11 @@ describe("every registered route can be navigated to", () => {
     // `key: "route"` shape cannot count as navigation anywhere else.
     const tabs = readFileSync(join(SRC, "shelterTabs.ts"), "utf8");
     for (const m of tabs.matchAll(/^\s*\w+:\s*"(\w+)",?$/gm)) out.add(m[1]);
+    // SQ5 follow-up · the owner and guest tabs are reached through `appTabs.ts`'s key -> route maps and `name: "home"` / `navigate`.
+    // Comments are stripped: appTabs.ts's own docs quote `navigate("ownerTabs", …)`, which is the NEXT PR, not a caller.
+    const appTabs = readFileSync(join(SRC, "appTabs.ts"), "utf8").split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
+    for (const m of appTabs.matchAll(/^\s*\w+:\s*"(\w+)",?$/gm)) out.add(m[1]);
+    for (const re of [/navigate\(\s*["'](\w+)["']/g, /name:\s*["'](\w+)["']/g]) for (const m of appTabs.matchAll(re)) out.add(m[1]);
     // SQ5 · ...and the shell itself is entered by the helpers' `navigate("shelterTabs", …)` / `name: "shelterTabs"`.
     for (const re of [/navigate\(\s*["'](\w+)["']/g, /name:\s*["'](\w+)["']/g]) for (const m of tabs.matchAll(re)) out.add(m[1]);
     return out;

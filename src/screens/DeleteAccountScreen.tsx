@@ -31,6 +31,7 @@ import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, maxFontScale, radii, typography } from "../theme";
 import { Button, Field, ScreenHeader } from "../components/ui";
+import { openOwnerTab } from "../appTabs";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -180,9 +181,11 @@ function Blocked({
             <TouchableOpacity key={blocker.id} activeOpacity={0.75} style={styles.blockerCard}
                               hitSlop={TAP_SLOP} accessibilityRole="button"
                               accessibilityLabel={`${label} Opens it.`}
-                              onPress={() => (navigation as unknown as {
-                                navigate: (name: string, params?: object) => void;
-                              }).navigate(to.name, to.params)}>
+                              onPress={() => {
+                                const nav = navigation as unknown as { navigate: (name: string, params?: object) => void };
+                                if ("ownerTab" in to) openOwnerTab(nav as never, to.ownerTab, to.params);
+                                else nav.navigate(to.name, to.params);
+                              }}>
               {body}
             </TouchableOpacity>
           ) : (

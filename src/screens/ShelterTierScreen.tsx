@@ -21,6 +21,7 @@ import { RootStackParamList } from "../navigation/types";
 import { restoreOfferFrom } from "../restore";
 import { AuthHeader, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { elevation, maxFontScale, radii, spacing, typography } from "../theme";
+import { enterOwnerShell } from "../appTabs";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterTier">;
 
@@ -84,7 +85,7 @@ export function ShelterTierScreen({ navigation, route }: Props) {
           // Test-plan F8: an existing account (the server ignored `account_type` and the tier
           // was never sent) — this was a sign-in. Home, not shelter setup for an account that
           // may well be personal.
-          navigation.reset({ index: 0, routes: [{ name: "home" }] });
+          enterOwnerShell(navigation);
           return;
         }
         navigation.navigate("shelterSetup", { tier });

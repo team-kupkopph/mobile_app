@@ -46,7 +46,7 @@ describe("the two screens that post to /auth/social", () => {
 
   it("reset a returning user straight to home after setting tokens (OtpScreen's resume branch)", () => {
     for (const src of [accountType, shelterTier]) {
-      expect(src).toMatch(/navigation\.reset\(\{ index: 0, routes: \[\{ name: "home" \}\] \}\);/);
+      expect(src).toMatch(/enterOwnerShell\(navigation\);/);
     }
   });
 

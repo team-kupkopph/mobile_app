@@ -19,6 +19,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { TAP_SLOP } from "../touch";
 import { colors, maxFontScale, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
+import { openOwnerTab } from "../appTabs";
 
 type Props = NativeStackScreenProps<RootStackParamList, "kawanggawaRequested">;
 
@@ -26,14 +27,14 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
   useEffect(() => navigation.addListener("beforeRemove", (e) => {
     if (e.data.action.type === "GO_BACK") {
       e.preventDefault();
-      navigation.navigate("kawanggawa", { tab: "mine" });
+      openOwnerTab(navigation, "volunteer", { tab: "mine" });
     }
   }), [navigation]);
 
   return (
     <View style={styles.screen} testID="screen.kawanggawaRequested">
       <ScreenBackdrop />
-      <ScreenHeader title="Request sent" onBack={() => navigation.navigate("kawanggawa", { tab: "browse" })} />
+      <ScreenHeader title="Request sent" onBack={() => openOwnerTab(navigation, "volunteer", { tab: "browse" })} />
 
       {/* At AX5 the outcome outgrows the screen (the buttons were unreachable); a short one still sits where it did. */}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -52,14 +53,14 @@ export function KawangGawaRequestedScreen({ navigation }: Props) {
 
         <Button
           label="View my shifts"
-          onPress={() => navigation.navigate("kawanggawa", { tab: "mine" })}
+          onPress={() => openOwnerTab(navigation, "volunteer", { tab: "mine" })}
           style={styles.primaryButton}
         />
 
         <TouchableOpacity hitSlop={TAP_SLOP}
           activeOpacity={0.7}
           style={styles.secondaryButton}
-          onPress={() => navigation.navigate("kawanggawa", { tab: "browse" })}
+          onPress={() => openOwnerTab(navigation, "volunteer", { tab: "browse" })}
         >
           <Text style={styles.secondaryText}>Browse more opportunities</Text>
         </TouchableOpacity>

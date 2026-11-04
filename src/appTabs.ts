@@ -48,6 +48,9 @@ export function guestPressAction(key: GuestTab): { kind: "tab"; route: keyof Gue
   return { kind: "tab", route: GUEST_TAB_ROUTE[key] };
 }
 
+/** The route the app opens on for a signed-in user (`RootNavigator`'s `initialRouteName`). The switch PR makes it "ownerTabs". */
+export const OWNER_SHELL_ROUTE = "home" as const;
+
 type OwnerRoute = (typeof OWNER_TAB_ROUTE)[OwnerTab];
 
 /** Replace the whole stack with the personal member's shell on Home (`justSignedUp` is Home's one-shot intent flag). */
@@ -65,6 +68,19 @@ export function openOwnerTab(
   params?: object
 ): void {
   navigation.navigate(OWNER_TAB_ROUTE[key], params);
+}
+
+/**
+ * Go BACK to a member tab already on the stack, with params (Settings' "Edit profile" returns to You with its editor open).
+ * `popTo`, never `navigate`: in React Navigation 7 `navigate("profile")` pushes a second copy of the tab, the loop the settings
+ * review found. The switch PR changes the body to `popTo("ownerTabs", { screen, params })`.
+ */
+export function popToOwnerTab(
+  navigation: { popTo: (route: OwnerRoute, params?: object) => void },
+  key: OwnerTab,
+  params?: object
+): void {
+  navigation.popTo(OWNER_TAB_ROUTE[key], params);
 }
 
 /** Enter the signed-out visitor's shell (Welcome's "browse as a guest"). */

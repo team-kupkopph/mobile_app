@@ -9,6 +9,7 @@ import { TopStatus } from "../components/TopStatus";
 import { RootStackParamList } from "../navigation/types";
 import { PrimaryButton, authColors } from "./AuthFormKit";
 import { elevation, maxFontScale, pill, radii, spacing, squircle, typography } from "../theme";
+import { enterOwnerShell } from "../appTabs";
 
 type Props = NativeStackScreenProps<RootStackParamList, "signupSuccess">;
 
@@ -51,7 +52,7 @@ export function SignupSuccessScreen({ navigation }: Props) {
     // justSignedUp gates HomeScreen's guest-intent resume (see HomeScreen.tsx) — this is the only
     // route that should ever set it, since it's the sole confirmation that a signup actually
     // completed (SigninScreen's reset to "home" must NOT carry this flag).
-    navigation.reset({ index: 0, routes: [{ name: "home", params: { justSignedUp: true } }] });
+    enterOwnerShell(navigation, { justSignedUp: true });
   }
 
   return (

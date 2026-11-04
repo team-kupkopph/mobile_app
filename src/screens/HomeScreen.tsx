@@ -33,6 +33,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { enterShelterShell } from "../shelterTabs";
+import { openOwnerTab } from "../appTabs";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;
@@ -429,7 +430,7 @@ export function HomeScreen({ navigation, route }: Props) {
         <SectionHeader
           title="Adopt near you"
           actionLabel="See all ›"
-          onAction={() => navigation.navigate("adopt")}
+          onAction={() => openOwnerTab(navigation, "adopt")}
           testID="btn.home.adopt"
           style={sectionSpacing.first}
         />

@@ -22,6 +22,7 @@ import { RootStackParamList } from "../navigation/types";
 import { RowAction, settingsGroups } from "../settings";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, typography } from "../theme";
+import { popToOwnerTab } from "../appTabs";
 
 const card = {
   backgroundColor: colors.white, ...elevation.soft,
@@ -86,8 +87,8 @@ export function SettingsScreen({ navigation, route }: Props) {
   function perform(action: RowAction) {
     switch (action.type) {
       case "navigate": nav.navigate(action.name, action.params); return;
-      // Back to the EXISTING screen (React Navigation 7: `navigate` would push a second copy).
-      case "popTo": nav.popTo(action.name, action.params); return;
+      // Back to the EXISTING tab (React Navigation 7: `navigate` would push a second copy), through the one helper.
+      case "popToOwnerTab": popToOwnerTab(nav as never, action.key, action.params); return;
       case "logoutAll": handleLogoutAll(); return;
       case "link": void Linking.openURL(action.url); return;
       // Turning it ON asks for one successful scan first (useAppLock); OFF just turns it off.

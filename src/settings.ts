@@ -1,6 +1,7 @@
 // US-N5 · pure helpers for the settings / data-rights surfaces. Kept out of the screens so
 // the rules that matter (what counts as a confirmation, how a refusal is worded) are
 // testable without rendering anything.
+import type { OwnerTab } from "./components/OwnerTabs";
 import type { RootStackParamList } from "./navigation/types";
 
 // AS8 (backend#112) · `approximate_location` and `masked_contact` are no longer served: they
@@ -143,7 +144,8 @@ export function humanSize(bytes: number): string {
 type RouteName = keyof RootStackParamList;
 export type RowAction =
   | { type: "navigate"; name: RouteName; params?: object }
-  | { type: "popTo"; name: RouteName; params?: object }
+  /** Back to a member tab already on the stack, with params (Edit profile). Executed by `popToOwnerTab`. */
+  | { type: "popToOwnerTab"; key: OwnerTab; params?: object }
   | { type: "logoutAll" }
   /** Plan Task 14b · a switch, not a destination; the screen hides it on a device without biometrics. */
   | { type: "appLock" }
@@ -179,7 +181,7 @@ export function settingsGroups(opts: {
     // Back to the EXISTING You tab with its inline editor open. `navigate("profile")` pushes a
     // second copy of the tab in React Navigation 7 — the loop the review found.
     { key: "editProfile", label: "Edit profile",
-      action: { type: "popTo", name: "profile", params: { editing: true } } },
+      action: { type: "popToOwnerTab", key: "profile", params: { editing: true } } },
     // No value on the row: Settings has no load of its own to hang the lookup on (and a failed one
     // must never read as "Not added"). The phone screen shows the number on file and its status.
     { key: "phone", label: "Phone number", action: { type: "navigate", name: "verifyPhone" } },
@@ -245,10 +247,10 @@ export const DELETE_ENDS_NOTE =
   "Pledges you made end, and a shelter's open wishlist closes. The people involved are told.";
 
 /** Where a blocker's owner goes to close it. `null` for a kind this app does not know yet. */
-export function blockerRoute(kind: string): { name: RouteName; params?: object } | null {
+export function blockerRoute(kind: string): { name: RouteName; params?: object } | { ownerTab: OwnerTab; params?: object } | null {
   switch (kind) {
     case "rescue_claim": return { name: "myRescues" };
-    case "volunteer_shift": return { name: "kawanggawa", params: { tab: "mine" } };
+    case "volunteer_shift": return { ownerTab: "volunteer", params: { tab: "mine" } };
     case "adoption_inquiry": return { name: "myInquiries" };
     case "hosted_shift": return { name: "shelterVolunteer" };
     default: return null;

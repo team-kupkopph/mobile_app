@@ -18,6 +18,7 @@ import { notificationTarget } from "../notifications";
 import { relTime } from "../sagip";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
+import { openOwnerTab } from "../appTabs";
 import { openShelterTab } from "../shelterTabs";
 
 
@@ -90,7 +91,7 @@ export function NotificationsScreen({ navigation }: Props) {
         navigation.navigate("myRescues");
         return;
       case "kawanggawa":
-        navigation.navigate("kawanggawa", { tab: target.tab });
+        openOwnerTab(navigation, "volunteer", { tab: target.tab });
         return;
       case "shelterVolunteerActivity":
         navigation.navigate("shelterVolunteerActivity", { shiftId: target.shiftId, section: target.section });
