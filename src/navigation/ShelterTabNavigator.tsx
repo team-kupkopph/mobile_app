@@ -2,8 +2,8 @@
 // navigator. It is the `shelterTabs` route of the root stack; the five tabs keep their old route names, so the
 // `screen.shelter*` ids and the screens' files do not move.
 //
-// PR 1 registers this and nothing navigates to it yet: the screens still draw their own <ShelterTabs> as stack routes.
-// The switch PR points `openShelterTab` / `enterShelterShell` here and deletes the eight hand-mounted bars.
+// The screens draw no bar of their own: this navigator renders the one <ShelterTabs>, so a load-failure branch has its exit
+// by construction (US-PF3 found it missing on a device). Inbound paths reach it through `openShelterTab` / `enterShelterShell`.
 //
 // ⚠️ THE BAR IS NOT LAID OUT BY THE NAVIGATOR. bottom-tabs renders a custom `tabBar` as a flex sibling after its
 // screens, but the shared TabBar's root is `position: absolute`, so it takes no flow height and the scenes (which are
@@ -11,7 +11,7 @@
 // reading BottomTabView in 7.21.0 (spec §4.5); the sim walk in the switch PR is the proof on a device.
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
-import { ComponentType, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ShelterTabs, type ShelterTabKey } from "../components/ShelterTabs";
 import { ShelterReturnContext } from "../useRefreshOnFocus";
@@ -69,12 +69,11 @@ export function ShelterTabNavigator() {
         tabBar={(props) => <ShelterTabBar {...props} />}
         screenOptions={{ headerShown: false, lazy: true, freezeOnBlur: true, animation: "none" }}
       >
-        {/* The roots are typed against the stack today; the switch PR moves them to composite props. */}
-        <Tab.Screen name="shelterDashboard" component={ShelterDashboardScreen as ComponentType<any>} />
-        <Tab.Screen name="shelterAnimals" component={ShelterAnimalsScreen as ComponentType<any>} />
-        <Tab.Screen name="shelterDonate" component={ShelterDonateScreen as ComponentType<any>} />
-        <Tab.Screen name="shelterRequests" component={ShelterRequestsScreen as ComponentType<any>} />
-        <Tab.Screen name="shelterProfile" component={ShelterProfileScreen as ComponentType<any>} />
+        <Tab.Screen name="shelterDashboard" component={ShelterDashboardScreen} />
+        <Tab.Screen name="shelterAnimals" component={ShelterAnimalsScreen} />
+        <Tab.Screen name="shelterDonate" component={ShelterDonateScreen} />
+        <Tab.Screen name="shelterRequests" component={ShelterRequestsScreen} />
+        <Tab.Screen name="shelterProfile" component={ShelterProfileScreen} />
       </Tab.Navigator>
     </ShelterReturnContext.Provider>
   );

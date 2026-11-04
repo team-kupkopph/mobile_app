@@ -76,10 +76,19 @@ function fullScreenBranches(src: string): string[] {
   return out;
 }
 
+/**
+ * SQ5 · the five shelter tab roots get their exit from the TAB NAVIGATOR, which renders the one bar around every tab, failed or
+ * not. They draw no `<ShelterTabs>` themselves any more, so the EXIT scan below would silently drop them (a shrinking
+ * subject list that still prints green is how scans here have under-reported before). They are judged by their own rule:
+ * registered in the navigator, which renders the bar; and still carrying the full-screen failure branch the bar protects.
+ */
+const SHELL_ROOTS = ["ShelterDashboardScreen.tsx", "ShelterAnimalsScreen.tsx", "ShelterDonateScreen.tsx", "ShelterRequestsScreen.tsx", "ShelterProfileScreen.tsx"];
+const navigatorSrc = readFileSync(join(__dirname, "..", "navigation", "ShelterTabNavigator.tsx"), "utf8");
+
 /** Screens that have a full-screen failure branch AND an exit on their happy path. */
 const SUBJECTS = files.filter((f) => {
   const src = read(f);
-  return fullScreenBranches(src).length > 0 && EXIT.test(src);
+  return !SHELL_ROOTS.includes(f) && fullScreenBranches(src).length > 0 && EXIT.test(src);
 });
 
 describe("a failed screen still has a way out", () => {
@@ -93,5 +102,19 @@ describe("a failed screen still has a way out", () => {
     const src = read(f);
     const offenders = fullScreenBranches(src).filter((branch) => !EXIT.test(resolveExits(branch, src)));
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("the shelter shell supplies its own exit (SQ5)", () => {
+  it("the navigator renders the bar", () => {
+    expect(navigatorSrc).toMatch(/<ShelterTabs\b/);
+    expect(navigatorSrc).toMatch(/tabBar=\{\(props\) => <ShelterTabBar/);
+  });
+  it.each(SHELL_ROOTS)("%s is a tab of that navigator", (f) => {
+    expect(navigatorSrc).toContain(`component={${f.replace(".tsx", "")}}`);
+  });
+  it("the roots that fail as a whole screen are Dashboard, Donate and You (the three US-PF3 found)", () => {
+    const failing = SHELL_ROOTS.filter((f) => fullScreenBranches(read(f)).length > 0);
+    expect(failing).toEqual(["ShelterDashboardScreen.tsx", "ShelterDonateScreen.tsx", "ShelterProfileScreen.tsx"]);
   });
 });

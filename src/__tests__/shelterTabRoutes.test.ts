@@ -1,53 +1,66 @@
 /**
- * Every shelter screen's bottom tab bar must route to the four OTHER tabs (found in the Run 6 part 18 default-size pass): the Donate tab's bar handled only "Home"
- * (`t === "home" && navigate(...)`), so Animals, Requests and You were dead taps from it, and the Animals tab's bar had no route to Requests. Nothing about text size:
- * a navigation dead end that the AX5 walks happened to step around (they entered each tab from Home).
+ * Every shelter screen's bottom tab bar must route to the four OTHER tabs (Run 6 part 18 found the Donate tab's bar handled only
+ * "Home", and the Animals tab's bar had no route to Requests). SH11 held that with eight hand-written chains, then one helper
+ * that eight bars pressed through.
  *
- * SH11 (shelter home review, step 14) · that rule was held by eight hand-written `if (t === …)` chains, one per bar (two on
- * Dashboard, You and Donate: their failure branches carry the bar too). They now all call `shelterTabNavigate`, so the
- * routing is tested once, on the helper, and the scan only checks that every bar uses it.
+ * SQ5 · the shell is ONE bottom-tab navigator (spec 2026-11-04-shelter-tab-navigator-design.md). The rule now holds by
+ * construction: the navigator renders the single bar, so no screen can forget it or route it wrongly. This test pins that
+ * construction, and the two helpers every inbound path uses.
  */
 import { readFileSync } from "fs";
 import { join } from "path";
 
-import { SHELTER_TAB_ROUTE, shelterTabNavigate } from "../shelterTabs";
+import { SHELTER_TAB_ROUTE, enterShelterShell, openShelterTab } from "../shelterTabs";
 
+const read = (rel: string) => readFileSync(join(__dirname, "..", rel), "utf-8");
 const SCREENS = ["ShelterDashboardScreen", "ShelterAnimalsScreen", "ShelterDonateScreen", "ShelterRequestsScreen", "ShelterProfileScreen"];
+const nav = read("navigation/ShelterTabNavigator.tsx");
+const root = read("navigation/RootNavigator.tsx");
 
-describe("shelterTabNavigate", () => {
-  it("routes each of the five tabs to its root", () => {
-    const calls: string[] = [];
-    const nav = { navigate: (route: string) => calls.push(route) };
-    for (const key of ["home", "animals", "donate", "requests", "profile"] as const) shelterTabNavigate(nav, key);
-    expect(calls).toEqual(["shelterDashboard", "shelterAnimals", "shelterDonate", "shelterRequests", "shelterProfile"]);
-    expect(new Set(Object.values(SHELTER_TAB_ROUTE)).size).toBe(5);
+describe("the bar is the navigator's, once", () => {
+  it("the navigator renders exactly one <ShelterTabs>", () => {
+    const code = nav.split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
+    expect(code.match(/<ShelterTabs\b/g)).toHaveLength(1);
   });
-});
-
-const blocks = (src: string) => {
-  const out: string[] = [];
-  const re = /<ShelterTabs[\s\S]*?\/>/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(src))) out.push(m[0]);
-  return out;
-};
-
-describe.each(SCREENS)("%s's tab bars", (file) => {
-  const src = readFileSync(join(__dirname, "..", "screens", `${file}.tsx`), "utf-8");
-  const bs = blocks(src);
-  it("the scan found the tab bar (a guard that matches nothing proves nothing)", () => {
-    expect(bs.length).toBeGreaterThan(0);
+  it("a press emits tabPress, then navigates to the pressed tab's route (all five keys exist)", () => {
+    expect(nav).toMatch(/type: "tabPress"/);
+    expect(nav).toMatch(/navigation\.navigate\(route\.name\)/);
+    expect(Object.keys(SHELTER_TAB_ROUTE)).toEqual(["home", "animals", "donate", "requests", "profile"]);
   });
-  it("every bar routes through the one helper, with no hand-written chain", () => {
-    for (const b of bs) {
-      expect(b).toMatch(/onTabPress=\{\(t\) => shelterTabNavigate\(navigation, t\)\}/);
-      expect(b).not.toMatch(/t === "/);
+  it.each(SCREENS)("%s renders no bar of its own, and no longer presses through the old helper", (file) => {
+    const src = read(`screens/${file}.tsx`);
+    expect(src).not.toMatch(/<ShelterTabs\b/);
+    expect(src).not.toMatch(/shelterTabNavigate/);
+    expect(src).not.toMatch(/import \{ ShelterTabs \}/);
+  });
+  it("the five names are registered once, inside the tab navigator, and no longer as root stack routes", () => {
+    for (const s of SCREENS) {
+      expect(nav).toContain(`component={${s}}`);
+      expect(root).not.toMatch(new RegExp(`component=\\{${s}\\}`));
     }
+    expect(root).toMatch(/<Stack\.Screen name="shelterTabs" component=\{ShelterTabNavigator\} \/>/);
   });
 });
 
-it("the eight bars are all still there", () => {
-  const total = SCREENS.reduce(
-    (n, f) => n + blocks(readFileSync(join(__dirname, "..", "screens", `${f}.tsx`), "utf-8")).length, 0);
-  expect(total).toBe(8);
+describe("inbound helpers", () => {
+  it("openShelterTab reaches each tab through the nested form, popping back to a shell already on the stack", () => {
+    const calls: unknown[][] = [];
+    for (const key of ["home", "animals", "donate", "requests", "profile"] as const) {
+      openShelterTab({ navigate: (...a) => calls.push(a) }, key);
+    }
+    expect(calls).toEqual(
+      ["shelterDashboard", "shelterAnimals", "shelterDonate", "shelterRequests", "shelterProfile"].map((screen) => [
+        "shelterTabs", { screen }, { pop: true }
+      ])
+    );
+  });
+  it("enterShelterShell resets onto Home by default and onto the named tab otherwise", () => {
+    const states: unknown[] = [];
+    enterShelterShell({ reset: (s) => states.push(s) });
+    enterShelterShell({ reset: (s) => states.push(s) }, "requests");
+    expect(states).toEqual([
+      { index: 0, routes: [{ name: "shelterTabs", params: { screen: "shelterDashboard" } }] },
+      { index: 0, routes: [{ name: "shelterTabs", params: { screen: "shelterRequests" } }] }
+    ]);
+  });
 });

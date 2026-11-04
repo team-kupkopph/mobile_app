@@ -37,3 +37,36 @@ appId: ph.kupkop.app
     id: "tab.shelter.home"
 - assertVisible:
     id: "screen.shelterDashboard"
+
+# SQ5 · the shell is ONE tab navigator, so the other three tabs are reachable from each other and a root has nothing
+# beneath it. Visit them all, ending on Home...
+- tapOn:
+    id: "tab.shelter.animals"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterAnimals"
+    timeout: 20000
+- tapOn:
+    id: "tab.shelter.donate"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterDonate"
+    timeout: 20000
+- tapOn:
+    id: "tab.shelter.requests"
+- extendedWaitUntil:
+    visible:
+      id: "screen.shelterRequests"
+    timeout: 20000
+
+# ...then the iOS back swipe on a root. Before SQ5 it popped to whichever tab came before (here: Donate). Now there is
+# nothing to pop: the screen must not change.
+- swipe:
+    start: "1%, 50%"
+    end: "80%, 50%"
+- assertVisible:
+    id: "screen.shelterRequests"
+- tapOn:
+    id: "tab.shelter.home"
+- assertVisible:
+    id: "screen.shelterDashboard"

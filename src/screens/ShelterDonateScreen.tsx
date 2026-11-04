@@ -4,7 +4,6 @@
 // (US-Q2) shows a stranger: the same Donation QR two-key gate, plus the Abot-tulong
 // wishlist with pledged/received per need. Payments stay off-platform in the payment app —
 // Kupkop never touches the money, same as DonateScreen.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -17,11 +16,9 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { ShelterTabs } from "../components/ShelterTabs";
-import { shelterTabNavigate } from "../shelterTabs";
 import { Button, Card, Chip, SectionHeader } from "../components/ui";
 import { CHIP_UI_TONE, NeedStatus, needPercent, needProgressFraction, needProgressLabel, needStatusChip } from "../community";
-import { RootStackParamList } from "../navigation/types";
+import { ShelterTabScreenProps } from "../navigation/types";
 import { donateSections, DonateNeedInput } from "../shelterDonate";
 import { donateChip, OwnQr, qrImageLabel } from "../ownQr";
 import { colors, gradients, maxFontScale, pill, spacing, squircle, typography } from "../theme";
@@ -29,7 +26,7 @@ import { useLargeText } from "../useLargeText";
 
 const PROVIDER_LABEL: Record<string, string> = { gcash: "GCash", maya: "Maya" };
 
-type Props = NativeStackScreenProps<RootStackParamList, "shelterDonate">;
+type Props = ShelterTabScreenProps<"shelterDonate">;
 
 // One row of GET /shelters/{me}/needs. `quantity_pledged` rides on it, so this tab makes ONE request for the whole
 // wishlist; it used to fan out a `/needs/{id}/pledges` call per need to add the pledged total up itself.
@@ -111,12 +108,6 @@ export function ShelterDonateScreen({ navigation }: Props) {
       <View style={[styles.screen, { paddingTop: insets.top }]}>
         <ScreenBackdrop />
         <LoadStateView state={loadState(dashRes)} onRetry={load} />
-        {/* The tab bar belongs in this branch too — the screen is reached by a tab, so
-            there is no back button, and the offline state must not be a dead end. */}
-        <ShelterTabs
-          active="donate"
-          onTabPress={(t) => shelterTabNavigate(navigation, t)}
-        />
       </View>
     );
   }
@@ -226,10 +217,6 @@ export function ShelterDonateScreen({ navigation }: Props) {
         ) : null}
       </ScrollView>
 
-      <ShelterTabs
-        active="donate"
-        onTabPress={(t) => shelterTabNavigate(navigation, t)}
-      />
     </View>
   );
 }

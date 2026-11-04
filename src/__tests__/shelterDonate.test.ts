@@ -84,8 +84,9 @@ describe("ShelterDonateScreen file guards", () => {
     expect(readScreen()).toMatch(/<ScreenBackdrop\b/);
   });
 
-  it('renders ShelterTabs active="donate"', () => {
-    expect(readScreen()).toMatch(/<ShelterTabs[\s\S]*?active="donate"/);
+  it('draws no bar of its own: the tab navigator renders it (SQ5)', () => {
+    expect(readScreen()).not.toMatch(/<ShelterTabs\b/);
+    expect(readFileSync(join(__dirname, "..", "navigation", "ShelterTabNavigator.tsx"), "utf8")).toContain("component={ShelterDonateScreen}");
   });
 
   it('carries testID="screen.shelterDonate"', () => {

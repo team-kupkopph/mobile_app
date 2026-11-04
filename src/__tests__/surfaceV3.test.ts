@@ -144,6 +144,7 @@ describe("surface, re-derived", () => {
     // Task B3 wires the Requests tab the same way (both roots' onTabPress gain
     // `t === "requests"`, and ShelterRequestsScreen itself wires home/animals/donate/
     // profile) — the last of ShelterTabs' five tabs, so this list is empty now.
+    // SQ5 · "wired" now means: the tab navigator's single bar presses through `SHELTER_TAB_ROUTE`, which routes all five.
     expect(s.deadTabs.sort()).toEqual([]);
   });
 });
