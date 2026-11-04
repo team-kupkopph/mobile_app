@@ -2,11 +2,10 @@
 // navigator: the `ownerTabs` route of the root stack. The four tabs keep their old route names (`home`, `adopt`,
 // `kawanggawa`, `profile`), so the `screen.*` ids and the screens' files do not move.
 //
-// PR 1 registers this and nothing navigates to it yet: the screens still draw their own <OwnerTabs> as stack routes. The switch
-// PR points `enterOwnerShell` / `openOwnerTab` here and deletes the five hand-mounted bars. The bar is the shared TabBar, which
-// is `position: absolute`, so the navigator adds no bottom inset (shelter spec §7a/§7b).
+// The screens draw no bar of their own: this navigator renders the one <OwnerTabs>, so a load-failure branch has its exit by
+// construction. Inbound paths reach it through `enterOwnerShell` / `openOwnerTab` / `popToOwnerTab`. The bar is the shared
+// TabBar, which is `position: absolute`, so the navigator adds no bottom inset (shelter spec §7a/§7b).
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { ComponentType } from "react";
 
 import { OwnerTabs, type OwnerTab } from "../components/OwnerTabs";
 import { OWNER_TAB_ROUTE, ownerTabKeyForRoute } from "../appTabs";
@@ -46,11 +45,10 @@ export function OwnerTabNavigator() {
         tabBar={(props) => <OwnerTabBar {...props} />}
         screenOptions={{ headerShown: false, lazy: true, freezeOnBlur: true, animation: "none" }}
       >
-        {/* The roots are typed against the stack today; the switch PR moves them to composite props. */}
-        <Tab.Screen name="home" component={HomeScreen as ComponentType<any>} />
-        <Tab.Screen name="adopt" component={AdoptScreen as ComponentType<any>} />
-        <Tab.Screen name="kawanggawa" component={KawangGawaScreen as ComponentType<any>} />
-        <Tab.Screen name="profile" component={ProfileScreen as ComponentType<any>} />
+        <Tab.Screen name="home" component={HomeScreen} />
+        <Tab.Screen name="adopt" component={AdoptScreen} />
+        <Tab.Screen name="kawanggawa" component={KawangGawaScreen} />
+        <Tab.Screen name="profile" component={ProfileScreen} />
       </Tab.Navigator>
     </ShelterReturnContext.Provider>
   );

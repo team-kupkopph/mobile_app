@@ -18,6 +18,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { notificationTarget } from "../notifications";
 import { registerPushToken } from "../push";
+import { openOwnerTab, ownerTabKeyForRoute } from "../appTabs";
 import { openShelterTab, shelterTabKeyForRoute } from "../shelterTabs";
 
 // A notification arriving while the app is open should be visible but not disruptive — the
@@ -92,6 +93,10 @@ export function PushBridge({ navRef }: { navRef: any }) {
       // SQ5 · a shelter tab is entered through the one helper, not by name (the switch PR makes it a nested navigate).
       const key = shelterTabKeyForRoute(screen);
       if (key) { openShelterTab(navRef, key); return; }
+      // SQ5 follow-up · same for a member tab (a volunteer notification opens the Kawang-Gawa hub): a root-level
+      // `navigate("kawanggawa")` does not reach a screen inside a tab navigator.
+      const ownerKey = ownerTabKeyForRoute(screen);
+      if (ownerKey) { openOwnerTab(navRef, ownerKey, Object.keys(params).length ? params : undefined); return; }
       navRef.navigate(screen, Object.keys(params).length ? params : undefined);
     }
 

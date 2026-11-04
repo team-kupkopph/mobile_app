@@ -17,3 +17,30 @@ appId: ph.kupkop.app
     visible:
       id: "screen.profile"
     timeout: 20000
+
+# SQ5 follow-up · the member shell is ONE tab navigator, so every tab is reachable from every other and a root has nothing
+# beneath it. Visit the rest, ending on Home...
+- tapOn:
+    id: "tab.adopt"
+- extendedWaitUntil:
+    visible:
+      id: "screen.adopt"
+    timeout: 20000
+- tapOn:
+    id: "tab.volunteer"
+- extendedWaitUntil:
+    visible:
+      id: "screen.kawanggawa"
+    timeout: 20000
+
+# ...then the iOS back swipe on a root. Before the navigator it popped to whichever tab came before (here: Adopt). Now there is
+# nothing to pop: the screen must not change.
+- swipe:
+    start: "1%, 50%"
+    end: "80%, 50%"
+- assertVisible:
+    id: "screen.kawanggawa"
+- tapOn:
+    id: "tab.home"
+- assertVisible:
+    id: "screen.home"

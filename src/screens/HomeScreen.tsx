@@ -4,7 +4,6 @@
 // routes to locationPicker (M5) and reads the cached city from AuthContext (no GET /me/location
 // exists — see AuthContext.tsx). The "Saw a stray?" hero is still static — its destination
 // lands in a later sprint.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -20,11 +19,10 @@ import { loadState } from "../net";
 import { Listing, Me, MyReport, RescueCaseSummary } from "../api/types";
 import { useAuth } from "../auth/AuthContext";
 import { cityToCache } from "../auth/cityFromMe";
-import { OwnerTabs } from "../components/OwnerTabs";
 import { CheckIcon, ClockIcon } from "../components/AppIcons";
 import { NotificationBell } from "../components/NotificationBell";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
-import { RootStackParamList } from "../navigation/types";
+import { OwnerTabScreenProps, RootStackParamList } from "../navigation/types";
 import { pickSpotlight } from "../sagip";
 import { MySignupItem, shiftHeadline, shiftTimeRange, todayShift } from "../volunteer";
 import { HelpShelter, WAYS_TO_HELP_EMPTY } from "../waysToHelp";
@@ -34,9 +32,10 @@ import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, spacing, typography } from "../theme";
 import { enterShelterShell } from "../shelterTabs";
 import { openOwnerTab } from "../appTabs";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 
-type Props = NativeStackScreenProps<RootStackParamList, "home">;
+type Props = OwnerTabScreenProps<"home">;
 
 // Redesigned 2026-09-09 · Home used to carry a flat row of four teal text links AND a
 // four-tile quick-action grid, and every tile in that grid was already reachable somewhere
@@ -119,7 +118,8 @@ export function HomeScreen({ navigation, route }: Props) {
       // US-X1: the right shell for who you are. A returning shelter account lands here (the
       // single stack's initialRouteName is always "home") — redirect it to the shelter shell.
       if (r.data.account_type === "shelter") {
-        enterShelterShell(navigation);
+        // The tab screen's own `navigation.reset` would reset the tab navigator; the shelter shell is a root-stack route.
+        enterShelterShell(navigation.getParent<NativeStackNavigationProp<RootStackParamList>>()!);
         return;
       }
       setMe(r.data);
@@ -509,7 +509,6 @@ export function HomeScreen({ navigation, route }: Props) {
         {pendingMember && <Text style={styles.lockedNote}>Claiming rescues unlocks once you're verified.</Text>}
       </ScrollView>
 
-      <OwnerTabs active="home" />
     </View>
   );
 }

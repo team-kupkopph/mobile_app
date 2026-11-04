@@ -1,7 +1,6 @@
 // US-A3 · the Adopt tab — browse public listings. GET /listings?city=&species=&page=.
 // Reference: design/mobile-v3/Adopt.dc.html (the V3 deck; screens/user/screen-adopt.png was the
 // V2 list it replaced). Replaces the M8 placeholder.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -17,8 +16,7 @@ import { LoadStateView } from "../components/LoadStateView";
 import { StaleBanner } from "../components/StaleBanner";
 import { isOffline } from "../net";
 import { useAuth } from "../auth/AuthContext";
-import { OwnerTabs } from "../components/OwnerTabs";
-import { RootStackParamList } from "../navigation/types";
+import { OwnerTabScreenProps } from "../navigation/types";
 import { feedState, useCachedFeed } from "../useCachedFeed";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
@@ -32,7 +30,7 @@ const SPECIES: Array<{ key: string; label: string }> = [
   { key: "cat", label: "Cats" }, { key: "other", label: "Other" }
 ];
 
-type Props = NativeStackScreenProps<RootStackParamList, "adopt">;
+type Props = OwnerTabScreenProps<"adopt">;
 
 export function AdoptScreen({ navigation }: Props) {
   const api = useApi();
@@ -162,7 +160,6 @@ export function AdoptScreen({ navigation }: Props) {
       </>
       )}
 
-      <OwnerTabs active="adopt" />
     </View>
   );
 }

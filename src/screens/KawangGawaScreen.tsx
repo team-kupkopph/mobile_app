@@ -22,7 +22,6 @@
 // ⚠️ WHAT THE DATA WILL NOT SUPPORT. `_shift_repr` carries no location, description or photo
 // (volunteer/views.py), so "shelters near you", distance and imagery are not available here
 // without backend work. Everything below is derived from the two endpoints that already exist.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -34,12 +33,8 @@ import { StaleBanner } from "../components/StaleBanner";
 import { MyShifts } from "../components/volunteer/MyShifts";
 import { isOffline, loadState } from "../net";
 import { VolunteerIcon } from "../components/AppIcons";
-import { GuestTabs } from "../components/GuestTabs";
-import { OwnerTabs } from "../components/OwnerTabs";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { SignupWall, SignupWallAction } from "../components/SignupWall";
-import { setIntent } from "../guestIntent";
-import { RootStackParamList } from "../navigation/types";
+import { OwnerTabScreenProps } from "../navigation/types";
 import { TAP_SLOP } from "../touch";
 import { feedState, useCachedFeed } from "../useCachedFeed";
 import {
@@ -57,7 +52,9 @@ const FILTERS: Array<{ key: "" | ShiftType; label: string }> = [
   ...SHIFT_TYPES.map((t) => ({ key: t, label: shiftTypeLabel(t) }))
 ];
 
-type Props = NativeStackScreenProps<RootStackParamList, "kawanggawa">;
+// One component, two parents: a tab of `ownerTabs` for a member and of `guestTabs` for a visitor (SQ5 follow-up). The props
+// both share are the tab's `route.params.tab` and the root stack above it.
+type Props = OwnerTabScreenProps<"kawanggawa">;
 
 export function KawangGawaScreen({ navigation, route }: Props) {
   // At Dynamic Type AX3 and up a shift card's icon | copy row and its title | slots chip row cannot share a line, so they stack and wrap.
@@ -66,7 +63,7 @@ export function KawangGawaScreen({ navigation, route }: Props) {
   const { tokens, city, isReady } = useAuth();
   // G13 · guests may browse the hub read-only: no /me/signups call, no impact strip, no
   // My shifts segment (there is nothing of theirs to show) — Browse only, and the tab bar
-  // is the guest one rather than OwnerTabs.
+  // is the guest navigator's (it draws the bar, and hosts the sign-up wall for Adopt and You).
   const isGuest = tokens === null;
   const { rows: shifts, res, stale, load: loadFeed } =
     useCachedFeed<BrowseShift>(api, (d) => d?.results ?? []);
@@ -85,10 +82,6 @@ export function KawangGawaScreen({ navigation, route }: Props) {
   // they folded into this tab — lets LoadStateView tell offline/error/gone apart on the My
   // shifts segment, the same way those screens' load states did.
   const [mineRes, setMineRes] = useState<{ ok: boolean; status: number } | null>(null);
-
-  // G13 · Adopt/You are still gated for a guest browsing the hub — same wall the guest Home
-  // uses for those two tabs.
-  const [wall, setWall] = useState<SignupWallAction | null>(null);
 
   const [tabIndex, setTabIndex] = useState(route.params?.tab === "mine" ? 1 : 0);
   // Browse sub-toggle (2026-09-30, owner request): view === 0 is the shipped scrolling list;
@@ -367,21 +360,6 @@ export function KawangGawaScreen({ navigation, route }: Props) {
         )}
       </ScrollView>
 
-      {isGuest ? (
-        <GuestTabs active="volunteer" onGated={setWall} />
-      ) : (
-        <OwnerTabs active="volunteer" />
-      )}
-
-      {isGuest && (
-        <SignupWall
-          visible={!!wall}
-          action={wall ?? "account"}
-          onCreateAccount={() => { if (wall) setIntent(wall); setWall(null); navigation.navigate("accountType"); }}
-          onLogin={() => { setWall(null); navigation.navigate("signin"); }}
-          onDismiss={() => setWall(null)}
-        />
-      )}
     </View>
   );
 }

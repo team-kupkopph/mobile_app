@@ -108,12 +108,8 @@ export type RootStackParamList = {
   resetPassword: { email: string; code: string };
   passwordChanged: undefined;
   support: undefined;
-  home: { justSignedUp?: boolean } | undefined;
-  homeGuest: undefined;
-  adopt: undefined;
-  // Task 10 · Settings → Edit profile sends the user BACK to this tab with `editing`, which opens the
-  // inline name editor (React Navigation 7's `navigate` would push a second copy — the old loop).
-  profile: { editing?: boolean } | undefined;
+  // SQ5 follow-up · `home`, `adopt`, `kawanggawa`, `profile` and `homeGuest` are tabs now: see OwnerTabParamList and
+  // GuestTabParamList above. (Settings → Edit profile pops back to the You tab with `editing`: `popToOwnerTab`.)
   locationPicker: undefined;
   memberUpgrade: undefined;
   memberVerify: undefined;
@@ -253,11 +249,8 @@ export type RootStackParamList = {
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
   reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message" | "shift"; targetId: string };
-  // US-V8 — Kawang-Gawa volunteer flow (Track V, Sprint 5). `kawanggawa` is the real hub
-  // (Task 3). Task 5 (K30/G9) folded the standalone schedule and history screens into one
-  // segmented Browse | My shifts hub — `tab` picks the initial segment (defaults to
-  // "browse"); omitted params are the same as `{ tab: "browse" }`.
-  kawanggawa: { tab?: "browse" | "mine" } | undefined;
+  // US-V8 — Kawang-Gawa volunteer flow (Track V, Sprint 5). The hub `kawanggawa` is a tab of both shells now
+  // (Task 5 folded the schedule and history into one segmented Browse | My shifts hub; `tab` picks the initial segment).
   kawanggawaDetail: { shiftId: string };
   waiver: undefined; // the D-S5-1 placeholder
   kawanggawaRequested: undefined;

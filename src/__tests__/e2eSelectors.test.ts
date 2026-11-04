@@ -107,7 +107,7 @@ describe("the flows reference every screen anchor they need", () => {
     // the anchor and the Stack.Screen name makes a failing flow point at the wrong screen.
     // SQ5 · the five shelter roots are registered in the tab navigator, not the root stack; their anchors are unchanged.
     const routes = new Set(
-      ["RootNavigator.tsx", "ShelterTabNavigator.tsx"].flatMap((f) =>
+      ["RootNavigator.tsx", "ShelterTabNavigator.tsx", "OwnerTabNavigator.tsx", "GuestTabNavigator.tsx"].flatMap((f) =>
         [...readFileSync(join(SRC, "navigation", f), "utf8").matchAll(/name="([a-zA-Z]+)"/g)].map((m) => m[1])));
     const anchors = [...LITERALS].filter((id) => id.startsWith("screen."));
     expect(anchors.length).toBeGreaterThan(10);

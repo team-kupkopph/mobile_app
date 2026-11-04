@@ -15,7 +15,7 @@ describe("callers outside the tab roots", () => {
   const callers: [string, RegExp][] = [
     ["screens/NotificationsScreen.tsx", /openShelterTab\(navigation, "requests"\)/],
     ["screens/PlaceAcceptedScreen.tsx", /openShelterTab\(navigation, "animals"\)/],
-    ["screens/HomeScreen.tsx", /enterShelterShell\(navigation\)/],
+    ["screens/HomeScreen.tsx", /enterShelterShell\(navigation\.getParent/],
     ["screens/ShelterVerifyScreen.tsx", /enterShelterShell\(navigation\)/],
     ["screens/ShelterVerifyNgoScreen.tsx", /enterShelterShell\(navigation\)/],
     ["push/PushBridge.tsx", /openShelterTab\(navRef, key\)/]

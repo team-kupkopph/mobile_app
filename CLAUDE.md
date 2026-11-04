@@ -91,12 +91,11 @@ than restyling from scratch when touching that flow.
 
 ### Components (`src/components/`)
 
-- `OwnerTabs.tsx` — the 4-tab floating bottom bar (Home/Adopt/Volunteer/You) used by owner-shell
-  screens. Not a React Navigation tab navigator: this is a single native-stack app, so each screen
-  renders this bar itself and tab presses just call `navigate()`.
-- `ShelterTabs.tsx` — the shelter-side equivalent (Home/Animals/Donate/Requests/You). Currently
-  only referenced by the orphaned mockups below, not by any wired-in screen — relevant if you're
-  working on this branch's shelter dashboard.
+- `OwnerTabs.tsx` / `GuestTabs.tsx` / `ShelterTabs.tsx` — the floating bottom bars of the three shells (owner: Home/Adopt/Volunteer/You;
+  guest: the same four, with Adopt and You opening the sign-up wall; shelter: Home/Animals/Donate/Requests/You). Each shell is
+  ONE `bottom-tabs` navigator (`src/navigation/OwnerTabNavigator.tsx`, `GuestTabNavigator.tsx`, `ShelterTabNavigator.tsx`, the
+  `ownerTabs` / `guestTabs` / `shelterTabs` routes of the root stack) that draws the bar once; no screen renders a bar, and a bar
+  only reports which item was pressed. Reach a shell only through `src/appTabs.ts` and `src/shelterTabs.ts`.
 - `SignupWall.tsx` — the modal signup gate shown when a guest taps a gated action. Copy is keyed
   by `GuestIntentAction`. This is the signup gate only; the separate "Verified Member" gate
   (`MemberUpgradeScreen`) is a different, already-built flow — don't conflate the two.
