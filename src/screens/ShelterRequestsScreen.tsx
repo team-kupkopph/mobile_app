@@ -24,8 +24,7 @@ import { shelterTabNavigate } from "../shelterTabs";
 import { Card, Chip, SegmentedControl } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import {
-  DEFAULT_STATUS_TONE, REQUEST_KIND_TILE, REQUEST_STATUS_TONE, SEGMENT_KIND, requestCountLine, requestRoute,
-  requestsEmptyCopy
+  REQUEST_KIND_TILE, SEGMENT_KIND, requestChip, requestCountLine, requestRoute, requestSubtitle, requestsEmptyCopy
 } from "../shelterRequests";
 import { TAP_SLOP } from "../touch";
 import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
@@ -109,7 +108,7 @@ export function ShelterRequestsScreen({ navigation }: Props) {
           />
         ) : (
           (requests ?? []).map((item) => {
-            const chip = REQUEST_STATUS_TONE[item.status] ?? DEFAULT_STATUS_TONE;
+            const chip = requestChip(item);
             const tile = REQUEST_KIND_TILE[item.kind] ?? REQUEST_KIND_TILE.adoption;
             // Branch on the route name rather than spreading `route.params` into a generic
             // `navigate` call — same shape as NotificationsScreen's own target dispatch —
@@ -150,7 +149,7 @@ export function ShelterRequestsScreen({ navigation }: Props) {
                   </View>
                   <View style={[styles.rowCopy, large && styles.rowCopyLarge]}>
                     <Text style={styles.rowTitle} numberOfLines={large ? 3 : 1}>{item.title}</Text>
-                    <Text style={styles.rowSub} numberOfLines={large ? 3 : 1}>{item.subtitle}</Text>
+                    <Text style={styles.rowSub} numberOfLines={large ? 3 : 1}>{requestSubtitle(item)}</Text>
                   </View>
                   <View style={[styles.rowSide, large && styles.rowSideLarge]}>
                     <Chip tone={chip.tone} dot={false} label={chip.label} />

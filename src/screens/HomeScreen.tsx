@@ -132,8 +132,9 @@ export function HomeScreen({ navigation, route }: Props) {
       });
       // Refetched on every focus, including right after leaving NotificationsScreen (which
       // marks everything read on open) — so the dot clears the moment you come back.
-      api.get("/me/notifications").then((r) => {
-        if (r.ok) setHasUnread((r.data?.notifications ?? []).some((n: { read: boolean }) => !n.read));
+      // SH12 · one count, not the whole feed.
+      api.get("/me/notifications/unread-count").then((r) => {
+        if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
       });
       // The spotlight's two sources (see pickSpotlight). Home was already making four
       // requests per focus and these make six — the cost of the card saying something true

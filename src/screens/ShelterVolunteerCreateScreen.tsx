@@ -93,7 +93,7 @@ export function ShelterVolunteerCreateScreen({ navigation, route }: Props) {
     if (res.status === 422 && err?.code === "bad_window") return setErrors({ when: "End must be after start." });
     if (res.status === 422 && err?.code === "location_required") {
       setForm(revealLocationOnError(form));
-      setErrors({ location: "Add your shelter's address in Organization details, or enter one here." });
+      setErrors({ location: "Add your shelter's address in Organization profile, or enter one here." });
       return;
     }
     if (res.status === 400 && err?.field === "title") return setErrors({ title: err.message });

@@ -246,6 +246,8 @@ export type PetDetail = {
 // coming up next. `next_shift` is null when nothing open/full is scheduled ahead.
 export type ShelterDashboardVolunteer = {
   pending_requests: number;
+  // SH12 · open and full shifts that have not ended (You's "n active"). Optional: an older server omits it.
+  active_shifts?: number;
   attendance_due: number;
   next_shift: { shift_id: string; title: string; starts_at: string } | null;
 };
@@ -294,4 +296,9 @@ export type ShelterRequest = {
   status: ShelterRequestStatus;
   created_at: string;
   target: { route: string; id: string };
+  // SH15 / SQ4 · the person on the other side is suspended: shown with a chip, forward actions refused.
+  counterparty_suspended?: boolean;
+  // SH18 · volunteer rows only: the raw shift start and title, formatted on the phone.
+  shift_starts_at?: string;
+  shift_title?: string;
 };

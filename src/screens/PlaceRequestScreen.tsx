@@ -96,6 +96,8 @@ export function PlaceRequestScreen({ navigation, route }: Props) {
       code === "already_decided" ? "This placement has already been decided."
       : code === "not_your_placement" ? "This placement isn't addressed to you."
       : code === "not_a_placement" ? "This isn't a direct placement."
+      // SQ4 · the rescuer offering it is suspended: the offer can be declined, not taken.
+      : code === "counterparty_suspended" ? "This rescuer's account is suspended. You can still decline."
       : "Couldn't process that right now. Try again."
     );
     // C14 · already_decided can mean the rescuer took the offer back while this was open:

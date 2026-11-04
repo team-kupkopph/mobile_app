@@ -78,6 +78,8 @@ export function ApplicantScreen({ navigation, route }: Props) {
         setNotice(`We've asked ${name} to get verified.`);
       } else if (kind === "changed") {
         setNotice(CHANGED_NOTE);
+      } else if (kind === "suspended") {
+        setNotice(`${name}'s account is suspended. You can still decline.`);
       } else {
         Alert.alert("Couldn't do that", "Try again.");
       }
