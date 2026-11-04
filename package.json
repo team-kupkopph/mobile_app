@@ -18,7 +18,7 @@
     "testPathIgnorePatterns": ["/node_modules/", "<rootDir>/src/__tests__/v3Scope.ts"]
   },
   "dependencies": {
-    "@babel/runtime": "^7.29.7",
+    "@babel/runtime": "^7.29.10",
     "@expo/metro-runtime": "~6.1.2",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/netinfo": "11.4.1",
