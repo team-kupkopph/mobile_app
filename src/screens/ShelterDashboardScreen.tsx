@@ -109,6 +109,10 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   const badge = id.tier === "community_rescue" ? "Verified Rescue" : "Verified Shelter";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
 
+  // W5 (shelter home test plan) · the foot card's Continue goes where the banner goes, so it hides when that does
+  // nothing: never a dead tap while the tier, and so the document set, is unknown.
+  const footContinue = !(state === "incomplete" && !id.tier);
+
   function onBannerPress() {
     // US-D4 audit (2026-08-24) · was a dead tap for "pending" — the banner's own CTA
     // reads "Status ›" but nothing navigated, same shape as the dead Google-signup and
@@ -329,9 +333,11 @@ export function ShelterDashboardScreen({ navigation }: Props) {
                 {state === "pending" ? "They go live the moment you're approved." : state === "rejected" ? "Fix the flagged files to get approved." : "Upload your documents to get approved."}
               </Text>
             </View>
-            <TouchableOpacity testID="btn.shelterDashboard.continueVerify" hitSlop={TAP_SLOP} activeOpacity={0.8} onPress={onBannerPress}>
-              <Text style={styles.footCta}>{state === "pending" ? "Start ›" : "Continue ›"}</Text>
-            </TouchableOpacity>
+            {footContinue ? (
+              <TouchableOpacity testID="btn.shelterDashboard.continueVerify" hitSlop={TAP_SLOP} activeOpacity={0.8} onPress={onBannerPress}>
+                <Text style={styles.footCta}>{state === "pending" ? "Start ›" : "Continue ›"}</Text>
+              </TouchableOpacity>
+            ) : null}
           </Card>
         ) : null}
       </ScrollView>

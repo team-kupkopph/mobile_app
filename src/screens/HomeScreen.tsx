@@ -108,49 +108,51 @@ export function HomeScreen({ navigation, route }: Props) {
   const [stories, setStories] = useState<StoryCard[]>([]);
   const [storiesRes, setStoriesRes] = useState<{ ok: boolean; status: number } | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      api.get("/me").then((r) => {
-        if (!r.ok) return;
-        // US-X1: the right shell for who you are. A returning shelter account lands here (the
-        // single stack's initialRouteName is always "home") — redirect it to the shelter shell.
-        if (r.data.account_type === "shelter") {
-          navigation.reset({ index: 0, routes: [{ name: "shelterDashboard" }] });
-          return;
-        }
-        setMe(r.data);
-        // G15 · shelter accounts already returned above (via the reset); admin accounts have
-        // no shifts to volunteer for. Only a personal account's own signups are relevant here,
-        // and the brief is explicit that this must not fire for shelter/business accounts.
-        if (r.data.account_type === "personal") {
-          api.get("/me/signups").then((sr) => {
-            setTodaySignup(sr.ok ? todayShift(sr.data) : null);
-          });
-        } else {
-          setTodaySignup(null);
-        }
-      });
-      // Refetched on every focus, including right after leaving NotificationsScreen (which
-      // marks everything read on open) — so the dot clears the moment you come back.
-      // SH12 · one count, not the whole feed.
-      api.get("/me/notifications/unread-count").then((r) => {
-        if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
-      });
-      // The spotlight's two sources (see pickSpotlight). Home was already making four
-      // requests per focus and these make six — the cost of the card saying something true
-      // rather than being a static list. There is no summary endpoint to collapse them into.
-      api.get("/me/rescues").then((r) => {
-        if (r.ok) setMyCases(r.data?.cases ?? []);
-      });
-      api.get("/me/reports").then((r) => {
-        // `results`, not `reports` — /me/reports and /reports/map disagree on the key
-        // (views.py:430 vs :417), and MyReportsScreen reads `results`. Getting this wrong
-        // is silent: the spotlight just never appears.
-        if (r.ok) setMyReports(r.data?.results ?? []);
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
-    }, [])
-  );
+  // F8 (shelter home test plan) · named so focus AND the offline panel's "Try again" run it. A shelter that opened the
+  // app offline lands here (the stack's initial route is "home"); the redirect below waits for /me, so a retry that
+  // skipped it left the shelter in the owner shell after the connection came back.
+  const loadAccount = useCallback(() => {
+    api.get("/me").then((r) => {
+      if (!r.ok) return;
+      // US-X1: the right shell for who you are. A returning shelter account lands here (the
+      // single stack's initialRouteName is always "home") — redirect it to the shelter shell.
+      if (r.data.account_type === "shelter") {
+        navigation.reset({ index: 0, routes: [{ name: "shelterDashboard" }] });
+        return;
+      }
+      setMe(r.data);
+      // G15 · shelter accounts already returned above (via the reset); admin accounts have
+      // no shifts to volunteer for. Only a personal account's own signups are relevant here,
+      // and the brief is explicit that this must not fire for shelter/business accounts.
+      if (r.data.account_type === "personal") {
+        api.get("/me/signups").then((sr) => {
+          setTodaySignup(sr.ok ? todayShift(sr.data) : null);
+        });
+      } else {
+        setTodaySignup(null);
+      }
+    });
+    // Refetched on every focus, including right after leaving NotificationsScreen (which
+    // marks everything read on open) — so the dot clears the moment you come back.
+    // SH12 · one count, not the whole feed.
+    api.get("/me/notifications/unread-count").then((r) => {
+      if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
+    });
+    // The spotlight's two sources (see pickSpotlight). Home was already making four
+    // requests per focus and these make six — the cost of the card saying something true
+    // rather than being a static list. There is no summary endpoint to collapse them into.
+    api.get("/me/rescues").then((r) => {
+      if (r.ok) setMyCases(r.data?.cases ?? []);
+    });
+    api.get("/me/reports").then((r) => {
+      // `results`, not `reports` — /me/reports and /reports/map disagree on the key
+      // (views.py:430 vs :417), and MyReportsScreen reads `results`. Getting this wrong
+      // is silent: the spotlight just never appears.
+      if (r.ok) setMyReports(r.data?.results ?? []);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
+  }, []);
+  useFocusEffect(loadAccount);
 
   // The two CITY-SCOPED panels, split out of the account-scoped effect above and keyed on
   // `city`.
@@ -211,9 +213,10 @@ export function HomeScreen({ navigation, route }: Props) {
 
   /** One retry for the whole screen, for the one-notice case below. */
   const reloadPanels = useCallback(() => {
+    loadAccount();
     loadCityPanels();
     loadStories();
-  }, [loadCityPanels, loadStories]);
+  }, [loadAccount, loadCityPanels, loadStories]);
 
   /**
    * ⚠️ PER-PANEL STATE — the US-R2 rule this screen's own comment says it follows, now
