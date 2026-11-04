@@ -201,7 +201,7 @@ describe("settingsGroups", () => {
 
     const edit = groups.flatMap((g) => g.rows).find((r) => r.key === "editProfile")!;
 
-    expect(edit.action).toEqual({ type: "popTo", name: "profile", params: { editing: true } });
+    expect(edit.action).toEqual({ type: "popToOwnerTab", key: "profile", params: { editing: true } });
   });
 
   it("Privacy & terms exists ONLY once the policy URL does (launch gate 4)", () => {
@@ -272,11 +272,14 @@ describe("delete copy (AS2)", () => {
 describe("blockerRoute", () => {
   it.each([
     ["rescue_claim", "myRescues"],
-    ["volunteer_shift", "kawanggawa"],
     ["adoption_inquiry", "myInquiries"],
     ["hosted_shift", "shelterVolunteer"],
   ])("%s leads to %s", (kind, name) => {
-    expect(blockerRoute(kind)?.name).toBe(name);
+    expect(blockerRoute(kind)).toEqual({ name });
+  });
+
+  it("volunteer_shift leads to the member's Volunteer tab on My shifts (SQ5 follow-up: a tab, not a stack route)", () => {
+    expect(blockerRoute("volunteer_shift")).toEqual({ ownerTab: "volunteer", params: { tab: "mine" } });
   });
 
   it("an unknown kind is not tappable rather than a dead tap", () => {
@@ -315,7 +318,7 @@ describe("the wiring", () => {
 
   it("Settings reaches the profile with popTo, never navigate — the loop must stay gone", () => {
     const src = read("screens", "SettingsScreen.tsx");
-    expect(src).toContain("popTo(");
+    expect(src).toContain("popToOwnerTab(");
     expect(src).not.toMatch(/navigate\(\s*"profile"/);
   });
 

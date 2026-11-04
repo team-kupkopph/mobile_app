@@ -99,6 +99,7 @@ import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen"
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
 import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
+import { OWNER_SHELL_ROUTE, enterGuestShell } from "../appTabs";
 import { GuestTabNavigator } from "./GuestTabNavigator";
 import { OwnerTabNavigator } from "./OwnerTabNavigator";
 import { ShelterTabNavigator } from "./ShelterTabNavigator";
@@ -126,7 +127,7 @@ export function RootNavigator() {
   // user straight to the app stack the instant setTokens() resolves, stranding signupSuccess.
   // `initialRouteName` still respects a returning, already-authenticated user.
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={tokens ? "home" : "welcome"}>
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={tokens ? OWNER_SHELL_ROUTE : "welcome"}>
       <Stack.Screen name="welcome" component={WelcomeRoute} />
       <Stack.Screen name="accountType" component={AccountTypeScreen} />
       <Stack.Screen name="signup" component={SignupScreen} />
@@ -259,7 +260,7 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
     <WelcomeScreen
       onGetStarted={() => navigation.navigate("accountType")}
       onLogin={() => navigation.navigate("signin")}
-      onBrowseGuest={() => navigation.navigate("homeGuest")}
+      onBrowseGuest={() => enterGuestShell(navigation)}
       onSocial={onSocial}
       onDevMenu={() => navigation.navigate("dev")}
     />

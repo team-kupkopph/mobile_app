@@ -26,7 +26,7 @@ describe("SigninScreen · dev-seed chips (R2-F2)", () => {
   it("mints tokens via /auth/dev/seed_tokens and lands on home — same path DevMenuScreen uses", () => {
     expect(src).toMatch(/api\.post\("\/auth\/dev\/seed_tokens", \{ email: seedEmail \}\)/);
     expect(src).toMatch(/setTokens\(\{ access: res\.data\.access, refresh: res\.data\.refresh \}\)/);
-    expect(src).toMatch(/navigation\.reset\(\{ index: 0, routes: \[\{ name: "home" \}\] \}\)/);
+    expect(src).toMatch(/enterOwnerShell\(navigation\)/);
   });
 
   it("surfaces a reachable-server error without disabling the chips", () => {

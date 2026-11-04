@@ -18,6 +18,7 @@ import { useAuth } from "../../auth/AuthContext";
 import { Button, Field, ScreenHeader, SegmentedControl } from "../../components/ui";
 import { RootStackParamList } from "../../navigation/types";
 import { colors, radii, spacing, typography } from "../../theme";
+import { enterOwnerShell } from "../../appTabs";
 
 /** The two seeded e2e fixture accounts — owner first, since most deferred rows are on the
  * owner journey. */
@@ -47,7 +48,7 @@ export function DevMenuScreen({ navigation }: Props) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
         // Single-stack nav doesn't auto-switch on token change — explicitly land on home,
         // same as SigninScreen/OtpScreen do after a real login.
-        navigation.reset({ index: 0, routes: [{ name: "home" }] });
+        enterOwnerShell(navigation);
         return;
       }
       if (res.status === 0) {

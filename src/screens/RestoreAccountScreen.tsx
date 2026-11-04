@@ -21,6 +21,7 @@ import { RootStackParamList } from "../navigation/types";
 import { daysLeft, purgeDateLabel, restoreErrorMessage } from "../restore";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { SimpleHeader, authColors } from "./AuthFormKit";
+import { enterOwnerShell } from "../appTabs";
 
 type Props = NativeStackScreenProps<RootStackParamList, "restoreAccount">;
 
@@ -53,7 +54,7 @@ export function RestoreAccountScreen({ navigation, route }: Props) {
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
         // Single-stack nav doesn't switch on a token change — land on home explicitly.
-        navigation.reset({ index: 0, routes: [{ name: "home" }] });
+        enterOwnerShell(navigation);
         return;
       }
       setExpired(res.status === 400);

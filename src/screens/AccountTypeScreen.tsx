@@ -25,6 +25,7 @@ import { RootStackParamList } from "../navigation/types";
 import { restoreOfferFrom } from "../restore";
 import { AuthHeader, authColors } from "./AuthFormKit";
 import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
+import { enterOwnerShell } from "../appTabs";
 
 const paw = require("../../assets/paw-white.png") as ImageSourcePropType;
 
@@ -69,7 +70,7 @@ export function AccountTypeScreen({ navigation, route }: Props) {
           // on the "You're in!" recap. The returning user still saw this chooser for one tap:
           // the backend decides identity on the same call that creates the account, so the
           // client cannot know it is talking to a returning user before it asks.
-          navigation.reset({ index: 0, routes: [{ name: "home" }] });
+          enterOwnerShell(navigation);
           return;
         }
         navigation.navigate("signupSuccess");

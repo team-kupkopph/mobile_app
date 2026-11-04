@@ -19,6 +19,7 @@ import { AuthHeader, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./Aut
 import { TAP_SLOP } from "../touch";
 import { maxFontScale, radii, spacing, typography } from "../theme";
 import { formatCountdown, resendOutcome } from "../otpResend";
+import { enterOwnerShell } from "../appTabs";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -112,7 +113,7 @@ export function OtpScreen({ navigation, route }: Props) {
         if (isUnverifiedResume) {
           // Resuming a signin, not finishing a fresh signup — land straight on home rather than
           // the "You're in!" recap. Single-stack nav doesn't auto-switch on token change.
-          navigation.reset({ index: 0, routes: [{ name: "home" }] });
+          enterOwnerShell(navigation);
         } else if (tier) {
           // Shelter signup continues into org setup (US-B2), not the owner "You're in!" recap.
           navigation.navigate("shelterSetup", { tier });

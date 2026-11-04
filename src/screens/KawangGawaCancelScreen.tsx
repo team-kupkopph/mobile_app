@@ -24,6 +24,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { CancelVariant, MySignupItem, MySignups, cancelVariant, lateCancelCopy } from "../volunteer";
 import { colors, maxFontScale, spacing, typography } from "../theme";
 import { Button, ScreenHeader } from "../components/ui";
+import { openOwnerTab } from "../appTabs";
 
 type Phase = "confirm" | "submitting" | "result";
 
@@ -147,7 +148,7 @@ export function KawangGawaCancelScreen({ navigation, route }: Props) {
 
           <Button
             label="Back to my shifts"
-            onPress={() => navigation.navigate("kawanggawa", { tab: "mine" })}
+            onPress={() => openOwnerTab(navigation, "volunteer", { tab: "mine" })}
             style={styles.primaryButton}
           />
         </ScrollView>

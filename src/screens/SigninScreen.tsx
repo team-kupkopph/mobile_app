@@ -17,6 +17,7 @@ import { SocialSignIn } from "../components/ui/SocialSignIn";
 import { colors, gradients, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
+import { enterOwnerShell } from "../appTabs";
 
 // Same gate as RootNavigator.tsx's IS_DEV_PROFILE / WelcomeScreen.tsx's triple-tap /
 // SignupWall.tsx's dev chip. In a production build the two chips below never render.
@@ -94,7 +95,7 @@ export function SigninScreen({ navigation }: Props) {
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
         // Single-stack nav doesn't auto-switch on token change — explicitly land on home.
-        navigation.reset({ index: 0, routes: [{ name: "home" }] });
+        enterOwnerShell(navigation);
         return;
       }
       if (res.status === 0) {
@@ -225,7 +226,7 @@ export function SigninScreen({ navigation }: Props) {
       const res = await api.post("/auth/dev/seed_tokens", { email: seedEmail });
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
-        navigation.reset({ index: 0, routes: [{ name: "home" }] });
+        enterOwnerShell(navigation);
         return;
       }
       if (res.status === 0) {

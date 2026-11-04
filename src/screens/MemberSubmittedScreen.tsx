@@ -11,6 +11,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, Card } from "../components/ui";
+import { enterOwnerShell } from "../appTabs";
 
 type Props = NativeStackScreenProps<RootStackParamList, "memberSubmitted">;
 
@@ -18,7 +19,7 @@ export function MemberSubmittedScreen({ navigation }: Props) {
   // At Dynamic Type AX3 and up the notice's icon cannot share a line with its text, so it stacks.
   const large = useLargeText();
   function backToHome() {
-    navigation.reset({ index: 0, routes: [{ name: "home" }] });
+    enterOwnerShell(navigation);
   }
 
   return (
