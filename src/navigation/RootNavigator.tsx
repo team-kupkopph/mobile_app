@@ -99,6 +99,8 @@ import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen"
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
 import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
+import { GuestTabNavigator } from "./GuestTabNavigator";
+import { OwnerTabNavigator } from "./OwnerTabNavigator";
 import { ShelterTabNavigator } from "./ShelterTabNavigator";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
@@ -159,6 +161,11 @@ export function RootNavigator() {
       {/* SQ5 · the shelter shell: ONE bottom-tab navigator holding Home, Animals, Donate, Requests and You. Reach it
           through `openShelterTab` / `enterShelterShell` (src/shelterTabs.ts), never by naming a tab here. */}
       <Stack.Screen name="shelterTabs" component={ShelterTabNavigator} />
+      {/* SQ5 follow-up · the personal member's shell and the signed-out visitor's shell as tab navigators. Registered, but
+          nothing navigates to them until the switch PR; until then `home`, `adopt`, `kawanggawa`, `profile` and `homeGuest`
+          below are the live routes. */}
+      <Stack.Screen name="ownerTabs" component={OwnerTabNavigator} />
+      <Stack.Screen name="guestTabs" component={GuestTabNavigator} />
       <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
       <Stack.Screen name="verifyResubmit" component={VerifyResubmitScreen} />
       <Stack.Screen name="reportStray" component={ReportStrayScreen} />

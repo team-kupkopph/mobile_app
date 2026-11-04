@@ -55,7 +55,35 @@ export type ShelterTabScreenProps<K extends keyof ShelterTabParamList> = Composi
   NativeStackScreenProps<RootStackParamList>
 >;
 
+// SQ5 follow-up (owner and guest shells; spec 2026-11-04-owner-guest-tab-navigator-design.md) · the tabs of the personal
+// member's shell and of the signed-out visitor's shell. Route names are the stack routes' names, kept so screen files and
+// `screen.*` ids do not move. `kawanggawa` is registered in BOTH (one component, two parents).
+export type OwnerTabParamList = {
+  home: { justSignedUp?: boolean } | undefined;
+  adopt: undefined;
+  kawanggawa: { tab?: "browse" | "mine" } | undefined;
+  profile: { editing?: boolean } | undefined;
+};
+
+export type GuestTabParamList = {
+  homeGuest: undefined;
+  kawanggawa: { tab?: "browse" | "mine" } | undefined;
+};
+
+export type OwnerTabScreenProps<K extends keyof OwnerTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<OwnerTabParamList, K>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type GuestTabScreenProps<K extends keyof GuestTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<GuestTabParamList, K>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
 export type RootStackParamList = {
+  // SQ5 follow-up · the two other shells. PR 1 registers them; nothing navigates to them until the switch PR.
+  ownerTabs: NavigatorScreenParams<OwnerTabParamList> | undefined;
+  guestTabs: NavigatorScreenParams<GuestTabParamList> | undefined;
   // SQ5 · the shelter shell: a bottom-tab navigator holding the five roots. The ONLY way in is `shelterTabs.ts`.
   shelterTabs: NavigatorScreenParams<ShelterTabParamList> | undefined;
   welcome: undefined;

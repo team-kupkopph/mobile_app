@@ -131,9 +131,19 @@ describe("every registered route can be navigated to", () => {
     expect(registered.length).toBeGreaterThan(50);
   });
 
+  // SQ5 follow-up PR 1 registers the owner and guest tab navigators before anything navigates to them (the callers move in
+  // PR 2, the switch is PR 3). This is the ONLY exemption, it names its own exit, and it fails the moment either route
+  // becomes reachable, so the switch PR cannot forget to delete it.
+  const PENDING_OWNER_GUEST = ["ownerTabs", "guestTabs"];
+
   it("has no orphan routes", () => {
     const reached = destinations();
-    expect(registered.filter((r) => !reached.has(r)).sort()).toEqual([]);
+    expect(registered.filter((r) => !reached.has(r) && !PENDING_OWNER_GUEST.includes(r)).sort()).toEqual([]);
+  });
+
+  it("the owner/guest exemption is still needed (delete it, and this test, in the switch PR)", () => {
+    const reached = destinations();
+    expect(PENDING_OWNER_GUEST.filter((r) => reached.has(r))).toEqual([]);
   });
 
 });

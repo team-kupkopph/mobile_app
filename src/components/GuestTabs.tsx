@@ -26,17 +26,22 @@ import { SignupWallAction } from "./SignupWall";
 
 export type GuestTab = "home" | "adopt" | "volunteer" | "profile";
 
-export function GuestTabs({ active, onGated }: { active: GuestTab; onGated: (action: SignupWallAction) => void }) {
+// `onTabPress` (SQ5 follow-up): when the guest tab navigator draws this bar it decides what a press does (a real tab, or the
+// wall for Adopt and You), so the bar only reports the key. Without it (every screen today) a press is what it always was
+// and `onGated` is required.
+type GuestTabsProps = { active: GuestTab; onGated?: (action: SignupWallAction) => void; onTabPress?: (tab: GuestTab) => void };
+
+export function GuestTabs({ active, onGated, onTabPress }: GuestTabsProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const items: TabBarItem[] = [
     // TabBar itself swallows a press on the already-active tab, so this only fires when Home
     // isn't the current screen (i.e. from the volunteer hub).
-    { key: "home", label: "Home", testID: "tab.guest.home", icon: (c, s) => <HomeIcon color={c} size={s} />, onPress: () => navigation.navigate("homeGuest") },
-    { key: "adopt", label: "Adopt", testID: "tab.guest.adopt", icon: (c, s) => <AdoptIcon color={c} size={s} />, onPress: () => onGated("adopt") },
+    { key: "home", label: "Home", testID: "tab.guest.home", icon: (c, s) => <HomeIcon color={c} size={s} />, onPress: () => (onTabPress ? onTabPress("home") : navigation.navigate("homeGuest")) },
+    { key: "adopt", label: "Adopt", testID: "tab.guest.adopt", icon: (c, s) => <AdoptIcon color={c} size={s} />, onPress: () => (onTabPress ? onTabPress("adopt") : onGated?.("adopt")) },
     // G13: browsing is allowed, so this tab now opens the hub instead of the wall.
-    { key: "volunteer", label: "Volunteer", testID: "tab.guest.volunteer", icon: (c, s) => <VolunteerIcon color={c} size={s} />, onPress: () => navigation.navigate("kawanggawa", { tab: "browse" }) },
-    { key: "profile", label: "You", testID: "tab.guest.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: () => onGated("account") }
+    { key: "volunteer", label: "Volunteer", testID: "tab.guest.volunteer", icon: (c, s) => <VolunteerIcon color={c} size={s} />, onPress: () => (onTabPress ? onTabPress("volunteer") : navigation.navigate("kawanggawa", { tab: "browse" })) },
+    { key: "profile", label: "You", testID: "tab.guest.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: () => (onTabPress ? onTabPress("profile") : onGated?.("account")) }
   ];
 
   return <TabBar items={items} active={active} />;
