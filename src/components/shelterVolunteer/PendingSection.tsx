@@ -17,17 +17,8 @@ import { useLargeText } from "../../useLargeText";
 import { Avatar, Button, Card, ChipTone, chipTones } from "../ui";
 import { useRequestActions } from "./useRequestActions";
 import { RosterSync, useReloadOnRosterChange } from "./rosterSync";
+import { timeAgo } from "../../timeAgo";
 
-function timeAgo(iso: string, nowMs: number = Date.now()): string {
-  const mins = Math.max(0, Math.floor((nowMs - new Date(iso).getTime()) / 60000));
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins} min ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
