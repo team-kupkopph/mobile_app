@@ -46,12 +46,7 @@ import { ProfileScreen } from "../screens/ProfileScreen";
 import { ResetOtpScreen } from "../screens/ResetOtpScreen";
 import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
 import { ShelterContactScreen } from "../screens/ShelterContactScreen";
-import { ShelterAnimalsScreen } from "../screens/ShelterAnimalsScreen";
-import { ShelterDashboardScreen } from "../screens/ShelterDashboardScreen";
-import { ShelterDonateScreen } from "../screens/ShelterDonateScreen";
 import { ShelterPhoneVerifyScreen } from "../screens/ShelterPhoneVerifyScreen";
-import { ShelterProfileScreen } from "../screens/ShelterProfileScreen";
-import { ShelterRequestsScreen } from "../screens/ShelterRequestsScreen";
 import { ShelterSetupScreen } from "../screens/ShelterSetupScreen";
 import { ShelterTierScreen } from "../screens/ShelterTierScreen";
 import { ShelterVolunteerActivityScreen } from "../screens/ShelterVolunteerActivityScreen";
@@ -161,14 +156,9 @@ export function RootNavigator() {
       <Stack.Screen name="shelterPhoneVerify" component={ShelterPhoneVerifyScreen} />
       <Stack.Screen name="shelterVerify" component={ShelterVerifyScreen} />
       <Stack.Screen name="shelterVerifyNgo" component={ShelterVerifyNgoScreen} />
-      {/* SQ5 · the tab navigator for the shelter shell. Registered, but nothing navigates to it until the switch PR;
-          until then the five stack routes below are the live ones. */}
+      {/* SQ5 · the shelter shell: ONE bottom-tab navigator holding Home, Animals, Donate, Requests and You. Reach it
+          through `openShelterTab` / `enterShelterShell` (src/shelterTabs.ts), never by naming a tab here. */}
       <Stack.Screen name="shelterTabs" component={ShelterTabNavigator} />
-      <Stack.Screen name="shelterDashboard" component={ShelterDashboardScreen} />
-      <Stack.Screen name="shelterProfile" component={ShelterProfileScreen} />
-      <Stack.Screen name="shelterAnimals" component={ShelterAnimalsScreen} />
-      <Stack.Screen name="shelterDonate" component={ShelterDonateScreen} />
-      <Stack.Screen name="shelterRequests" component={ShelterRequestsScreen} />
       <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
       <Stack.Screen name="verifyResubmit" component={VerifyResubmitScreen} />
       <Stack.Screen name="reportStray" component={ReportStrayScreen} />

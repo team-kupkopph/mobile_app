@@ -1,11 +1,11 @@
 /**
  * SQ5 PR 1 · the shelter tab navigator is registered and shaped as the spec says (2026-11-04-shelter-tab-navigator-design.md §5).
- * It is inert: nothing navigates to `shelterTabs` yet, and the five screens still draw their own bar as stack routes.
+ * (PR 3 made it live: the helpers' behaviour is pinned in shelterTabRoutes.test.ts.)
  */
 import { readFileSync } from "fs";
 import { join } from "path";
 
-import { SHELTER_TAB_ROUTE, enterShelterShell, openShelterTab } from "../shelterTabs";
+import { SHELTER_TAB_ROUTE } from "../shelterTabs";
 
 const read = (rel: string) => readFileSync(join(__dirname, "..", rel), "utf8");
 const nav = read("navigation/ShelterTabNavigator.tsx");
@@ -38,22 +38,5 @@ describe("ShelterTabNavigator", () => {
     expect(nav).toMatch(/addListener\("blur"/);
     expect(nav).toMatch(/addListener\("focus"/);
     expect(nav).toMatch(/ShelterReturnContext\.Provider value=\{returns\}/);
-  });
-});
-
-describe("inbound helpers (shims until the switch)", () => {
-  it("openShelterTab navigates to the tab's route", () => {
-    const calls: string[] = [];
-    for (const key of ["home", "animals", "donate", "requests", "profile"] as const) openShelterTab({ navigate: (r) => calls.push(r) }, key);
-    expect(calls).toEqual(["shelterDashboard", "shelterAnimals", "shelterDonate", "shelterRequests", "shelterProfile"]);
-  });
-  it("enterShelterShell resets onto Home by default and onto the named tab otherwise", () => {
-    const states: unknown[] = [];
-    enterShelterShell({ reset: (s) => states.push(s) });
-    enterShelterShell({ reset: (s) => states.push(s) }, "requests");
-    expect(states).toEqual([
-      { index: 0, routes: [{ name: "shelterDashboard" }] },
-      { index: 0, routes: [{ name: "shelterRequests" }] }
-    ]);
   });
 });

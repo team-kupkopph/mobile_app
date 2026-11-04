@@ -2,7 +2,6 @@
 // screen-shelter-dashboard-incomplete.png. GET /shelter/dashboard drives the amber banner + gates;
 // GET /shelter/profile carries the org name and tier (SH13; /me is the fallback). Everything is derived —
 // listings stay drafts, donations are locked, no badge — until the request is approved (Sprint 2).
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -17,9 +16,7 @@ import { loadState } from "../net";
 import { AlertIcon, CheckIcon, ClockIcon, LocationPinIcon, VolunteerIcon } from "../components/AppIcons";
 import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { ShelterTabs } from "../components/ShelterTabs";
-import { shelterTabNavigate } from "../shelterTabs";
-import { RootStackParamList } from "../navigation/types";
+import { ShelterTabScreenProps } from "../navigation/types";
 import { RESUME_SETUP, setupNeeded } from "../shelterSetup";
 import { rescueSummary, shelterIdentity, shelterShellState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
@@ -27,7 +24,7 @@ import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { Button, Card } from "../components/ui";
 
-type Props = NativeStackScreenProps<RootStackParamList, "shelterDashboard">;
+type Props = ShelterTabScreenProps<"shelterDashboard">;
 
 const BANNER: Record<"pending" | "rejected" | "incomplete", { title: string; l1: string; l2: string; cta: string }> = {
   pending: {
@@ -149,16 +146,6 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             body, and most LoadStateView call sites are inline placeholders in a ScrollView.
             See __tests__/safeAreaOnFailure.test.ts. */}
         <LoadStateView state={loadState(res)} onRetry={load} />
-        {/* ⚠️ THE TAB BAR BELONGS IN THIS BRANCH TOO. It does not depend on the data this
-            branch is missing, and it is this screen's only VISIBLE way out — the screen is
-            reached by a tab, so there is no back button either. Without it the offline state
-            is a dead end to look at: the iOS edge-swipe still pops the screen, which is why
-            this survived review and every automated check, but a person sees no exit. Found
-            on a real device during US-PF3 by someone who could not get past it. */}
-        <ShelterTabs
-          active="home"
-          onTabPress={(t) => shelterTabNavigate(navigation, t)}
-        />
       </View>
     );
   }
@@ -354,10 +341,6 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         ) : null}
       </ScrollView>
 
-      <ShelterTabs
-        active="home"
-        onTabPress={(t) => shelterTabNavigate(navigation, t)}
-      />
     </View>
   );
 }

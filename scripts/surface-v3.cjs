@@ -21,8 +21,9 @@ const { join } = require("node:path");
 
 const SCREENS_DIR = join(__dirname, "..", "src", "screens");
 const SHELTER_TABS = join(__dirname, "..", "src", "components", "ShelterTabs.tsx");
-// SH11 · the one tab-press helper every shelter bar calls, and its key -> route map.
+// SH11 · the key -> route map. SQ5 · the tab navigator's bar presses through it (no screen draws a bar any more).
 const SHELTER_TAB_HELPER = join(__dirname, "..", "src", "shelterTabs.ts");
+const SHELTER_TAB_NAVIGATOR = join(__dirname, "..", "src", "navigation", "ShelterTabNavigator.tsx");
 
 const HAS_BACKDROP = /<ScreenBackdrop\b/;
 const HAS_CARD = /<Card\b/;
@@ -42,18 +43,19 @@ function baseName(file) {
 }
 
 /**
- * A tab is "dead" if nothing routes it. ShelterTabs.tsx declares the full tab set. Since SH11 every bar presses
- * through `shelterTabNavigate`, so a key is live when the helper's map routes it (`key: "route"`) and some screen
- * calls the helper; a screen still on a hand-written chain counts if it compares against the key (`t === "<key>"`).
+ * A tab is "dead" if nothing routes it. ShelterTabs.tsx declares the full tab set. Since SQ5 the ONE bar is the tab
+ * navigator's, and it presses through the key -> route map (`SHELTER_TAB_ROUTE[key]`), so a key is live when that map
+ * routes it and the navigator uses the map. A key the map lacks, or a navigator that stops using it, makes tabs dead.
  */
-function findDeadTabs(screenFiles) {
+function findDeadTabs() {
   const tabsSource = readFileSync(SHELTER_TABS, "utf8");
   const keys = [...tabsSource.matchAll(TAB_KEY)].map((m) => m[1]);
-  const screensSource = screenFiles.map((f) => read(SCREENS_DIR, f)).join("\n");
+  // A scan that found nothing proves nothing: say so rather than report "no dead tabs".
+  if (keys.length === 0) throw new Error("surface-v3: found no tab keys in ShelterTabs.tsx");
   const helper = readFileSync(SHELTER_TAB_HELPER, "utf8");
-  const viaHelper = screensSource.includes("shelterTabNavigate(navigation, t)");
-  return keys.filter((key) => !screensSource.includes(`t === "${key}"`)
-    && !(viaHelper && new RegExp(`\\b${key}:\\s*"\\w+"`).test(helper)));
+  const navigator = readFileSync(SHELTER_TAB_NAVIGATOR, "utf8");
+  const pressesViaMap = navigator.includes("SHELTER_TAB_ROUTE[key]");
+  return keys.filter((key) => !(pressesViaMap && new RegExp(`\\b${key}:\\s*"\\w+"`).test(helper)));
 }
 
 function surfaceV3() {
@@ -63,7 +65,7 @@ function surfaceV3() {
   const backdrop = files.filter((f) => HAS_BACKDROP.test(read(SCREENS_DIR, f))).map(baseName);
   const cardUsers = files.filter((f) => HAS_CARD.test(read(SCREENS_DIR, f))).map(baseName);
   const elevationSpreaders = files.filter((f) => SPREADS_ELEVATION.test(read(SCREENS_DIR, f))).map(baseName);
-  const deadTabs = findDeadTabs(files);
+  const deadTabs = findDeadTabs();
 
   return { screens, backdrop, cardUsers, elevationSpreaders, deadTabs };
 }

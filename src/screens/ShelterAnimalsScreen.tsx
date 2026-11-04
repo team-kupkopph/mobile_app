@@ -4,20 +4,17 @@
 // plus drafts — is ListingsByStatus, shared with My listings (spec 2026-10-06 §3). The "+ List
 // an animal" CTA used to live on ShelterDashboardScreen; it lives here, next to the listings it
 // actually creates.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ListingsByStatus } from "../components/ListingsByStatus";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { ShelterTabs } from "../components/ShelterTabs";
-import { shelterTabNavigate } from "../shelterTabs";
 import { Button } from "../components/ui";
-import { RootStackParamList } from "../navigation/types";
+import { ShelterTabScreenProps } from "../navigation/types";
 import { draftRoute } from "../shelterAnimals";
 import { colors, maxFontScale, spacing, typography } from "../theme";
 
-type Props = NativeStackScreenProps<RootStackParamList, "shelterAnimals">;
+type Props = ShelterTabScreenProps<"shelterAnimals">;
 
 export function ShelterAnimalsScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
@@ -41,10 +38,6 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
         />
       </ScrollView>
 
-      <ShelterTabs
-        active="animals"
-        onTabPress={(t) => shelterTabNavigate(navigation, t)}
-      />
     </View>
   );
 }

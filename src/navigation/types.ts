@@ -1,4 +1,6 @@
-import type { NavigatorScreenParams } from "@react-navigation/native";
+import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import type { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ShelterTier } from "../api/types";
 import { SocialIdentity } from "../auth/socialAuth";
@@ -47,8 +49,14 @@ export type ShelterTabParamList = {
   shelterProfile: undefined;
 };
 
+/** A tab root's props: the tab navigator's own, plus the root stack above it (a tab pushes `applicant`, `listingForm`, …). */
+export type ShelterTabScreenProps<K extends keyof ShelterTabParamList> = CompositeScreenProps<
+  BottomTabScreenProps<ShelterTabParamList, K>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
 export type RootStackParamList = {
-  // SQ5 · PR 1 registers the container; nothing navigates to it until the switch PR.
+  // SQ5 · the shelter shell: a bottom-tab navigator holding the five roots. The ONLY way in is `shelterTabs.ts`.
   shelterTabs: NavigatorScreenParams<ShelterTabParamList> | undefined;
   welcome: undefined;
   // A social identity rides through account-type (US-A2): the provider already asserted a

@@ -6,7 +6,6 @@
 // placement both land on the same inquiry ladder (the shelter reads it either as the
 // poster or as the placement recipient), volunteer opens that shift's activity timeline
 // on the Pending section (Task 9 folded the old standalone requests queue into it).
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -19,10 +18,8 @@ import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { EMPTY_PAGED, PagedState, createPagedList } from "../pagedList";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { ShelterTabs } from "../components/ShelterTabs";
-import { shelterTabNavigate } from "../shelterTabs";
 import { Card, Chip, SegmentedControl } from "../components/ui";
-import { RootStackParamList } from "../navigation/types";
+import { ShelterTabScreenProps } from "../navigation/types";
 import {
   REQUEST_KIND_TILE, SEGMENT_KIND, requestChip, requestCountLine, requestRoute, requestSubtitle, requestsEmptyCopy
 } from "../shelterRequests";
@@ -36,7 +33,7 @@ import { timeAgo } from "../timeAgo";
 const SEGMENTS = ["Adoption", "Volunteer", "Placement"];
 
 
-type Props = NativeStackScreenProps<RootStackParamList, "shelterRequests">;
+type Props = ShelterTabScreenProps<"shelterRequests">;
 
 export function ShelterRequestsScreen({ navigation }: Props) {
   // At Dynamic Type AX3 and up a row's title and status chip cannot share a line (the animal's name truncated to "R5 N…"),
@@ -160,10 +157,6 @@ export function ShelterRequestsScreen({ navigation }: Props) {
         ) : null}
       </ScrollView>
 
-      <ShelterTabs
-        active="requests"
-        onTabPress={(t) => shelterTabNavigate(navigation, t)}
-      />
     </View>
   );
 }

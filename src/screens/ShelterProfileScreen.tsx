@@ -8,7 +8,6 @@
 //
 // Before this screen existed the shelter "You" tab landed on the OWNER profile, which showed an
 // owner's rows to an org and no gated state at all.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { OwnQr, youRowValue } from "../ownQr";
@@ -27,16 +26,14 @@ import { useAuth } from "../auth/AuthContext";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { ShelterTabs } from "../components/ShelterTabs";
-import { shelterTabNavigate } from "../shelterTabs";
 import { Card, Chip } from "../components/ui";
-import { RootStackParamList } from "../navigation/types";
+import { ShelterTabScreenProps } from "../navigation/types";
 import { activeShiftsLabel, shelterListingsTile, shelterShellState } from "../shelterDashboard";
 import { RESUME_SETUP, setupNeeded } from "../shelterSetup";
 import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
-type Props = NativeStackScreenProps<RootStackParamList, "shelterProfile">;
+type Props = ShelterTabScreenProps<"shelterProfile">;
 
 // F13 · one card per derived state, mirroring the dashboard's BANNER. "incomplete" is the
 // shelter that chose "I'll upload these later" — it has NO request, so "Under review" was
@@ -145,16 +142,6 @@ export function ShelterProfileScreen({ navigation }: Props) {
             body, and most LoadStateView call sites are inline placeholders in a ScrollView.
             See __tests__/safeAreaOnFailure.test.ts. */}
         <LoadStateView state={loadState(res)} onRetry={load} />
-        {/* ⚠️ THE TAB BAR BELONGS IN THIS BRANCH TOO. It does not depend on the data this
-            branch is missing, and it is this screen's only VISIBLE way out — the screen is
-            reached by a tab, so there is no back button either. Without it the offline state
-            is a dead end to look at: the iOS edge-swipe still pops the screen, which is why
-            this survived review and every automated check, but a person sees no exit. Found
-            on a real device during US-PF3 by someone who could not get past it. */}
-        <ShelterTabs
-          active="profile"
-          onTabPress={(t) => shelterTabNavigate(navigation, t)}
-        />
       </View>
     );
   }
@@ -296,10 +283,6 @@ export function ShelterProfileScreen({ navigation }: Props) {
         </Card>
       </ScrollView>
 
-      <ShelterTabs
-        active="profile"
-        onTabPress={(t) => shelterTabNavigate(navigation, t)}
-      />
     </View>
   );
 }
