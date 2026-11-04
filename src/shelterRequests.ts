@@ -10,7 +10,7 @@
 // SEGMENT_STATUS/STATUS_CHIP and shelterDashboard.ts's shelterShellState — so the
 // segment→kind mapping and the routing decision are testable without React Native at all.
 import { ChipTone } from "./components/ui";
-import { ShelterRequest } from "./api/types";
+import { ShelterRequest, ShelterRequestStatus } from "./api/types";
 
 /**
  * `SegmentedControl`'s `index` -> the `kind` query param B-be2 accepts. Segments, in
@@ -30,7 +30,8 @@ export type RequestSegmentIndex = keyof typeof SEGMENT_KIND;
  * shared `warning` tone, the same "waiting on someone" reading STATUS_CHIP gives Pending
  * over in shelterAnimals.ts.
  */
-export const REQUEST_STATUS_TONE: Record<string, { label: string; tone: ChipTone }> = {
+// SH8b · keyed by the typed union, so a status added to `ShelterRequestStatus` without a chip fails tsc.
+export const REQUEST_STATUS_TONE: Record<ShelterRequestStatus, { label: string; tone: ChipTone }> = {
   // Adoption / placement — AdoptionInquiry.status.
   active: { label: "Active", tone: "warning" },
   adopted: { label: "Adopted", tone: "success" },

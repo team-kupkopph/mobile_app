@@ -1,4 +1,7 @@
-import { Me, ShelterDashboard, ShelterDashboardRescue, ShelterDashboardVolunteer, ShelterDashboardWishlist } from "./api/types";
+import {
+  Me, ShelterDashboard, ShelterDashboardRescue, ShelterDashboardVolunteer, ShelterDashboardWishlist, ShelterProfileSummary,
+  ShelterTier
+} from "./api/types";
 import { pledgeCountLabel } from "./community";
 
 // SH1 / SH2 / SH10 (shelter home review) · ONE verified state for the whole shell — Home, You and
@@ -31,6 +34,30 @@ export function shelterShellState(dash: ShelterDashboard | null, me: Me | null):
   if (!submitted) return { verified, banner: "incomplete", donationsOn };
   // A reviewed-and-refused request is not "under review".
   return { verified, banner: status === "rejected" ? "rejected" : "pending", donationsOn };
+}
+
+// SH5 · You's first stat tile. A verified shelter's "Listings" is its LIVE count; it used to show
+// `draft_listings` under that label, so 12 live animals and no drafts read "0 Listings". A gated shelter
+// counts its drafts (nothing of it is live yet). An older server without `live_listings` gets the honest
+// "Drafts" rather than a draft count called Listings.
+export function shelterListingsTile(
+  counts: ShelterDashboard["counts"], verified: boolean, isTier1: boolean
+): { n: number; label: string } {
+  if (verified && counts.live_listings !== undefined) return { n: counts.live_listings, label: "Listings" };
+  return { n: counts.draft_listings, label: isTier1 && !verified ? "Draft" : "Drafts" };
+}
+
+// SH13 · the shell's name and tier: the ORGANISATION's (GET /shelter/profile, the same source as You),
+// falling back to /me while the profile has not answered. Never a default: a failed /me used to make
+// the tier community_rescue, so an NGO read "Verified Rescue" and "Upload ›" opened the tier-1 set.
+// `tier: null` means unknown, and the screen hides what depends on it.
+export function shelterIdentity(
+  profile: ShelterProfileSummary | null, me: Me | null
+): { name: string | null; tier: ShelterTier | null } {
+  return {
+    name: profile?.org_name ?? me?.display_name ?? null,
+    tier: profile?.tier ?? me?.shelter?.tier ?? null
+  };
 }
 
 // Task 10 (G12) · "Sat 9:00 AM" — short enough to sit inline in the Volunteers card's copy.
