@@ -14,14 +14,16 @@ import { AdoptIcon, HomeIcon, ProfileIcon, VolunteerIcon } from "./AppIcons";
 
 export type OwnerTab = "home" | "adopt" | "volunteer" | "profile";
 
-export function OwnerTabs({ active }: { active: OwnerTab }) {
+// `onTabPress` (SQ5 follow-up): when the tab navigator draws this bar it decides what a press does, so the bar only reports
+// the key. Without it (every screen today) a press is the stack `navigate` it always was.
+export function OwnerTabs({ active, onTabPress }: { active: OwnerTab; onTabPress?: (tab: OwnerTab) => void }) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const go = (route: keyof RootStackParamList) => () => navigation.navigate(route as never);
+  const go = (key: OwnerTab, route: keyof RootStackParamList) => () => (onTabPress ? onTabPress(key) : navigation.navigate(route as never));
 
   const items: TabBarItem[] = [
-    { key: "home", label: "Home", testID: "tab.home", icon: (c, s) => <HomeIcon color={c} size={s} />, onPress: go("home") },
-    { key: "adopt", label: "Adopt", testID: "tab.adopt", icon: (c, s) => <AdoptIcon color={c} size={s} />, onPress: go("adopt") },
+    { key: "home", label: "Home", testID: "tab.home", icon: (c, s) => <HomeIcon color={c} size={s} />, onPress: go("home", "home") },
+    { key: "adopt", label: "Adopt", testID: "tab.adopt", icon: (c, s) => <AdoptIcon color={c} size={s} />, onPress: go("adopt", "adopt") },
     {
       key: "volunteer",
       label: "Volunteer",
@@ -29,9 +31,9 @@ export function OwnerTabs({ active }: { active: OwnerTab }) {
       icon: (c, s) => <VolunteerIcon color={c} size={s} />,
       // The Volunteer tab opens the Kawang-Gawa hub (US-V8) rather than the old "volunteer"
       // placeholder route, which stays registered but unreachable from here.
-      onPress: go("kawanggawa")
+      onPress: go("volunteer", "kawanggawa")
     },
-    { key: "profile", label: "You", testID: "tab.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: go("profile") }
+    { key: "profile", label: "You", testID: "tab.profile", icon: (c, s) => <ProfileIcon color={c} size={s} />, onPress: go("profile", "profile") }
   ];
 
   return <TabBar items={items} active={active} />;
