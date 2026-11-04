@@ -86,7 +86,7 @@ describe("notificationTarget", () => {
 
   it("opens the two poster-push fallback destinations from the bell when a push lacks an inquiry id", () => {
     const src = require("fs").readFileSync(require("path").join(__dirname, "../screens/NotificationsScreen.tsx"), "utf8");
-    expect(src).toMatch(/case "shelterRequests":\s*navigation\.navigate\("shelterRequests"\)/);
+    expect(src).toMatch(/case "shelterRequests":\s*openShelterTab\(navigation, "requests"\)/);
     expect(src).toMatch(/case "listingDetail":\s*navigation\.navigate\("listingDetail", \{ listingId: target\.listingId \}\)/);
   });
 

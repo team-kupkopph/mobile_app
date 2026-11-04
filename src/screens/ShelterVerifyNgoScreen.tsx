@@ -17,6 +17,7 @@ import { RootStackParamList, ShelterDoc } from "../navigation/types";
 import { authColors } from "./AuthFormKit";
 import { colors, elevation, maxFontScale, radii, spacing, typography } from "../theme";
 import { Avatar, Button, Field, ScreenHeader } from "../components/ui";
+import { enterShelterShell } from "../shelterTabs";
 
 const PRC_RE = /^\d{6,8}$/;
 
@@ -125,7 +126,7 @@ export function ShelterVerifyNgoScreen({ navigation, route }: Props) {
         return;
       }
       if (res.ok) {
-        navigation.reset({ index: 0, routes: [{ name: "shelterDashboard" }] });
+        enterShelterShell(navigation);
         return;
       }
       setError(res.data?.error?.message ?? "Couldn't submit for review. Try again.");

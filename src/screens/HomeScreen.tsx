@@ -32,6 +32,7 @@ import { HelpShelter, WAYS_TO_HELP_EMPTY } from "../waysToHelp";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, radii, spacing, typography } from "../theme";
+import { enterShelterShell } from "../shelterTabs";
 
 
 type Props = NativeStackScreenProps<RootStackParamList, "home">;
@@ -117,7 +118,7 @@ export function HomeScreen({ navigation, route }: Props) {
       // US-X1: the right shell for who you are. A returning shelter account lands here (the
       // single stack's initialRouteName is always "home") — redirect it to the shelter shell.
       if (r.data.account_type === "shelter") {
-        navigation.reset({ index: 0, routes: [{ name: "shelterDashboard" }] });
+        enterShelterShell(navigation);
         return;
       }
       setMe(r.data);

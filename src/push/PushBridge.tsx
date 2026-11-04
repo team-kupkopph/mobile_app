@@ -18,6 +18,7 @@ import { useApi } from "../api/useApi";
 import { useAuth } from "../auth/AuthContext";
 import { notificationTarget } from "../notifications";
 import { registerPushToken } from "../push";
+import { openShelterTab, shelterTabKeyForRoute } from "../shelterTabs";
 
 // A notification arriving while the app is open should be visible but not disruptive — the
 // in-app bell is the primary surface, and a banner over a rescue map is an interruption.
@@ -88,6 +89,9 @@ export function PushBridge({ navRef }: { navRef: any }) {
       if (!target || !navRef?.isReady?.()) return;
 
       const { screen, ...params } = target as any;
+      // SQ5 · a shelter tab is entered through the one helper, not by name (the switch PR makes it a nested navigate).
+      const key = shelterTabKeyForRoute(screen);
+      if (key) { openShelterTab(navRef, key); return; }
       navRef.navigate(screen, Object.keys(params).length ? params : undefined);
     }
 
