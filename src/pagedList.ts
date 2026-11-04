@@ -93,7 +93,7 @@ export function createPagedList<T>(
       let last = 0;
       for (let page = 1; page <= pages; page++) {
         const r = await get(withPage(base, page));
-        if (gen !== generation) return false;
+          if (gen !== generation) return false;
         if (!r.ok) { refreshing = false; return false; }
         items.push(...(r.data?.results ?? []));
         next = r.data?.next ?? null;

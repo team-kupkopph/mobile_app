@@ -10,6 +10,14 @@ export const ShelterReturnContext = createContext(0);
 
 export const DEFAULT_STALE_MS = 30_000;
 
+/**
+ * Coming back from a pushed screen fires TWO triggers a moment apart: the tab's own focus (which loads if the data is stale)
+ * and then the shell's "returned" count. The second would repeat the first's request (the walk saw two identical requests
+ * and two overlapping refreshes). A load that began this recently, on this focus, is as fresh as the pop, so the count alone
+ * does not start another.
+ */
+export const COALESCE_MS = 2_000;
+
 export type RefreshInput = {
   /** When the last load that did not fail began; null before the first, or after a failed one. */
   lastLoadAt: number | null;
@@ -22,7 +30,7 @@ export type RefreshInput = {
 
 export function shouldRefresh({ lastLoadAt, now, staleMs, returns, returnsAtLastLoad }: RefreshInput): boolean {
   if (lastLoadAt === null) return true;
-  if (returns !== returnsAtLastLoad) return true;
+  if (returns !== returnsAtLastLoad) return now - lastLoadAt >= COALESCE_MS;
   return now - lastLoadAt >= staleMs;
 }
 
@@ -39,7 +47,10 @@ export function useRefreshOnFocus(load: () => void | Promise<boolean | void>, st
   useFocusEffect(
     useCallback(() => {
       const now = Date.now();
-      if (!shouldRefresh({ lastLoadAt: lastLoadAt.current, now, staleMs, returns, returnsAtLastLoad: returnsAtLastLoad.current })) return;
+      if (!shouldRefresh({ lastLoadAt: lastLoadAt.current, now, staleMs, returns, returnsAtLastLoad: returnsAtLastLoad.current })) {
+        returnsAtLastLoad.current = returns; // counted: a skipped return must not trigger on the next, unrelated focus
+        return;
+      }
       lastLoadAt.current = now;
       returnsAtLastLoad.current = returns;
       const done = loadRef.current();
