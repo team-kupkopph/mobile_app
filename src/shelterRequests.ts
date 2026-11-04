@@ -10,7 +10,8 @@
 // SEGMENT_STATUS/STATUS_CHIP and shelterDashboard.ts's shelterShellState — so the
 // segment→kind mapping and the routing decision are testable without React Native at all.
 import { ChipTone } from "./components/ui";
-import { ShelterRequest, ShelterRequestStatus } from "./api/types";
+import { colors } from "./theme";
+import { ShelterRequest, ShelterRequestKind, ShelterRequestStatus } from "./api/types";
 
 /**
  * `SegmentedControl`'s `index` -> the `kind` query param B-be2 accepts. Segments, in
@@ -77,4 +78,23 @@ export function requestRoute(item: ShelterRequest): { name: string; params: Reco
   // of one applicant, with Accept/Reject, the reservation and the stage ladder.
   if (item.kind === "adoption") return { name: "applicant", params: { inquiryId: item.target.id } };
   return { name: "inquiry", params: { inquiryId: item.target.id } };
+}
+
+// V3 (shelter home review step 10) · the artboard's kind tile: only the glyph and the destination differ between
+// the three kinds of row. Icons rather than the canvas's emoji, tinted from the theme.
+export const REQUEST_KIND_TILE: Record<ShelterRequestKind, { icon: "mail" | "volunteer" | "paw"; bg: string }> = {
+  adoption: { icon: "mail", bg: colors.soft },
+  volunteer: { icon: "volunteer", bg: colors.warningBg },
+  placement: { icon: "paw", bg: colors.dangerBg }
+};
+
+/** "{n} {segment} requests" from the server's `count`. Null when there is none to say (no count, or zero: the
+ *  empty state says it then). */
+export function requestCountLine(count: number | null, segment: string): string | null {
+  if (!count) return null;
+  return `${count} ${segment.toLowerCase()} request${count === 1 ? "" : "s"}`;
+}
+
+export function requestsEmptyCopy(segment: string): { title: string; body: string } {
+  return { title: `No ${segment.toLowerCase()} requests`, body: "New requests land here as they come in." };
 }

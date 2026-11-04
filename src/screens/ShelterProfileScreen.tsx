@@ -27,6 +27,7 @@ import { accountIdFromAccessToken } from "../auth/idToken";
 import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
+import { shelterTabNavigate } from "../shelterTabs";
 import { Card, Chip } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { shelterListingsTile, shelterShellState } from "../shelterDashboard";
@@ -160,12 +161,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
             on a real device during US-PF3 by someone who could not get past it. */}
         <ShelterTabs
           active="profile"
-          onTabPress={(t) => {
-            if (t === "home") navigation.navigate("shelterDashboard");
-            if (t === "donate") navigation.navigate("shelterDonate");
-            if (t === "animals") navigation.navigate("shelterAnimals");
-            if (t === "requests") navigation.navigate("shelterRequests");
-          }}
+          onTabPress={(t) => shelterTabNavigate(navigation, t)}
         />
       </View>
     );
@@ -307,12 +303,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
 
       <ShelterTabs
         active="profile"
-        onTabPress={(t) => {
-          if (t === "home") navigation.navigate("shelterDashboard");
-          if (t === "donate") navigation.navigate("shelterDonate");
-          if (t === "animals") navigation.navigate("shelterAnimals");
-          if (t === "requests") navigation.navigate("shelterRequests");
-        }}
+        onTabPress={(t) => shelterTabNavigate(navigation, t)}
       />
     </View>
   );
@@ -377,7 +368,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.teal
   },
   avatarImage: { width: 96, height: 96, borderRadius: squircle(96) },
-  avatarGlyph: { color: "#FFFFFF", fontSize: 40, fontWeight: "900" },
+  avatarGlyph: { color: colors.white, fontSize: 40, fontWeight: "900" },
   orgName: { marginTop: 16, color: colors.ink, ...typography.hero },
   chip: {
     marginTop: 12
@@ -414,7 +405,9 @@ const styles = StyleSheet.create({
   rowDanger: { color: colors.danger, ...typography.subtitle, fontWeight: "600" },
   rowRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   rowValue: { color: colors.muted, ...typography.strong, fontWeight: "700" },
-  chev: { color: "#C9CEC7", fontSize: 19, fontWeight: "700" },
+  // SH19 · was #C9CEC7, 1.60:1 on white (the value tabBarContrast exists for). The 19 / 700 is the canvas's
+  // chevron, counted as a glyph by typeRampAdoption.
+  chev: { color: colors.muted, fontSize: 19, fontWeight: "700" },
   accentWarn: {
     margin: 12,
     minHeight: 52,
@@ -426,7 +419,7 @@ const styles = StyleSheet.create({
   },
   accentCopy: { flex: 1 },
   accentWarnTitle: { color: colors.warningStrong, ...typography.subtitle, fontWeight: "800" },
-  accentWarnBody: { marginTop: 3, color: "#8a6d3b", ...typography.meta },
+  accentWarnBody: { marginTop: 3, color: colors.warning, ...typography.meta },
   accentWarnChev: { color: colors.warningStrong, fontSize: 19, fontWeight: "700" },
   accentTeal: {
     margin: 12,
@@ -438,6 +431,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.infoBg
   },
   accentTealTitle: { color: colors.tealDark, ...typography.subtitle, fontWeight: "800" },
-  accentTealBody: { marginTop: 3, color: "#5f6b6a", ...typography.meta },
+  accentTealBody: { marginTop: 3, color: colors.muted, ...typography.meta },
   accentTealChev: { color: colors.tealDark, fontSize: 19, fontWeight: "700" }
 });

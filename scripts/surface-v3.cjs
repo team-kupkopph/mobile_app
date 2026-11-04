@@ -21,6 +21,8 @@ const { join } = require("node:path");
 
 const SCREENS_DIR = join(__dirname, "..", "src", "screens");
 const SHELTER_TABS = join(__dirname, "..", "src", "components", "ShelterTabs.tsx");
+// SH11 · the one tab-press helper every shelter bar calls, and its key -> route map.
+const SHELTER_TAB_HELPER = join(__dirname, "..", "src", "shelterTabs.ts");
 
 const HAS_BACKDROP = /<ScreenBackdrop\b/;
 const HAS_CARD = /<Card\b/;
@@ -40,15 +42,18 @@ function baseName(file) {
 }
 
 /**
- * A tab is "dead" if no screen's onTabPress handler ever compares against it
- * (`t === "<key>"`). ShelterTabs.tsx declares the full tab set; screens wire up
- * only the tabs they actually navigate to.
+ * A tab is "dead" if nothing routes it. ShelterTabs.tsx declares the full tab set. Since SH11 every bar presses
+ * through `shelterTabNavigate`, so a key is live when the helper's map routes it (`key: "route"`) and some screen
+ * calls the helper; a screen still on a hand-written chain counts if it compares against the key (`t === "<key>"`).
  */
 function findDeadTabs(screenFiles) {
   const tabsSource = readFileSync(SHELTER_TABS, "utf8");
   const keys = [...tabsSource.matchAll(TAB_KEY)].map((m) => m[1]);
   const screensSource = screenFiles.map((f) => read(SCREENS_DIR, f)).join("\n");
-  return keys.filter((key) => !screensSource.includes(`t === "${key}"`));
+  const helper = readFileSync(SHELTER_TAB_HELPER, "utf8");
+  const viaHelper = screensSource.includes("shelterTabNavigate(navigation, t)");
+  return keys.filter((key) => !screensSource.includes(`t === "${key}"`)
+    && !(viaHelper && new RegExp(`\\b${key}:\\s*"\\w+"`).test(helper)));
 }
 
 function surfaceV3() {

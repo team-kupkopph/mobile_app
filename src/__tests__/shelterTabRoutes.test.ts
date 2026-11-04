@@ -3,16 +3,26 @@
  * (`t === "home" && navigate(...)`), so Animals, Requests and You were dead taps from it, and the Animals tab's bar had no route to Requests. Nothing about text size:
  * a navigation dead end that the AX5 walks happened to step around (they entered each tab from Home).
  *
- * A source scan: each `<ShelterTabs active="x" onTabPress=...>` block must navigate for every tab except its own.
+ * SH11 (shelter home review, step 14) · that rule was held by eight hand-written `if (t === …)` chains, one per bar (two on
+ * Dashboard, You and Donate: their failure branches carry the bar too). They now all call `shelterTabNavigate`, so the
+ * routing is tested once, on the helper, and the scan only checks that every bar uses it.
  */
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const SCREENS: Record<string, string> = {
-  ShelterDashboardScreen: "home", ShelterAnimalsScreen: "animals", ShelterDonateScreen: "donate", ShelterRequestsScreen: "requests", ShelterProfileScreen: "profile"
-};
-const ROUTE: Record<string, string> = { home: "shelterDashboard", animals: "shelterAnimals", donate: "shelterDonate", requests: "shelterRequests", profile: "shelterProfile" };
-const TAB_FOR_KEY: Record<string, string> = ROUTE;
+import { SHELTER_TAB_ROUTE, shelterTabNavigate } from "../shelterTabs";
+
+const SCREENS = ["ShelterDashboardScreen", "ShelterAnimalsScreen", "ShelterDonateScreen", "ShelterRequestsScreen", "ShelterProfileScreen"];
+
+describe("shelterTabNavigate", () => {
+  it("routes each of the five tabs to its root", () => {
+    const calls: string[] = [];
+    const nav = { navigate: (route: string) => calls.push(route) };
+    for (const key of ["home", "animals", "donate", "requests", "profile"] as const) shelterTabNavigate(nav, key);
+    expect(calls).toEqual(["shelterDashboard", "shelterAnimals", "shelterDonate", "shelterRequests", "shelterProfile"]);
+    expect(new Set(Object.values(SHELTER_TAB_ROUTE)).size).toBe(5);
+  });
+});
 
 const blocks = (src: string) => {
   const out: string[] = [];
@@ -22,13 +32,22 @@ const blocks = (src: string) => {
   return out;
 };
 
-describe.each(Object.entries(SCREENS))("%s's tab bar", (file, own) => {
+describe.each(SCREENS)("%s's tab bars", (file) => {
   const src = readFileSync(join(__dirname, "..", "screens", `${file}.tsx`), "utf-8");
   const bs = blocks(src);
   it("the scan found the tab bar (a guard that matches nothing proves nothing)", () => {
     expect(bs.length).toBeGreaterThan(0);
   });
-  it.each(Object.keys(ROUTE).filter((k) => k !== own))("every bar routes %s", (tab) => {
-    for (const b of bs) expect(b).toContain(`navigate("${TAB_FOR_KEY[tab]}")`);
+  it("every bar routes through the one helper, with no hand-written chain", () => {
+    for (const b of bs) {
+      expect(b).toMatch(/onTabPress=\{\(t\) => shelterTabNavigate\(navigation, t\)\}/);
+      expect(b).not.toMatch(/t === "/);
+    }
   });
+});
+
+it("the eight bars are all still there", () => {
+  const total = SCREENS.reduce(
+    (n, f) => n + blocks(readFileSync(join(__dirname, "..", "screens", `${f}.tsx`), "utf-8")).length, 0);
+  expect(total).toBe(8);
 });

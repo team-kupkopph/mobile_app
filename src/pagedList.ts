@@ -15,9 +15,11 @@ export type PagedState<T> = {
   /** Page 1's outcome, for loadState(); null while it is in flight. */
   res: { ok: boolean; status: number } | null;
   moreFailed: boolean;
+  /** The server's total for the query (page 1's `count`), or null when it sends none. Never `items.length`. */
+  count: number | null;
 };
 
-export const EMPTY_PAGED: PagedState<never> = { items: null, next: null, res: null, moreFailed: false };
+export const EMPTY_PAGED: PagedState<never> = { items: null, next: null, res: null, moreFailed: false, count: null };
 
 function withPage(path: string, page: number): string {
   return `${path}${path.includes("?") ? "&" : "?"}page=${page}`;
@@ -47,7 +49,8 @@ export function createPagedList<T>(
         set({
           res: { ok: r.ok, status: r.status },
           items: r.ok ? (r.data?.results ?? []) : null,
-          next: r.ok ? (r.data?.next ?? null) : null
+          next: r.ok ? (r.data?.next ?? null) : null,
+          count: r.ok && typeof r.data?.count === "number" ? r.data.count : null
         });
       });
     },

@@ -18,6 +18,7 @@ import { loadState } from "../net";
 import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
+import { shelterTabNavigate } from "../shelterTabs";
 import { Button, Card, Chip, SectionHeader } from "../components/ui";
 import { CHIP_UI_TONE, NeedStatus, needPercent, needProgressFraction, needProgressLabel, needStatusChip } from "../community";
 import { RootStackParamList } from "../navigation/types";
@@ -114,12 +115,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
             there is no back button, and the offline state must not be a dead end. */}
         <ShelterTabs
           active="donate"
-          onTabPress={(t) => {
-            if (t === "home") navigation.navigate("shelterDashboard");
-            if (t === "animals") navigation.navigate("shelterAnimals");
-            if (t === "requests") navigation.navigate("shelterRequests");
-            if (t === "profile") navigation.navigate("shelterProfile");
-          }}
+          onTabPress={(t) => shelterTabNavigate(navigation, t)}
         />
       </View>
     );
@@ -232,12 +228,7 @@ export function ShelterDonateScreen({ navigation }: Props) {
 
       <ShelterTabs
         active="donate"
-        onTabPress={(t) => {
-            if (t === "home") navigation.navigate("shelterDashboard");
-            if (t === "animals") navigation.navigate("shelterAnimals");
-            if (t === "requests") navigation.navigate("shelterRequests");
-            if (t === "profile") navigation.navigate("shelterProfile");
-          }}
+        onTabPress={(t) => shelterTabNavigate(navigation, t)}
       />
     </View>
   );
