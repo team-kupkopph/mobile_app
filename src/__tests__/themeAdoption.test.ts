@@ -75,3 +75,52 @@ describe("ConfirmModal takes colour from the theme", () => {
     expect(OWN_TABLE.test(src)).toBe(false);
   });
 });
+
+/**
+ * SH19 / V4 (shelter home review, step 11) · the scan above passes as long as no screen declares
+ * `const colors = {`. It never saw a raw hex written straight into a style or an icon's `color=` prop:
+ * the shelter Dashboard held 12 and You 4 while this file reported zero holdouts. Same habit as everywhere
+ * else in this repo: the guard under-reported.
+ *
+ * A RATCHET per file. A screen not named below may hold no hex literal at all; a named one may not gain any.
+ * Lowering a number (or removing a screen) when you convert it is the point; raising one is not allowed.
+ */
+const HEX_LITERAL =
+  /\b(?:color|backgroundColor|borderColor|borderTopColor|borderBottomColor|tintColor|shadowColor)\s*[:=]\s*\{?\s*["']#[0-9A-Fa-f]{3,8}["']/g;
+
+const HEX_HOLDOUTS: Record<string, number> = {
+  "AccountTypeScreen.tsx": 2, "AuthFormKit.tsx": 5, "ForgotPasswordScreen.tsx": 1, "HomeScreen.tsx": 5,
+  "ImpactScreen.tsx": 1, "KawangGawaDetailScreen.tsx": 3, "KawangGawaScreen.tsx": 1, "MyDonationsScreen.tsx": 1,
+  "NotificationsScreen.tsx": 1, "OtpLockedScreen.tsx": 5, "OtpScreen.tsx": 9, "PasswordChangedScreen.tsx": 5,
+  "ProfileScreen.tsx": 6, "ResetOtpScreen.tsx": 5, "ResetPasswordScreen.tsx": 4, "ShelterPhoneVerifyScreen.tsx": 3,
+  "ShelterSetupScreen.tsx": 2, "ShelterTierScreen.tsx": 1, "ShelterVerifyNgoScreen.tsx": 11,
+  "ShelterVerifyScreen.tsx": 8, "SignupScreen.tsx": 2, "SignupSuccessScreen.tsx": 7, "StoriesScreen.tsx": 1,
+  "StoryComposeScreen.tsx": 2, "StoryDetailScreen.tsx": 3, "VerifyDocumentsScreen.tsx": 5,
+  "VerifyPhoneScreen.tsx": 3, "VerifyResubmitScreen.tsx": 4
+};
+
+const hexCount = (f: string) => (read(f).match(HEX_LITERAL) ?? []).length;
+
+describe("screens write no raw hex into styles or icon props", () => {
+  it("sees the shapes it is meant to see", () => {
+    expect('color: "#FFFFFF"'.match(HEX_LITERAL)).toHaveLength(1);
+    expect('<CheckIcon color="#FFFFFF" size={10} />'.match(HEX_LITERAL)).toHaveLength(1);
+    expect('backgroundColor: "#F3E1BE"'.match(HEX_LITERAL)).toHaveLength(1);
+    expect("color: colors.white".match(HEX_LITERAL)).toBeNull();
+    // Guard the guard: the holdouts are real, so the scan must find them.
+    expect(files.reduce((n, f) => n + hexCount(f), 0)).toBeGreaterThan(80);
+  });
+
+  it("no screen outside the holdouts holds one, and no holdout gains one", () => {
+    const over = files
+      .map((f) => [f, hexCount(f), HEX_HOLDOUTS[f] ?? 0] as const)
+      .filter(([, n, allowed]) => n > allowed);
+    expect(over).toEqual([]);
+  });
+
+  it("the shelter A1 roots are converted (SH19)", () => {
+    expect(hexCount("ShelterDashboardScreen.tsx")).toBe(0);
+    expect(hexCount("ShelterProfileScreen.tsx")).toBe(0);
+    expect(HEX_HOLDOUTS["ShelterDashboardScreen.tsx"]).toBeUndefined();
+  });
+});

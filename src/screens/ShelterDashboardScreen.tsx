@@ -17,6 +17,7 @@ import { AlertIcon, CheckIcon, ClockIcon, LocationPinIcon, VolunteerIcon } from 
 import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
+import { shelterTabNavigate } from "../shelterTabs";
 import { RootStackParamList } from "../navigation/types";
 import { rescueSummary, shelterIdentity, shelterShellState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
@@ -136,12 +137,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             on a real device during US-PF3 by someone who could not get past it. */}
         <ShelterTabs
           active="home"
-          onTabPress={(t) => {
-            if (t === "profile") navigation.navigate("shelterProfile");
-            if (t === "donate") navigation.navigate("shelterDonate");
-            if (t === "animals") navigation.navigate("shelterAnimals");
-            if (t === "requests") navigation.navigate("shelterRequests");
-          }}
+          onTabPress={(t) => shelterTabNavigate(navigation, t)}
         />
       </View>
     );
@@ -157,7 +153,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
             id.tier ? (
               <View style={styles.verifiedPill}>
                 <View style={styles.verifiedPillDot}>
-                  <CheckIcon color="#FFFFFF" size={10} />
+                  <CheckIcon color={colors.white} size={10} />
                 </View>
                 <Text style={styles.verifiedPillText}>{badge}</Text>
               </View>
@@ -182,7 +178,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           // US-V5 · the "you're verified" hero replaces the amber under-review banner.
           <View style={[styles.verifiedHero, large && styles.stackLarge]}>
             <View style={styles.verifiedHeroIcon}>
-              <CheckIcon color="#FFFFFF" size={20} />
+              <CheckIcon color={colors.white} size={20} />
             </View>
             <View style={[styles.bannerCopy, large && styles.bannerCopyLarge]}>
               <Text style={styles.verifiedHeroTitle} maxFontSizeMultiplier={maxFontScale.title}>You're verified</Text>
@@ -203,7 +199,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           <TouchableOpacity activeOpacity={0.85} onPress={onBannerPress}>
             <Card tone="hero" accent={colors.warningStrong} style={[styles.banner, large && styles.stackLarge]}>
               <View style={styles.bannerIcon}>
-                {state === "pending" ? <ClockIcon color="#633806" size={34} /> : <AlertIcon color="#633806" size={34} />}
+                {state === "pending" ? <ClockIcon color={colors.warningStrong} size={34} /> : <AlertIcon color={colors.warningStrong} size={34} />}
               </View>
               <View style={[styles.bannerCopy, large && styles.bannerCopyLarge]}>
                 <Text style={styles.bannerTitle} maxFontSizeMultiplier={maxFontScale.title}>{banner.title}</Text>
@@ -337,12 +333,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
 
       <ShelterTabs
         active="home"
-        onTabPress={(t) => {
-          if (t === "profile") navigation.navigate("shelterProfile");
-          if (t === "donate") navigation.navigate("shelterDonate");
-          if (t === "animals") navigation.navigate("shelterAnimals");
-          if (t === "requests") navigation.navigate("shelterRequests");
-        }}
+        onTabPress={(t) => shelterTabNavigate(navigation, t)}
       />
     </View>
   );
@@ -392,7 +383,7 @@ const styles = StyleSheet.create({
     width: 18, height: 18, borderRadius: 9, alignItems: "center", justifyContent: "center",
     backgroundColor: colors.teal
   },
-  verifiedPillText: { color: "#14504F", ...typography.meta, fontWeight: "800" },
+  verifiedPillText: { color: colors.tealDark, ...typography.meta, fontWeight: "800" },
   verifiedHero: {
     marginTop: 20, flexDirection: "row", alignItems: "center", gap: 16, padding: 20,
     borderRadius: radii.card, backgroundColor: colors.teal
@@ -401,8 +392,8 @@ const styles = StyleSheet.create({
     width: 46, height: 46, borderRadius: 15, alignItems: "center", justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.18)"
   },
-  verifiedHeroTitle: { color: "#FFFFFF", ...typography.title },
-  verifiedHeroBody: { marginTop: 4, color: "#DCEDEB", ...typography.body },
+  verifiedHeroTitle: { color: colors.white, ...typography.title },
+  verifiedHeroBody: { marginTop: 4, color: colors.onHeroMuted, ...typography.body },
   verifiedHeroLink: { fontWeight: "700", textDecorationLine: "underline" },
   subLabel: { marginTop: 6, color: colors.muted, ...typography.subtitle },
   banner: {
@@ -419,11 +410,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F3E1BE"
+    backgroundColor: colors.warningBg
   },
   bannerCopy: { flex: 1, marginLeft: 18 },
   bannerTitle: { color: colors.warningStrong, ...typography.section },
-  bannerBody: { marginTop: 2, color: "#8a6d3b", ...typography.meta },
+  bannerBody: { marginTop: 2, color: colors.warning, ...typography.meta },
   bannerCta: { color: colors.warningStrong, ...typography.strong, fontWeight: "700" },
   statRow: { marginTop: 22, flexDirection: "row", justifyContent: "space-between" },
   statCard: {
@@ -452,7 +443,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24
   },
   footCopy: { flex: 1 },
-  footTitle: { color: "#14504F", ...typography.subtitle, fontWeight: "800" },
-  footBody: { marginTop: 6, color: "#5f6b6a", ...typography.meta },
-  footCta: { color: "#14504F", ...typography.subtitle, fontWeight: "800", marginLeft: 12 }
+  footTitle: { color: colors.tealDark, ...typography.subtitle, fontWeight: "800" },
+  footBody: { marginTop: 6, color: colors.muted, ...typography.meta },
+  footCta: { color: colors.tealDark, ...typography.subtitle, fontWeight: "800", marginLeft: 12 }
 });

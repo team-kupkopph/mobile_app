@@ -118,6 +118,10 @@ describe("every registered route can be navigated to", () => {
                       /name:\s*["'](\w+)["']/g, /initialRouteName=\{?[^}]*?["'](\w+)["']/g]) {
       for (const m of all.matchAll(re)) out.add(m[1]);
     }
+    // SH11 · the shelter tab roots are reached through `shelterTabs.ts`'s key -> route map, read on its own so the
+    // `key: "route"` shape cannot count as navigation anywhere else.
+    const tabs = readFileSync(join(SRC, "shelterTabs.ts"), "utf8");
+    for (const m of tabs.matchAll(/^\s*\w+:\s*"(\w+)",?$/gm)) out.add(m[1]);
     return out;
   }
 

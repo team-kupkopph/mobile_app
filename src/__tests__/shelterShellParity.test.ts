@@ -77,6 +77,14 @@ describeParity("the shelter shell matches the anchor artboards", () => {
     expect(row["row-shape"]).toBe("photo-title-subtitle-chip");
   });
 
+  it("a Requests row leads with the kind glyph tile the artboard draws", () => {
+    // V3 · the artboard's row-shape fact predates its glyph tile, so read the markup, not just the fact.
+    const art = readCanvas("ShelterRequests.dc.html");
+    expect(facts(art)["row-shape"]).toBe("title-subtitle-chip-time");
+    expect(art).toMatch(/\{\{r\.glyph\}\}/);
+    expect(read("screens/ShelterRequestsScreen.tsx")).toMatch(/testID=\{`tile\.shelterRequests\.\$\{item\.kind\}`\}/);
+  });
+
   it("the rescue case stepper has six stages and a shared done layout", () => {
     const rescue = facts(readCanvas("RescueCase.dc.html"));
     expect(rescue.stages).toBe("6");

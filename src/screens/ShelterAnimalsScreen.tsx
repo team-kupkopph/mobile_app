@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListingsByStatus } from "../components/ListingsByStatus";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
+import { shelterTabNavigate } from "../shelterTabs";
 import { Button } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { draftRoute } from "../shelterAnimals";
@@ -42,12 +43,7 @@ export function ShelterAnimalsScreen({ navigation }: Props) {
 
       <ShelterTabs
         active="animals"
-        onTabPress={(t) => {
-          if (t === "home") navigation.navigate("shelterDashboard");
-          if (t === "donate") navigation.navigate("shelterDonate");
-          if (t === "requests") navigation.navigate("shelterRequests");
-          if (t === "profile") navigation.navigate("shelterProfile");
-        }}
+        onTabPress={(t) => shelterTabNavigate(navigation, t)}
       />
     </View>
   );

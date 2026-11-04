@@ -136,7 +136,13 @@ export const colors = {
    */
   placeholder: "#DBE6E2",
 
-  tabInactive: "#5F5E5A"
+  tabInactive: "#5F5E5A",
+
+  /**
+   * Secondary text ON the teal hero (the verified hero's body copy; HomeScreen's hero uses the same value). A text
+   * colour for the dark hero only, never for the light page. From the shelter Dashboard's literal (SH19).
+   */
+  onHeroMuted: "#DCEDEB"
 } as const;
 
 export type ColorToken = keyof typeof colors;

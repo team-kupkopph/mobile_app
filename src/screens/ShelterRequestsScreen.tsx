@@ -14,16 +14,21 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ShelterRequest } from "../api/types";
 import { useApi } from "../api/useApi";
+import { AdoptIcon, MailIcon, VolunteerIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { EMPTY_PAGED, PagedState, createPagedList } from "../pagedList";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
+import { shelterTabNavigate } from "../shelterTabs";
 import { Card, Chip, SegmentedControl } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
-import { DEFAULT_STATUS_TONE, REQUEST_STATUS_TONE, SEGMENT_KIND, requestRoute } from "../shelterRequests";
+import {
+  DEFAULT_STATUS_TONE, REQUEST_KIND_TILE, REQUEST_STATUS_TONE, SEGMENT_KIND, requestCountLine, requestRoute,
+  requestsEmptyCopy
+} from "../shelterRequests";
 import { TAP_SLOP } from "../touch";
-import { colors, maxFontScale, spacing, typography } from "../theme";
+import { colors, maxFontScale, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
 /** The canvas's Requests artboard: ["Adoption", "Volunteer", "Placement"] — see
@@ -68,6 +73,10 @@ export function ShelterRequestsScreen({ navigation }: Props) {
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const state = loadState(paged.res, requests?.length);
+  // V3 · the artboard's count line and per-segment empty state. The count is the server's total, not the rows on
+  // screen: those stop at 20 until Load more.
+  const countLine = requestCountLine(paged.count, SEGMENTS[segment]);
+  const empty = requestsEmptyCopy(SEGMENTS[segment]);
 
   return (
     <View style={styles.screen} testID="screen.shelterRequests">
@@ -89,16 +98,19 @@ export function ShelterRequestsScreen({ navigation }: Props) {
           style={styles.segmented}
         />
 
+        {state.kind === "ready" && countLine ? <Text style={styles.countLine}>{countLine}</Text> : null}
+
         {state.kind !== "ready" ? (
           <LoadStateView
             state={state}
-            emptyTitle="No requests here yet."
-            emptyBody="New adoption, volunteer, and placement requests will show up here."
+            emptyTitle={empty.title}
+            emptyBody={empty.body}
             onRetry={load}
           />
         ) : (
           (requests ?? []).map((item) => {
             const chip = REQUEST_STATUS_TONE[item.status] ?? DEFAULT_STATUS_TONE;
+            const tile = REQUEST_KIND_TILE[item.kind] ?? REQUEST_KIND_TILE.adoption;
             // Branch on the route name rather than spreading `route.params` into a generic
             // `navigate` call — same shape as NotificationsScreen's own target dispatch —
             // so each call stays fully typed against RootStackParamList instead of an `any`.
@@ -128,12 +140,22 @@ export function ShelterRequestsScreen({ navigation }: Props) {
                 onPress={onPress}
               >
                 <Card style={[styles.row, large && styles.rowLarge]}>
+                  {/* V3 · the kind glyph tile: what tells the three kinds apart at a glance. Decorative: the
+                      segment already says which kind this is. */}
+                  <View testID={`tile.shelterRequests.${item.kind}`} style={[styles.tile, { backgroundColor: tile.bg }]}
+                    accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                    {tile.icon === "mail" ? <MailIcon color={colors.tealDark} size={20} />
+                      : tile.icon === "volunteer" ? <VolunteerIcon color={colors.warningStrong} size={20} />
+                      : <AdoptIcon color={colors.danger} size={20} />}
+                  </View>
                   <View style={[styles.rowCopy, large && styles.rowCopyLarge]}>
                     <Text style={styles.rowTitle} numberOfLines={large ? 3 : 1}>{item.title}</Text>
                     <Text style={styles.rowSub} numberOfLines={large ? 3 : 1}>{item.subtitle}</Text>
+                  </View>
+                  <View style={[styles.rowSide, large && styles.rowSideLarge]}>
+                    <Chip tone={chip.tone} dot={false} label={chip.label} />
                     <Text style={styles.rowTime}>{timeAgo(item.created_at)}</Text>
                   </View>
-                  <Chip tone={chip.tone} dot={false} label={chip.label} />
                 </Card>
               </TouchableOpacity>
             );
@@ -150,12 +172,7 @@ export function ShelterRequestsScreen({ navigation }: Props) {
 
       <ShelterTabs
         active="requests"
-        onTabPress={(t) => {
-          if (t === "home") navigation.navigate("shelterDashboard");
-          if (t === "animals") navigation.navigate("shelterAnimals");
-          if (t === "donate") navigation.navigate("shelterDonate");
-          if (t === "profile") navigation.navigate("shelterProfile");
-        }}
+        onTabPress={(t) => shelterTabNavigate(navigation, t)}
       />
     </View>
   );
@@ -174,7 +191,12 @@ const styles = StyleSheet.create({
   rowCopyLarge: { marginLeft: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   rowTitle: { color: colors.ink, ...typography.subtitle, fontWeight: "800" },
   rowSub: { marginTop: 4, color: colors.muted, ...typography.meta },
-  rowTime: { marginTop: 4, color: colors.muted, ...typography.meta },
+  rowTime: { color: colors.muted, ...typography.meta },
+  // The artboard's 44 pt squircle tile.
+  tile: { width: 44, height: 44, borderRadius: squircle(44), alignItems: "center", justifyContent: "center" },
+  rowSide: { alignItems: "flex-end", gap: 6 },
+  rowSideLarge: { alignItems: "flex-start" },
+  countLine: { marginTop: 16, color: colors.muted, ...typography.meta, fontWeight: "700" },
   more: { alignSelf: "center", marginTop: 12, minHeight: 44, justifyContent: "center", paddingHorizontal: 16 },
   moreLabel: { color: colors.teal, ...typography.strong, fontWeight: "700" }
 });
