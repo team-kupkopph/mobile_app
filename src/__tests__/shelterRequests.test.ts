@@ -51,7 +51,7 @@ describe("requestRoute", () => {
   });
 
   it("routes a decided placement to the inquiry ladder", () => {
-    for (const status of ["adopted", "declined"]) {
+    for (const status of ["adopted", "declined"] as const) {
       expect(requestRoute(item({
         kind: "placement", id: "iq-3", status, target: { route: "inquiry", id: "iq-3" }
       }))).toEqual({ name: "inquiry", params: { inquiryId: "iq-3" } });

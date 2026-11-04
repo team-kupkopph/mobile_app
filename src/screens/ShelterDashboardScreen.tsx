@@ -1,13 +1,13 @@
 // US-B5 / US-X1 / US-X2 — shelter shell home. Reference: screens/user/screen-shelter-dashboard-pending.png,
 // screen-shelter-dashboard-incomplete.png. GET /shelter/dashboard drives the amber banner + gates;
-// GET /me carries the tier (for the "Finish verifying" route) and the org name. Everything is derived —
+// GET /shelter/profile carries the org name and tier (SH13; /me is the fallback). Everything is derived —
 // listings stay drafts, donations are locked, no badge — until the request is approved (Sprint 2).
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { Me, ShelterDashboard, ShelterTier } from "../api/types";
+import { Me, ShelterDashboard, ShelterProfileSummary } from "../api/types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useApi } from "../api/useApi";
@@ -18,7 +18,7 @@ import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { RootStackParamList } from "../navigation/types";
-import { rescueSummary, shelterShellState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
+import { rescueSummary, shelterIdentity, shelterShellState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
@@ -58,6 +58,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   const api = useApi();
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [me, setMe] = useState<Me | null>(null);
+  const [profile, setProfile] = useState<ShelterProfileSummary | null>(null);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [hasUnread, setHasUnread] = useState(false);
 
@@ -76,6 +77,11 @@ export function ShelterDashboardScreen({ navigation }: Props) {
         if (r.ok) setDash(r.data);
       });
       api.get("/me").then((r) => { if (r.ok) setMe(r.data); });
+      // SH13 · the ORGANISATION's name and tier, the same source You reads. Secondary like /me: a 404
+      // (no profile yet, SH9) or a failure leaves `profile` null and /me answers instead.
+      api.get("/shelter/profile").then((r) => {
+        if (r.ok) setProfile({ org_name: r.data.org_name, tier: r.data.tier });
+      });
       // F-R3-4 · the bell's dot, same query and same focus refetch as HomeScreen's — so it
       // clears on return from NotificationsScreen (which marks everything read on open).
       api.get("/me/notifications").then((r) => {
@@ -92,8 +98,9 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   const verified = shell.verified;
   const state = shell.banner;
   const banner = state === "pending" || state === "rejected" || state === "incomplete" ? BANNER[state] : null;
-  const tier: ShelterTier = me?.shelter?.tier ?? "community_rescue";
-  const badge = tier === "community_rescue" ? "Verified Rescue" : "Verified Shelter";
+  // SH13 · never a defaulted tier: while it is unknown the badge and the Upload CTA stay hidden.
+  const id = shelterIdentity(profile, me);
+  const badge = id.tier === "community_rescue" ? "Verified Rescue" : "Verified Shelter";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
 
   function onBannerPress() {
@@ -103,7 +110,8 @@ export function ShelterDashboardScreen({ navigation }: Props) {
     // ShelterAnimalsScreen — Task B2). ShelterProfileScreen's "Under review" accent
     // already reached verifyDocuments for the same gated state; this banner (the first
     // thing a pending shelter sees) is the more obvious entry point.
-    if (state === "incomplete") navigation.navigate("shelterVerify", { tier });
+    if (state === "incomplete" && !id.tier) return;   // which document set is unknown until the tier is
+    if (state === "incomplete") navigation.navigate("shelterVerify", { tier: id.tier! });
     else navigation.navigate("verifyDocuments");
   }
 
@@ -144,14 +152,16 @@ export function ShelterDashboardScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]} showsVerticalScrollIndicator={false}>
         <View style={[styles.headerRow, large && styles.headerRowLarge]}>
-          <Text style={[styles.orgName, large && styles.orgNameLarge]} maxFontSizeMultiplier={maxFontScale.title}>{me?.display_name ?? "Your shelter"}</Text>
+          <Text style={[styles.orgName, large && styles.orgNameLarge]} maxFontSizeMultiplier={maxFontScale.title}>{id.name ?? "Your shelter"}</Text>
           {verified ? (
-            <View style={styles.verifiedPill}>
-              <View style={styles.verifiedPillDot}>
-                <CheckIcon color="#FFFFFF" size={10} />
+            id.tier ? (
+              <View style={styles.verifiedPill}>
+                <View style={styles.verifiedPillDot}>
+                  <CheckIcon color="#FFFFFF" size={10} />
+                </View>
+                <Text style={styles.verifiedPillText}>{badge}</Text>
               </View>
-              <Text style={styles.verifiedPillText}>{badge}</Text>
-            </View>
+            ) : null
           ) : (
             <View style={styles.unverifiedPill}>
               <View style={styles.pillDot} />
@@ -163,9 +173,9 @@ export function ShelterDashboardScreen({ navigation }: Props) {
               dismiss the push (or deny the permission) and it was gone. Same bell as HomeScreen's. */}
           <NotificationBell hasUnread={hasUnread} onPress={() => navigation.navigate("notifications")} />
         </View>
-        {/* Per-tier label (the -rescue variants): a community rescue is not a "Shelter". */}
+        {/* Per-tier label (the -rescue variants): a community rescue is not a "Shelter". Plain while unknown. */}
         <Text style={styles.subLabel}>
-          {tier === "community_rescue" ? "Rescue dashboard" : "Shelter dashboard"}
+          {id.tier === "community_rescue" ? "Rescue dashboard" : id.tier ? "Shelter dashboard" : "Dashboard"}
         </Text>
 
         {verified ? (
@@ -200,7 +210,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
                 <Text style={styles.bannerBody}>{banner.l1}</Text>
                 <Text style={styles.bannerBody}>{banner.l2}</Text>
               </View>
-              <Text style={styles.bannerCta}>{banner.cta}</Text>
+              {state === "incomplete" && !id.tier ? null : <Text style={styles.bannerCta}>{banner.cta}</Text>}
             </Card>
           </TouchableOpacity>
         ) : null}

@@ -265,6 +265,8 @@ export type ShelterDashboard = {
   // US-W3 · the Wishlist line. Optional: a server older than the wishlist refactor sends no block.
   wishlist?: ShelterDashboardWishlist;
 };
+// SH13 · the two fields of GET /shelter/profile the shell's identity reads (the full payload has more).
+export type ShelterProfileSummary = { org_name: string; tier: ShelterTier };
 export type ShelterDashboardWishlist = { open_needs: number; pledges_awaiting_confirm: number };
 export type ShelterDashboardRescue = {
   city: string | null; city_supported: boolean; needs_help: number | null; open_cases: number;
@@ -280,12 +282,16 @@ export type ShelterDashboardRescue = {
 // shelterRequests.ts re-derives it from `kind` instead of trusting the wire string
 // directly, same defensive stance as notifications.ts's own client-side routing.
 export type ShelterRequestKind = "adoption" | "volunteer" | "placement";
+// SH8b · the two sources' own vocabularies, as a union (the server 400s an unknown `kind` since backend step 5).
+export type ShelterRequestStatus =
+  | "active" | "adopted" | "declined" | "withdrawn"
+  | "requested" | "approved" | "cancelled" | "completed" | "no_show";
 export type ShelterRequest = {
   kind: ShelterRequestKind;
   id: string;
   title: string;
   subtitle: string;
-  status: string;
+  status: ShelterRequestStatus;
   created_at: string;
   target: { route: string; id: string };
 };

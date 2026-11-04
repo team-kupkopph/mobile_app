@@ -29,7 +29,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { Card, Chip } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
-import { shelterShellState } from "../shelterDashboard";
+import { shelterListingsTile, shelterShellState } from "../shelterDashboard";
 import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
@@ -206,7 +206,8 @@ export function ShelterProfileScreen({ navigation }: Props) {
         </Card>
 
         <View style={[styles.statRow, large && styles.statRowLarge]}>
-          <Stat n={counts.draft_listings} label={gated ? (isTier1 ? "Draft" : "Drafts") : "Listings"} large={large} />
+          {/* SH5 · verified: the LIVE count under "Listings"; gated: the drafts. */}
+          <Stat {...shelterListingsTile(counts, !gated, isTier1)} large={large} />
           <Stat n={counts.adopted} label="Adopted" large={large} />
           <Stat n={counts.volunteers ?? 0} label="Volunteers" large={large} />
         </View>
