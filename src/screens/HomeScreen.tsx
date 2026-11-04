@@ -23,6 +23,8 @@ import { CheckIcon, ClockIcon } from "../components/AppIcons";
 import { NotificationBell } from "../components/NotificationBell";
 import { GuestIntentAction, takeIntent } from "../guestIntent";
 import { OwnerTabScreenProps, RootStackParamList } from "../navigation/types";
+import { keepGoodRes } from "../refreshState";
+import { useRefreshOnFocus, useRefreshWithKey } from "../useRefreshOnFocus";
 import { pickSpotlight } from "../sagip";
 import { MySignupItem, shiftHeadline, shiftTimeRange, todayShift } from "../volunteer";
 import { HelpShelter, WAYS_TO_HELP_EMPTY } from "../waysToHelp";
@@ -112,15 +114,18 @@ export function HomeScreen({ navigation, route }: Props) {
   // F8 (shelter home test plan) · named so focus AND the offline panel's "Try again" run it. A shelter that opened the
   // app offline lands here (the stack's initial route is "home"); the redirect below waits for /me, so a retry that
   // skipped it left the shelter in the owner shell after the connection came back.
+  // SQ5 follow-up · this is the ACCOUNT half of what Home loads: who you are (and the shelter redirect) and today's shift. It
+  // changes only through something done elsewhere, so it loads on first focus and after a pushed screen pops, never on a
+  // plain tab switch (`useRefreshOnFocus(…, Infinity)`). It resolves to /me's outcome, so a failure retries on the next focus.
   const loadAccount = useCallback(() => {
-    api.get("/me").then((r) => {
-      if (!r.ok) return;
+    return api.get("/me").then((r) => {
+      if (!r.ok) return false;
       // US-X1: the right shell for who you are. A returning shelter account lands here (the
       // single stack's initialRouteName is always "home") — redirect it to the shelter shell.
       if (r.data.account_type === "shelter") {
         // The tab screen's own `navigation.reset` would reset the tab navigator; the shelter shell is a root-stack route.
         enterShelterShell(navigation.getParent<NativeStackNavigationProp<RootStackParamList>>()!);
-        return;
+        return true;
       }
       setMe(r.data);
       // G15 · shelter accounts already returned above (via the reset); admin accounts have
@@ -133,28 +138,36 @@ export function HomeScreen({ navigation, route }: Props) {
       } else {
         setTodaySignup(null);
       }
-    });
-    // Refetched on every focus, including right after leaving NotificationsScreen (which
-    // marks everything read on open) — so the dot clears the moment you come back.
-    // SH12 · one count, not the whole feed.
-    api.get("/me/notifications/unread-count").then((r) => {
-      if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
-    });
-    // The spotlight's two sources (see pickSpotlight). Home was already making four
-    // requests per focus and these make six — the cost of the card saying something true
-    // rather than being a static list. There is no summary endpoint to collapse them into.
-    api.get("/me/rescues").then((r) => {
-      if (r.ok) setMyCases(r.data?.cases ?? []);
-    });
-    api.get("/me/reports").then((r) => {
-      // `results`, not `reports` — /me/reports and /reports/map disagree on the key
-      // (views.py:430 vs :417), and MyReportsScreen reads `results`. Getting this wrong
-      // is silent: the spotlight just never appears.
-      if (r.ok) setMyReports(r.data?.results ?? []);
+      return true;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
   }, []);
-  useFocusEffect(loadAccount);
+  useRefreshOnFocus(loadAccount, Infinity);
+
+  // The bell's dot and the spotlight's two sources (see pickSpotlight): the 30 s rule, and always after a pushed screen pops
+  // (NotificationsScreen marks everything read on open, so the dot clears the moment you come back).
+  // SH12 · one count, not the whole feed. There is no summary endpoint to collapse the three into.
+  const loadHomeData = useCallback(() => {
+    return Promise.all([
+      api.get("/me/notifications/unread-count").then((r) => {
+        if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
+        return r.ok;
+      }),
+      api.get("/me/rescues").then((r) => {
+        if (r.ok) setMyCases(r.data?.cases ?? []);
+        return r.ok;
+      }),
+      api.get("/me/reports").then((r) => {
+        // `results`, not `reports` — /me/reports and /reports/map disagree on the key
+        // (views.py:430 vs :417), and MyReportsScreen reads `results`. Getting this wrong
+        // is silent: the spotlight just never appears.
+        if (r.ok) setMyReports(r.data?.results ?? []);
+        return r.ok;
+      })
+    ]).then((all) => all.every(Boolean));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable
+  }, []);
+  useRefreshOnFocus(loadHomeData);
 
   // The two CITY-SCOPED panels, split out of the account-scoped effect above and keyed on
   // `city`.
@@ -175,7 +188,7 @@ export function HomeScreen({ navigation, route }: Props) {
   // retry WITH. Before this, the two panels below had no retry at all — they rendered a
   // sentence claiming there was nothing to show.
   const loadCityPanels = useCallback(() => {
-      if (!isReady) return;
+      if (!isReady) return false;
       // Adoption preview — the first 5 available listings in the user's city.
       //
       // ⚠️ THE SLICE IS THE LIMIT, not the query string. This used to ask for `page_size=2`
@@ -183,42 +196,52 @@ export function HomeScreen({ navigation, route }: Props) {
       // and slices by its own PAGE_SIZE = 20, so `page_size` has never been honoured. Home
       // was rendering up to twenty pets under a comment claiming two.
       const cityParam = city ? `?city=${encodeURIComponent(city)}` : "";
-      api.get(`/listings${cityParam}`).then((r) => {
-        setListingsRes({ ok: r.ok, status: r.status });
+      // SQ5 follow-up · a refresh keeps what is showing: `keepGoodRes` never downgrades a panel that had loaded.
+      const listingsP = api.get(`/listings${cityParam}`).then((r) => {
+        setListingsRes((prev) => keepGoodRes(prev, r));
         if (r.ok) setListings((r.data?.results ?? []).slice(0, 5));
+        return r.ok;
       });
       // US-W4 · Ways to help — page 1 of the shelters asking for help, near first; the slice is the limit (as above).
-      api.get(`/shelters/ways-to-help?city=${encodeURIComponent(city ?? "")}`).then((r) => {
-        setHelpRes({ ok: r.ok, status: r.status });
+      const helpP = api.get(`/shelters/ways-to-help?city=${encodeURIComponent(city ?? "")}`).then((r) => {
+        setHelpRes((prev) => keepGoodRes(prev, r));
         if (r.ok) setHelpers((r.data?.results ?? []).slice(0, 3));
+        return r.ok;
       });
       // Nearby rescues — first 2 reported strays near the user's city.
       const rescueCity = city ?? "Marikina";
-      api.get(`/reports/map?city=${encodeURIComponent(rescueCity)}&status=reported`).then((r) => {
-        setRescuesRes({ ok: r.ok, status: r.status });
+      const rescuesP = api.get(`/reports/map?city=${encodeURIComponent(rescueCity)}&status=reported`).then((r) => {
+        setRescuesRes((prev) => keepGoodRes(prev, r));
         if (r.ok) setRescues((r.data?.reports ?? []).slice(0, 2));
+        return r.ok;
       });
+      return Promise.all([listingsP, helpP, rescuesP]).then((all) => all.every(Boolean));
       // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable; refetch on focus and whenever the city resolves or changes
   }, [city, isReady]);
 
   const loadStories = useCallback(() => {
-    api.get("/stories").then((r) => {
-      setStoriesRes({ ok: r.ok, status: r.status });
+    return api.get("/stories").then((r) => {
+      setStoriesRes((prev) => keepGoodRes(prev, r));
       // Two, matching the rescue strip. `results`, like StoriesScreen reads.
       if (r.ok) setStories((r.data?.results ?? []).slice(0, 2));
+      return r.ok;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- api identity is stable
   }, []);
 
-  useFocusEffect(loadCityPanels);
-  useFocusEffect(loadStories);
+  // The cached city lands ASYNCHRONOUSLY on a cold start (above): the panels reload by themselves when it does, and wait for it
+  // (a null key) before the first focus load. The 30 s rule decides every other focus.
+  const cityKey = isReady ? city ?? "" : null;
+  useRefreshWithKey(loadCityPanels, cityKey);
+  useRefreshOnFocus(loadStories);
 
   /** One retry for the whole screen, for the one-notice case below. */
   const reloadPanels = useCallback(() => {
     loadAccount();
+    loadHomeData();
     loadCityPanels();
     loadStories();
-  }, [loadAccount, loadCityPanels, loadStories]);
+  }, [loadAccount, loadHomeData, loadCityPanels, loadStories]);
 
   /**
    * ⚠️ PER-PANEL STATE — the US-R2 rule this screen's own comment says it follows, now
