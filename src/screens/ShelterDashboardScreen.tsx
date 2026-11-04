@@ -20,6 +20,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabs } from "../components/ShelterTabs";
 import { shelterTabNavigate } from "../shelterTabs";
 import { RootStackParamList } from "../navigation/types";
+import { RESUME_SETUP, setupNeeded } from "../shelterSetup";
 import { rescueSummary, shelterIdentity, shelterShellState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
@@ -62,6 +63,8 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   const [me, setMe] = useState<Me | null>(null);
   const [profile, setProfile] = useState<ShelterProfileSummary | null>(null);
+  // NT-14 · the account has no organization profile yet (it quit onboarding after the email code).
+  const [needsSetup, setNeedsSetup] = useState(false);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [hasUnread, setHasUnread] = useState(false);
 
@@ -86,6 +89,7 @@ export function ShelterDashboardScreen({ navigation }: Props) {
       // (no profile yet, SH9) or a failure leaves `profile` null and /me answers instead.
       api.get("/shelter/profile").then(only((r) => {
         if (r.ok) setProfile({ org_name: r.data.org_name, tier: r.data.tier });
+        setNeedsSetup(setupNeeded(r));
       }));
       // F-R3-4 · the bell's dot, same query and same focus refetch as HomeScreen's — so it
       // clears on return from NotificationsScreen (which marks everything read on open).
@@ -103,13 +107,20 @@ export function ShelterDashboardScreen({ navigation }: Props) {
   const shell = shelterShellState(dash, me);
   const verified = shell.verified;
   const state = shell.banner;
-  const banner = state === "pending" || state === "rejected" || state === "incomplete" ? BANNER[state] : null;
+  // NT-14 · no profile yet: the banner leads back into setup instead of to documents it cannot send.
+  const banner = needsSetup && !verified
+    ? { title: RESUME_SETUP.title, l1: RESUME_SETUP.body, l2: "", cta: RESUME_SETUP.cta }
+    : state === "pending" || state === "rejected" || state === "incomplete" ? BANNER[state] : null;
   // SH13 · never a defaulted tier: while it is unknown the badge and the Upload CTA stay hidden.
   const id = shelterIdentity(profile, me);
   const badge = id.tier === "community_rescue" ? "Verified Rescue" : "Verified Shelter";
   const counts = dash?.counts ?? { draft_listings: 0, adopted: 0, donations: 0 };
 
   function onBannerPress() {
+    if (needsSetup) {
+      navigation.navigate("shelterTier", { resume: true });
+      return;
+    }
     // US-D4 audit (2026-08-24) · was a dead tap for "pending" — the banner's own CTA
     // reads "Status ›" but nothing navigated, same shape as the dead Google-signup and
     // the old draft-a-listing button earlier audits found (that one has since moved to
@@ -209,9 +220,9 @@ export function ShelterDashboardScreen({ navigation }: Props) {
               <View style={[styles.bannerCopy, large && styles.bannerCopyLarge]}>
                 <Text style={styles.bannerTitle} maxFontSizeMultiplier={maxFontScale.title}>{banner.title}</Text>
                 <Text style={styles.bannerBody}>{banner.l1}</Text>
-                <Text style={styles.bannerBody}>{banner.l2}</Text>
+                {banner.l2 ? <Text style={styles.bannerBody}>{banner.l2}</Text> : null}
               </View>
-              {state === "incomplete" && !id.tier ? null : <Text style={styles.bannerCta}>{banner.cta}</Text>}
+              {state === "incomplete" && !id.tier && !needsSetup ? null : <Text style={styles.bannerCta}>{banner.cta}</Text>}
             </Card>
           </TouchableOpacity>
         ) : null}
@@ -321,7 +332,8 @@ export function ShelterDashboardScreen({ navigation }: Props) {
           );
         })() : null}
 
-        {!verified && banner ? (
+        {/* NT-14 · while setup is not finished the banner is the one next step; the foot card would repeat it. */}
+        {!verified && banner && !needsSetup ? (
           <Card accent={colors.teal} style={[styles.footCard, large && styles.stackLarge]}>
             <View style={[styles.footCopy, large && styles.footCopyLarge]}>
               <Text style={styles.footTitle}>{state === "pending" ? "Draft your listings while you wait" : "Finish verifying to go live"}</Text>

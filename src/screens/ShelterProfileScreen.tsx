@@ -32,6 +32,7 @@ import { shelterTabNavigate } from "../shelterTabs";
 import { Card, Chip } from "../components/ui";
 import { RootStackParamList } from "../navigation/types";
 import { activeShiftsLabel, shelterListingsTile, shelterShellState } from "../shelterDashboard";
+import { RESUME_SETUP, setupNeeded } from "../shelterSetup";
 import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
 
@@ -74,6 +75,9 @@ export function ShelterProfileScreen({ navigation }: Props) {
   // Plan Task 9 · the ORGANISATION's name and logo (GET /shelter/profile). The header used to show the account's display
   // name and a glyph. Until this loads (or if it fails) the header falls back to those — a stand-in, never a blank.
   const [org, setOrg] = useState<{ name: string; logoUrl: string | null } | null>(null);
+  // NT-14 · no organization profile yet (onboarding quit after the email code): the card, the row and the tier label
+  // all lead back into setup instead of to screens that need a profile.
+  const [needsSetup, setNeedsSetup] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
   const [dash, setDash] = useState<ShelterDashboard | null>(null);
   // DW2 (backend#93) · the shelter's own QRs, so the Donation QR row says On only when a QR is live (AT5).
@@ -97,6 +101,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
       }));
       api.get("/shelter/profile").then(only((r) => {
         if (r.ok) { setOrg({ name: r.data.org_name, logoUrl: r.data.logo_url ?? null }); setLogoFailed(false); }
+        setNeedsSetup(setupNeeded(r));
       }));
       api.get("/shelter/dashboard").then(only((r) => { if (r.ok) setDash(r.data); }));
       api.get("/shelter/donation-qr").then(only((r) => { if (r.ok) setOwnQr(r.data.donation_qrs ?? []); }));
@@ -185,7 +190,7 @@ export function ShelterProfileScreen({ navigation }: Props) {
             <Chip tone="info" dot={false} label={badge} style={styles.chip} />
           )}
 
-          <Text style={styles.orgSub}>{sub}</Text>
+          {needsSetup ? null : <Text style={styles.orgSub}>{sub}</Text>}
         </Card>
 
         <View style={[styles.statRow, large && styles.statRowLarge]}>
@@ -199,7 +204,8 @@ export function ShelterProfileScreen({ navigation }: Props) {
         <Card style={styles.group}>
           {/* F-R3-4 removed a dead "Organization details" row until its screen existed. Plan Task 9 brought it
               back WITH its screen: name, logo, description, hours and the private contacts. */}
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("organizationProfile")}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() =>
+            needsSetup ? navigation.navigate("shelterTier", { resume: true }) : navigation.navigate("organizationProfile")}>
             <Row label="Organization profile" />
           </TouchableOpacity>
           {/* US-Q1 · was a dead row (no onPress at all, same shape as the "+ List an
@@ -230,14 +236,16 @@ export function ShelterProfileScreen({ navigation }: Props) {
               activeOpacity={0.85}
               style={styles.accentWarn}
               onPress={() =>
-                card === "incomplete"
-                  ? navigation.navigate("shelterVerify", { tier })
-                  : navigation.navigate("verifyDocuments")
+                needsSetup
+                  ? navigation.navigate("shelterTier", { resume: true })
+                  : card === "incomplete"
+                    ? navigation.navigate("shelterVerify", { tier })
+                    : navigation.navigate("verifyDocuments")
               }
             >
               <View style={styles.accentCopy}>
-                <Text style={styles.accentWarnTitle}>{CARD[card].title}</Text>
-                <Text style={styles.accentWarnBody}>{CARD[card].body}</Text>
+                <Text style={styles.accentWarnTitle}>{needsSetup ? RESUME_SETUP.title : CARD[card].title}</Text>
+                <Text style={styles.accentWarnBody}>{needsSetup ? RESUME_SETUP.body : CARD[card].body}</Text>
               </View>
               <Text style={styles.accentWarnChev} allowFontScaling={false}>›</Text>
             </TouchableOpacity>

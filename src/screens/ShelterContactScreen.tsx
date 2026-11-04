@@ -5,9 +5,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { Me } from "../api/types";
 import { useApi } from "../api/useApi";
 import { RootStackParamList } from "../navigation/types";
 import { normalizePhMobile, phoneError } from "../phone";
+import { phoneAlreadyVerified } from "../shelterSetup";
 import { AuthHeader, FormField, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { maxFontScale, spacing, typography } from "../theme";
 
@@ -24,6 +26,8 @@ export function ShelterContactScreen({ navigation, route }: Props) {
   const [website, setWebsite] = useState("");
   const [error, setError] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
+  // NT-14 · the account's own phone, to skip the code for a number it already verified.
+  const [me, setMe] = useState<Me | null>(null);
 
   // ⚠️ US-R4 · NOT a detail route — this is FORM PREFILL, and it belongs to US-R5.
   // @loadStateExempt form prefill, not a detail route — a blank editable field is the
@@ -43,6 +47,7 @@ export function ShelterContactScreen({ navigation, route }: Props) {
   useEffect(() => {
     let alive = true;
     api.get("/me").then((r) => {
+      if (alive && r.ok) setMe(r.data);
       if (alive && r.ok && r.data.display_name) {
         setName((current) => (current ? current : r.data.display_name));
         setPrefilled(true);
@@ -83,6 +88,11 @@ export function ShelterContactScreen({ navigation, route }: Props) {
       });
       if (!patch.ok) {
         setError(patch.data?.error?.message ?? "Couldn't save your contact details. Try again.");
+        return;
+      }
+      // NT-14 · resuming setup with the number this account already verified: no second code.
+      if (phoneAlreadyVerified(me, e164)) {
+        navigation.navigate("shelterVerify", { tier });
         return;
       }
       const sms = await api.post("/me/phone", { phone: e164 });

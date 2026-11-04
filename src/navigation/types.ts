@@ -69,7 +69,8 @@ export type RootStackParamList = {
   memberVerify: undefined;
   memberSubmitted: undefined;
   // Shelter journey (B · tier 1, C · tier 2)
-  shelterTier: { social?: SocialIdentity } | undefined;
+  // NT-14 · `resume`: a signed-in shelter finishing setup it quit; a pick goes straight to shelterSetup.
+  shelterTier: { social?: SocialIdentity; resume?: true } | undefined;
   shelterSetup: { tier: ShelterTier };
   shelterContact: { tier: ShelterTier };
   shelterPhoneVerify: { tier: ShelterTier; phone: string };
