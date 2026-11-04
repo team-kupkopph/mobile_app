@@ -43,6 +43,8 @@ export function ShelterTierScreen({ navigation, route }: Props) {
   const api = useApi();
   const { setTokens } = useAuth();
   const social = route.params?.social;
+  // NT-14 · a signed-in shelter finishing the setup it quit (from Home or You): the account exists, so no signup.
+  const resume = route.params?.resume === true;
   const [busy, setBusy] = useState(false);
   // R6-F10 · at a large font scale (AX3 and up) the icon, the text and the chevron cannot share a row: the text
   // column is too narrow for a title word ("Organization" broke as "Organi / zation"). The card stacks, so the
@@ -51,6 +53,10 @@ export function ShelterTierScreen({ navigation, route }: Props) {
   const large = fontScale > 1.5;
 
   async function onPick(tier: ShelterTier) {
+    if (resume) {
+      navigation.navigate("shelterSetup", { tier });
+      return;
+    }
     if (!social) {
       navigation.navigate("signup", { accountType: "shelter", tier });
       return;
@@ -92,7 +98,7 @@ export function ShelterTierScreen({ navigation, route }: Props) {
 
   return (
     <View style={styles.screen}>
-      <AuthHeader title="Shelter type" activeStep={0} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
+      <AuthHeader title={resume ? "Finish setting up" : "Shelter type"} activeStep={0} stepCount={SHELTER_STEP_COUNT} onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
