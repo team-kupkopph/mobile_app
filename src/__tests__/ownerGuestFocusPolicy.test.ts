@@ -9,7 +9,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 
 import { keepGoodRes } from "../refreshState";
-import { shouldRefresh } from "../useRefreshOnFocus";
+import { COALESCE_MS, shouldRefresh, shouldRunKeyedLoad } from "../useRefreshOnFocus";
 
 const read = (rel: string) => readFileSync(join(__dirname, "..", rel), "utf8");
 const strip = (src: string) => src.split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
@@ -52,12 +52,31 @@ describe("an invalidated tab loads at its next focus", () => {
   });
   it("an Infinity window (Home's account) is untouched by it: only the key-driven loads pass `invalidated`", () => {
     const src = strip(read("useRefreshOnFocus.ts"));
-    expect(src).toMatch(/useRefreshOnFocus\(\(\) => \{[\s\S]*?\}, staleMs, invalid\);/);
+    expect(src).toMatch(/useRefreshOnFocus\(\(\) => runRef\.current\(\), staleMs, invalid\);/);
   });
   it("useRefreshWithKey loads a key change at once only while focused, and otherwise invalidates", () => {
     const src = strip(read("useRefreshOnFocus.ts"));
     expect(src).toMatch(/const focused = useIsFocused\(\);/);
-    expect(src).toMatch(/if \(focused\) loadRef\.current\(\);\s*else invalid\.current = true;/);
+    expect(src).toMatch(/if \(focused\) runRef\.current\(\);\s*else invalid\.current = true;/);
+  });
+});
+
+// NT-O3, second half (found by the walk): a blurred tab is FROZEN (`freezeOnBlur`), so a key change that happens while it is on
+// another tab does not run its effect until the tab unfreezes, which is at its next FOCUS: the key-change effect and the focus load
+// then both fire. A load for the same key that began a moment ago covers the second one.
+describe("shouldRunKeyedLoad", () => {
+  const base = { loadedKey: "Makati", key: "Makati", loadedAt: 1_000_000, now: 1_000_000 + COALESCE_MS - 1 };
+  it("skips a second load for the same key inside the coalescing window", () => {
+    expect(shouldRunKeyedLoad(base)).toBe(false);
+  });
+  it("loads once the window has passed, or for a different key, or before any load", () => {
+    expect(shouldRunKeyedLoad({ ...base, now: base.loadedAt + COALESCE_MS })).toBe(true);
+    expect(shouldRunKeyedLoad({ ...base, key: "Pasig City" })).toBe(true);
+    expect(shouldRunKeyedLoad({ ...base, loadedKey: null, loadedAt: null })).toBe(true);
+  });
+  it("both paths (focus and key change) go through it", () => {
+    const src = strip(read("useRefreshOnFocus.ts"));
+    expect((src.match(/shouldRunKeyedLoad\(/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -111,7 +130,7 @@ describe("useRefreshWithKey", () => {
   const hook = read("useRefreshOnFocus.ts");
   it("a key change loads by itself (a filter, the city landing) and a null key means not ready: the focus load reports failure", () => {
     expect(hook).toMatch(/export function useRefreshWithKey/);
-    expect(hook).toMatch(/if \(keyRef\.current === null\) return false;/);
+    expect(hook).toMatch(/if \(k === null\) return false;/);
     expect(hook).toMatch(/prevKey\.current !== key/);
   });
 });

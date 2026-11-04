@@ -70,6 +70,14 @@ export function useRefreshOnFocus(
   );
 }
 
+export type KeyedLoadInput = { loadedKey: string | null; key: string; loadedAt: number | null; now: number };
+
+/** A load for the SAME key that began less than COALESCE_MS ago already covers this one (see useRefreshWithKey). */
+export function shouldRunKeyedLoad({ loadedKey, key, loadedAt, now }: KeyedLoadInput): boolean {
+  if (loadedKey === null || loadedAt === null || loadedKey !== key) return true;
+  return now - loadedAt >= COALESCE_MS;
+}
+
 /**
  * `useRefreshOnFocus` for a load that depends on something that can change while the tab is mounted: the filters of a feed, the
  * cached city landing after a cold start. `key` identifies those inputs; `null` means "not ready yet".
@@ -86,16 +94,26 @@ export function useRefreshWithKey(load: () => void | boolean | Promise<boolean |
   // it invalidates, and the next focus loads once. Loading at once AND again on return sent every city-scoped request twice.
   const focused = useIsFocused();
   const invalid = useRef(false);
-  useRefreshOnFocus(() => {
-    if (keyRef.current === null) return false;
+  // The key the last load was for, and when: the focus path and the key-change path share it. A blurred tab is frozen
+  // (`freezeOnBlur`), so a key change made elsewhere is only SEEN when the tab unfreezes at its next focus, where the key-change
+  // effect and the focus load would both fire; whichever runs second finds a load for this key that just began and skips.
+  const loaded = useRef<{ key: string | null; at: number | null }>({ key: null, at: null });
+  const run = () => {
+    const k = keyRef.current;
+    if (k === null) return false;
+    if (!shouldRunKeyedLoad({ loadedKey: loaded.current.key, key: k, loadedAt: loaded.current.at, now: Date.now() })) return true;
+    loaded.current = { key: k, at: Date.now() };
     return loadRef.current();
-  }, staleMs, invalid);
+  };
+  const runRef = useRef(run);
+  runRef.current = run;
+  useRefreshOnFocus(() => runRef.current(), staleMs, invalid);
   const prevKey = useRef(key);
   useEffect(() => {
     if (prevKey.current !== key) {
       prevKey.current = key;
       if (key !== null) {
-        if (focused) loadRef.current();
+        if (focused) runRef.current();
         else invalid.current = true;
       }
     }
