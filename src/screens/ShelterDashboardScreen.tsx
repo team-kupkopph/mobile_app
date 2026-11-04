@@ -2,7 +2,6 @@
 // screen-shelter-dashboard-incomplete.png. GET /shelter/dashboard drives the amber banner + gates;
 // GET /shelter/profile carries the org name and tier (SH13; /me is the fallback). Everything is derived —
 // listings stay drafts, donations are locked, no badge — until the request is approved (Sprint 2).
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -17,6 +16,7 @@ import { AlertIcon, CheckIcon, ClockIcon, LocationPinIcon, VolunteerIcon } from 
 import { NotificationBell } from "../components/NotificationBell";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { ShelterTabScreenProps } from "../navigation/types";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 import { RESUME_SETUP, setupNeeded } from "../shelterSetup";
 import { rescueSummary, shelterIdentity, shelterShellState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 import { TAP_SLOP } from "../touch";
@@ -77,9 +77,12 @@ export function ShelterDashboardScreen({ navigation }: Props) {
       // community_rescue tier as FACT — a verified shelter shown its own work as zero.
       // Same class as the rescue map's "No strays reported": a failed request rendered as
       // a confident statement about the world.
-      api.get("/shelter/dashboard").then(only((r) => {
+      // SQ5 · resolves to the PRIMARY request's outcome: a failed one makes `useRefreshOnFocus` try again on the next focus
+      // instead of waiting out the stale window. `dash` is never cleared, so a failed refresh leaves the last good counts.
+      const primary = api.get("/shelter/dashboard").then(only((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setDash(r.data);
+        return r.ok;
       }));
       api.get("/me").then(only((r) => { if (r.ok) setMe(r.data); }));
       // SH13 · the ORGANISATION's name and tier, the same source You reads. Secondary like /me: a 404
@@ -94,9 +97,10 @@ export function ShelterDashboardScreen({ navigation }: Props) {
       api.get("/me/notifications/unread-count").then(only((r) => {
         if (r.ok) setHasUnread((r.data?.unread ?? 0) > 0);
       }));
+      return primary;
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, []);
-  useFocusEffect(load);
+  useRefreshOnFocus(load);
 
   // SH1 · the shell's ONE verified state (shared with You and the Rescue card): "any approved"
   // from the server's gates, not the latest request's status — an approved tier-1 rescue with a

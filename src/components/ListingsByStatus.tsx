@@ -2,8 +2,7 @@
 // the poster's OWN listings (GET /listings?mine=true&status=<available|pending|adopted>, B-be1),
 // segmented Live / Reserved / Adopted, with a strip of private drafts above them. Extracted whole
 // from ShelterAnimalsScreen (Task B2); the two screens differ only in chrome and where a row goes.
-import { useFocusEffect } from "@react-navigation/native";
-import { ReactNode, useCallback, useRef, useState } from "react";
+import { ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { Listing } from "../api/types";
@@ -13,6 +12,7 @@ import { ARCHIVED_STATUS, DRAFT_STATUS, SEGMENT_STATUS, applicantsChip, cardChip
 import { TAP_SLOP } from "../touch";
 import { colors, spacing, squircle, typography } from "../theme";
 import { useLargeText } from "../useLargeText";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 import { LoadStateView } from "./LoadStateView";
 import { Card, Chip, SegmentedControl } from "./ui";
 
@@ -26,9 +26,12 @@ type Props = {
   /** Rendered between the segments and the rows — where "+ List an animal" sits. */
   actions?: ReactNode;
   segmentTestID?: string;
+  /** SQ5 · how old the rows may be before a re-focus reloads them. 0 (the default) reloads on every focus, as My listings
+   *  always has; the shelter's Animals tab, which stays mounted, passes DEFAULT_STALE_MS. */
+  refreshStaleMs?: number;
 };
 
-export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }: Props) {
+export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID, refreshStaleMs = 0 }: Props) {
   // At Dynamic Type AX3 and up a row's photo, text and chip cannot share a line (the name truncated to "R1 Dr…"), so the row
   // stacks and its text may wrap.
   const large = useLargeText();
@@ -48,32 +51,47 @@ export function ListingsByStatus({ onOpen, onOpenDraft, actions, segmentTestID }
   const [next, setNext] = useState<number | null>(null);
   // Bumped on every page-1 load: an answer from an earlier segment (or a stale page 2) is dropped, so rows never mix statuses.
   const generation = useRef(0);
-  const loadPage = useCallback((page: number) => {
+  // SQ5 · `keep` re-reads page 1 WITHOUT blanking what is showing (a mounted tab refreshing on focus); a failure leaves the
+  // rows. It resolves to whether page 1 loaded, for `useRefreshOnFocus`. Rows past page 1 are re-read on "Load more".
+  const loadPage = useCallback((page: number, keep = false): Promise<boolean> => {
       const gen = page === 1 ? ++generation.current : generation.current;
-      if (page === 1) {
+      if (page === 1 && !keep) {
         setRes(null);
         setListings(null);
         setNext(null);
       }
       const status = archived ? ARCHIVED_STATUS : SEGMENT_STATUS[segment as keyof typeof SEGMENT_STATUS];
-      api.get(`/listings?mine=true&status=${status}&page=${page}`).then((r) => {
-        if (gen !== generation.current) return;
-        if (page === 1) setRes({ ok: r.ok, status: r.status });
-        if (!r.ok) return;
+      const done = api.get(`/listings?mine=true&status=${status}&page=${page}`).then((r) => {
+        if (gen !== generation.current) return false;
+        if (page === 1 && !(keep && !r.ok)) setRes({ ok: r.ok, status: r.status });
+        if (!r.ok) return false;
         setListings((prev) => (page === 1 ? (r.data?.results ?? []) : [...(prev ?? []), ...(r.data?.results ?? [])]));
         setNext(r.data?.next ?? null);
+        return true;
       });
       if (page === 1) {
         api.get(`/listings?mine=true&status=${DRAFT_STATUS}`).then((r) => {
           if (r.ok) setDrafts(r.data?.results ?? []);
         });
       }
+      return done;
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus + segment change
     }, [segment, archived]);
   // US-R1 · named so the same function serves the focus refetch AND the retry button.
   // Re-derived on every segment change too, same shape as AdoptScreen's species filter.
   const load = useCallback(() => loadPage(1), [loadPage]);
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  // SQ5 · WHEN a re-focus reloads is `useRefreshOnFocus`'s decision; what it does is refresh in place once there are rows.
+  const listingsRef = useRef(listings);
+  listingsRef.current = listings;
+  useRefreshOnFocus(() => (listingsRef.current ? loadPage(1, true) : loadPage(1)), refreshStaleMs);
+  // A segment (or the archive link) changes WHICH rows these are: that always starts from an empty list.
+  const shown = useRef(`${segment}|${archived}`);
+  useEffect(() => {
+    const key = `${segment}|${archived}`;
+    if (shown.current === key) return;
+    shown.current = key;
+    loadPage(1);
+  }, [segment, archived, loadPage]);
 
   const state = loadState(res, listings?.length);
 

@@ -5,7 +5,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 
-import { DEFAULT_STALE_MS, shouldRefresh } from "../useRefreshOnFocus";
+import { COALESCE_MS, DEFAULT_STALE_MS, shouldRefresh } from "../useRefreshOnFocus";
 
 const base = { lastLoadAt: 1_000_000, now: 1_000_000, staleMs: 30_000, returns: 0, returnsAtLastLoad: 0 };
 
@@ -19,8 +19,11 @@ describe("shouldRefresh", () => {
   it("reloads once the data is stale", () => {
     expect(shouldRefresh({ ...base, now: base.now + 30_000 })).toBe(true);
   });
-  it("always reloads after returning from a pushed screen, however fresh", () => {
-    expect(shouldRefresh({ ...base, now: base.now + 1, returns: 1 })).toBe(true);
+  it("reloads after returning from a pushed screen even when the data is otherwise fresh", () => {
+    expect(shouldRefresh({ ...base, now: base.now + COALESCE_MS, returns: 1 })).toBe(true);
+  });
+  it("but not when a load began a moment ago on this same return (the focus load already covers it)", () => {
+    expect(shouldRefresh({ ...base, now: base.now + COALESCE_MS - 1, returns: 1 })).toBe(false);
   });
   it("a failed load (lastLoadAt cleared) loads again on the next focus", () => {
     expect(shouldRefresh({ ...base, lastLoadAt: null, now: base.now + 1 })).toBe(true);

@@ -6,8 +6,7 @@
 // placement both land on the same inquiry ladder (the shelter reads it either as the
 // poster or as the placement recipient), volunteer opens that shift's activity timeline
 // on the Pending section (Task 9 folded the old standalone requests queue into it).
-import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,6 +18,7 @@ import { loadState } from "../net";
 import { EMPTY_PAGED, PagedState, createPagedList } from "../pagedList";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Card, Chip, SegmentedControl } from "../components/ui";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 import { ShelterTabScreenProps } from "../navigation/types";
 import {
   REQUEST_KIND_TILE, SEGMENT_KIND, requestChip, requestCountLine, requestRoute, requestSubtitle, requestsEmptyCopy
@@ -52,12 +52,26 @@ export function ShelterRequestsScreen({ navigation }: Props) {
   const requests = paged.items;
 
   // Named so the same function serves the focus refetch AND the retry button — same shape
-  // as ShelterAnimalsScreen's `load`. Re-derived on every segment change too.
-  const load = useCallback(() => {
-      const kind = SEGMENT_KIND[segment as keyof typeof SEGMENT_KIND];
-      list.reset(`/shelter/requests?kind=${kind}&status=open`);
-    }, [segment, list]);
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  // as ShelterAnimalsScreen's `load`.
+  // SQ5 · this tab stays mounted, so a visit after the first REFRESHES in place (rows, "Load more" progress and the
+  // segment stay on screen; a failed refresh leaves them) and only the first load, or one after a failure, starts from
+  // an empty list. WHEN it runs is `useRefreshOnFocus`'s decision; a segment change loads itself, below.
+  const pagedRef = useRef(paged);
+  pagedRef.current = paged;
+  const pathFor = (seg: number) => `/shelter/requests?kind=${SEGMENT_KIND[seg as keyof typeof SEGMENT_KIND]}&status=open`;
+  const load = useCallback(
+    () => (pagedRef.current.items ? list.refresh() : list.reset(pathFor(segment))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pathFor is a pure function of `segment`
+    [segment, list]
+  );
+  useRefreshOnFocus(load);
+  const shownSegment = useRef(segment);
+  useEffect(() => {
+    if (shownSegment.current === segment) return;
+    shownSegment.current = segment;
+    list.reset(pathFor(segment));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pathFor is a pure function of `segment`
+  }, [segment, list]);
 
   const state = loadState(paged.res, requests?.length);
   // V3 · the artboard's count line and per-segment empty state. The count is the server's total, not the rows on

@@ -8,7 +8,6 @@
 //
 // Before this screen existed the shelter "You" tab landed on the OWNER profile, which showed an
 // owner's rows to an org and no gated state at all.
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { OwnQr, youRowValue } from "../ownQr";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -28,6 +27,7 @@ import { LockIcon } from "../components/AppIcons";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { Card, Chip } from "../components/ui";
 import { ShelterTabScreenProps } from "../navigation/types";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 import { activeShiftsLabel, shelterListingsTile, shelterShellState } from "../shelterDashboard";
 import { RESUME_SETUP, setupNeeded } from "../shelterSetup";
 import { colors, maxFontScale, radii, spacing, squircle, typography } from "../theme";
@@ -92,9 +92,11 @@ export function ShelterProfileScreen({ navigation }: Props) {
       // as `!me?.is_verified_rescuer` — so a failed /me showed an
       // APPROVED shelter its own account as unverified and gated, with every capability
       // apparently revoked. The counts fell back to zero on the same failure.
-      api.get("/me").then(only((r) => {
+      // SQ5 · resolves to the PRIMARY request's outcome (see ShelterDashboardScreen); `me` is never cleared.
+      const primary = api.get("/me").then(only((r) => {
         setRes({ ok: r.ok, status: r.status });
         if (r.ok) setMe(r.data);
+        return r.ok;
       }));
       api.get("/shelter/profile").then(only((r) => {
         if (r.ok) { setOrg({ name: r.data.org_name, logoUrl: r.data.logo_url ?? null }); setLogoFailed(false); }
@@ -102,9 +104,10 @@ export function ShelterProfileScreen({ navigation }: Props) {
       }));
       api.get("/shelter/dashboard").then(only((r) => { if (r.ok) setDash(r.data); }));
       api.get("/shelter/donation-qr").then(only((r) => { if (r.ok) setOwnQr(r.data.donation_qrs ?? []); }));
+      return primary;
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch on focus only
     }, []);
-  useFocusEffect(load);
+  useRefreshOnFocus(load);
 
   // SH12 · the dashboard's exact `active_shifts` (the same set the manage list and calendar call upcoming, open or
   // full). It used to page /shelter/shifts and say "20+" past the first page.

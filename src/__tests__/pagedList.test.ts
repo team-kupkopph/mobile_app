@@ -146,3 +146,77 @@ describe("ShelterRequestsScreen pages through createPagedList", () => {
     expect(screen).toMatch(/paged\.moreFailed/);
   });
 });
+
+// SQ5 PR 4 (spec §5.3 rule 5) · a mounted Requests tab refreshes in place: rows, "Load more" progress and the loading
+// state stay on screen until the new answer replaces them, and a failed refresh leaves them alone.
+describe("createPagedList.refresh (SQ5)", () => {
+  const AD = "/shelter/requests?kind=adoption&status=open";
+
+  it("does nothing before a first load", async () => {
+    const { s, list } = harness();
+    expect(await list.refresh()).toBe(false);
+    expect(s.calls).toHaveLength(0);
+  });
+
+  it("re-reads every page already loaded and replaces the rows in one step (no empty state in between)", async () => {
+    const { s, list, now } = harness();
+    list.reset(AD); s.answer(0); await flush();
+    list.more(); s.answer(1); await flush();
+    expect(now().items).toHaveLength(25);
+
+    const seen: Array<number | null> = [];
+    const p = list.refresh();
+    seen.push(now().items?.length ?? null);
+    expect(s.calls[2].path).toBe(`${AD}&page=1`);
+    s.answer(2); await flush();
+    seen.push(now().items?.length ?? null);
+    expect(s.calls[3].path).toBe(`${AD}&page=2`);
+    s.answer(3); await flush();
+    expect(await p).toBe(true);
+    expect(seen).toEqual([25, 25]);
+    expect(now().items).toHaveLength(25);
+    expect(now().next).toBeNull();
+    expect(now().res).toEqual({ ok: true, status: 200 });
+  });
+
+  it("only re-reads page 1 when only page 1 was loaded", async () => {
+    const { s, list, now } = harness();
+    list.reset(AD); s.answer(0); await flush();
+    const p = list.refresh();
+    s.answer(1); await flush();
+    expect(await p).toBe(true);
+    expect(s.calls).toHaveLength(2);
+    expect(now().items).toHaveLength(20);
+    expect(now().next).toBe(2);
+  });
+
+  it("a failed refresh keeps the rows and reports false", async () => {
+    const { s, list, now } = harness();
+    list.reset(AD); s.answer(0); await flush();
+    const before = now().items;
+    const p = list.refresh();
+    s.answer(1, { ok: false, status: 503, data: null }); await flush();
+    expect(await p).toBe(false);
+    expect(now().items).toBe(before);
+    expect(now().res).toEqual({ ok: true, status: 200 });
+  });
+
+  it("a reset (segment switch) during a refresh wins: the refresh's answer is dropped", async () => {
+    const { s, list, now } = harness();
+    list.reset(AD); s.answer(0); await flush();
+    const p = list.refresh();
+    list.reset("/shelter/requests?kind=volunteer&status=open");
+    s.answer(1); await flush();   // the refresh's page 1, now stale
+    s.answer(2); await flush();   // the volunteer segment's page 1
+    expect(await p).toBe(false);
+    expect(now().items).toHaveLength(3);
+  });
+
+  it("Load more is a no-op while a refresh is in flight", async () => {
+    const { s, list } = harness();
+    list.reset(AD); s.answer(0); await flush();
+    list.refresh();
+    list.more();
+    expect(s.calls).toHaveLength(2);
+  });
+});

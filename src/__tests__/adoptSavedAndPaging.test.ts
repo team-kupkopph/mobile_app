@@ -88,6 +88,6 @@ describe("My listings / Animals read every page (Run 1, R1-F1 / ML-N1)", () => {
     expect(by).toMatch(/onPress=\{\(\) => loadPage\(next\)\}/);
   });
   it("drops a page that answers after the segment changed, so rows never mix statuses", () => {
-    expect(by).toMatch(/if \(gen !== generation\.current\) return;/);
+    expect(by).toMatch(/if \(gen !== generation\.current\) return false;/);
   });
 });
