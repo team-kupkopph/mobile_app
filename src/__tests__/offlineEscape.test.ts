@@ -83,12 +83,16 @@ function fullScreenBranches(src: string): string[] {
  * registered in the navigator, which renders the bar; and still carrying the full-screen failure branch the bar protects.
  */
 const SHELL_ROOTS = ["ShelterDashboardScreen.tsx", "ShelterAnimalsScreen.tsx", "ShelterDonateScreen.tsx", "ShelterRequestsScreen.tsx", "ShelterProfileScreen.tsx"];
+// SQ5 follow-up · the personal member's and the guest shell's roots get their exit from THEIR navigators the same way. The owner
+// You tab (`ProfileScreen`) used to carry a second bar in its failure branch; it is the only one of these with a full-screen
+// failure branch, and this guard would have silently dropped it from SUBJECTS when the bar left the screen.
+const OWNER_GUEST_ROOTS = ["HomeScreen.tsx", "AdoptScreen.tsx", "KawangGawaScreen.tsx", "ProfileScreen.tsx", "HomeGuestScreen.tsx"];
 const navigatorSrc = readFileSync(join(__dirname, "..", "navigation", "ShelterTabNavigator.tsx"), "utf8");
 
 /** Screens that have a full-screen failure branch AND an exit on their happy path. */
 const SUBJECTS = files.filter((f) => {
   const src = read(f);
-  return !SHELL_ROOTS.includes(f) && fullScreenBranches(src).length > 0 && EXIT.test(src);
+  return !SHELL_ROOTS.includes(f) && !OWNER_GUEST_ROOTS.includes(f) && fullScreenBranches(src).length > 0 && EXIT.test(src);
 });
 
 describe("a failed screen still has a way out", () => {
@@ -116,5 +120,22 @@ describe("the shelter shell supplies its own exit (SQ5)", () => {
   it("the roots that fail as a whole screen are Dashboard, Donate and You (the three US-PF3 found)", () => {
     const failing = SHELL_ROOTS.filter((f) => fullScreenBranches(read(f)).length > 0);
     expect(failing).toEqual(["ShelterDashboardScreen.tsx", "ShelterDonateScreen.tsx", "ShelterProfileScreen.tsx"]);
+  });
+});
+
+describe("the owner and guest shells supply their own exit (SQ5 follow-up)", () => {
+  const owner = readFileSync(join(__dirname, "..", "navigation", "OwnerTabNavigator.tsx"), "utf8");
+  const guest = readFileSync(join(__dirname, "..", "navigation", "GuestTabNavigator.tsx"), "utf8");
+  it("the navigators render the bar", () => {
+    expect(owner).toMatch(/<OwnerTabs\b/);
+    expect(guest).toMatch(/<GuestTabs\b/);
+  });
+  it.each(OWNER_GUEST_ROOTS)("%s is a tab of a navigator that draws the bar", (f) => {
+    const name = f.replace(".tsx", "");
+    expect(owner.includes(`component={${name}}`) || guest.includes(`component={${name}}`)).toBe(true);
+  });
+  it("the one root that fails as a whole screen is the owner You tab", () => {
+    const failing = OWNER_GUEST_ROOTS.filter((f) => fullScreenBranches(read(f)).length > 0);
+    expect(failing).toEqual(["ProfileScreen.tsx"]);
   });
 });

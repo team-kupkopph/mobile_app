@@ -11,7 +11,6 @@
 //
 // It was written against a V1 mock and then not kept up with Home for two sprints; the header
 // of HomeSections.tsx records what that looked like and why the pieces are now shared.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -22,21 +21,20 @@ import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { Listing } from "../api/types";
-import { GuestTabs } from "../components/GuestTabs";
 import { ProfileIcon } from "../components/AppIcons";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
 import { SectionHeader } from "../components/ui";
 import { EmptyNote, HomeHeader, ListingRow, MapReport, ReportStrayCard, ShelterHelpRow, StoryRow, StoryRowData, StrayRow, sectionSpacing } from "../components/home/HomeSections";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { RootStackParamList } from "../navigation/types";
+import { GuestTabScreenProps } from "../navigation/types";
 import { HelpShelter, WAYS_TO_HELP_EMPTY } from "../waysToHelp";
 import { TAP_SLOP } from "../touch";
 import { useLargeText } from "../useLargeText";
 import { colors, elevation, pill, radii, spacing, squircle, typography } from "../theme";
 
 
-type Props = NativeStackScreenProps<RootStackParamList, "homeGuest">;
+type Props = GuestTabScreenProps<"homeGuest">;
 
 const GUEST_CITY = "Marikina";
 // US-W4 · the city the header shows, for Ways to help's near-first order and its "Near {city}" heading.
@@ -228,8 +226,6 @@ export function HomeGuestScreen({ navigation }: Props) {
           <StrayRow key={report.report_id} report={report} onPress={() => openWall("account", report.species)} />
         ))}
       </ScrollView>
-
-      <GuestTabs active="home" onGated={openWall} />
 
       <SignupWall
         visible={!!wall}

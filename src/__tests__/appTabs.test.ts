@@ -16,22 +16,26 @@ describe("owner shell helpers", () => {
     expect(ownerTabKeyForRoute("home")).toBe("home");
     expect(ownerTabKeyForRoute("shelterDashboard")).toBeNull();
   });
-  it("enterOwnerShell resets onto Home, carrying justSignedUp only when given", () => {
+  it("enterOwnerShell resets onto the owner shell on Home, carrying justSignedUp only when given", () => {
     const states: unknown[] = [];
     enterOwnerShell({ reset: (s) => states.push(s) });
     enterOwnerShell({ reset: (s) => states.push(s) }, { justSignedUp: true });
     expect(states).toEqual([
-      { index: 0, routes: [{ name: "home" }] },
-      { index: 0, routes: [{ name: "home", params: { justSignedUp: true } }] }
+      { index: 0, routes: [{ name: "ownerTabs", params: { screen: "home" } }] },
+      { index: 0, routes: [{ name: "ownerTabs", params: { screen: "home", params: { justSignedUp: true } } }] }
     ]);
   });
-  it("openOwnerTab navigates to the tab's route with its params", () => {
+  it("openOwnerTab uses the nested form, popping back to a shell already on the stack", () => {
     const calls: unknown[][] = [];
     const nav = { navigate: (...a: unknown[]) => calls.push(a) };
     openOwnerTab(nav, "volunteer", { tab: "mine" });
     openOwnerTab(nav, "profile", { editing: true });
     openOwnerTab(nav, "adopt");
-    expect(calls).toEqual([["kawanggawa", { tab: "mine" }], ["profile", { editing: true }], ["adopt", undefined]]);
+    expect(calls).toEqual([
+      ["ownerTabs", { screen: "kawanggawa", params: { tab: "mine" } }, { pop: true }],
+      ["ownerTabs", { screen: "profile", params: { editing: true } }, { pop: true }],
+      ["ownerTabs", { screen: "adopt", params: undefined }, { pop: true }]
+    ]);
   });
 });
 
@@ -48,9 +52,9 @@ describe("guest shell helpers", () => {
     expect(guestPressAction("adopt")).toEqual({ kind: "wall", action: "adopt" });
     expect(guestPressAction("profile")).toEqual({ kind: "wall", action: "account" });
   });
-  it("enterGuestShell opens the guest Home", () => {
+  it("enterGuestShell pushes the guest shell (a push, so the visitor can swipe back to Welcome as before)", () => {
     const calls: string[] = [];
     enterGuestShell({ navigate: (r) => calls.push(r) });
-    expect(calls).toEqual(["homeGuest"]);
+    expect(calls).toEqual(["guestTabs"]);
   });
 });

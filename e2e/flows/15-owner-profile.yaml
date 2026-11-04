@@ -17,3 +17,34 @@ appId: ph.kupkop.app
     visible:
       id: "screen.profile"
     timeout: 20000
+
+# SQ5 follow-up · the member shell is ONE tab navigator, so every tab is reachable from every other and a root has nothing
+# beneath it. Visit the rest, ending on Home...
+- tapOn:
+    id: "tab.adopt"
+- extendedWaitUntil:
+    visible:
+      id: "screen.adopt"
+    timeout: 20000
+- tapOn:
+    id: "tab.volunteer"
+- extendedWaitUntil:
+    visible:
+      id: "screen.kawanggawa"
+    timeout: 20000
+
+# ...then the iOS back swipe on a root. Before the navigator it popped to whichever tab came before (here: Adopt). Now there is
+# nothing to pop: the screen must not change.
+# ⚠️ THIS ASSERTION CANNOT FAIL. A positive control (a pushed Sign in screen, the same swipe, expecting the guest Home) did NOT pop
+# under Maestro, with the swipe starting at 1% or at 0%: Maestro's swipe does not trigger iOS's interactive back gesture here. An OS
+# edge swipe from x = 2 pt (the simulator tool's `swipe`) does pop, and that is the check that counts; it was done by hand on
+# 2026-11-04. Kept as a smoke check that the tab stays put, not as proof.
+- swipe:
+    start: "1%, 50%"
+    end: "80%, 50%"
+- assertVisible:
+    id: "screen.kawanggawa"
+- tapOn:
+    id: "tab.home"
+- assertVisible:
+    id: "screen.home"

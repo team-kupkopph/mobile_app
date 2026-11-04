@@ -52,25 +52,55 @@ describe("GuestTabNavigator", () => {
   });
 });
 
-describe("registration (inert)", () => {
+describe("registration (live since the switch)", () => {
   it("both are root-stack routes typed as nested navigators", () => {
     expect(root).toMatch(/<Stack\.Screen name="ownerTabs" component=\{OwnerTabNavigator\} \/>/);
     expect(root).toMatch(/<Stack\.Screen name="guestTabs" component=\{GuestTabNavigator\} \/>/);
     expect(types).toMatch(/ownerTabs: NavigatorScreenParams<OwnerTabParamList> \| undefined;/);
     expect(types).toMatch(/guestTabs: NavigatorScreenParams<GuestTabParamList> \| undefined;/);
   });
-  it("the five live stack routes are still registered (nothing moved yet)", () => {
+  it("the five tab routes left the root stack, in the registration and in the param list", () => {
+    const block = /export type RootStackParamList = \{\n([\s\S]*?)\n\};/.exec(types);
+    expect(block).not.toBeNull();
+    const rootKeys = [...block![1].matchAll(/^ {2}(\w+):/gm)].map((m) => m[1]);
+    expect(rootKeys.length).toBeGreaterThan(50); // a scan that found nothing proves nothing
     for (const r of ["home", "adopt", "kawanggawa", "profile", "homeGuest"]) {
-      expect(root).toMatch(new RegExp(`<Stack\\.Screen name="${r}"`));
+      expect(root).not.toMatch(new RegExp(`<Stack\\.Screen name="${r}"`));
+      expect(rootKeys).not.toContain(r);
     }
   });
-  it("the bars still work without a navigator: their default presses are the stack navigates they were", () => {
+  it("the bars only report a key: a press is decided by the navigator, never by a stack navigate", () => {
     const o = read("components/OwnerTabs.tsx");
     const g = read("components/GuestTabs.tsx");
-    expect(o).toMatch(/onTabPress \? onTabPress\(key\) : navigation\.navigate\(route as never\)/);
-    expect(g).toMatch(/onTabPress \? onTabPress\("adopt"\) : onGated\?\.\("adopt"\)/);
-    expect(g).toMatch(/navigation\.navigate\("homeGuest"\)/);
+    expect(o).toMatch(/onTabPress: \(tab: OwnerTab\) => void/);
+    expect(g).toMatch(/onTabPress: \(tab: GuestTab\) => void/);
+    expect(o).not.toMatch(/useNavigation|navigation\.navigate/);
+    expect(g).not.toMatch(/useNavigation|navigation\.navigate/);
     for (const id of ["tab.home", "tab.adopt", "tab.volunteer", "tab.profile"]) expect(o).toContain(`"${id}"`);
     for (const id of ["tab.guest.home", "tab.guest.adopt", "tab.guest.volunteer", "tab.guest.profile"]) expect(g).toContain(`"${id}"`);
+  });
+});
+
+describe("one bar, drawn by the navigator", () => {
+  const OWNER_ROOTS = ["HomeScreen", "AdoptScreen", "KawangGawaScreen", "ProfileScreen"];
+  const GUEST_ROOTS = ["HomeGuestScreen", "KawangGawaScreen"];
+  it("each navigator renders exactly one bar", () => {
+    const strip = (src: string) => src.split("\n").filter((l) => !l.trim().startsWith("//")).join("\n");
+    expect(strip(owner).match(/<OwnerTabs\b/g)).toHaveLength(1);
+    expect(strip(guest).match(/<GuestTabs\b/g)).toHaveLength(1);
+  });
+  it.each([...new Set([...OWNER_ROOTS, ...GUEST_ROOTS])])("%s draws no bar of its own and no longer imports one", (f) => {
+    const src = read(`screens/${f}.tsx`);
+    expect(src).not.toMatch(/<(OwnerTabs|GuestTabs)\b/);
+    expect(src).not.toMatch(/import \{ (OwnerTabs|GuestTabs) \}/);
+  });
+  it("the roots are registered once, in their navigator", () => {
+    for (const f of OWNER_ROOTS) expect(owner).toContain(`component={${f}}`);
+    for (const f of GUEST_ROOTS) expect(guest).toContain(`component={${f}}`);
+  });
+  it("the Volunteer hub no longer hosts a wall for the bar: the guest navigator does", () => {
+    const kg = read("screens/KawangGawaScreen.tsx");
+    expect(kg).not.toMatch(/SignupWall|setWall/);
+    expect(guest).toMatch(/<SignupWall/);
   });
 });

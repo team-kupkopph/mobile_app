@@ -53,6 +53,14 @@ describe("the Volunteer hub is opened through openOwnerTab", () => {
   });
 });
 
+describe("a push tap into a member tab", () => {
+  it("PushBridge routes a tab target through openOwnerTab, because a root-level navigate does not reach a nested tab", () => {
+    const src = code("push/PushBridge.tsx");
+    expect(src).toMatch(/const ownerKey = ownerTabKeyForRoute\(screen\);/);
+    expect(src).toMatch(/openOwnerTab\(navRef, ownerKey, /);
+  });
+});
+
 describe("other inbound paths", () => {
   it("Home's empty state opens the Adopt tab through the helper", () => {
     expect(code("screens/HomeScreen.tsx")).toMatch(/openOwnerTab\(navigation, "adopt"\)/);
@@ -62,6 +70,7 @@ describe("other inbound paths", () => {
     const root = code("navigation/RootNavigator.tsx");
     expect(root).toMatch(/onBrowseGuest=\{\(\) => enterGuestShell\(navigation\)\}/);
     expect(root).toMatch(/initialRouteName=\{tokens \? OWNER_SHELL_ROUTE : "welcome"\}/);
+    expect(read("appTabs.ts")).toMatch(/OWNER_SHELL_ROUTE = "ownerTabs" as const/);
   });
   it("Settings' Edit profile and the delete screen's volunteer blocker go through the owner-tab helpers", () => {
     const settings = code("settings.ts");
@@ -72,10 +81,10 @@ describe("other inbound paths", () => {
   });
 });
 
-describe("popToOwnerTab (shim until the switch)", () => {
-  it("pops back to the existing tab with its params: the loop `navigate` caused must stay gone", () => {
+describe("popToOwnerTab", () => {
+  it("pops back to the shell already on the stack and selects the tab with its params: never `navigate`, the loop it caused must stay gone", () => {
     const calls: unknown[][] = [];
     popToOwnerTab({ popTo: (...a: unknown[]) => calls.push(a) }, "profile", { editing: true });
-    expect(calls).toEqual([["profile", { editing: true }]]);
+    expect(calls).toEqual([["ownerTabs", { screen: "profile", params: { editing: true } }]]);
   });
 });

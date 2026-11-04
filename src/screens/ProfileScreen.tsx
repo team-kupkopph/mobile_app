@@ -2,7 +2,6 @@
 // Fetches /me on focus (avatar, name, email, Verified Member status). City has no GET endpoint
 // (only PUT /me/location — see accounts/views.py MeLocationView) so the last-picked city is cached
 // in AuthContext/SecureStore by LocationPickerScreen and read from there instead of /me.
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useState } from "react";
 import { Image, ImageSourcePropType, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from "react-native";
@@ -18,17 +17,17 @@ import { cityToCache } from "../auth/cityFromMe";
 import { accountIdFromAccessToken } from "../auth/idToken";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { confirmLogout } from "../auth/confirmLogout";
-import { OwnerTabs } from "../components/OwnerTabs";
 import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { pickAndUpload } from "../media/pickAndUpload";
-import { RootStackParamList } from "../navigation/types";
+import { OwnerTabScreenProps, RootStackParamList } from "../navigation/types";
 import { changeProfilePhoto, removeProfilePhoto } from "../profilePhoto";
 import { myPetsHint } from "../petForm";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
-type Props = NativeStackScreenProps<RootStackParamList, "profile">;
+type Props = OwnerTabScreenProps<"profile">;
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -143,7 +142,8 @@ export function ProfileScreen({ navigation, route }: Props) {
     await signOut();
     // Single stack (see RootNavigator) — signing out doesn't cross a stack boundary on its own,
     // so land the user back on welcome explicitly rather than stranding them on a gated screen.
-    navigation.reset({ index: 0, routes: [{ name: "welcome" }] });
+    // The tab screen's own `navigation.reset` would reset the tab navigator; Welcome is a root-stack route.
+    navigation.getParent<NativeStackNavigationProp<RootStackParamList>>()!.reset({ index: 0, routes: [{ name: "welcome" }] });
   }
 
   // Task 10 · Settings → Edit profile comes BACK here with `editing` (React Navigation 7's `navigate`
@@ -182,13 +182,6 @@ export function ProfileScreen({ navigation, route }: Props) {
             body, and most LoadStateView call sites are inline placeholders in a ScrollView.
             See __tests__/safeAreaOnFailure.test.ts. */}
         <LoadStateView state={loadState(res)} onRetry={load} />
-        {/* ⚠️ THE TAB BAR BELONGS IN THIS BRANCH TOO. It does not depend on the data this
-            branch is missing, and it is this screen's only VISIBLE way out — the screen is
-            reached by a tab, so there is no back button either. Without it the offline state
-            is a dead end to look at: the iOS edge-swipe still pops the screen, which is why
-            this survived review and every automated check, but a person sees no exit. Found
-            on a real device during US-PF3 by someone who could not get past it. */}
-        <OwnerTabs active="profile" />
       </View>
     );
   }
@@ -340,7 +333,6 @@ export function ProfileScreen({ navigation, route }: Props) {
         </View>
       </ScrollView>
 
-      <OwnerTabs active="profile" />
     </View>
   );
 }

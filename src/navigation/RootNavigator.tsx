@@ -6,7 +6,6 @@ import { useAuth } from "../auth/AuthContext";
 import { ScreenHeader } from "../components/ui";
 import { useSocialSignIn } from "../auth/useSocialSignIn";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
-import { AdoptScreen } from "../screens/AdoptScreen";
 import { DonateScreen } from "../screens/DonateScreen";
 import { DonatePledgeScreen } from "../screens/DonatePledgeScreen";
 import { MyDonationsScreen } from "../screens/MyDonationsScreen";
@@ -32,8 +31,6 @@ import { ReportMatchesScreen } from "../screens/ReportMatchesScreen";
 import { MatchDetailScreen } from "../screens/MatchDetailScreen";
 import { DonationQrScreen } from "../screens/DonationQrScreen";
 import { ForgotPasswordScreen } from "../screens/ForgotPasswordScreen";
-import { HomeGuestScreen } from "../screens/HomeGuestScreen";
-import { HomeScreen } from "../screens/HomeScreen";
 import { LocationPickerScreen } from "../screens/LocationPickerScreen";
 import { MemberSubmittedScreen } from "../screens/MemberSubmittedScreen";
 import { MemberUpgradeScreen } from "../screens/MemberUpgradeScreen";
@@ -42,7 +39,6 @@ import { OtpLockedScreen } from "../screens/OtpLockedScreen";
 import { RestoreAccountScreen } from "../screens/RestoreAccountScreen";
 import { OtpScreen } from "../screens/OtpScreen";
 import { PasswordChangedScreen } from "../screens/PasswordChangedScreen";
-import { ProfileScreen } from "../screens/ProfileScreen";
 import { ResetOtpScreen } from "../screens/ResetOtpScreen";
 import { ResetPasswordScreen } from "../screens/ResetPasswordScreen";
 import { ShelterContactScreen } from "../screens/ShelterContactScreen";
@@ -93,7 +89,6 @@ import { MyInquiriesScreen } from "../screens/MyInquiriesScreen";
 import { VerifyPhoneScreen } from "../screens/VerifyPhoneScreen";
 import { VerifyDocumentsScreen } from "../screens/VerifyDocumentsScreen";
 import { VerifyResubmitScreen } from "../screens/VerifyResubmitScreen";
-import { KawangGawaScreen } from "../screens/KawangGawaScreen";
 import { KawangGawaDetailScreen } from "../screens/KawangGawaDetailScreen";
 import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen";
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
@@ -145,10 +140,6 @@ export function RootNavigator() {
       <Stack.Screen name="resetPassword" component={ResetPasswordScreen} />
       <Stack.Screen name="passwordChanged" component={PasswordChangedScreen} />
       <Stack.Screen name="support" component={PlaceholderSupport} />
-      <Stack.Screen name="home" component={HomeScreen} />
-      <Stack.Screen name="homeGuest" component={HomeGuestScreen} />
-      <Stack.Screen name="adopt" component={AdoptScreen} />
-      <Stack.Screen name="profile" component={ProfileScreen} />
       <Stack.Screen name="locationPicker" component={LocationPickerScreen} />
       <Stack.Screen name="memberUpgrade" component={MemberUpgradeScreen} />
       <Stack.Screen name="memberVerify" component={MemberVerifyScreen} />
@@ -162,9 +153,8 @@ export function RootNavigator() {
       {/* SQ5 · the shelter shell: ONE bottom-tab navigator holding Home, Animals, Donate, Requests and You. Reach it
           through `openShelterTab` / `enterShelterShell` (src/shelterTabs.ts), never by naming a tab here. */}
       <Stack.Screen name="shelterTabs" component={ShelterTabNavigator} />
-      {/* SQ5 follow-up · the personal member's shell and the signed-out visitor's shell as tab navigators. Registered, but
-          nothing navigates to them until the switch PR; until then `home`, `adopt`, `kawanggawa`, `profile` and `homeGuest`
-          below are the live routes. */}
+      {/* SQ5 follow-up · the personal member's shell and the signed-out visitor's shell: tab navigators. Reach them through
+          `enterOwnerShell` / `openOwnerTab` / `enterGuestShell` (src/appTabs.ts), never by naming a tab here. */}
       <Stack.Screen name="ownerTabs" component={OwnerTabNavigator} />
       <Stack.Screen name="guestTabs" component={GuestTabNavigator} />
       <Stack.Screen name="verifyDocuments" component={VerifyDocumentsScreen} />
@@ -226,7 +216,6 @@ export function RootNavigator() {
       {/* US-V8 — the real hub + shift detail/waiver (Task 4), check-in/out (Task 6), and the
           cancel flow (Task 8). Task 5 (K30/G9) folded the standalone schedule and history
           screens into the hub itself — one screen, segmented Browse | My shifts. */}
-      <Stack.Screen name="kawanggawa" component={KawangGawaScreen} />
       <Stack.Screen name="kawanggawaDetail" component={KawangGawaDetailScreen} />
       <Stack.Screen name="waiver" component={WaiverScreen} />
       <Stack.Screen name="kawanggawaRequested" component={KawangGawaRequestedScreen} />

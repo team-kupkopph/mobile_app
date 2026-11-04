@@ -7,13 +7,10 @@ import type { GuestTabParamList, OwnerTabParamList } from "./navigation/types";
 // shell and the signed-out visitor's shell, and the helpers every INBOUND path will use (the nine sign-in/sign-up resets,
 // the `kawanggawa` callers, Settings' "edit profile" return, the bell). The shelter shell's twin is `shelterTabs.ts`.
 //
-// PR 1: the helpers are plain-navigate shims onto the stack routes that are live today, so callers can move first (PR 2) with
-// no behaviour change. The switch PR changes only these bodies to the nested forms:
-//   enterOwnerShell  -> reset onto `ownerTabs` with { screen: "home", params }
-//   openOwnerTab     -> navigate("ownerTabs", { screen, params }, { pop: true })
-//   enterGuestShell  -> reset onto `guestTabs`
-// (A root-level `navigate("kawanggawa")` does not reach a screen inside a tab navigator, and `pop: true` returns to a shell
-// already on the stack instead of pushing a second one: shelter spec §7a.)
+// The shells are tab navigators (the `ownerTabs` and `guestTabs` routes of the root stack). A root-level `navigate("kawanggawa")`
+// does not reach a screen inside a tab navigator, so every helper uses the nested form, and `pop: true` returns to a shell
+// already on the stack instead of pushing a second one (shelter spec §7a). Welcome's guest entry is a push, not a reset: the
+// visitor can still swipe back to Welcome, as before.
 export const OWNER_TAB_ROUTE = {
   home: "home",
   adopt: "adopt",
@@ -49,25 +46,25 @@ export function guestPressAction(key: GuestTab): { kind: "tab"; route: keyof Gue
 }
 
 /** The route the app opens on for a signed-in user (`RootNavigator`'s `initialRouteName`). The switch PR makes it "ownerTabs". */
-export const OWNER_SHELL_ROUTE = "home" as const;
+export const OWNER_SHELL_ROUTE = "ownerTabs" as const;
 
 type OwnerRoute = (typeof OWNER_TAB_ROUTE)[OwnerTab];
 
 /** Replace the whole stack with the personal member's shell on Home (`justSignedUp` is Home's one-shot intent flag). */
 export function enterOwnerShell(
-  navigation: { reset: (state: { index: number; routes: { name: "home"; params?: { justSignedUp?: boolean } }[] }) => void },
+  navigation: { reset: (state: { index: number; routes: { name: "ownerTabs"; params: { screen: "home"; params?: { justSignedUp?: boolean } } }[] }) => void },
   params?: { justSignedUp?: boolean }
 ): void {
-  navigation.reset({ index: 0, routes: [params ? { name: "home", params } : { name: "home" }] });
+  navigation.reset({ index: 0, routes: [{ name: "ownerTabs", params: params ? { screen: "home", params } : { screen: "home" } }] });
 }
 
 /** Open a member tab from anywhere: a pushed screen, the bell, Settings. `params` go to that tab (`{ tab }`, `{ editing }`). */
 export function openOwnerTab(
-  navigation: { navigate: (route: OwnerRoute, params?: object) => void },
+  navigation: { navigate: (name: "ownerTabs", params: { screen: OwnerRoute; params?: object }, options: { pop: true }) => void },
   key: OwnerTab,
   params?: object
 ): void {
-  navigation.navigate(OWNER_TAB_ROUTE[key], params);
+  navigation.navigate("ownerTabs", { screen: OWNER_TAB_ROUTE[key], params }, { pop: true });
 }
 
 /**
@@ -76,14 +73,14 @@ export function openOwnerTab(
  * review found. The switch PR changes the body to `popTo("ownerTabs", { screen, params })`.
  */
 export function popToOwnerTab(
-  navigation: { popTo: (route: OwnerRoute, params?: object) => void },
+  navigation: { popTo: (name: "ownerTabs", params: { screen: OwnerRoute; params?: object }) => void },
   key: OwnerTab,
   params?: object
 ): void {
-  navigation.popTo(OWNER_TAB_ROUTE[key], params);
+  navigation.popTo("ownerTabs", { screen: OWNER_TAB_ROUTE[key], params });
 }
 
 /** Enter the signed-out visitor's shell (Welcome's "browse as a guest"). */
-export function enterGuestShell(navigation: { navigate: (route: "homeGuest") => void }): void {
-  navigation.navigate("homeGuest");
+export function enterGuestShell(navigation: { navigate: (route: "guestTabs") => void }): void {
+  navigation.navigate("guestTabs");
 }

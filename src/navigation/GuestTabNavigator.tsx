@@ -3,13 +3,13 @@
 // Adopt and You are bar-only, they open the sign-up wall and never navigate, exactly as `GuestTabs` does today. The pill's
 // index is the item's place among the four, not the route's, and the bar already works that way (it takes the item key).
 //
-// PR 1 registers this and nothing navigates to it yet. The wall is hosted HERE for the bar's two gated items; a screen keeps
+// The wall is hosted HERE for the bar's two gated items; a screen keeps
 // its own wall for its in-screen gated actions (Request, a stray row, ...). The shell is chosen when it is ENTERED (a reset),
 // never swapped under a mounted navigator while tokens change (spec §4.1).
 import { BottomTabBarProps, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { ComponentType, useState } from "react";
+import { useState } from "react";
 
 import { GuestTabs, type GuestTab } from "../components/GuestTabs";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
@@ -53,9 +53,8 @@ export function GuestTabNavigator() {
         tabBar={(props) => <GuestTabBar {...props} onGated={setWall} />}
         screenOptions={{ headerShown: false, lazy: true, freezeOnBlur: true, animation: "none" }}
       >
-        {/* The roots are typed against the stack today; the switch PR moves them to composite props. */}
-        <Tab.Screen name="homeGuest" component={HomeGuestScreen as ComponentType<any>} />
-        <Tab.Screen name="kawanggawa" component={KawangGawaScreen as ComponentType<any>} />
+        <Tab.Screen name="homeGuest" component={HomeGuestScreen} />
+        <Tab.Screen name="kawanggawa" component={KawangGawaScreen} />
       </Tab.Navigator>
       <SignupWall
         visible={!!wall}
