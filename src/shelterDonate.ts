@@ -1,5 +1,5 @@
 // Task B1 · the Donate tab root's pure derivation. Kept out of the screen — same shape as
-// `shelterDashboard.ts`'s `shelterBannerState` / `shelterVerificationCard` — so the QR-state
+// `shelterDashboard.ts`'s `shelterShellState` — so the QR-state
 // rule and the needs → row mapping are testable without React Native at all.
 //
 // There is no dedicated "my own donation QR status" endpoint. `/shelter/dashboard`'s

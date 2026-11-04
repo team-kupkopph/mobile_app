@@ -7,7 +7,7 @@
 // VolunteerSignup).
 //
 // Kept pure and separate from the screen — same shape as shelterAnimals.ts's
-// SEGMENT_STATUS/STATUS_CHIP and shelterDashboard.ts's shelterBannerState — so the
+// SEGMENT_STATUS/STATUS_CHIP and shelterDashboard.ts's shelterShellState — so the
 // segment→kind mapping and the routing decision are testable without React Native at all.
 import { ChipTone } from "./components/ui";
 import { ShelterRequest } from "./api/types";

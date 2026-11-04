@@ -1,33 +1,36 @@
 import { Me, ShelterDashboard, ShelterDashboardRescue, ShelterDashboardVolunteer, ShelterDashboardWishlist } from "./api/types";
 import { pledgeCountLabel } from "./community";
 
-// US-B5: two derived dashboard states, never one screen. A shelter_org
-// verification_request existing (`submitted`) means "Under review"; no row means the
-// documents were never sent. Derivation only — the server stores no gate flag (§3.5).
-// US-V5 adds the third state: once the request is approved the dashboard flips to
-// "verified" — the amber banner clears, the badge appears, listings stop being drafts.
-export type ShelterBannerState = "verified" | "pending" | "rejected" | "incomplete";
+// SH1 / SH2 / SH10 (shelter home review) · ONE verified state for the whole shell — Home, You and
+// the Rescue card all read this, so they cannot drift again. It replaces `shelterBannerState`
+// (Home: the LATEST request's status) and `shelterVerificationCard` (You). Reading the latest
+// status told an approved tier-1 rescue applying for tier 2 (a newer pending request, US-X4) that
+// its listings were hidden and donations off, while You said "Verified Rescue".
+//
+// - `verified` is the server's "any approved": `gates.can_publish`, falling back to /me's
+//   `is_verified_rescuer` while the dashboard has not answered (or an older server sent no gates).
+// - `banner` comes from the latest request only when NOT verified. A verified shelter whose latest
+//   request is still with the reviewer has an upgrade in flight: `upgrade_in_review`, a quiet
+//   accent. An unknown status from a newer server reads as `pending`. Nothing known yet: `none`,
+//   never a false "Documents not sent".
+// - `donationsOn` is the two-key gate (US-X3: approved AND a live QR), `gates.donations_enabled`.
+export type ShelterShellBanner = "none" | "incomplete" | "pending" | "rejected" | "upgrade_in_review";
+export type ShelterShellState = { verified: boolean; banner: ShelterShellBanner; donationsOn: boolean };
 
-export function shelterBannerState(d: ShelterDashboard): ShelterBannerState {
-  if (d.verification.status === "approved") return "verified";
-  if (!d.verification.submitted) return "incomplete";
-  // A reviewed-and-refused request is not "under review" (the Profile card already says so).
-  return d.verification.status === "rejected" ? "rejected" : "pending";
-}
-
-// F13 · the profile tab's verification card, for a GATED shelter. The gate
-// (`me.is_verified_rescuer`) says only "not approved" — it is false for never-submitted,
-// pending, needs_info and rejected alike, so the card can't be read off it. Derive
-// from the dashboard's `verification` (the record); when that SECONDARY request has not
-// answered yet (US-R2), fall back to /me's latest request rather than guess.
-// `rejected` is its own state: a reviewed-and-refused request is not "under review".
-export type ShelterVerificationCard = "incomplete" | "pending" | "rejected";
-
-export function shelterVerificationCard(dash: ShelterDashboard | null, me: Me | null): ShelterVerificationCard {
-  const status = dash ? dash.verification.status : me?.shelter?.verification_status ?? null;
+export function shelterShellState(dash: ShelterDashboard | null, me: Me | null): ShelterShellState {
+  const gates = dash?.gates;
+  const verified = gates ? gates.can_publish : me?.is_verified_rescuer ?? false;
+  const donationsOn = gates?.donations_enabled ?? false;
+  if (!dash && !me) return { verified, banner: "none", donationsOn };
+  const status: string | null = dash ? dash.verification.status : me?.shelter?.verification_status ?? null;
+  if (verified) {
+    const inReview = status === "pending" || status === "needs_info";
+    return { verified, banner: inReview ? "upgrade_in_review" : "none", donationsOn };
+  }
   const submitted = dash ? dash.verification.submitted : status !== null;
-  if (!submitted) return "incomplete";
-  return status === "rejected" ? "rejected" : "pending";
+  if (!submitted) return { verified, banner: "incomplete", donationsOn };
+  // A reviewed-and-refused request is not "under review".
+  return { verified, banner: status === "rejected" ? "rejected" : "pending", donationsOn };
 }
 
 // Task 10 (G12) · "Sat 9:00 AM" — short enough to sit inline in the Volunteers card's copy.

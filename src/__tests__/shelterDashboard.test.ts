@@ -1,5 +1,5 @@
 import { ShelterDashboard, ShelterDashboardVolunteer } from "../api/types";
-import { rescueSummary, shelterBannerState, volunteerSummary, wishlistSummary } from "../shelterDashboard";
+import { rescueSummary, volunteerSummary, wishlistSummary } from "../shelterDashboard";
 
 function dash(submitted: boolean, status: ShelterDashboard["verification"]["status"]): ShelterDashboard {
   return {
@@ -11,27 +11,7 @@ function dash(submitted: boolean, status: ShelterDashboard["verification"]["stat
   };
 }
 
-describe("shelterBannerState (US-B5 — two derived states)", () => {
-  it("shows 'pending' when a verification request exists", () => {
-    expect(shelterBannerState(dash(true, "pending"))).toBe("pending");
-  });
-
-  it("shows 'incomplete' when nothing was submitted", () => {
-    expect(shelterBannerState(dash(false, null))).toBe("incomplete");
-  });
-
-  it("shows 'verified' once the request is approved (US-V5)", () => {
-    expect(shelterBannerState(dash(true, "approved"))).toBe("verified");
-  });
-
-  it("shows 'rejected' for a reviewed-and-refused request, not 'Under review' (Home said the wrong thing; the Profile card and Document status already said rejected)", () => {
-    expect(shelterBannerState(dash(true, "rejected"))).toBe("rejected");
-  });
-
-  it("keeps needs_info under 'pending' (still being worked on)", () => {
-    expect(shelterBannerState(dash(true, "needs_info"))).toBe("pending");
-  });
-});
+// shelterBannerState's cases moved to shelterShellState.test.ts (SH1): Home no longer has its own derivation.
 
 describe("volunteerSummary (Task 10 — K8/G12)", () => {
   const next: ShelterDashboardVolunteer["next_shift"] = {
