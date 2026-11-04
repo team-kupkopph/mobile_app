@@ -18,3 +18,17 @@ type TabRoute = (typeof SHELTER_TAB_ROUTE)[ShelterTabKey];
 export function shelterTabNavigate(navigation: { navigate: (route: TabRoute) => void }, key: ShelterTabKey): void {
   navigation.navigate(SHELTER_TAB_ROUTE[key]);
 }
+
+// SQ5 (PR 1) · the two helpers every INBOUND path will use (push taps, the bell, PlaceAccepted, the sign-in resets).
+// For now they are plain-navigate shims onto the five stack routes, so callers can move first with no behaviour change;
+// the switch PR changes only these bodies to `navigate("shelterTabs", { screen })` / a reset onto `shelterTabs`.
+export function openShelterTab(navigation: { navigate: (route: TabRoute) => void }, key: ShelterTabKey): void {
+  navigation.navigate(SHELTER_TAB_ROUTE[key]);
+}
+
+export function enterShelterShell(
+  navigation: { reset: (state: { index: number; routes: { name: TabRoute }[] }) => void },
+  key: ShelterTabKey = "home"
+): void {
+  navigation.reset({ index: 0, routes: [{ name: SHELTER_TAB_ROUTE[key] }] });
+}

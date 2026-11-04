@@ -129,8 +129,18 @@ describe("every registered route can be navigated to", () => {
     expect(registered.length).toBeGreaterThan(50);
   });
 
+  // SQ5 PR 1 registers the shelter tab navigator before anything navigates to it (the callers move in PR 2, the switch is
+  // PR 3). This is the ONLY exemption, it names its own exit, and it fails the moment the route becomes reachable, so
+  // PR 3 cannot forget to delete it.
+  const PENDING_SQ5 = ["shelterTabs"];
+
   it("has no orphan routes", () => {
     const reached = destinations();
-    expect(registered.filter((r) => !reached.has(r)).sort()).toEqual([]);
+    expect(registered.filter((r) => !reached.has(r) && !PENDING_SQ5.includes(r)).sort()).toEqual([]);
+  });
+
+  it("the SQ5 exemption is still needed (delete it, and this test, in the switch PR)", () => {
+    const reached = destinations();
+    expect(PENDING_SQ5.filter((r) => reached.has(r))).toEqual([]);
   });
 });
