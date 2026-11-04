@@ -5,7 +5,7 @@
 // exists — see AuthContext.tsx). The "Saw a stray?" hero is still static — its destination
 // lands in a later sprint.
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useEffect, useState } from "react";
+import { type ComponentProps, useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -296,6 +296,16 @@ export function HomeScreen({ navigation, route }: Props) {
   const approvedMember = me?.capabilities.some((c) => c.capability === "rescuer" && c.status === "approved") ?? false;
   const spotlight = pickSpotlight(myCases, myReports);
 
+  const rescueMapHeader = (style: ComponentProps<typeof SectionHeader>["style"]) => (
+    <SectionHeader
+      testID="btn.home.rescueMap"
+      title="Nearby rescues"
+      actionLabel="See map ›"
+      onPress={() => navigation.navigate("rescueMap")}
+      style={style}
+    />
+  );
+
   return (
     <View style={styles.screen} testID="screen.home">
       <ScreenBackdrop />
@@ -447,7 +457,13 @@ export function HomeScreen({ navigation, route }: Props) {
         </View>
 
         {allOffline ? (
-          <LoadStateView state={{ kind: "offline" }} onRetry={reloadPanels} />
+          <>
+            {/* ⚠️ The map stays reachable when every panel is offline: the map screen has its own
+                offline and stale states, and flow 70 taps this header to prove it never says
+                "No strays reported near" while the server is unreachable. */}
+            {rescueMapHeader(sectionSpacing.first)}
+            <LoadStateView state={{ kind: "offline" }} onRetry={reloadPanels} />
+          </>
         ) : (
         <>
         <SectionHeader
@@ -510,13 +526,7 @@ export function HomeScreen({ navigation, route }: Props) {
             the third path from Home to this same map (the fourth being the "Lost & found" grid
             tile). Both are gone; this row is now the single way there, so the testID e2e flow 70
             taps — the offline-degradation assertion the whole track exists for — lives here. */}
-        <SectionHeader
-          testID="btn.home.rescueMap"
-          title="Nearby rescues"
-          actionLabel="See map ›"
-          onPress={() => navigation.navigate("rescueMap")}
-          style={sectionSpacing.next}
-        />
+        {rescueMapHeader(sectionSpacing.next)}
 
         {rescuesPanel.kind !== "ready" && rescuesPanel.kind !== "empty" ? (
           <LoadStateView state={rescuesPanel} onRetry={loadCityPanels} />

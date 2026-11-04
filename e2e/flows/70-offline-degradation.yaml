@@ -49,6 +49,9 @@ appId: ph.kupkop.app
 - assertNotVisible: "No pets listed near you"
 
 # ── the rescue map · the screen the entire track came from ─────────────────────────
+# With every Home panel offline, Home collapses its sections into one notice but keeps this
+# "Nearby rescues · See map" header above it (HomeScreen `rescueMapHeader`), so the tap below is
+# reachable with the backend stopped.
 - tapOn:
     id: "btn.home.rescueMap"
 - extendedWaitUntil:
