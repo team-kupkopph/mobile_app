@@ -64,7 +64,7 @@ export function HomeScreen({ navigation, route }: Props) {
   // put the greeting under the clock once it was not.
   const insets = useSafeAreaInsets();
   const api = useApi();
-  const { city, isReady, setCity } = useAuth();
+  const { city, isReady, setCity, setAccountType } = useAuth();
   const [me, setMe] = useState<Me | null>(null);
   // X11 · the server returns the user's city in /me, but the app only knew the one cached on THIS phone, so a new phone
   // or a reinstall said "Set your city" while the server had it. Fill an EMPTY cache from /me — and only once the cache
@@ -123,6 +123,7 @@ export function HomeScreen({ navigation, route }: Props) {
       // US-X1: the right shell for who you are. A returning shelter account lands here (the
       // single stack's initialRouteName is always "home") — redirect it to the shelter shell.
       if (r.data.account_type === "shelter") {
+        void setAccountType("shelter");   // teaches the cache, so the next cold start opens this shell directly
         // The tab screen's own `navigation.reset` would reset the tab navigator; the shelter shell is a root-stack route.
         enterShelterShell(navigation.getParent<NativeStackNavigationProp<RootStackParamList>>()!);
         return true;
@@ -132,6 +133,7 @@ export function HomeScreen({ navigation, route }: Props) {
       // no shifts to volunteer for. Only a personal account's own signups are relevant here,
       // and the brief is explicit that this must not fire for shelter/business accounts.
       if (r.data.account_type === "personal") {
+        void setAccountType("personal");
         api.get("/me/signups").then((sr) => {
           setTodaySignup(sr.ok ? todayShift(sr.data) : null);
         });

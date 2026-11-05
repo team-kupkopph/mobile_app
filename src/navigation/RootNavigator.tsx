@@ -94,7 +94,8 @@ import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen"
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
 import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
-import { OWNER_SHELL_ROUTE, enterGuestShell } from "../appTabs";
+import { enterGuestShell } from "../appTabs";
+import { useLaunchRoute } from "./useLaunchRoute";
 import { GuestTabNavigator } from "./GuestTabNavigator";
 import { OwnerTabNavigator } from "./OwnerTabNavigator";
 import { ShelterTabNavigator } from "./ShelterTabNavigator";
@@ -113,8 +114,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const IS_DEV_PROFILE = Constants.expoConfig?.extra?.profile === "development";
 
 export function RootNavigator() {
-  const { tokens, isReady } = useAuth();
+  const { isReady } = useAuth();
+  // Who you are decides the first screen (a shelter must never flash the owner Home); null while hydrating or holding for /me.
+  const first = useLaunchRoute();
   if (!isReady) return null; // hold render until secure-store hydration completes
+  if (first === null) return null; // still deciding, or holding for /me (useLaunchRoute)
 
   // Single stack (not two conditional stacks): the US-A1 flow crosses what used to be the
   // auth/app boundary — otp calls setTokens() mid-flow, then still needs to navigate on to
@@ -122,7 +126,7 @@ export function RootNavigator() {
   // user straight to the app stack the instant setTokens() resolves, stranding signupSuccess.
   // `initialRouteName` still respects a returning, already-authenticated user.
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={tokens ? OWNER_SHELL_ROUTE : "welcome"}>
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={first}>
       <Stack.Screen name="welcome" component={WelcomeRoute} />
       <Stack.Screen name="accountType" component={AccountTypeScreen} />
       <Stack.Screen name="signup" component={SignupScreen} />
