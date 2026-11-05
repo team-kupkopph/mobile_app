@@ -1,6 +1,8 @@
 // US-W2/W3 · pure helpers for the Abot-tulong wishlist UI. Kept out of the screens so the
 // status/progress logic is unit-testable (the app's jest tests cover modules, not RN renders).
 
+import type { ResState } from "./refreshState";
+
 export type PledgeStatus = "pledged" | "delivered" | "cancelled";
 export type NeedStatus = "open" | "fulfilled" | "closed";
 
@@ -369,6 +371,35 @@ export function parseImpact(data: unknown): ImpactResponse | null {
     impact: { shifts_completed: c.shifts_completed, rescues_helped: c.rescues_helped, pets_rehomed: c.pets_rehomed, pledges_delivered: c.pledges_delivered },
     badges
   };
+}
+
+// IB6 · what My impact shows, and what looking at it again does to that. The screen holds the last GOOD answer and the
+// result of the latest request; those two are the whole state, and these functions are the only things that change it.
+export type ImpactView = { data: ImpactResponse | null; res: ResState };
+
+/**
+ * Starting a load. A screen that holds data keeps it, and keeps whatever it was saying: a refocus must not swap a grid for a
+ * spinner (it did, on every return from a badge's detail). A screen with nothing goes back to "loading", which is what a
+ * retry from the full-screen error needs.
+ */
+export function beginImpactLoad(view: ImpactView): ImpactView {
+  return view.data ? view : { data: null, res: null };
+}
+
+/**
+ * Folding an answer in. Only an answer that passes `parseImpact` replaces the data. A failure keeps the last good data and
+ * records that it failed, so the screen can say "showing what we saved earlier" instead of showing old tiles beside an
+ * unexplained error. A 200 that breaks the contract is a server fault (502), not a success and not an empty grid.
+ */
+export function applyImpactReply(view: ImpactView, reply: { ok: boolean; status: number; data: unknown }): ImpactView {
+  const answer = reply.ok ? parseImpact(reply.data) : null;
+  if (answer) return { data: answer, res: { ok: true, status: reply.status } };
+  return { data: view.data, res: { ok: false, status: reply.ok ? 502 : reply.status } };
+}
+
+/** Data is on screen AND the latest refresh failed: the stale banner shows. With nothing held, the full-screen error does. */
+export function impactIsStale(view: ImpactView): boolean {
+  return !!view.data && !!view.res && !view.res.ok;
 }
 
 // V7 / IB15 · the impact screen's three groups. The server sends the whole catalog in catalog order with `earned` and

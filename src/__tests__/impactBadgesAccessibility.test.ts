@@ -66,6 +66,42 @@ describe("Impact screen", () => {
   });
 });
 
+describe("Refocus (IB6): looking at My impact again", () => {
+  // The explanations name the old calls ("was `else setBadges([])`"), so the "never calls" checks read code only.
+  const code = impact.replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\/.*$/gm, "");
+
+  it("refreshes through the shared focus policy, not on every focus", () => {
+    expect(impact).toMatch(/useRefreshOnFocus\(load\)/);
+    expect(code).not.toMatch(/useFocusEffect\(load\)/);
+  });
+
+  it("only the newest answer lands: a slow older one cannot overwrite it", () => {
+    expect(impact).toMatch(/createLatestOnly/);
+    expect(impact).toMatch(/latest\.begin\(\)/);
+  });
+
+  it("starting a load never blanks what is held: that goes through beginImpactLoad", () => {
+    expect(impact).toMatch(/setView\(beginImpactLoad\)/);
+    expect(code).not.toMatch(/setRes\(null\)/);
+    expect(code).not.toMatch(/setBadges\(|setImpact\(/);          // the data is one `view`, changed only by the two functions
+  });
+
+  it("an answer is folded in by applyImpactReply, which keeps the last good data on a failure", () => {
+    expect(impact).toMatch(/applyImpactReply\(prev, r\)/);
+  });
+
+  it("a refresh that failed says so above the data it kept (the shared stale banner)", () => {
+    expect(impact).toMatch(/impactIsStale\(view\)\s*\?\s*<StaleBanner offline=\{isOffline\(view\.res\)\}/);
+    expect(impact.indexOf("<StaleBanner")).toBeGreaterThan(-1);
+    expect(impact.indexOf("<StaleBanner")).toBeLessThan(impact.indexOf("tile.impact."));   // above the tiles it qualifies
+  });
+
+  it("the load reports whether it worked, so a failed one is retried at the next focus", () => {
+    expect(impact).toMatch(/return\s+api\.get\("\/me\/impact"\)/);
+    expect(impact).toMatch(/return r\.ok && parseImpact\(r\.data\) !== null/);
+  });
+});
+
 describe("V3 and the lock (Impact review step 10; IQ8: keep the lock)", () => {
   const medalOf = (src: string) => /function Medal[\s\S]*?\n\}\n/.exec(src)?.[0] ?? "";
 
