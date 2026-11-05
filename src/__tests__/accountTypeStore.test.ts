@@ -70,6 +70,20 @@ describe("AuthContext wiring", () => {
     expect(all).toContain("loadAccountType()");
   });
 
+  it("clears the type FIRST when the session ends, so a later failing cleanup step cannot leave it behind", () => {
+    const elseBranch = src.slice(src.indexOf("} else {", src.indexOf("async function setTokens")));
+    expect(elseBranch.indexOf("clearAccountType()")).toBeGreaterThan(-1);
+    expect(elseBranch.indexOf("clearAccountType()")).toBeLessThan(elseBranch.indexOf("SecureStore.deleteItemAsync(KEY)"));
+  });
+
+  it("restores the type only together with parseable tokens", () => {
+    const hydrate = src.slice(src.indexOf("if (rawTokens)"), src.indexOf(".finally(() => setReady(true))"));
+    const tokensParsed = hydrate.indexOf("JSON.parse(rawTokens)");
+    expect(tokensParsed).toBeGreaterThan(-1);
+    expect(hydrate.indexOf("setAccountTypeState(rawType)")).toBeGreaterThan(tokensParsed);
+    expect(hydrate).toMatch(/catch \{[^}]*clearAccountType\(\)/s);   // a corrupt tokens entry forgets the type too
+  });
+
   it("clears the type wherever the tokens are cleared", () => {
     const elseBranch = src.slice(src.indexOf("} else {", src.indexOf("async function setTokens")));
     expect(elseBranch).toContain("clearAccountType()");

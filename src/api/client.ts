@@ -63,7 +63,9 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
     const tokens = getTokens();
     const access = accessOverride ?? tokens?.access;
     const headers: Record<string, string> = { "Content-Type": "application/json", ...opts?.headers };
-    if (access) headers.Authorization = `Bearer ${access}`;
+    // An explicit Authorization header wins: a sign-in asks /me with the token it was just issued, which the client's own copy
+    // may not hold yet (or may hold an older one of).
+    if (access && !headers.Authorization) headers.Authorization = `Bearer ${access}`;
 
     const first = await fetchWithTimeout(`${BASE}${path}`, {
       method, headers, body: body ? JSON.stringify(body) : undefined,

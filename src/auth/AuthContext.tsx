@@ -37,12 +37,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     Promise.all([SecureStore.getItemAsync(KEY), SecureStore.getItemAsync(CITY_KEY), loadAccountType()])
       .then(([rawTokens, rawCity, rawType]) => {
         try {
-          if (rawTokens) setTokensState(JSON.parse(rawTokens));
+          if (rawTokens) {
+            setTokensState(JSON.parse(rawTokens));
+            // The remembered type belongs to the signed-in session: restored only together with parseable tokens.
+            if (rawType) setAccountTypeState(rawType);
+          }
         } catch {
-          // corrupt entry — treat as signed out
+          // corrupt entry — treat as signed out, and forget whose shell it was
+          void clearAccountType();
         }
         if (rawCity) setCityState(rawCity);
-        if (rawType) setAccountTypeState(rawType);
       })
       .finally(() => setReady(true));
   }, []);
@@ -52,6 +56,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (t) {
       await SecureStore.setItemAsync(KEY, JSON.stringify(t));
     } else {
+      // First, so a later step that throws cannot leave the previous account's shell choice behind for the next sign-in.
+      setAccountTypeState(null);
+      await clearAccountType();
       await SecureStore.deleteItemAsync(KEY);
       // Any tokens -> null transition ends the session — not just explicit signOut(). The API
       // client's own 401/refresh-failure branch (src/api/client.ts) calls this setTokens(null)
@@ -71,10 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await clearAppLockPreference();
       // N5 · a remembered step-up proof is as personal as the app-lock preference: gone on any session end.
       clearStepUpCache();
-      // The remembered account type goes the same way, and for the same reason: the next person to sign in on this
-      // phone must not open the previous account's shell.
-      setAccountTypeState(null);
-      await clearAccountType();
     }
   }
 
