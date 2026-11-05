@@ -52,6 +52,12 @@ describe("resolveLaunchHold", () => {
     expect(remember).not.toHaveBeenCalled();
   });
 
+  it("opens Welcome when /me answers 401: the session is dead, and the client has already signed it out", async () => {
+    const route = await resolveLaunchHold(async () => ({ ok: false, status: 401 }), remember);
+    expect(route).toBe("welcome");
+    expect(remember).not.toHaveBeenCalled();
+  });
+
   it("gives up after HOLD_MS and opens the owner shell", async () => {
     jest.useFakeTimers();
     try {
@@ -101,5 +107,23 @@ describe("enterSignedInShell", () => {
     expect(reset).toHaveBeenCalledTimes(3);
     reset.mock.calls.forEach((c) => expect(c[0].routes[0].name).toBe("ownerTabs"));
     expect(remember).not.toHaveBeenCalled();
+  });
+});
+
+describe("enterSignedInShell never makes someone wait on a slow /me", () => {
+  it("enters the owner shell after HOLD_MS when /me does not answer", async () => {
+    jest.useFakeTimers();
+    try {
+      const reset = jest.fn();
+      const remember = jest.fn(async () => {});
+      const p = enterSignedInShell({ reset }, remember, { get: () => new Promise(() => {}) }, "tok");
+      await jest.advanceTimersByTimeAsync(HOLD_MS);
+      await p;
+      expect(reset).toHaveBeenCalledTimes(1);
+      expect(reset.mock.calls[0][0].routes[0].name).toBe("ownerTabs");
+      expect(remember).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

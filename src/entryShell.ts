@@ -20,7 +20,7 @@ export function launchPlan(tokens: object | null, accountType: AccountType | nul
   return accountType ? "shell" : "hold";
 }
 
-type MeAnswer = { ok: boolean; data?: { account_type?: string } };
+type MeAnswer = { ok: boolean; status?: number; data?: { account_type?: string } };
 
 /**
  * The hold: one /me read, raced against HOLD_MS. A shelter or personal answer is remembered and picks the shell; a failure,
@@ -29,11 +29,14 @@ type MeAnswer = { ok: boolean; data?: { account_type?: string } };
 export async function resolveLaunchHold(
   getMe: () => Promise<MeAnswer>,
   remember: (t: AccountType) => Promise<void>
-): Promise<"ownerTabs" | "shelterTabs"> {
+): Promise<"welcome" | "ownerTabs" | "shelterTabs"> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), HOLD_MS); });
   try {
     const answer = await Promise.race([getMe().catch(() => null), timeout]);
+    // A 401 here means the refresh failed too and the client has already ended the session. The navigator is not mounted yet,
+    // so SessionGuard could not act on it: open Welcome rather than an owner shell with no tokens.
+    if (answer?.status === 401) return "welcome";
     const type = answer?.ok ? answer.data?.account_type : undefined;
     if (type === "shelter" || type === "personal") {
       await remember(type);
@@ -59,10 +62,13 @@ export async function enterSignedInShell(
   access: string
 ): Promise<void> {
   let type: string | undefined;
+  // Capped like the launch hold: a person who has just signed in must not sit on the sign-in screen for the client's 20 s timeout.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), HOLD_MS); });
   try {
-    const me = await client.get("/me", { headers: { Authorization: `Bearer ${access}` } });
-    type = me.ok ? me.data?.account_type : undefined;
-  } catch { /* offline or down: fall through to the owner shell */ }
+    const me = await Promise.race([client.get("/me", { headers: { Authorization: `Bearer ${access}` } }), timeout]);
+    type = me?.ok ? me.data?.account_type : undefined;
+  } catch { /* offline or down: fall through to the owner shell */ } finally { clearTimeout(timer); }
   if (type === "shelter" || type === "personal") {
     await remember(type);
     if (type === "shelter") return enterShelterShell(navigation);

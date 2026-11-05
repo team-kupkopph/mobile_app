@@ -51,3 +51,12 @@ describe("useApi", () => {
     expect(src).not.toMatch(/createApi\(\(\) => tokens,/);
   });
 });
+
+describe("an explicit Authorization header", () => {
+  it("wins over the client's own token (a sign-in asks /me with the token it was just issued)", async () => {
+    const seen = recordAuthHeaders();
+    const api = createApi(() => ({ access: "stale-access", refresh: "stale-refresh" }), async () => {});
+    await api.get("/me", { headers: { Authorization: "Bearer fresh-access" } });
+    expect(seen).toEqual(["Bearer fresh-access"]);
+  });
+});
