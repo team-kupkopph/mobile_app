@@ -196,7 +196,10 @@ describe("impactTiles", () => {
     const tiles = impactTiles({
       shifts_completed: 3, rescues_helped: 1, pets_rehomed: 2, pledges_delivered: 5
     });
-    expect(tiles.map((t) => t.label)).toEqual(["Shifts", "Rescues", "Rehomed", "Donations"]);
+    // IQ5 (Impact review step 13, 2026-11-05) · "Pledges", not "Donations": the tile counts pledges a shelter received, and
+    // the badge it feeds (Generous) is named for the same thing. A pledge is not a money donation (the V3 Profile row already
+    // says "pledges").
+    expect(tiles.map((t) => t.label)).toEqual(["Shifts", "Rescues", "Rehomed", "Pledges"]);
     expect(tiles.map((t) => t.value)).toEqual([3, 1, 2, 5]);
   });
 });
@@ -430,4 +433,13 @@ describe("pledgeNextSteps (D1)", () => {
       "It counts toward the need, and you get a notification"
     ]);
   });
+});
+
+describe("impactTiles: the pledges tile (IQ5)", () => {
+  const tiles = impactTiles({ shifts_completed: 0, rescues_helped: 0, pets_rehomed: 0, pledges_delivered: 3 });
+  it("counts the delivered pledges", () => expect(tiles.find((t) => t.label === "Pledges")?.value).toBe(3));
+  it("is no longer called Donations anywhere in the tiles", () =>
+    expect(tiles.map((t) => t.label)).not.toContain("Donations"));
+  it("keeps the other three in their places", () =>
+    expect(tiles.map((t) => t.label).slice(0, 3)).toEqual(["Shifts", "Rescues", "Rehomed"]));
 });

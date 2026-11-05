@@ -127,6 +127,11 @@ const ACCOUNT_SETTINGS = ["ChangePasswordScreen", "ChangeEmailScreen", "TwoStepS
 /** Plan Task 9 · the shelter's Organization profile (backend#113) — V3 from birth. */
 const ORGANIZATION_PROFILE = ["OrganizationProfileScreen"] as const;
 
+/** Impact & badges review step 10 (V1-V4) · My impact and one badge's detail, moved in from OTHER_OWNER_SCREENS once
+ * rewritten on <ScreenBackdrop> + <Card>. There is no artboard for either yet (IQ8: commission them), so §3(c) "follows its
+ * artboard" is held by the Sprint 6 mockups and the design system until then. */
+const IMPACT_BADGES = ["ImpactScreen", "BadgeDetailScreen"] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -145,7 +150,9 @@ export const V3_SCOPE: readonly string[] = [
   // Task 10 · Change password — V3 from birth.
   ...ACCOUNT_SETTINGS,
   // Plan Task 9 · Organization profile — V3 from birth.
-  ...ORGANIZATION_PROFILE
+  ...ORGANIZATION_PROFILE,
+  // Impact & badges review step 10 · converted.
+  ...IMPACT_BADGES
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */
@@ -169,17 +176,16 @@ const OWNER_V3 = [
   "SigninScreen"
 ] as const;
 
-/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 32 names
- *  (MyPetsScreen moved to ADOPTION_POSTER when My Pets review step 11 converted it) */
+/** Every other owner screen (auth, onboarding, reports, settings, stories, etc.) — 30 names
+ *  (MyPetsScreen moved to ADOPTION_POSTER when My Pets review step 11 converted it; ImpactScreen and BadgeDetailScreen
+ *  moved to IMPACT_BADGES when Impact & badges review step 10 did) */
 const OTHER_OWNER_SCREENS = [
   "AccountTypeScreen",
   "AdjustPinScreen",
   "AuthFormKit",
-  "BadgeComparisonScreen",
   "DeleteAccountScreen",
   "ExportDataScreen",
   "ForgotPasswordScreen",
-  "ImpactScreen",
   "LocationPickerScreen",
   "MatchDetailScreen",
   "MyReportsScreen",

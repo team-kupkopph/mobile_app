@@ -19,7 +19,8 @@ import { confirmLogout } from "../auth/confirmLogout";
 import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
 import { ProfileBadges } from "../components/ProfileBadges";
 import { pickAndUpload } from "../media/pickAndUpload";
-import { BadgeShape, OwnerTabScreenProps, RootStackParamList } from "../navigation/types";
+import { BadgeShape, parseImpact } from "../community";
+import { OwnerTabScreenProps, RootStackParamList } from "../navigation/types";
 import { changeProfilePhoto, removeProfilePhoto } from "../profilePhoto";
 import { myPetsHint } from "../petForm";
 import { TAP_SLOP } from "../touch";
@@ -90,7 +91,8 @@ export function ProfileScreen({ navigation, route }: Props) {
         if (r.ok) setPetsHint(myPetsHint((r.data?.results ?? []) as MyPet[]));
       });
       api.get("/me/impact").then((r) => {
-        if (r.ok && Array.isArray(r.data?.badges)) setBadges(r.data.badges);
+        const answer = r.ok ? parseImpact(r.data) : null;
+        if (answer) setBadges(answer.badges);
       });
       return primary;
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change

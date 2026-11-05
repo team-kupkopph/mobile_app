@@ -10,7 +10,7 @@ import { join } from "path";
 
 const read = (rel: string) => readFileSync(join(__dirname, "..", rel), "utf-8");
 const impact = read("screens/ImpactScreen.tsx");
-const detail = read("screens/BadgeComparisonScreen.tsx");
+const detail = read("screens/BadgeDetailScreen.tsx");
 const profile = read("screens/ProfileScreen.tsx");
 const profileBadges = read("components/ProfileBadges.tsx");
 const count = (src: string, re: RegExp) => (src.match(re) ?? []).length;
@@ -51,8 +51,9 @@ describe("Impact screen", () => {
     expect(impact).not.toMatch(/current \/ [a-z.]*target/);
   });
 
-  it("a payload without the lists is a failure, not an empty grid", () => {
-    expect(impact).toMatch(/Array\.isArray\(r\.data\??\.badges\)/);
+  it("a payload that is not the contract is a failure, not an empty grid (IB26)", () => {
+    expect(impact).toMatch(/parseImpact\(r\.data\)/);
+    expect(impact).not.toMatch(/setBadges\(r\.data/);        // never from the raw `any`
   });
 
   it("keeps the AX5 behaviour: large text stacks the keep-going rows too", () => {
@@ -62,6 +63,81 @@ describe("Impact screen", () => {
 
   it("adds no raw colour: the file's hex budget in themeAdoption stays at one", () => {
     expect(count(impact, /#[0-9A-Fa-f]{6}\b/g)).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("Refocus (IB6): looking at My impact again", () => {
+  // The explanations name the old calls ("was `else setBadges([])`"), so the "never calls" checks read code only.
+  const code = impact.replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\/.*$/gm, "");
+
+  it("refreshes through the shared focus policy, not on every focus", () => {
+    expect(impact).toMatch(/useRefreshOnFocus\(load\)/);
+    expect(code).not.toMatch(/useFocusEffect\(load\)/);
+  });
+
+  it("only the newest answer lands: a slow older one cannot overwrite it", () => {
+    expect(impact).toMatch(/createLatestOnly/);
+    expect(impact).toMatch(/latest\.begin\(\)/);
+  });
+
+  it("starting a load never blanks what is held: that goes through beginImpactLoad", () => {
+    expect(impact).toMatch(/setView\(beginImpactLoad\)/);
+    expect(code).not.toMatch(/setRes\(null\)/);
+    expect(code).not.toMatch(/setBadges\(|setImpact\(/);          // the data is one `view`, changed only by the two functions
+  });
+
+  it("an answer is folded in by applyImpactReply, which keeps the last good data on a failure", () => {
+    expect(impact).toMatch(/applyImpactReply\(prev, r\)/);
+  });
+
+  it("a refresh that failed says so above the data it kept (the shared stale banner)", () => {
+    expect(impact).toMatch(/impactIsStale\(view\)\s*\?\s*<StaleBanner offline=\{isOffline\(view\.res\)\}/);
+    expect(impact.indexOf("<StaleBanner")).toBeGreaterThan(-1);
+    expect(impact.indexOf("<StaleBanner")).toBeLessThan(impact.indexOf("tile.impact."));   // above the tiles it qualifies
+  });
+
+  it("the load reports whether it worked, so a failed one is retried at the next focus", () => {
+    expect(impact).toMatch(/return\s+api\.get\("\/me\/impact"\)/);
+    expect(impact).toMatch(/return r\.ok && parseImpact\(r\.data\) !== null/);
+  });
+});
+
+describe("V3 and the lock (Impact review step 10; IQ8: keep the lock)", () => {
+  const medalOf = (src: string) => /function Medal[\s\S]*?\n\}\n/.exec(src)?.[0] ?? "";
+
+  it("an unearned medal carries the shared lock, so 'not earned' is a shape and not only a colour", () => {
+    const medal = medalOf(impact);
+    expect(medal).not.toBe("");                                   // the scan found the component: never assert on nothing
+    expect(medal).toMatch(/<LockIcon\b/);
+    expect(medal).toMatch(/earned \? null/);
+    expect(impact).toMatch(/import \{[^}]*\bLockIcon\b[^}]*\} from "\.\.\/components\/AppIcons"/);
+  });
+
+  it("the lock is inside what is hidden from readers: the words say 'not earned yet', the lock only repeats it", () => {
+    expect(medalOf(impact)).toMatch(/importantForAccessibility="no-hide-descendants"/);
+  });
+
+  it("the badge detail's medal carries the lock too, when the badge is not earned", () => {
+    expect(detail).toMatch(/<LockIcon\b/);
+    expect(detail).toMatch(/badge\.earned \? null/);
+  });
+
+  it("both screens sit on the backdrop and draw their surfaces with Card", () => {
+    for (const src of [impact, detail]) {
+      expect(src).toMatch(/<ScreenBackdrop \/>/);
+      expect(src).toMatch(/<Card\b/);
+      expect(src).not.toMatch(/\.\.\.elevation\./);
+    }
+  });
+
+  it("the Profile card is a Card too, with no raw shadow", () => {
+    expect(profileBadges).toMatch(/<Card\b/);
+    expect(profileBadges).not.toMatch(/\.\.\.elevation\./);
+  });
+
+  it("keeps the touch target the whole tile: the Card has no padding of its own, the touchable inside has it", () => {
+    expect(impact).toMatch(/badgeTile\s*:\s*\{[^}]*padding\s*:\s*0/);
+    expect(impact).toMatch(/keepCard\s*:\s*\{[^}]*padding\s*:\s*0/);
   });
 });
 
@@ -89,6 +165,7 @@ describe("Badge detail", () => {
 describe("Profile", () => {
   it("shows the badges earned, from /me/impact, and only as a second fetch that can fail alone (US-R2)", () => {
     expect(profile).toMatch(/api\.get\("\/me\/impact"\)/);
+    expect(profile).toMatch(/parseImpact\(r\.data\)/);
     expect(profile).toMatch(/<ProfileBadges\b/);
   });
 
