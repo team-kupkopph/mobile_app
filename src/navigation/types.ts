@@ -26,9 +26,12 @@ export type MatchShape = {
 };
 
 // US-B2 · a badge, threaded from the impact grid to its detail.
+// V7 · how far along a badge is: {current, target}, or null for a badge with no rule. `current` is honest, so it can pass
+// `target`: a badge held after its stat fell reads below it.
+export type BadgeProgress = { current: number; target: number };
 export type BadgeShape = {
   badge_code: string; name: string; description: string; icon: string; criteria: string;
-  earned: boolean; earned_at: string | null;
+  earned: boolean; earned_at: string | null; progress: BadgeProgress | null;
 };
 
 // US-W3 · a shelter need, threaded through the manage/edit/pledges screens.

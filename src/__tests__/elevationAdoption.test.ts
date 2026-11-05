@@ -283,9 +283,12 @@ describe("screens take depth from the theme", () => {
     expect(handRolled.length).toBe(ONE_OFFS);
   });
 
-  it("sees the two suppressions as suppressions, and no more than two", () => {
+  it("sees the one suppression as a suppression, and no more than one", () => {
+    // 2026-11-05 — Impact review step 7 (V7): ImpactScreen's flat grey unearned tile (`badgeTileDim`, `shadowOpacity: 0`) is
+    // gone. Unearned badges are now the near-win card and the Keep going rows, so the screen has no suppression left.
+    // 2 -> 1; the floor moves with what was removed.
     expect(suppressions.map((f) => f.replace(/^.*\/src\//, "src/")).sort()).toEqual([
-      "src/components/ui/Field.tsx", "src/screens/ImpactScreen.tsx"
+      "src/components/ui/Field.tsx"
     ]);
   });
 
