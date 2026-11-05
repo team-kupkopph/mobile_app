@@ -56,7 +56,9 @@ test("the Submitted notice stacks at large text and its heading is capped", () =
 });
 
 test("the Badge screen's ★ does not scale, its name is capped and the pill grows", () => {
-  expect(badge).toMatch(/styles\.medalGlyph[^>]*\][^>]*allowFontScaling=\{false\}/);
+  // IB8 · the ★ is `BadgeMedal`'s: drawn there, unscaled, and the Badge screen uses it.
+  expect(badge).toMatch(/<BadgeMedal\b/);
+  expect(readFileSync(join(__dirname, "..", "components", "BadgeMedal.tsx"), "utf-8")).toMatch(/styles\.glyph\b[^>]*\][^>]*allowFontScaling=\{false\}/);
   expect(badge).toMatch(/styles\.name[^>]*\][^>]*maxFontSizeMultiplier=\{maxFontScale\.title\}/);
   const p = body(badge, "earnedPill") as string;
   expect(p).not.toMatch(/(^|[^a-zA-Z])height\s*:/);

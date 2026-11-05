@@ -1,13 +1,13 @@
 // US-B2 · My Impact: the four impact aggregates as stat tiles + the badges, grouped (V7) as the design draws them: the one
 // that is nearly there, the ones held, and the rest to go for. A badge not held is never rendered as held — the Reliable-chip
 // trust rule — and since V8 that is said in words (a label, and which group it sits in), not by colour alone; since V6/IQ8 an
-// unearned medal also carries a lock. V3 (Impact review step 10): on the backdrop, every surface a <Card>.
+// unearned medal also carries a lock (BadgeMedal). V3 (Impact review step 10): on the backdrop, every surface a <Card>.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { useApi } from "../api/useApi";
-import { LockIcon } from "../components/AppIcons";
+import { BadgeMedal } from "../components/BadgeMedal";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { StaleBanner } from "../components/StaleBanner";
@@ -20,30 +20,14 @@ import { createLatestOnly } from "../latestOnly";
 import { RootStackParamList } from "../navigation/types";
 import { useLargeText } from "../useLargeText";
 import { useRefreshOnFocus } from "../useRefreshOnFocus";
-import { colors, maxFontScale, pill, radii, spacing, squircle, typography } from "../theme";
+import { colors, maxFontScale, pill, radii, spacing, typography } from "../theme";
 import { Card, ScreenHeader } from "../components/ui";
 
 type Badge = BadgeShape;
 type Props = NativeStackScreenProps<RootStackParamList, "impact">;
 
-/** The medal is decoration: what a badge is, and whether it is held, is in the words beside it (V8). */
-function Medal({ earned }: { earned: boolean }) {
-  return (
-    <View style={[styles.medal, earned ? styles.medalOn : styles.medalOff]}
-          importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-      {/* One glyph, dimmed when unearned — no emoji (design rule). The lock (V6, IQ8) is the cue that is not colour. */}
-      <Text style={[styles.medalGlyph, earned ? null : styles.medalGlyphOff]} allowFontScaling={false}>★</Text>
-      {earned ? null : (
-        <View style={styles.lockDot}>
-          <LockIcon color={colors.muted} size={12} />
-        </View>
-      )}
-    </View>
-  );
-}
-
 export function ImpactScreen({ navigation }: Props) {
-  // At Dynamic Type AX3 and up three stat tiles and a two-column badge grid cannot share a line, so they stack to one column.
+  // At Dynamic Type AX3 and up four stat tiles and a two-column badge grid cannot share a line, so they stack to one column.
   const large = useLargeText();
   const api = useApi();
   // IB6 · the whole state is the last GOOD answer plus the latest result, changed only by beginImpactLoad and applyImpactReply.
@@ -113,7 +97,7 @@ export function ImpactScreen({ navigation }: Props) {
                     accessibilityRole="button" accessibilityLabel={badgeA11yLabel(sections.almostThere)}
                     accessibilityHint="Opens the badge"
                     onPress={() => open(sections.almostThere as Badge)}>
-                    <Medal earned={false} />
+                    <BadgeMedal earned={false} size="small" />
                     <View style={[styles.almostCopy, large && styles.almostCopyLarge]}>
                       <Text style={styles.almostName}>{sections.almostThere.name}</Text>
                       <Text style={styles.badgeCriteria}>{sections.almostThere.criteria}</Text>
@@ -142,7 +126,7 @@ export function ImpactScreen({ navigation }: Props) {
                         accessibilityRole="button" accessibilityLabel={badgeA11yLabel(b)}
                         accessibilityHint="Opens the badge"
                         onPress={() => open(b)}>
-                        <Medal earned />
+                        <BadgeMedal earned size="small" />
                         <Text style={styles.badgeName}
                           numberOfLines={large ? undefined : 2}>{b.name}</Text>
                         <Text style={styles.badgeCriteria} numberOfLines={large ? undefined : 2}>{b.criteria}</Text>
@@ -164,7 +148,7 @@ export function ImpactScreen({ navigation }: Props) {
                       accessibilityRole="button" accessibilityLabel={badgeA11yLabel(b)}
                       accessibilityHint="Opens the badge"
                       onPress={() => open(b)}>
-                      <Medal earned={false} />
+                      <BadgeMedal earned={false} size="small" />
                       <View style={[styles.keepCopy, large && styles.keepCopyLarge]}>
                         <Text style={styles.keepName}>{b.name}</Text>
                         <Text style={styles.badgeCriteria}>{b.criteria}</Text>
@@ -222,13 +206,6 @@ const styles = StyleSheet.create({
   keepCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", marginLeft: 0, marginTop: 10 },
   keepName: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   keepProgress: { marginTop: 4, color: colors.tealDark, ...typography.meta, fontWeight: "700" },
-  medal: { width: 56, height: 56, borderRadius: squircle(56), alignItems: "center", justifyContent: "center" },
-  medalOn: { backgroundColor: colors.soft },
-  medalOff: { backgroundColor: "#E0DFD9" },
-  medalGlyph: { color: colors.teal, fontSize: 28, fontWeight: "800" },
-  medalGlyphOff: { color: colors.muted, fontSize: 22 },
-  // The lock sits on the medal's corner, as in the mockup, so "not earned" is a shape as well as a shade.
-  lockDot: { position: "absolute", right: -4, bottom: -4, width: 22, height: 22, borderRadius: 11, backgroundColor: colors.white, alignItems: "center", justifyContent: "center" },
   badgeName: { marginTop: 12, color: colors.ink, ...typography.strong, fontWeight: "800", textAlign: "center" },
   badgeCriteria: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 17 }
 });
