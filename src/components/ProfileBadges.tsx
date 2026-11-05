@@ -15,7 +15,7 @@ export function ProfileBadges({ badges, onPress }: { badges: BadgeShape[]; onPre
     <TouchableOpacity activeOpacity={0.8} style={styles.card} onPress={onPress} testID="row.profile.badges"
       accessibilityRole="button" accessibilityLabel={`Badges: ${held.map((b) => b.name).join(", ")}`}
       accessibilityHint="Opens My impact">
-      <View style={styles.head}>
+      <View style={[styles.head, large && styles.headLarge]}>
         <Text style={styles.title}>Badges</Text>
         {/* Words, not a "›": the type ramp counts glyphs drawn as text and lets the number fall, never rise. */}
         <Text style={styles.link}>My impact</Text>
@@ -34,6 +34,9 @@ export function ProfileBadges({ badges, onPress }: { badges: BadgeShape[]; onPre
 const styles = StyleSheet.create({
   card: { marginTop: 18, padding: 16, borderRadius: radii.card, backgroundColor: colors.white, ...elevation.soft },
   head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  // large: stacked. Side by side, "My impact" ran off the right edge at AX5 (walked on the simulator), and `space-between`
+  // gives a wrapped title no room to give back.
+  headLarge: { flexDirection: "column", alignItems: "flex-start", gap: 4 },
   title: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   link: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   chips: { flexDirection: "row", flexWrap: "wrap", marginTop: 12, gap: 8 },
