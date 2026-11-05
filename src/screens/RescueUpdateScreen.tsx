@@ -390,15 +390,19 @@ export function RescueUpdateScreen({ navigation, route }: Props) {
                   {target === "resolved" ? (
                     <>
                       <Field
-                        label="Outcome (optional)"
+                        label="Outcome"
                         value={outcomeNotes}
                         onChangeText={setOutcomeNotes}
                         placeholder="How this case ended — reunited, adopted, in foster care…"
                         multiline
                       />
+                      {/* IQ3 · skippable, but a rescue with neither a note nor a photo does not count toward My impact. */}
+                      <Text style={styles.impactHint} testID="text.rescueUpdate.impactHint">
+                        Add a note or a photo so this rescue counts toward your impact.
+                      </Text>
                       <TouchableOpacity style={styles.photoBtn} onPress={addOutcomePhoto} activeOpacity={0.85}>
                         {uploadingPhoto ? <ActivityIndicator color={colors.teal} />
-                          : <Text style={styles.photoText}>{outcomePhotoUrl ? "✓ Photo added" : "Add an outcome photo · optional"}</Text>}
+                          : <Text style={styles.photoText}>{outcomePhotoUrl ? "✓ Photo added" : "Add an outcome photo"}</Text>}
                       </TouchableOpacity>
                     </>
                   ) : null}
@@ -476,6 +480,7 @@ const styles = StyleSheet.create({
   handoffRow: { marginTop: 20, flexDirection: "row", gap: 12 },
   handoffRowLarge: { flexDirection: "column" },
   handoffBtn: { flex: 1 },
+  impactHint: { marginTop: 4, marginBottom: 8, color: colors.muted, ...typography.meta },
   resolvedNote: { marginTop: 24, color: colors.muted, ...typography.body },
   releaseLink: { marginTop: 8, minHeight: 44, alignItems: "center", justifyContent: "center" },
   releaseLinkText: { color: colors.muted, ...typography.subtitle, fontWeight: "700", textDecorationLine: "underline" },
