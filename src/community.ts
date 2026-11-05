@@ -1,6 +1,8 @@
 // US-W2/W3 · pure helpers for the Abot-tulong wishlist UI. Kept out of the screens so the
 // status/progress logic is unit-testable (the app's jest tests cover modules, not RN renders).
 
+import type { BadgeProgress, BadgeShape } from "./navigation/types";
+
 export type PledgeStatus = "pledged" | "delivered" | "cancelled";
 export type NeedStatus = "open" | "fulfilled" | "closed";
 
@@ -312,6 +314,72 @@ export type Impact = {
   shifts_completed: number; rescues_helped: number; pets_rehomed: number;
   pledges_delivered: number;
 };
+
+// V7 / IB15 · the impact screen's three groups. The server sends the whole catalog in catalog order with `earned` and
+// `progress`; what is drawn as the near-win, the trophies and the rest to go for is decided here, as pure functions.
+
+// ⚠️ The line for "Almost there". Without one the closest unearned badge is always called that, and 1 of 50 is not almost
+// anything. Half way is where "just N more" stops being a stretch.
+export const ALMOST_THERE_AT = 0.5;
+
+/** 0..1 for the bar: never past 1 (a held badge whose stat has since fallen, or a stat past its target) and never NaN. */
+export function progressFraction(p: BadgeProgress | null | undefined): number {
+  if (!p || !(p.target > 0) || !(p.current > 0)) return 0;
+  return Math.min(1, p.current / p.target);
+}
+
+/** "8 of 10", and with `cheer` "8 of 10 — just 2 more to go!" (the mockup's words). Cheer only when close: no "just 49 more". */
+export function progressLabel(p: BadgeProgress | null | undefined, cheer: boolean): string {
+  if (!p || !(p.target > 0)) return "";
+  const current = Math.max(0, Math.min(p.current, p.target));
+  const base = `${current} of ${p.target}`;
+  const left = p.target - current;
+  return cheer && left > 0 ? `${base} — just ${left} more to go!` : base;
+}
+
+/** The unearned badge furthest along, once it is past the line, else null. A tie keeps catalog order. */
+export function almostThere(badges: BadgeShape[]): BadgeShape | null {
+  let best: BadgeShape | null = null;
+  let bestFraction = 0;
+  for (const b of badges) {
+    const p = b.progress;
+    if (b.earned || !p || !(p.current > 0) || p.current >= p.target) continue;
+    const fraction = progressFraction(p);
+    if (fraction >= ALMOST_THERE_AT && fraction > bestFraction) { best = b; bestFraction = fraction; }
+  }
+  return best;
+}
+
+export type BadgeSections = { almostThere: BadgeShape | null; earned: BadgeShape[]; keepGoing: BadgeShape[] };
+
+/** Every badge exactly once: the near-win, the held ones, and the rest. Catalog order inside each. */
+export function badgeSections(badges: BadgeShape[]): BadgeSections {
+  const near = almostThere(badges);
+  return {
+    almostThere: near,
+    earned: badges.filter((b) => b.earned),
+    keepGoing: badges.filter((b) => !b.earned && b !== near)
+  };
+}
+
+/** "5 November 2026", or null. `new Date("garbage")` does not throw, it is Invalid Date, so the check is on the value (IB7). */
+export function earnedDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return null;
+  return at.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+}
+
+/** What a screen reader says for a badge: whether it is held, and how to get it if not (V8: earned was colour alone). */
+export function badgeA11yLabel(b: BadgeShape): string {
+  if (b.earned) {
+    const when = earnedDate(b.earned_at);
+    return when ? `${b.name}, earned ${when}` : `${b.name}, earned`;
+  }
+  const how = b.criteria ? ` ${b.criteria}.` : "";
+  const far = progressLabel(b.progress, false);
+  return `${b.name}, not earned yet.${how}${far ? ` ${far}.` : ""}`;
+}
 
 export function impactTiles(i: Impact): { label: string; value: number }[] {
   return [

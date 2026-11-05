@@ -17,8 +17,9 @@ import { accountIdFromAccessToken } from "../auth/idToken";
 import { useOutbox } from "../outbox/OutboxProvider";
 import { confirmLogout } from "../auth/confirmLogout";
 import { LocationPinIcon, UserBadgeIcon } from "../components/AppIcons";
+import { ProfileBadges } from "../components/ProfileBadges";
 import { pickAndUpload } from "../media/pickAndUpload";
-import { OwnerTabScreenProps, RootStackParamList } from "../navigation/types";
+import { BadgeShape, OwnerTabScreenProps, RootStackParamList } from "../navigation/types";
 import { changeProfilePhoto, removeProfilePhoto } from "../profilePhoto";
 import { myPetsHint } from "../petForm";
 import { TAP_SLOP } from "../touch";
@@ -59,6 +60,9 @@ export function ProfileScreen({ navigation, route }: Props) {
   // PP14 · the My pets row's hint (the You artboard: "2 listed for adoption"). Null until it loads,
   // and on a failed load: a hint is a nicety, and a wrong count is worse than none.
   const [petsHint, setPetsHint] = useState<string | null>(null);
+  // IB11 · the badges earned, from /me/impact. A second fetch that fails alone (US-R2): the strip is a nicety, and a failed
+  // refresh keeps the last list rather than showing nothing for someone who has earned something.
+  const [badges, setBadges] = useState<BadgeShape[]>([]);
   const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
   const [editing, setEditing] = useState(false);
   const [draftName, setDraftName] = useState("");
@@ -84,6 +88,9 @@ export function ProfileScreen({ navigation, route }: Props) {
       });
       api.get("/me/pets").then((r) => {
         if (r.ok) setPetsHint(myPetsHint((r.data?.results ?? []) as MyPet[]));
+      });
+      api.get("/me/impact").then((r) => {
+        if (r.ok && Array.isArray(r.data?.badges)) setBadges(r.data.badges);
       });
       return primary;
       // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch only on focus, not on every api identity change
@@ -287,6 +294,8 @@ export function ProfileScreen({ navigation, route }: Props) {
             </View>
           )}
         </TouchableOpacity>
+
+        <ProfileBadges badges={badges} onPress={() => navigation.navigate("impact")} />
 
         <View style={styles.accountCard}>
           <TouchableOpacity

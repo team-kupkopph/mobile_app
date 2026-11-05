@@ -4,6 +4,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { earnedDate, progressLabel } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, elevation, maxFontScale, pill, radii, spacing, squircle, typography } from "../theme";
 import { ScreenHeader } from "../components/ui";
@@ -14,16 +15,6 @@ const card = {
 
 type Props = NativeStackScreenProps<RootStackParamList, "badgeComparison">;
 
-function earnedDate(iso: string | null): string | null {
-  if (!iso) return null;
-  try {
-    return new Date(iso).toLocaleDateString(undefined,
-      { year: "numeric", month: "long", day: "numeric" });
-  } catch {
-    return null;
-  }
-}
-
 export function BadgeComparisonScreen({ navigation, route }: Props) {
   const { badge } = route.params;
   const when = earnedDate(badge.earned_at);
@@ -31,10 +22,13 @@ export function BadgeComparisonScreen({ navigation, route }: Props) {
     <View style={styles.screen}>
       <ScreenHeader title="Badge" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={[styles.medal, badge.earned ? styles.medalOn : styles.medalOff]}>
+        {/* Decoration: whether it is held is said in words below (V8). */}
+        <View style={[styles.medal, badge.earned ? styles.medalOn : styles.medalOff]}
+              importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
           <Text style={[styles.medalGlyph, badge.earned ? null : styles.medalGlyphOff]} allowFontScaling={false}>★</Text>
         </View>
-        <Text style={[styles.name, badge.earned ? null : styles.dimText]} maxFontSizeMultiplier={maxFontScale.title}>{badge.name}</Text>
+        <Text style={[styles.name, badge.earned ? null : styles.dimText]} accessibilityRole="header"
+              maxFontSizeMultiplier={maxFontScale.title}>{badge.name}</Text>
         {badge.description ? <Text style={styles.description}>{badge.description}</Text> : null}
 
         <View style={styles.criteriaCard}>
@@ -44,12 +38,17 @@ export function BadgeComparisonScreen({ navigation, route }: Props) {
 
         {badge.earned ? (
           <View style={styles.earnedPill}>
-            <Text style={styles.earnedText}>
+            <Text style={styles.earnedText} testID="text.badge.status">
               Earned{when ? ` · ${when}` : ""}
             </Text>
           </View>
         ) : (
-          <Text style={styles.lockedText}>Not earned yet — keep helping!</Text>
+          <>
+            <Text style={styles.lockedText} testID="text.badge.status">Not earned yet — keep helping!</Text>
+            {badge.progress ? (
+              <Text style={styles.progressText} testID="text.badge.progress">{progressLabel(badge.progress, false)}</Text>
+            ) : null}
+          </>
         )}
       </ScrollView>
     </View>
@@ -72,5 +71,6 @@ const styles = StyleSheet.create({
   criteriaText: { marginTop: 6, color: colors.ink, ...typography.subtitle, fontWeight: "600" },
   earnedPill: { marginTop: 22, minHeight: 38, paddingVertical: 8, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.successBg },
   earnedText: { color: colors.success, ...typography.strong, fontWeight: "700" },
-  lockedText: { marginTop: 22, color: colors.muted, ...typography.strong, fontWeight: "700" }
+  lockedText: { marginTop: 22, color: colors.muted, ...typography.strong, fontWeight: "700" },
+  progressText: { marginTop: 6, color: colors.tealDark, ...typography.meta, fontWeight: "700" }
 });
