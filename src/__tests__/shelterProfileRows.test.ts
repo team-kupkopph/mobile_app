@@ -75,6 +75,15 @@ describe("ShelterProfileScreen · no chevron row without an onPress (F-R3-4)", (
     expect(row?.wrapper).toMatch(/navigate\(\s*"settings",\s*\{\s*shelter:\s*true\s*\}\s*\)/);
   });
 
+  it("My impact opens the impact screen, ungated (IB13, IQ6)", () => {
+    // A shelter earns rehome and rescue badges and gets a `badge_earned` notice, but this tab had no route to the
+    // screen that shows them. It is not locked: the screen is a read of the caller's own badges and works before approval.
+    const row = found.find((r) => r.tag.includes('label="My impact"'));
+    expect(row?.wrapper).toMatch(/navigate\(\s*"impact"\s*\)/);
+    expect(row?.wrapper).toMatch(/testID="row\.shelterProfile\.impact"/);
+    expect(row?.tag).not.toMatch(/locked=/);
+  });
+
   it("the rows with no destination were removed, not left as chevrons", () => {
     const labels = found.map((r) => r.tag);
     expect(labels.filter((t) => /Organization details|Help & support/.test(t))).toEqual([]);

@@ -277,6 +277,12 @@ export function ShelterProfileScreen({ navigation }: Props) {
               "Help & support" sat under it the same way; with no support screen to open (the
               `support` route is a signed-out placeholder), it was removed, matching the owner
               side, which has no help row either. __tests__/shelterProfileRows guards both. */}
+          {/* IB13 / IQ6 · a shelter earns rehome and rescue badges and is told so by a `badge_earned` notice, but this tab
+              had no way to the screen that shows them. Not locked: it reads the caller's own badges, approved or not. */}
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("impact")}
+            testID="row.shelterProfile.impact" accessibilityRole="button">
+            <Row label="My impact" />
+          </TouchableOpacity>
           <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("settings", { shelter: true })}>
             <Row label="Account settings" />
           </TouchableOpacity>
