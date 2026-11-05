@@ -13,6 +13,7 @@ const impact = read("screens/ImpactScreen.tsx");
 const detail = read("screens/BadgeDetailScreen.tsx");
 const profile = read("screens/ProfileScreen.tsx");
 const profileBadges = read("components/ProfileBadges.tsx");
+const medal = read("components/BadgeMedal.tsx");      // IB8 · the one medal: its lock and its hiding live here
 const count = (src: string, re: RegExp) => (src.match(re) ?? []).length;
 
 describe("Impact screen", () => {
@@ -42,8 +43,9 @@ describe("Impact screen", () => {
   });
 
   it("the decorative star is hidden from readers, so a tile is not read as 'star'", () => {
-    expect(impact).toMatch(/importantForAccessibility="no-hide-descendants"/);
-    expect(impact).toMatch(/accessibilityElementsHidden/);
+    expect(impact).toMatch(/<BadgeMedal\b/);
+    expect(medal).toMatch(/importantForAccessibility="no-hide-descendants"/);
+    expect(medal).toMatch(/accessibilityElementsHidden/);
   });
 
   it("draws the bar from progressFraction, which is clamped, never from raw current over target", () => {
@@ -103,23 +105,19 @@ describe("Refocus (IB6): looking at My impact again", () => {
 });
 
 describe("V3 and the lock (Impact review step 10; IQ8: keep the lock)", () => {
-  const medalOf = (src: string) => /function Medal[\s\S]*?\n\}\n/.exec(src)?.[0] ?? "";
-
   it("an unearned medal carries the shared lock, so 'not earned' is a shape and not only a colour", () => {
-    const medal = medalOf(impact);
     expect(medal).not.toBe("");                                   // the scan found the component: never assert on nothing
     expect(medal).toMatch(/<LockIcon\b/);
     expect(medal).toMatch(/earned \? null/);
-    expect(impact).toMatch(/import \{[^}]*\bLockIcon\b[^}]*\} from "\.\.\/components\/AppIcons"/);
+    expect(medal).toMatch(/import \{ LockIcon \} from "\.\/AppIcons"/);
   });
 
   it("the lock is inside what is hidden from readers: the words say 'not earned yet', the lock only repeats it", () => {
-    expect(medalOf(impact)).toMatch(/importantForAccessibility="no-hide-descendants"/);
+    expect(medal).toMatch(/importantForAccessibility="no-hide-descendants"/);
   });
 
   it("the badge detail's medal carries the lock too, when the badge is not earned", () => {
-    expect(detail).toMatch(/<LockIcon\b/);
-    expect(detail).toMatch(/badge\.earned \? null/);
+    expect(detail).toMatch(/<BadgeMedal earned=\{badge\.earned\}/);   // the same component, so the same lock
   });
 
   it("both screens sit on the backdrop and draw their surfaces with Card", () => {
@@ -149,7 +147,7 @@ describe("Badge detail", () => {
 
   it("the name is a header and the medal is decoration", () => {
     expect(detail).toMatch(/accessibilityRole="header"/);
-    expect(detail).toMatch(/importantForAccessibility="no-hide-descendants"/);
+    expect(medal).toMatch(/importantForAccessibility="no-hide-descendants"/);
   });
 
   it("says plainly whether it is held, in words and not only colour", () => {

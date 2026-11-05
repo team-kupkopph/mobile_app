@@ -1,5 +1,5 @@
 /**
- * "My impact" at AX5 (static risk from `dev/handoff-ax5.md`, then walked): three stat tiles share one row, each `flex: 1` holding a hero-size number and a
+ * "My impact" at AX5 (static risk from `dev/handoff-ax5.md`, then walked): four stat tiles share one row, each `flex: 1` holding a hero-size number and a
  * label, so at AX5 the numbers overflow and the labels break; the badge grid is two `width: "48%"` columns whose name and criteria are
  * `numberOfLines={2}`, so a badge's name and what it takes are cut off after two lines of a ~150 pt column; and the ★ is a text glyph in a fixed 56 pt medal.
  *
@@ -46,6 +46,8 @@ test.each(["badgeName", "badgeCriteria"])("%s is truncated to two lines only at 
 });
 
 test("the ★ in the fixed medal does not scale, and the stat number is capped", () => {
-  expect((src.match(/styles\.medalGlyph[^>]*allowFontScaling=\{false\}/gs) ?? []).length).toBe(1);
+  // IB8 · the medal is `BadgeMedal` now: the ★ is drawn there, once, and this screen draws no medal of its own.
+  const medal = readFileSync(join(__dirname, "..", "components", "BadgeMedal.tsx"), "utf-8");
+  expect((medal.match(/styles\.glyph\b[^>]*allowFontScaling=\{false\}/gs) ?? []).length).toBe(1);
   expect(src).toMatch(/styles\.statValue\}[^>]*maxFontSizeMultiplier=\{maxFontScale\.title\}/);
 });
