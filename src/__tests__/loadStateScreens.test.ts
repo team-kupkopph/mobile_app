@@ -216,7 +216,12 @@ describe.each(USES_VIEW)("%s distinguishes offline from empty", (file) => {
     // state back into the screen — the point of a shared hook is that it cannot be got wrong
     // per-screen, which is strictly better than each screen proving it separately.
     const usesFeedHook = /useCachedFeed</.test(src);
-    expect(nullInitList || tracksResult || usesFeedHook).toBe(true);
+    // IB6 (Impact review step 12) · My impact keeps the last good answer and the latest result as ONE value, `ImpactView`
+    // ({ data: null, res: null } until it loads), so a refocus can keep showing data instead of blanking it. `data` is null until
+    // the first good answer and `res` records whether the request came back: both halves of the invariant, in one state. Taught
+    // here by name, not by loosening the regexes above, which would let the dangerous shape through.
+    const holdsLoadView = /useState<ImpactView>\(\{\s*data:\s*null,\s*res:\s*null\s*\}\)/.test(src);
+    expect(nullInitList || tracksResult || usesFeedHook || holdsLoadView).toBe(true);
   });
 });
 

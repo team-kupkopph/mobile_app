@@ -2,7 +2,6 @@
 // that is nearly there, the ones held, and the rest to go for. A badge not held is never rendered as held — the Reliable-chip
 // trust rule — and since V8 that is said in words (a label, and which group it sits in), not by colour alone; since V6/IQ8 an
 // unearned medal also carries a lock. V3 (Impact review step 10): on the backdrop, every surface a <Card>.
-import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -11,10 +10,16 @@ import { useApi } from "../api/useApi";
 import { LockIcon } from "../components/AppIcons";
 import { LoadStateView } from "../components/LoadStateView";
 import { ScreenBackdrop } from "../components/ScreenBackground";
-import { loadState } from "../net";
-import { badgeA11yLabel, badgeSections, BadgeShape, impactTiles, Impact, parseImpact, progressFraction, progressLabel } from "../community";
+import { StaleBanner } from "../components/StaleBanner";
+import { isOffline, loadState } from "../net";
+import {
+  applyImpactReply, badgeA11yLabel, badgeSections, BadgeShape, beginImpactLoad, impactIsStale, ImpactView, impactTiles, parseImpact,
+  progressFraction, progressLabel
+} from "../community";
+import { createLatestOnly } from "../latestOnly";
 import { RootStackParamList } from "../navigation/types";
 import { useLargeText } from "../useLargeText";
+import { useRefreshOnFocus } from "../useRefreshOnFocus";
 import { colors, maxFontScale, pill, radii, spacing, squircle, typography } from "../theme";
 import { Card, ScreenHeader } from "../components/ui";
 
@@ -41,26 +46,30 @@ export function ImpactScreen({ navigation }: Props) {
   // At Dynamic Type AX3 and up three stat tiles and a two-column badge grid cannot share a line, so they stack to one column.
   const large = useLargeText();
   const api = useApi();
-  const [impact, setImpact] = useState<Impact | null>(null);
-  const [badges, setBadges] = useState<Badge[] | null>(null);
-  const [res, setRes] = useState<{ ok: boolean; status: number } | null>(null);
-
+  // IB6 · the whole state is the last GOOD answer plus the latest result, changed only by beginImpactLoad and applyImpactReply.
+  const [view, setView] = useState<ImpactView>({ data: null, res: null });
+  const [latest] = useState(createLatestOnly);
 
   const load = useCallback(() => {
-    setRes(null);
-    // ⚠️ was `else setBadges([])` — a failure rendered an empty badge grid, showing someone
-    // none of the badges they have actually earned. And since IB26 a 200 that is not the contract is a failure
-    // too: it used to read as ready, and the screen as having no badges.
-    api.get("/me/impact").then((r) => {
-      const answer = r.ok ? parseImpact(r.data) : null;
-      setRes({ ok: !!answer, status: answer || !r.ok ? r.status : 502 });
-      if (answer) { setImpact(answer.impact); setBadges(answer.badges); }
-    });
+    // Only the newest answer lands: a slow older one must not overwrite it.
+    const only = latest.begin();
+    // A screen that holds data keeps it while it refreshes (no spinner on a return from a badge); one with nothing shows loading.
+    setView(beginImpactLoad);
+    // ⚠️ was `else setBadges([])` — a failure rendered an empty badge grid, showing someone none of the badges they have
+    // actually earned. Now a failure keeps the last good data and says so, a 200 that is not the contract (IB26) is a
+    // failure too, and with nothing held it is the full-screen error.
+    return api.get("/me/impact").then(only((r) => {
+      setView((prev) => applyImpactReply(prev, r));
+      // false: the next focus tries again, instead of waiting out the freshness window on a failed load.
+      return r.ok && parseImpact(r.data) !== null;
+    }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  useFocusEffect(load);
+  useRefreshOnFocus(load);
 
-  const state = loadState(res, badges?.length);
+  const impact = view.data?.impact ?? null;
+  const badges = view.data?.badges ?? null;
+  const state = view.data ? loadState({ ok: true, status: 200 }, view.data.badges.length) : loadState(view.res);
   const sections = useMemo(() => badgeSections(badges ?? []), [badges]);
   const open = (b: Badge) => navigation.navigate("badgeDetail", { badge: b });
 
@@ -69,6 +78,7 @@ export function ImpactScreen({ navigation }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="My impact" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {impactIsStale(view) ? <StaleBanner offline={isOffline(view.res)} /> : null}
         {impact ? (
           <View style={[styles.statRow, large && styles.statRowLarge]}>
             {impactTiles(impact).map((t) => (
