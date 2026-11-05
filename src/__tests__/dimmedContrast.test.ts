@@ -7,7 +7,7 @@
  * the token colors.ts says "must never be treated as a text colour":
  *
  *   #B8B6AD  2.03:1  Settings' row chevron — the only sign a row navigates at all
- *   #A6A49C  2.50:1  the unearned badge's star AND its name (BadgeComparison, Impact)
+ *   #A6A49C  2.50:1  the unearned badge's star AND its name (BadgeDetail, Impact)
  *   #9A9E96  2.73:1  ShelterProfile's lock icon AND the locked row's label
  *
  * All three now use `muted` (6.49:1), which is the same call the tab bar made: its comment

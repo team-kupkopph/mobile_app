@@ -3,8 +3,9 @@
 // someone with none, or when the fetch failed: a hollow strip would say "you have nothing" on a request that never arrived.
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-import { BadgeShape } from "../navigation/types";
-import { colors, elevation, radii, typography } from "../theme";
+import { BadgeShape } from "../community";
+import { colors, radii, typography } from "../theme";
+import { Card } from "./ui";
 import { useLargeText } from "../useLargeText";
 
 export function ProfileBadges({ badges, onPress }: { badges: BadgeShape[]; onPress: () => void }) {
@@ -12,10 +13,11 @@ export function ProfileBadges({ badges, onPress }: { badges: BadgeShape[]; onPre
   const held = badges.filter((b) => b.earned);
   if (!held.length) return null;
   return (
-    <TouchableOpacity activeOpacity={0.8} style={styles.card} onPress={onPress} testID="row.profile.badges"
+    <TouchableOpacity activeOpacity={0.8} style={styles.press} onPress={onPress} testID="row.profile.badges"
       accessibilityRole="button" accessibilityLabel={`Badges: ${held.map((b) => b.name).join(", ")}`}
       accessibilityHint="Opens My impact">
-      <View style={styles.head}>
+      <Card>
+      <View style={[styles.head, large && styles.headLarge]}>
         <Text style={styles.title}>Badges</Text>
         {/* Words, not a "›": the type ramp counts glyphs drawn as text and lets the number fall, never rise. */}
         <Text style={styles.link}>My impact</Text>
@@ -27,13 +29,17 @@ export function ProfileBadges({ badges, onPress }: { badges: BadgeShape[]; onPre
           </View>
         ))}
       </View>
+      </Card>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { marginTop: 18, padding: 16, borderRadius: radii.card, backgroundColor: colors.white, ...elevation.soft },
+  press: { marginTop: 18 },
   head: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  // large: stacked. Side by side, "My impact" ran off the right edge at AX5 (walked on the simulator), and `space-between`
+  // gives a wrapped title no room to give back.
+  headLarge: { flexDirection: "column", alignItems: "flex-start", gap: 4 },
   title: { color: colors.ink, ...typography.strong, fontWeight: "800" },
   link: { color: colors.teal, ...typography.meta, fontWeight: "700" },
   chips: { flexDirection: "row", flexWrap: "wrap", marginTop: 12, gap: 8 },

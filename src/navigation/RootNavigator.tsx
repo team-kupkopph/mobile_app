@@ -23,7 +23,7 @@ import { ChangePasswordScreen } from "../screens/ChangePasswordScreen";
 import { TwoStepScreen } from "../screens/TwoStepScreen";
 import { OrganizationProfileScreen } from "../screens/OrganizationProfileScreen";
 import { SettingsScreen } from "../screens/SettingsScreen";
-import { BadgeComparisonScreen } from "../screens/BadgeComparisonScreen";
+import { BadgeDetailScreen } from "../screens/BadgeDetailScreen";
 import { StoriesScreen } from "../screens/StoriesScreen";
 import { StoryComposeScreen } from "../screens/StoryComposeScreen";
 import { StoryDetailScreen } from "../screens/StoryDetailScreen";
@@ -210,7 +210,7 @@ export function RootNavigator() {
       <Stack.Screen name="deleteAccount" component={DeleteAccountScreen} />
       <Stack.Screen name="exportData" component={ExportDataScreen} />
       <Stack.Screen name="impact" component={ImpactScreen} />
-      <Stack.Screen name="badgeComparison" component={BadgeComparisonScreen} />
+      <Stack.Screen name="badgeDetail" component={BadgeDetailScreen} />
       <Stack.Screen name="stories" component={StoriesScreen} />
       <Stack.Screen name="storyCompose" component={StoryComposeScreen} />
       <Stack.Screen name="storyDetail" component={StoryDetailScreen} />

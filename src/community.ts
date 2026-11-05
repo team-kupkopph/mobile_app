@@ -1,8 +1,6 @@
 // US-W2/W3 · pure helpers for the Abot-tulong wishlist UI. Kept out of the screens so the
 // status/progress logic is unit-testable (the app's jest tests cover modules, not RN renders).
 
-import type { BadgeProgress, BadgeShape } from "./navigation/types";
-
 export type PledgeStatus = "pledged" | "delivered" | "cancelled";
 export type NeedStatus = "open" | "fulfilled" | "closed";
 
@@ -314,6 +312,64 @@ export type Impact = {
   shifts_completed: number; rescues_helped: number; pets_rehomed: number;
   pledges_delivered: number;
 };
+
+// IB26 · GET /me/impact, as the server promises it (backend MeImpactSerializer; backend's test_impact_contract.py compares
+// these four types' keys with it). `parseImpact` checks an answer against them, so the screens never read `any`.
+// V7 · `progress` is how far along a badge is, or null for one with no rule. `current` is honest, so it can pass `target`:
+// a badge held after its stat fell reads below it.
+export type BadgeProgress = { current: number; target: number };
+export type BadgeShape = {
+  badge_code: string; name: string; description: string; icon: string; criteria: string;
+  earned: boolean; earned_at: string | null; progress: BadgeProgress | null;
+};
+export type ImpactResponse = { impact: Impact; badges: BadgeShape[] };
+
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+const isCount = (v: unknown): v is number => typeof v === "number" && Number.isInteger(v) && v >= 0;
+const text = (v: unknown): string => (typeof v === "string" ? v : "");
+
+function parseProgress(v: unknown): BadgeProgress | null {
+  // Decoration: a malformed one costs the bar, not the badge.
+  return isObject(v) && isCount(v.current) && isCount(v.target) ? { current: v.current, target: v.target } : null;
+}
+
+function parseBadge(v: unknown): BadgeShape | null {
+  if (!isObject(v)) return null;
+  // Identity, and whether it is held, are never guessed: a badge that cannot say which it is, or whether it is earned,
+  // makes the whole answer unusable (see below).
+  if (typeof v.badge_code !== "string" || !v.badge_code || typeof v.name !== "string" || !v.name) return null;
+  if (typeof v.earned !== "boolean") return null;
+  return {
+    badge_code: v.badge_code, name: v.name, description: text(v.description), icon: text(v.icon),
+    criteria: text(v.criteria), earned: v.earned, earned_at: typeof v.earned_at === "string" ? v.earned_at : null,
+    progress: parseProgress(v.progress)
+  };
+}
+
+/**
+ * The answer from GET /me/impact, checked against the contract, or null when it is not that.
+ *
+ * ⚠️ ONE BAD BADGE MAKES THE WHOLE ANSWER NULL, ON PURPOSE. Dropping it quietly would draw a grid that looks complete and
+ * is not, which is the failure this exists to stop; null shows an error with a retry. Unknown fields are ignored and not
+ * copied, so the server can add to the shape without breaking the app.
+ */
+export function parseImpact(data: unknown): ImpactResponse | null {
+  if (!isObject(data) || !isObject(data.impact) || !Array.isArray(data.badges)) return null;
+  const c = data.impact;
+  if (!isCount(c.shifts_completed) || !isCount(c.rescues_helped) || !isCount(c.pets_rehomed) || !isCount(c.pledges_delivered)) return null;
+  const badges: BadgeShape[] = [];
+  const seen = new Set<string>();
+  for (const raw of data.badges) {
+    const b = parseBadge(raw);
+    if (!b || seen.has(b.badge_code)) return null;     // a duplicate would draw one tile twice
+    seen.add(b.badge_code);
+    badges.push(b);
+  }
+  return {
+    impact: { shifts_completed: c.shifts_completed, rescues_helped: c.rescues_helped, pets_rehomed: c.pets_rehomed, pledges_delivered: c.pledges_delivered },
+    badges
+  };
+}
 
 // V7 / IB15 · the impact screen's three groups. The server sends the whole catalog in catalog order with `earned` and
 // `progress`; what is drawn as the near-win, the trophies and the rest to go for is decided here, as pure functions.
