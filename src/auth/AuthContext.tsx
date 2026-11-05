@@ -2,6 +2,7 @@ import * as SecureStore from "expo-secure-store";
 
 import { clearCache } from "../cache";
 import { clearStepUpCache } from "../stepUpCache";
+import { type AccountType, clearAccountType, loadAccountType, saveAccountType } from "./accountTypeStore";
 import { clearAppLockPreference } from "./appLockStore";
 import { signOutWithRevoke } from "./logout";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -16,6 +17,10 @@ type AuthValue = {
   // here, alongside tokens, so Home/Profile can both read it without re-deriving it from /me.
   city: string | null;
   setCity: (c: string | null) => Promise<void>;
+  // Who the signed-in person is, remembered so a cold start opens the right shell before (or without) /me.
+  // Spec 2026-11-04-account-aware-first-screen-design.md; null = not known yet.
+  accountType: AccountType | null;
+  setAccountType: (t: AccountType) => Promise<void>;
 };
 
 const KEY = "kupkop.tokens";
@@ -25,17 +30,19 @@ const AuthContext = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tokens, setTokensState] = useState<Tokens>(null);
   const [city, setCityState] = useState<string | null>(null);
+  const [accountType, setAccountTypeState] = useState<AccountType | null>(null);
   const [isReady, setReady] = useState(false);
 
   useEffect(() => {
-    Promise.all([SecureStore.getItemAsync(KEY), SecureStore.getItemAsync(CITY_KEY)])
-      .then(([rawTokens, rawCity]) => {
+    Promise.all([SecureStore.getItemAsync(KEY), SecureStore.getItemAsync(CITY_KEY), loadAccountType()])
+      .then(([rawTokens, rawCity, rawType]) => {
         try {
           if (rawTokens) setTokensState(JSON.parse(rawTokens));
         } catch {
           // corrupt entry — treat as signed out
         }
         if (rawCity) setCityState(rawCity);
+        if (rawType) setAccountTypeState(rawType);
       })
       .finally(() => setReady(true));
   }, []);
@@ -64,6 +71,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await clearAppLockPreference();
       // N5 · a remembered step-up proof is as personal as the app-lock preference: gone on any session end.
       clearStepUpCache();
+      // The remembered account type goes the same way, and for the same reason: the next person to sign in on this
+      // phone must not open the previous account's shell.
+      setAccountTypeState(null);
+      await clearAccountType();
     }
   }
 
@@ -71,6 +82,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setCityState(c);
     if (c) await SecureStore.setItemAsync(CITY_KEY, c);
     else await SecureStore.deleteItemAsync(CITY_KEY);
+  }
+
+  async function setAccountType(t: AccountType) {
+    setAccountTypeState(t);
+    await saveAccountType(t);
   }
 
   async function signOut() {
@@ -81,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ tokens, isReady, setTokens, signOut, city, setCity }}>
+    <AuthContext.Provider value={{ tokens, isReady, setTokens, signOut, city, setCity, accountType, setAccountType }}>
       {children}
     </AuthContext.Provider>
   );
