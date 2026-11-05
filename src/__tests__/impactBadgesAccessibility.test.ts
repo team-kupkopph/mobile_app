@@ -107,6 +107,11 @@ describe("Profile", () => {
     expect(profileBadges).toMatch(/testID="row\.profile\.badges"/);
   });
 
+  it("stacks the header at large text: walked at AX5, the 'My impact' link ran off the right edge beside the title", () => {
+    expect(profileBadges).toMatch(/styles\.head, large && styles\.headLarge/);
+    expect(profileBadges).toMatch(/headLarge\s*:\s*\{[^}]*flexDirection\s*:\s*"column"/);
+  });
+
   it("stacks at large text, and draws no glyph as text (the type ramp lets that count fall, never rise)", () => {
     expect(profileBadges).toMatch(/useLargeText\(\)/);
     const code = profileBadges.replace(/\{\/\*[\s\S]*?\*\/\}/g, "").replace(/\/\/.*$/gm, "");   // the explanation may name the glyph
