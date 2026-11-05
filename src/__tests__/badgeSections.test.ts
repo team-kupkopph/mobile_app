@@ -7,9 +7,8 @@
  * renderer: the repo has none, and a screen test that needed one would not be written.
  */
 import {
-  ALMOST_THERE_AT, almostThere, badgeA11yLabel, badgeSections, earnedDate, progressFraction, progressLabel
+  ALMOST_THERE_AT, almostThere, badgeA11yLabel, badgeSections, BadgeShape, earnedDate, progressFraction, progressLabel
 } from "../community";
-import type { BadgeShape } from "../navigation/types";
 
 const badge = (code: string, over: Partial<BadgeShape> = {}): BadgeShape => ({
   badge_code: code, name: code, description: "", icon: "", criteria: `criteria of ${code}`,

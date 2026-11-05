@@ -3,6 +3,7 @@ import type { CompositeScreenProps, NavigatorScreenParams } from "@react-navigat
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { ShelterTier } from "../api/types";
+import type { BadgeShape } from "../community";
 import { SocialIdentity } from "../auth/socialAuth";
 import type { QueuedReason } from "../sagip";
 import { ActivitySection } from "../shelterVolunteer";
@@ -26,13 +27,6 @@ export type MatchShape = {
 };
 
 // US-B2 · a badge, threaded from the impact grid to its detail.
-// V7 · how far along a badge is: {current, target}, or null for a badge with no rule. `current` is honest, so it can pass
-// `target`: a badge held after its stat fell reads below it.
-export type BadgeProgress = { current: number; target: number };
-export type BadgeShape = {
-  badge_code: string; name: string; description: string; icon: string; criteria: string;
-  earned: boolean; earned_at: string | null; progress: BadgeProgress | null;
-};
 
 // US-W3 · a shelter need, threaded through the manage/edit/pledges screens.
 export type ShelterNeedShape = {
@@ -241,7 +235,7 @@ export type RootStackParamList = {
   exportData: undefined;
   // US-B2 · My impact: the badge grid + a single badge's detail.
   impact: undefined;
-  badgeComparison: { badge: BadgeShape };
+  badgeDetail: { badge: BadgeShape };
   // US-T2 · success stories: feed, compose (optionally prefilled from an adoption), detail.
   stories: undefined;
   storyCompose: { adoptionListingId?: string } | undefined;

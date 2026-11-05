@@ -15,7 +15,7 @@ import { join } from "path";
 const read = (f: string) => readFileSync(join(__dirname, "..", "screens", f), "utf-8");
 const upgrade = read("MemberUpgradeScreen.tsx");
 const submitted = read("MemberSubmittedScreen.tsx");
-const badge = read("BadgeComparisonScreen.tsx");
+const badge = read("BadgeDetailScreen.tsx");
 const body = (s: string, name: string) => {
   const m = new RegExp(`(?:^|\\n)\\s*${name}\\s*:\\s*\\{([^{}]*)\\}`).exec(s);
   return m ? m[1] : null;
