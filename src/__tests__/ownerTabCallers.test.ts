@@ -13,7 +13,9 @@ const read = (rel: string) => readFileSync(join(__dirname, "..", rel), "utf8");
 const code = (rel: string) =>
   read(rel).split("\n").filter((l) => !l.trim().startsWith("//") && !l.trim().startsWith("*") && !l.trim().startsWith("{/*")).join("\n");
 
-describe("the nine sign-in / sign-up resets land on Home through enterOwnerShell", () => {
+// The five sign-in files moved to `enterSignedInShell` (it enters the owner shell for a personal account and the shelter shell
+// for a shelter; signinEntersByType.test.ts guards them). The three below are not sign-ins and still call enterOwnerShell.
+describe("the nine sign-in / sign-up resets land on Home through enterOwnerShell or enterSignedInShell", () => {
   const sites: [string, number][] = [
     ["screens/SignupSuccessScreen.tsx", 1],
     ["screens/SigninScreen.tsx", 2],
@@ -29,7 +31,7 @@ describe("the nine sign-in / sign-up resets land on Home through enterOwnerShell
   });
   it.each(sites)("%s calls enterOwnerShell %i time(s) and names no `home` route itself", (file, count) => {
     const src = code(file);
-    expect(src.match(/enterOwnerShell\(navigation/g)).toHaveLength(count);
+    expect(src.match(/enter(?:OwnerShell|SignedInShell)\(navigation/g)).toHaveLength(count);
     expect(src).not.toMatch(/name: "home"/);
   });
   it("only SignupSuccess carries justSignedUp (it, and only it, resumes the guest intent)", () => {

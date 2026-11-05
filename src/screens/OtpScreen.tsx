@@ -19,7 +19,7 @@ import { AuthHeader, PrimaryButton, SHELTER_STEP_COUNT, authColors } from "./Aut
 import { TAP_SLOP } from "../touch";
 import { maxFontScale, radii, spacing, typography } from "../theme";
 import { formatCountdown, resendOutcome } from "../otpResend";
-import { enterOwnerShell } from "../appTabs";
+import { enterSignedInShell } from "../entryShell";
 
 const CODE_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -28,7 +28,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "otp">;
 
 export function OtpScreen({ navigation, route }: Props) {
   const api = useApi();
-  const { setTokens } = useAuth();
+  const { setTokens, setAccountType } = useAuth();
   const { email, mode, tier } = route.params;
   const isUnverifiedResume = mode === "unverified";
 
@@ -113,11 +113,13 @@ export function OtpScreen({ navigation, route }: Props) {
         if (isUnverifiedResume) {
           // Resuming a signin, not finishing a fresh signup — land straight on home rather than
           // the "You're in!" recap. Single-stack nav doesn't auto-switch on token change.
-          enterOwnerShell(navigation);
+          await enterSignedInShell(navigation, setAccountType, api, res.data.access);
         } else if (tier) {
           // Shelter signup continues into org setup (US-B2), not the owner "You're in!" recap.
+          await setAccountType("shelter");
           navigation.navigate("shelterSetup", { tier });
         } else {
+          await setAccountType("personal");
           navigation.navigate("signupSuccess");
         }
         return;

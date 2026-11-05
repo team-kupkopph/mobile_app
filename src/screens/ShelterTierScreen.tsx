@@ -21,7 +21,7 @@ import { RootStackParamList } from "../navigation/types";
 import { restoreOfferFrom } from "../restore";
 import { AuthHeader, SHELTER_STEP_COUNT, authColors } from "./AuthFormKit";
 import { elevation, maxFontScale, radii, spacing, typography } from "../theme";
-import { enterOwnerShell } from "../appTabs";
+import { enterSignedInShell } from "../entryShell";
 
 type Props = NativeStackScreenProps<RootStackParamList, "shelterTier">;
 
@@ -42,7 +42,7 @@ const options: Array<{ tier: ShelterTier; title: string; body: string; glyph: st
 
 export function ShelterTierScreen({ navigation, route }: Props) {
   const api = useApi();
-  const { setTokens } = useAuth();
+  const { setTokens, setAccountType } = useAuth();
   const social = route.params?.social;
   // NT-14 · a signed-in shelter finishing the setup it quit (from Home or You): the account exists, so no signup.
   const resume = route.params?.resume === true;
@@ -85,9 +85,10 @@ export function ShelterTierScreen({ navigation, route }: Props) {
           // Test-plan F8: an existing account (the server ignored `account_type` and the tier
           // was never sent) — this was a sign-in. Home, not shelter setup for an account that
           // may well be personal.
-          enterOwnerShell(navigation);
+          await enterSignedInShell(navigation, setAccountType, api, res.data.access);
           return;
         }
+        await setAccountType("shelter");
         navigation.navigate("shelterSetup", { tier });
         return;
       }
