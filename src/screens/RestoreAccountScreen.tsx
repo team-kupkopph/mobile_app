@@ -21,7 +21,7 @@ import { RootStackParamList } from "../navigation/types";
 import { daysLeft, purgeDateLabel, restoreErrorMessage } from "../restore";
 import { colors, maxFontScale, radii, spacing, typography } from "../theme";
 import { SimpleHeader, authColors } from "./AuthFormKit";
-import { enterOwnerShell } from "../appTabs";
+import { enterSignedInShell } from "../entryShell";
 
 type Props = NativeStackScreenProps<RootStackParamList, "restoreAccount">;
 
@@ -37,7 +37,7 @@ function whenLine(purgeOn: string): string {
 export function RestoreAccountScreen({ navigation, route }: Props) {
   const { restoreToken, purgeOn } = route.params;
   const api = useApi();
-  const { setTokens } = useAuth();
+  const { setTokens, setAccountType } = useAuth();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
   // A 400 means the token is spent or stale: only a fresh sign-in can mint another.
@@ -54,7 +54,7 @@ export function RestoreAccountScreen({ navigation, route }: Props) {
       if (res.ok) {
         await setTokens({ access: res.data.access, refresh: res.data.refresh });
         // Single-stack nav doesn't switch on a token change — land on home explicitly.
-        enterOwnerShell(navigation);
+        await enterSignedInShell(navigation, setAccountType, api, res.data.access);
         return;
       }
       setExpired(res.status === 400);

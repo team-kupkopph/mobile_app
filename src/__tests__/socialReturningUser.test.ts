@@ -46,7 +46,8 @@ describe("the two screens that post to /auth/social", () => {
 
   it("reset a returning user straight to home after setting tokens (OtpScreen's resume branch)", () => {
     for (const src of [accountType, shelterTier]) {
-      expect(src).toMatch(/enterOwnerShell\(navigation\);/);
+      // Was enterOwnerShell; a returning social account now enters the shell for its type (entryShell.enterSignedInShell).
+      expect(src).toMatch(/enterSignedInShell\(navigation, setAccountType, api, res\.data\.access\);/);
     }
   });
 

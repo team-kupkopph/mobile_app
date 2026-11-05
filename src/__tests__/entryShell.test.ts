@@ -1,4 +1,4 @@
-import { HOLD_MS, launchPlan, resolveLaunchHold, shellRouteFor } from "../entryShell";
+import { HOLD_MS, enterSignedInShell, launchPlan, resolveLaunchHold, shellRouteFor } from "../entryShell";
 
 describe("shellRouteFor", () => {
   it("sends a shelter to its own shell", () => {
@@ -63,5 +63,43 @@ describe("resolveLaunchHold", () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+});
+
+describe("enterSignedInShell", () => {
+  const remember = jest.fn(async () => {});
+  const reset = jest.fn();
+  const nav = { reset };
+  const apiReturning = (r: unknown) => ({ get: jest.fn(async () => r as never) });
+  beforeEach(() => { remember.mockClear(); reset.mockClear(); });
+
+  const lastRoute = () => reset.mock.calls[0][0].routes[0].name;
+
+  it("opens the shelter shell and remembers a shelter", async () => {
+    await enterSignedInShell(nav, remember, apiReturning({ ok: true, data: { account_type: "shelter" } }), "tok");
+    expect(reset).toHaveBeenCalledTimes(1);
+    expect(lastRoute()).toBe("shelterTabs");
+    expect(remember).toHaveBeenCalledWith("shelter");
+  });
+
+  it("opens the owner shell and remembers a personal account", async () => {
+    await enterSignedInShell(nav, remember, apiReturning({ ok: true, data: { account_type: "personal" } }), "tok");
+    expect(lastRoute()).toBe("ownerTabs");
+    expect(remember).toHaveBeenCalledWith("personal");
+  });
+
+  it("asks /me with the new access token, not whatever the client last held", async () => {
+    const api = apiReturning({ ok: true, data: { account_type: "personal" } });
+    await enterSignedInShell(nav, remember, api, "fresh-access");
+    expect(api.get).toHaveBeenCalledWith("/me", { headers: { Authorization: "Bearer fresh-access" } });
+  });
+
+  it("falls back to the owner shell, remembering nothing, on a failure, an admin or a throw", async () => {
+    await enterSignedInShell(nav, remember, apiReturning({ ok: false, status: 0 }), "t");
+    await enterSignedInShell(nav, remember, apiReturning({ ok: true, data: { account_type: "admin" } }), "t");
+    await enterSignedInShell(nav, remember, { get: async () => { throw new Error("down"); } }, "t");
+    expect(reset).toHaveBeenCalledTimes(3);
+    reset.mock.calls.forEach((c) => expect(c[0].routes[0].name).toBe("ownerTabs"));
+    expect(remember).not.toHaveBeenCalled();
   });
 });
