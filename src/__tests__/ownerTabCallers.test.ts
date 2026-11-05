@@ -66,10 +66,12 @@ describe("other inbound paths", () => {
     expect(code("screens/HomeScreen.tsx")).toMatch(/openOwnerTab\(navigation, "adopt"\)/);
     expect(code("screens/HomeScreen.tsx")).not.toMatch(/navigate\("adopt"\)/);
   });
-  it("Welcome's guest entry and the initial route come from appTabs", () => {
+  it("Welcome's guest entry comes from appTabs and the initial route from the account type", () => {
     const root = code("navigation/RootNavigator.tsx");
     expect(root).toMatch(/onBrowseGuest=\{\(\) => enterGuestShell\(navigation\)\}/);
-    expect(root).toMatch(/initialRouteName=\{tokens \? OWNER_SHELL_ROUTE : "welcome"\}/);
+    // Was `tokens ? OWNER_SHELL_ROUTE : "welcome"`; the account-aware first screen chooses it (entryShell.ts, useLaunchRoute).
+    expect(root).toMatch(/initialRouteName=\{first\}/);
+    expect(read("entryShell.ts")).toMatch(/"ownerTabs" \| "shelterTabs"/);
     expect(read("appTabs.ts")).toMatch(/OWNER_SHELL_ROUTE = "ownerTabs" as const/);
   });
   it("Settings' Edit profile and the delete screen's volunteer blocker go through the owner-tab helpers", () => {
