@@ -473,7 +473,7 @@ export function impactTiles(i: Impact): { label: string; value: number }[] {
     { label: "Shifts", value: i.shifts_completed },
     { label: "Rescues", value: i.rescues_helped },
     { label: "Rehomed", value: i.pets_rehomed },
-    { label: "Donations", value: i.pledges_delivered }
+    { label: "Pledges", value: i.pledges_delivered }
   ];
 }
 
