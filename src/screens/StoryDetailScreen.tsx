@@ -3,11 +3,12 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View
+  Image, ScrollView, StyleSheet, Text, TouchableOpacity, View
 } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
 import { useApi } from "../api/useApi";
+import { PersonActions } from "../components/PersonActions";
 import { LoadStateView } from "../components/LoadStateView";
 import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
@@ -83,23 +84,14 @@ export function StoryDetailScreen({ navigation, route }: Props) {
     }
   }
 
-  function confirmFlag() {
-    // G16 (same reasoning as toggleReact): a guest tapping Flag would confirm the
-    // Alert, POST to /moderation/flags, 401, and then see "Thanks" from the client
-    // (which reads res.ok only, not the status code) — a truly silent failure with
-    // false-positive UX. Route them to the wall instead.
+  // Review step 7g · "Report this", the same word and the same form as everywhere else (this screen used to say "Flag",
+  // ask with an Alert, and send a fixed reason no moderator could use). G16, kept: a guest raises the sign-up wall
+  // instead of tapping into a 401.
+  function reportStory() {
     if (isGuest) { setWallOpen(true); return; }
-    Alert.alert("Flag this story?",
-      "It'll be sent to Kupkop for review. Use this for off-topic, misleading, or unsafe posts.",
-      [{ text: "Cancel", style: "cancel" },
-       { text: "Flag", style: "destructive", onPress: doFlag }]);
-  }
-
-  async function doFlag() {
-    const res = await api.post("/moderation/flags",
-      { target_type: "story", target_id: storyId, reason: "reported from story detail" });
-    Alert.alert(res.ok ? "Thanks" : "Couldn't flag",
-      res.ok ? "Our team will take a look." : "Please try again.");
+    navigation.navigate("reportContent", {
+      targetType: "story", targetId: storyId, subject: story ? `${story.author.name}'s story` : undefined,
+    });
   }
 
   // ⚠️ HOISTED OUT OF BOTH RETURNS ON PURPOSE. The back button does not depend on `story`, and
@@ -149,14 +141,21 @@ export function StoryDetailScreen({ navigation, route }: Props) {
           </View>
         </View>
         {story.caption ? <Text style={styles.caption}>{story.caption}</Text> : null}
+        <PersonActions testID="row.storyDetail.person"
+          person={{ name: story.author.name, via: { type: "story", id: storyId } }}
+          onReport={() => navigation.navigate("reportContent", {
+            targetType: "account", via: { type: "story", id: storyId }, subject: story.author.name,
+            person: { name: story.author.name, via: { type: "story", id: storyId } }, leaveContent: true })}
+          onBlocked={() => navigation.goBack()} />
 
         <View style={styles.actionRow}>
           <TouchableOpacity style={styles.reactBtn} onPress={toggleReact}>
             <Text style={[styles.heart, story.my_reaction ? styles.heartOn : null]}>♥</Text>
             <Text style={styles.reactLabel}>React · {story.reaction_count}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.flagBtn} onPress={confirmFlag}>
-            <Text style={styles.flagLabel}>Flag</Text>
+          <TouchableOpacity style={styles.flagBtn} onPress={reportStory} accessibilityRole="button"
+            accessibilityLabel="Report this story" testID="btn.storyDetail.report">
+            <Text style={styles.flagLabel}>Report this</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

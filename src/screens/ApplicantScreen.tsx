@@ -18,6 +18,7 @@ import { STAGE_ORDER, STAGE_STEP, ladderStageTone, stageMeta } from "../adoption
 import { CheckIcon } from "../components/AppIcons";
 import { ConfirmModal } from "../components/ConfirmModal";
 import { LoadStateView } from "../components/LoadStateView";
+import { PersonActions } from "../components/PersonActions";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { DeclineSheet } from "../components/applicant/DeclineSheet";
 import { StepSheet } from "../components/applicant/StepSheet";
@@ -126,6 +127,11 @@ export function ApplicantScreen({ navigation, route }: Props) {
             {row.adopter.verified_member ? <Chip label="Verified Member" tone="info" dot={false} /> : null}
           </View>
           <Text style={styles.forLine}>For {pet}{row.created_at ? ` · asked ${askedAgo(row.created_at, new Date())}` : ""}</Text>
+          <PersonActions testID="row.applicant.person"
+            person={{ name, accountId: row.adopter.account_id }}
+            onReport={() => navigation.navigate("reportContent", {
+              targetType: "account", targetId: row.adopter.account_id, subject: name,
+              person: { name, accountId: row.adopter.account_id } })} />
         </Card>
 
         {row.message ? (

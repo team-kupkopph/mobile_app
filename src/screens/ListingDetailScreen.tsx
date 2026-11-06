@@ -16,6 +16,7 @@ import { loadState } from "../net";
 import { inquireBlockedCopy, inquireRefusalMessage, inquirySentCopy } from "../adoption";
 import { useAuth } from "../auth/AuthContext";
 import { accountIdFromAccessToken } from "../auth/idToken";
+import { PersonActions } from "../components/PersonActions";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { InquireSheet } from "../components/InquireSheet";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
@@ -155,7 +156,7 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             // A guest's report would 401 at /moderation/flags and dead-end on "Couldn't send
             // the report" — raise the signup wall instead, same as Inquire.
             onPress={() => isGuest ? openWall("account") : navigation.navigate("reportContent",
-              { targetType: "listing", targetId: listing.listing_id })}
+              { targetType: "listing", targetId: listing.listing_id, subject: listing.pet.name })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
           </TouchableOpacity>
@@ -215,6 +216,12 @@ export function ListingDetailScreen({ navigation, route }: Props) {
             {listing.poster.name}{listing.poster.is_shelter ? " · Shelter" : ""}
             {listing.poster.city ? ` · ${listing.poster.city}` : ""}
           </Text>
+          <PersonActions testID="row.listingDetail.person"
+            person={{ name: listing.poster.name, accountId: listing.poster.account_id }}
+            onReport={() => navigation.navigate("reportContent", {
+              targetType: "account", targetId: listing.poster.account_id, subject: listing.poster.name,
+              person: { name: listing.poster.name, accountId: listing.poster.account_id }, leaveContent: true })}
+            onBlocked={() => navigation.goBack()} />
 
           {listing.poster.is_shelter ? (
             // US-Q2 · a 404 (org unapproved or no verified QR yet) is handled on the
