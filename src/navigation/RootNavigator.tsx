@@ -63,7 +63,9 @@ import { SignupScreen } from "../screens/SignupScreen";
 import { SignupSuccessScreen } from "../screens/SignupSuccessScreen";
 import { MyReportsScreen } from "../screens/MyReportsScreen";
 import { AdjustPinScreen } from "../screens/AdjustPinScreen";
+import { BlockedPeopleScreen } from "../screens/BlockedPeopleScreen";
 import { ReportContentScreen } from "../screens/ReportContentScreen";
+import { ReportContentSentScreen } from "../screens/ReportContentSentScreen";
 import { ReportDetailScreen } from "../screens/ReportDetailScreen";
 import { ReportSentScreen } from "../screens/ReportSentScreen";
 import { ReportStrayScreen } from "../screens/ReportStrayScreen";
@@ -217,6 +219,8 @@ export function RootNavigator() {
       <Stack.Screen name="reportMatches" component={ReportMatchesScreen} />
       <Stack.Screen name="matchDetail" component={MatchDetailScreen} />
       <Stack.Screen name="reportContent" component={ReportContentScreen} />
+      <Stack.Screen name="reportContentSent" component={ReportContentSentScreen} />
+      <Stack.Screen name="blockedPeople" component={BlockedPeopleScreen} />
       {/* US-V8 — the real hub + shift detail/waiver (Task 4), check-in/out (Task 6), and the
           cancel flow (Task 8). Task 5 (K30/G9) folded the standalone schedule and history
           screens into the hub itself — one screen, segmented Browse | My shifts. */}

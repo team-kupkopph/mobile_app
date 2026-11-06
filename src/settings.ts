@@ -216,6 +216,8 @@ export function settingsGroups(opts: {
       { key: "privacyControls", label: "Privacy controls", value: privacySummary(),
         action: { type: "navigate", name: "settingsPrivacy" } },
       { key: "notifications", label: "Notifications", action: { type: "navigate", name: "notifications" } },
+      // Review step 7d · both stores require a way to block, and a way to undo it.
+      { key: "blockedPeople", label: "Blocked people", action: { type: "navigate", name: "blockedPeople" } },
     ] },
     // §12.6 promises these two in-app. Named the way a person would name them.
     { title: "YOUR DATA", rows: [

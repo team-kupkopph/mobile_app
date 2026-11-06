@@ -13,6 +13,7 @@ import { useAuth } from "../auth/AuthContext";
 import { LoadStateView } from "../components/LoadStateView";
 import { loadState } from "../net";
 import { CheckIcon, VolunteerIcon } from "../components/AppIcons";
+import { PersonActions } from "../components/PersonActions";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { SignupWall, SignupWallAction } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
@@ -162,7 +163,7 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
             testID="lnk.kawanggawaDetail.report"
             hitSlop={TAP_SLOP}
             onPress={() => isGuest ? openWall("account") : navigation.navigate("reportContent",
-              { targetType: "shift", targetId: shift.shift_id })}
+              { targetType: "shift", targetId: shift.shift_id, subject: shift.org_name })}
           >
             <Text style={styles.flagLinkText}>Report this</Text>
           </TouchableOpacity>
@@ -187,6 +188,13 @@ export function KawangGawaDetailScreen({ navigation, route }: Props) {
           {/* Matched to the hub card 2026-09-09. This said "5 of 5 slots left" while the card
               the user had just tapped said "5 slots" — one shift, two vocabularies, one tap
               apart. Same three tiers as the card now: day, time · duration, toned chip. */}
+          <PersonActions testID="row.kawanggawaDetail.person"
+            person={{ name: shift.org_name, via: { type: "shift", id: shift.shift_id } }}
+            onReport={() => navigation.navigate("reportContent", {
+              targetType: "account", via: { type: "shift", id: shift.shift_id }, subject: shift.org_name,
+              person: { name: shift.org_name, via: { type: "shift", id: shift.shift_id } }, leaveContent: true })}
+            onBlocked={() => navigation.goBack()} />
+
           <Card style={styles.infoCard}>
             <Text style={styles.infoDate}>{shiftDateLabel(shift.starts_at)}</Text>
             <Text style={styles.infoWhen}>

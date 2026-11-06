@@ -1,3 +1,4 @@
+import type { PersonRef, ReportParams } from "../moderation";
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import type { CompositeScreenProps, NavigatorScreenParams } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -245,7 +246,11 @@ export type RootStackParamList = {
   matchDetail: { reportId: string; match: MatchShape };
   // US-M1 — "report this" on a stray report or listing (or, in principle, any moderation
   // flag_target — account/qr/message are modeled backend-side but have no UI trigger yet).
-  reportContent: { targetType: "report" | "listing" | "account" | "qr" | "message" | "shift"; targetId: string };
+  reportContent: ReportParams;
+  // Review step 7g · what a report ends on, and (for a report about a person) where Block is offered.
+  reportContentSent: { subject?: string; person?: PersonRef; leaveContent?: boolean };
+  // Review step 7d · the people you have blocked, reached from Settings.
+  blockedPeople: undefined;
   // US-V8 — Kawang-Gawa volunteer flow (Track V, Sprint 5). The hub `kawanggawa` is a tab of both shells now
   // (Task 5 folded the schedule and history into one segmented Browse | My shifts hub; `tab` picks the initial segment).
   kawanggawaDetail: { shiftId: string };
