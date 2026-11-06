@@ -55,10 +55,10 @@ test("the Submitted notice stacks at large text and its heading is capped", () =
   expect(submitted).toMatch(/styles\.heading\}[^>]*maxFontSizeMultiplier=\{maxFontScale\.title\}/);
 });
 
-test("the Badge screen's ★ does not scale, its name is capped and the pill grows", () => {
-  // IB8 · the ★ is `BadgeMedal`'s: drawn there, unscaled, and the Badge screen uses it.
+test("the Badge screen's glyph does not scale, its name is capped and the pill grows", () => {
+  // V5 · the glyph is `BadgeMedal`'s: an Image of a fixed size, drawn there, and the Badge screen uses it.
   expect(badge).toMatch(/<BadgeMedal\b/);
-  expect(readFileSync(join(__dirname, "..", "components", "BadgeMedal.tsx"), "utf-8")).toMatch(/styles\.glyph\b[^>]*\][^>]*allowFontScaling=\{false\}/);
+  expect(readFileSync(join(__dirname, "..", "components", "BadgeMedal.tsx"), "utf-8")).toMatch(/<Image\b[^>]*source=\{badgeGlyph\(icon\)\}/);
   expect(badge).toMatch(/styles\.name[^>]*\][^>]*maxFontSizeMultiplier=\{maxFontScale\.title\}/);
   // V4 · the status is the shared Chip now, which grows with its text (R6-F4: `minHeight`, never `height`).
   expect(badge).toMatch(/<Chip\b/);

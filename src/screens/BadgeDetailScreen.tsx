@@ -23,7 +23,7 @@ export function BadgeDetailScreen({ navigation, route }: Props) {
       <ScreenBackdrop />
       <ScreenHeader title="Badge" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <BadgeMedal earned={badge.earned} size="large" />
+        <BadgeMedal earned={badge.earned} size="large" icon={badge.icon} />
         <Text style={[styles.name, badge.earned ? null : styles.dimText]} accessibilityRole="header"
               maxFontSizeMultiplier={maxFontScale.title}>{badge.name}</Text>
         {badge.description ? <Text style={styles.description}>{badge.description}</Text> : null}

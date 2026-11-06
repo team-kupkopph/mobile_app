@@ -45,9 +45,10 @@ test.each(["badgeName", "badgeCriteria"])("%s is truncated to two lines only at 
   expect(m![1]).toMatch(/large \? undefined : 2/);
 });
 
-test("the ★ in the fixed medal does not scale, and the stat number is capped", () => {
-  // IB8 · the medal is `BadgeMedal` now: the ★ is drawn there, once, and this screen draws no medal of its own.
+test("the glyph in the fixed medal is a picture, so it does not scale, and the stat number is capped", () => {
+  // V5 · the medal is `BadgeMedal`: its glyph is an Image of a fixed size (no font to scale), drawn once, and this screen draws no medal of its own.
   const medal = readFileSync(join(__dirname, "..", "components", "BadgeMedal.tsx"), "utf-8");
-  expect((medal.match(/styles\.glyph\b[^>]*allowFontScaling=\{false\}/gs) ?? []).length).toBe(1);
+  expect((medal.match(/<Image\b/g) ?? []).length).toBe(1);
+  expect(medal).not.toMatch(/<Text\b/);
   expect(src).toMatch(/styles\.statValue\}[^>]*maxFontSizeMultiplier=\{maxFontScale\.title\}/);
 });

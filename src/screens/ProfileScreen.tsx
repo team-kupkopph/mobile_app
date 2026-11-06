@@ -26,6 +26,9 @@ import { myPetsHint } from "../petForm";
 import { TAP_SLOP } from "../touch";
 import { ScreenBackdrop } from "../components/ScreenBackground";
 import { colors, elevation, maxFontScale, radii, spacing, squircle, typography } from "../theme";
+
+// V10 · the artboard's heart on the My impact row: a white mask (Tabler, see assets/glyphs), tinted.
+const heartGlyph = require("../../assets/glyphs/heart.png") as ImageSourcePropType;
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { keepGoodRes } from "../refreshState";
 import { useRefreshOnFocus } from "../useRefreshOnFocus";
@@ -331,6 +334,10 @@ export function ProfileScreen({ navigation, route }: Props) {
             accessibilityLabel="My impact, rescues, pledges and adoptions"
             onPress={() => navigation.navigate("impact")}
           >
+            {large ? null : (
+              <Image source={heartGlyph} resizeMode="contain" tintColor={colors.teal} style={styles.accountRowIcon}
+                testID="icon.profile.impact" accessibilityElementsHidden importantForAccessibility="no" />
+            )}
             <View style={styles.accountRowText}>
               <Text style={styles.accountRowLabel}>My impact</Text>
               <Text style={styles.accountRowHint}>Rescues, pledges and adoptions</Text>
@@ -568,6 +575,7 @@ const styles = StyleSheet.create({
     ...typography.strong,
     fontWeight: "800"
   },
+  accountRowIcon: { width: 24, height: 24, marginRight: 14 },
   accountRowText: { flex: 1 },
   accountRowHint: { marginTop: 2, color: colors.muted, ...typography.meta },
   accountRowChevron: {
