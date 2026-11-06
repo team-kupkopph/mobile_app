@@ -31,14 +31,16 @@ type ChipProps = {
   /** The leading dot. Off for a chip that already carries an icon. */
   dot?: boolean;
   style?: StyleProp<ViewStyle>;
+  /** Lands on the label, so an e2e flow reads the words. */
+  testID?: string;
 };
 
-export function Chip({ label, tone = "neutral", dot = true, style }: ChipProps) {
+export function Chip({ label, tone = "neutral", dot = true, style, testID }: ChipProps) {
   const { bg, fg } = chipTones[tone];
   return (
     <View style={[styles.chip, { backgroundColor: bg }, style]}>
       {dot ? <View style={[styles.dot, { backgroundColor: fg }]} /> : null}
-      <Text style={[styles.label, { color: fg }]}>{label}</Text>
+      <Text style={[styles.label, { color: fg }]} testID={testID}>{label}</Text>
     </View>
   );
 }

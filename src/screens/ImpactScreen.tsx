@@ -4,7 +4,7 @@
 // unearned medal also carries a lock (BadgeMedal). V3 (Impact review step 10): on the backdrop, every surface a <Card>.
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { BadgeMedal } from "../components/BadgeMedal";
@@ -21,7 +21,7 @@ import { RootStackParamList } from "../navigation/types";
 import { useLargeText } from "../useLargeText";
 import { useRefreshOnFocus } from "../useRefreshOnFocus";
 import { colors, maxFontScale, pill, radii, spacing, typography } from "../theme";
-import { Card, ScreenHeader } from "../components/ui";
+import { Card, PressScale, ScreenHeader, SectionHeader } from "../components/ui";
 
 type Badge = BadgeShape;
 type Props = NativeStackScreenProps<RootStackParamList, "impact">;
@@ -78,7 +78,7 @@ export function ImpactScreen({ navigation }: Props) {
           </View>
         ) : null}
 
-        <Text style={styles.sectionTitle} accessibilityRole="header">Badges</Text>
+        <SectionHeader title="Badges" style={styles.sectionHeader} />
         {state.kind !== "ready" ? (
           <LoadStateView
             state={state}
@@ -92,7 +92,7 @@ export function ImpactScreen({ navigation }: Props) {
               <>
                 <Text style={styles.groupTitle} accessibilityRole="header">Almost there</Text>
                 <View style={styles.almostCard} testID="card.impact.almostThere">
-                  <TouchableOpacity activeOpacity={0.8} style={[styles.almostTop, large && styles.almostTopLarge]}
+                  <PressScale style={[styles.almostTop, large && styles.almostTopLarge]}
                     testID={`tile.badge.${sections.almostThere.badge_code}`}
                     accessibilityRole="button" accessibilityLabel={badgeA11yLabel(sections.almostThere)}
                     accessibilityHint="Opens the badge"
@@ -102,7 +102,7 @@ export function ImpactScreen({ navigation }: Props) {
                       <Text style={styles.almostName}>{sections.almostThere.name}</Text>
                       <Text style={styles.badgeCriteria}>{sections.almostThere.criteria}</Text>
                     </View>
-                  </TouchableOpacity>
+                  </PressScale>
                   <View style={styles.barTrack} accessibilityRole="progressbar"
                     accessibilityLabel={`${sections.almostThere.name} progress`}
                     accessibilityValue={{ min: 0, max: sections.almostThere.progress?.target ?? 0, now: Math.min(sections.almostThere.progress?.current ?? 0, sections.almostThere.progress?.target ?? 0), text: progressLabel(sections.almostThere.progress, true) }}>
@@ -121,7 +121,7 @@ export function ImpactScreen({ navigation }: Props) {
                 <View style={styles.grid}>
                   {sections.earned.map((b) => (
                     <Card key={b.badge_code} style={[styles.badgeTile, large && styles.badgeTileLarge]}>
-                      <TouchableOpacity activeOpacity={0.8} style={styles.tilePress}
+                      <PressScale style={styles.tilePress}
                         testID={`tile.badge.${b.badge_code}`}
                         accessibilityRole="button" accessibilityLabel={badgeA11yLabel(b)}
                         accessibilityHint="Opens the badge"
@@ -130,7 +130,7 @@ export function ImpactScreen({ navigation }: Props) {
                         <Text style={styles.badgeName}
                           numberOfLines={large ? undefined : 2}>{b.name}</Text>
                         <Text style={styles.badgeCriteria} numberOfLines={large ? undefined : 2}>{b.criteria}</Text>
-                      </TouchableOpacity>
+                      </PressScale>
                     </Card>
                   ))}
                 </View>
@@ -142,7 +142,7 @@ export function ImpactScreen({ navigation }: Props) {
                 <Text style={styles.groupTitle} accessibilityRole="header">Keep going</Text>
                 {sections.keepGoing.map((b) => (
                   <Card key={b.badge_code} style={styles.keepCard}>
-                    <TouchableOpacity activeOpacity={0.8}
+                    <PressScale
                       style={[styles.keepRow, large && styles.keepRowLarge]}
                       testID={`tile.badge.${b.badge_code}`}
                       accessibilityRole="button" accessibilityLabel={badgeA11yLabel(b)}
@@ -156,7 +156,10 @@ export function ImpactScreen({ navigation }: Props) {
                           <Text style={styles.keepProgress}>{progressLabel(b.progress, false)}</Text>
                         ) : null}
                       </View>
-                    </TouchableOpacity>
+                      {/* IB15 · what to do about it. Decoration: the row is already a labelled button. */}
+                      <Text style={[styles.keepAction, large && styles.keepActionLarge]} importantForAccessibility="no" accessibilityElementsHidden
+                        testID={`text.impact.start.${b.badge_code}`}>Start ›</Text>
+                    </PressScale>
                   </Card>
                 ))}
               </>
@@ -180,7 +183,7 @@ const styles = StyleSheet.create({
   statTileLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto" },
   statValue: { color: colors.teal, ...typography.hero },
   statLabel: { marginTop: 4, color: colors.muted, ...typography.meta, fontWeight: "600" },
-  sectionTitle: { marginTop: 28, marginBottom: 14, color: colors.ink, ...typography.section },
+  sectionHeader: { marginTop: 28, marginBottom: 14 },
   groupTitle: { marginTop: 8, marginBottom: 12, color: colors.ink, ...typography.strong, fontWeight: "800" },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
   // The Card owns the surface and its padding; the touchable inside owns the padding, so the whole tile is the target.
@@ -205,6 +208,8 @@ const styles = StyleSheet.create({
   keepCopy: { flex: 1, marginLeft: 14 },
   keepCopyLarge: { flex: 0, alignSelf: "stretch", flexGrow: 0, flexBasis: "auto", marginLeft: 0, marginTop: 10 },
   keepName: { color: colors.ink, ...typography.strong, fontWeight: "800" },
+  keepAction: { marginLeft: 8, color: colors.teal, ...typography.meta, fontWeight: "800" },
+  keepActionLarge: { marginLeft: 0, marginTop: 10, alignSelf: "flex-start" },
   keepProgress: { marginTop: 4, color: colors.tealDark, ...typography.meta, fontWeight: "700" },
   badgeName: { marginTop: 12, color: colors.ink, ...typography.strong, fontWeight: "800", textAlign: "center" },
   badgeCriteria: { marginTop: 6, color: colors.muted, ...typography.meta, lineHeight: 17 }
