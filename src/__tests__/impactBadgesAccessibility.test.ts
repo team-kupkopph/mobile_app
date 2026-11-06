@@ -29,7 +29,8 @@ describe("Impact screen", () => {
   });
 
   it("the section titles are headers", () => {
-    expect(count(impact, /accessibilityRole="header"/g)).toBeGreaterThanOrEqual(4);   // Badges, Almost there, Earned, Keep going
+    expect(count(impact, /accessibilityRole="header"/g)).toBeGreaterThanOrEqual(3);   // Almost there, Earned, Keep going
+    expect(impact).toMatch(/<SectionHeader title="Badges"/);                            // V4 · its role="header" lives in SectionHeader
   });
 
   it("each stat tile reads as one thing: the number with its label", () => {

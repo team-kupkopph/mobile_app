@@ -11,7 +11,7 @@ import { ScreenBackdrop } from "../components/ScreenBackground";
 import { earnedDate, progressLabel } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { colors, maxFontScale, pill, spacing, typography } from "../theme";
-import { Card, ScreenHeader } from "../components/ui";
+import { Card, Chip, ScreenHeader } from "../components/ui";
 
 type Props = NativeStackScreenProps<RootStackParamList, "badgeDetail">;
 
@@ -34,11 +34,7 @@ export function BadgeDetailScreen({ navigation, route }: Props) {
         </Card>
 
         {badge.earned ? (
-          <View style={styles.earnedPill}>
-            <Text style={styles.earnedText} testID="text.badge.status">
-              Earned{when ? ` · ${when}` : ""}
-            </Text>
-          </View>
+          <Chip tone="success" dot={false} style={styles.earnedChip} testID="text.badge.status" label={`Earned${when ? ` · ${when}` : ""}`} />
         ) : (
           <>
             <Text style={styles.lockedText} testID="text.badge.status">Not earned yet — keep helping!</Text>
@@ -61,8 +57,7 @@ const styles = StyleSheet.create({
   criteriaCard: { marginTop: 24, alignSelf: "stretch", padding: 18 },
   criteriaLabel: { color: colors.muted, ...typography.meta, fontWeight: "600", letterSpacing: 0.4 },
   criteriaText: { marginTop: 6, color: colors.ink, ...typography.subtitle, fontWeight: "600" },
-  earnedPill: { marginTop: 22, minHeight: 38, paddingVertical: 8, paddingHorizontal: 18, justifyContent: "center", borderRadius: pill(38), backgroundColor: colors.successBg },
-  earnedText: { color: colors.success, ...typography.strong, fontWeight: "700" },
+  earnedChip: { marginTop: 22, alignSelf: "center" },
   lockedText: { marginTop: 22, color: colors.muted, ...typography.strong, fontWeight: "700" },
   progressText: { marginTop: 6, color: colors.tealDark, ...typography.meta, fontWeight: "700" }
 });

@@ -48,7 +48,8 @@ export function SectionHeader({ title, actionLabel, onAction, onPress, testID, s
     : {};
   return (
     <Row style={[styles.row, large && styles.rowLarge, style]} {...rowProps}>
-      <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>{title}</Text>
+      <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}
+        accessibilityRole={onPress ? undefined : "header"}>{title}</Text>
       {actionLabel && onAction && !onPress ? (
         <PressScale
           testID={testID}
