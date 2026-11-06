@@ -451,7 +451,8 @@ const OFF_RAMP = 0;
  *  `policyChev` — the `›` on the "Read our privacy policy" row, rendered only when
  *  EXPO_PUBLIC_PRIVACY_POLICY_URL is set. Same 19 / 700 style. 34 covered the state before
  *  the M4-launch-gate scaffolding landed. 33 covered the pre-Browse-calendar state.) */
-const GLYPHS = 35;
+// V5 · 32: the medal's three ★ sizes (glyphSmall, glyphSmallOff, glyphLarge) are a picture now, not text, so the floor falls by three.
+const GLYPHS = 32;
 
 describe("screens take their text sizes from the ramp", () => {
   it("found style objects to classify", () => {

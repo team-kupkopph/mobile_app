@@ -97,7 +97,7 @@ export function ImpactScreen({ navigation }: Props) {
                     accessibilityRole="button" accessibilityLabel={badgeA11yLabel(sections.almostThere)}
                     accessibilityHint="Opens the badge"
                     onPress={() => open(sections.almostThere as Badge)}>
-                    <BadgeMedal earned={false} size="small" />
+                    <BadgeMedal earned={false} size="small" icon={sections.almostThere.icon} />
                     <View style={[styles.almostCopy, large && styles.almostCopyLarge]}>
                       <Text style={styles.almostName}>{sections.almostThere.name}</Text>
                       <Text style={styles.badgeCriteria}>{sections.almostThere.criteria}</Text>
@@ -126,7 +126,7 @@ export function ImpactScreen({ navigation }: Props) {
                         accessibilityRole="button" accessibilityLabel={badgeA11yLabel(b)}
                         accessibilityHint="Opens the badge"
                         onPress={() => open(b)}>
-                        <BadgeMedal earned size="small" />
+                        <BadgeMedal earned size="small" icon={b.icon} />
                         <Text style={styles.badgeName}
                           numberOfLines={large ? undefined : 2}>{b.name}</Text>
                         <Text style={styles.badgeCriteria} numberOfLines={large ? undefined : 2}>{b.criteria}</Text>
@@ -148,7 +148,7 @@ export function ImpactScreen({ navigation }: Props) {
                       accessibilityRole="button" accessibilityLabel={badgeA11yLabel(b)}
                       accessibilityHint="Opens the badge"
                       onPress={() => open(b)}>
-                      <BadgeMedal earned={false} size="small" />
+                      <BadgeMedal earned={false} size="small" icon={b.icon} />
                       <View style={[styles.keepCopy, large && styles.keepCopyLarge]}>
                         <Text style={styles.keepName}>{b.name}</Text>
                         <Text style={styles.badgeCriteria}>{b.criteria}</Text>

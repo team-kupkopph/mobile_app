@@ -15,12 +15,11 @@ const impact = read("screens/ImpactScreen.tsx");
 const detail = read("screens/BadgeDetailScreen.tsx");
 
 describe("BadgeMedal", () => {
-  it("is drawn here: the lock, the unscaled glyph, and hidden from readers (the words say whether it is held)", () => {
+  it("is drawn here: the lock, the glyph, and hidden from readers (the words say whether it is held)", () => {
     expect(medal).not.toBe("");                                   // never assert on nothing
     expect(medal).toMatch(/<LockIcon\b/);
     expect(medal).toMatch(/earned \? null/);
-    expect(medal).toMatch(/★/);
-    expect(medal).toMatch(/allowFontScaling=\{false\}/);
+    expect(medal).toMatch(/<Image\b/);                                // V5 · the badge's own glyph, a picture that does not scale with text
     expect(medal).toMatch(/importantForAccessibility="no-hide-descendants"/);
     expect(medal).toMatch(/accessibilityElementsHidden/);
   });
