@@ -129,6 +129,9 @@ export function NotificationsScreen({ navigation }: Props) {
       case "posterListing":
         navigation.navigate("posterListing", { listingId: target.listingId });
         return;
+      case "storyDetail":
+        navigation.navigate("storyDetail", { storyId: target.storyId });
+        return;
       default: {
         const unhandled: never = target;
         return unhandled;

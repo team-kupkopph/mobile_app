@@ -42,10 +42,14 @@ describe("the story page's controls can be found by a screen reader and by a flo
   const src = read("screens/StoryDetailScreen.tsx");
   it("announces React and Report as buttons, each with a testID", () => {
     for (const id of ["btn.storyDetail.react", "btn.storyDetail.report"]) expect(src).toContain(`testID="${id}"`);
-    expect(src.split('accessibilityRole="button"').length - 1).toBe(2);
+    expect(src.split('accessibilityRole="button"').length - 1).toBe(3);      // React, Report, and the hidden banner's appeal (step 9)
   });
   it("says whether the reaction is on", () => {
     expect(src).toContain("accessibilityState={{ selected: story.my_reaction }}");
+  });
+  it("offers the author a way to ask for a second look on the hidden banner itself (step 9)", () => {
+    expect(src).toContain('testID="btn.storyDetail.appeal"');
+    expect(src).toContain('navigation.navigate("support")');
   });
   it("draws the hidden banner from the theme's warning tokens", () => {
     expect(src).toContain("backgroundColor: colors.warningBg");
