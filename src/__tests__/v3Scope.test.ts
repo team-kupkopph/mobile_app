@@ -25,7 +25,8 @@ describe("v3Scope", () => {
     // 53 -> 54: PetDetailScreen, PP12 one pet and its actions (My Pets review 2026-10-28), born V3.
     // 54 -> 55: MyPetsScreen, moved from V3_EXCLUDED when My Pets review step 11 converted it (artboards approved 2026-10-29).
     // 55 -> 57: ImpactScreen and BadgeDetailScreen, moved from V3_EXCLUDED when Impact & badges review step 10 converted them.
-    expect(V3_SCOPE.length).toBe(57);
+    // 57 -> 59: ReportContentScreen and StoryDetailScreen, moved from V3_EXCLUDED when content-moderation review step 25 converted them.
+    expect(V3_SCOPE.length).toBe(59);
   });
 
   it("has no duplicate names in V3_SCOPE", () => {

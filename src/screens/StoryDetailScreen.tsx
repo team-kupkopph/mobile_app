@@ -3,7 +3,7 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Image, ScrollView, StyleSheet, Text, TouchableOpacity, View
+  Image, ScrollView, StyleSheet, Text, View
 } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
@@ -12,16 +12,14 @@ import { PersonActions } from "../components/PersonActions";
 import { LoadStateView } from "../components/LoadStateView";
 import { SignupWall } from "../components/SignupWall";
 import { setIntent } from "../guestIntent";
-import { Avatar, ScreenHeader } from "../components/ui";
+import { ScreenBackdrop } from "../components/ScreenBackground";
+import { Avatar, Card, PressScale, ScreenHeader } from "../components/ui";
 import { loadState } from "../net";
 import { storyTypeChip, StoryType } from "../community";
 import { RootStackParamList } from "../navigation/types";
 import { useLargeText } from "../useLargeText";
-import { colors, elevation, pill, radii, spacing, typography } from "../theme";
+import { colors, pill, radii, spacing, typography } from "../theme";
 
-const card = {
-  backgroundColor: colors.white, ...elevation.soft
-};
 const CHIP: Record<"ok" | "teal" | "muted", { bg: string; fg: string }> = {
   ok: { bg: colors.successBg, fg: colors.success },
   teal: { bg: colors.soft, fg: colors.teal },
@@ -108,6 +106,7 @@ export function StoryDetailScreen({ navigation, route }: Props) {
     // offline and error are the only outcomes that can happen here.
     return (
       <View style={styles.screen}>
+        <ScreenBackdrop />
         {header}
         <LoadStateView
           state={loadState(res)}
@@ -120,16 +119,18 @@ export function StoryDetailScreen({ navigation, route }: Props) {
   const chip = storyTypeChip(story.story_type);
   return (
     <View style={styles.screen}>
+      <ScreenBackdrop />
       {header}
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {story.status === "hidden" ? (
-          <View style={styles.hiddenBanner}>
+          <View style={styles.hiddenBanner} testID="banner.storyDetail.hidden">
             <Text style={styles.hiddenText}>Hidden by moderation — only you can see this.</Text>
           </View>
         ) : null}
         {story.photos[0]
           ? <Image source={{ uri: story.photos[0].url }} style={styles.photo} resizeMode="cover" />
           : <View style={styles.photo} />}
+        <Card style={styles.authorCard}>
         <View style={[styles.authorRow, large && styles.authorRowLarge]}>
           <Avatar initials={initials(story.author.name)} tinted size={50} />
           <View style={large ? styles.authorCopyLarge : styles.authorCopy}>
@@ -147,16 +148,19 @@ export function StoryDetailScreen({ navigation, route }: Props) {
             targetType: "account", via: { type: "story", id: storyId }, subject: story.author.name,
             person: { name: story.author.name, via: { type: "story", id: storyId } }, leaveContent: true })}
           onBlocked={() => navigation.goBack()} />
+        </Card>
 
         <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.reactBtn} onPress={toggleReact}>
+          <PressScale style={styles.reactBtn} onPress={toggleReact} accessibilityRole="button"
+            accessibilityLabel={`React to this story. ${story.reaction_count} reactions.`}
+            accessibilityState={{ selected: story.my_reaction }} testID="btn.storyDetail.react">
             <Text style={[styles.heart, story.my_reaction ? styles.heartOn : null]}>♥</Text>
             <Text style={styles.reactLabel}>React · {story.reaction_count}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.flagBtn} onPress={reportStory} accessibilityRole="button"
+          </PressScale>
+          <PressScale style={styles.flagBtn} onPress={reportStory} accessibilityRole="button"
             accessibilityLabel="Report this story" testID="btn.storyDetail.report">
             <Text style={styles.flagLabel}>Report this</Text>
-          </TouchableOpacity>
+          </PressScale>
         </View>
       </ScrollView>
       <SignupWall
@@ -174,13 +178,17 @@ export function StoryDetailScreen({ navigation, route }: Props) {
   );
 }
 
+// A pressable pill sits on the page by its outline, not a shadow: a shadow is the card's, and these are controls.
+const pillButton = { backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border };
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.page },
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
-  hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: radii.notice, backgroundColor: "#FAEEDA" },
-  hiddenText: { color: "#8A5A12", ...typography.meta, fontWeight: "600" },
+  hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: radii.notice, backgroundColor: colors.warningBg },
+  hiddenText: { color: colors.warning, ...typography.meta, fontWeight: "600" },
+  authorCard: { marginTop: 18 },
   photo: { height: 280, borderRadius: radii.field, backgroundColor: colors.placeholder },
-  authorRow: { flexDirection: "row", alignItems: "center", gap: 12, marginTop: 18 },
+  authorRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   // large: stacked. The base copy column is `flex: 1`, which survives in a style array and would collapse the text in a column (`flex: 0` is what works, #189).
   authorRowLarge: { flexDirection: "column", alignItems: "flex-start" },
   authorCopy: { flex: 1 },
@@ -191,10 +199,10 @@ const styles = StyleSheet.create({
   chipText: { ...typography.meta, fontWeight: "700" },
   caption: { marginTop: 18, color: colors.ink, ...typography.body },
   actionRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 26 },
-  reactBtn: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44, paddingVertical: 8, paddingHorizontal: 22, borderRadius: pill(44), ...card },
-  heart: { fontSize: 22, color: "#C9D3CF" },
+  reactBtn: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44, paddingVertical: 8, paddingHorizontal: 22, borderRadius: pill(44), ...pillButton },
+  heart: { fontSize: 22, color: colors.muted },
   heartOn: { color: colors.teal },
   reactLabel: { color: colors.ink, ...typography.subtitle, fontWeight: "700" },
-  flagBtn: { minHeight: 44, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(44), ...card },
+  flagBtn: { minHeight: 44, paddingVertical: 8, paddingHorizontal: 22, justifyContent: "center", borderRadius: pill(44), ...pillButton },
   flagLabel: { color: colors.muted, ...typography.subtitle, fontWeight: "700" }
 });
