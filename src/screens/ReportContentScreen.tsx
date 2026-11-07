@@ -10,7 +10,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 
 import { useApi } from "../api/useApi";
 import {
-  REPORT_REASONS, reportBody, reportSubject, stillWrong, validateReport, type ReportProblems, type ReportReason,
+  REPORT_REASONS, reportBody, reportFailure, reportSubject, stillWrong, validateReport, type ReportProblems, type ReportReason,
 } from "../moderation";
 import { RootStackParamList } from "../navigation/types";
 import { colors, pill, radii, spacing, typography } from "../theme";
@@ -36,7 +36,7 @@ export function ReportContentScreen({ navigation, route }: Props) {
     const res = await api.post("/moderation/flags", reportBody(params, code, note));
     setSubmitting(false);
     if (res.ok) { navigation.replace("reportContentSent", { subject, person: params.person, leaveContent: params.leaveContent }); return; }
-    setProblems({ form: res.data?.error?.message ?? "Couldn't send the report. Try again." });
+    setProblems({ form: reportFailure(res) });
   }
 
   return (

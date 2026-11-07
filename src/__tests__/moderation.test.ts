@@ -7,7 +7,8 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 import {
-  REPORT_REASONS, REPORT_TARGET_TYPES, blockBody, blockConfirmCopy, blockExitDepth, blockPerson, reportBody, reportSubject, stillWrong, validateReport,
+  REPORT_REASONS, REPORT_TARGET_TYPES, blockBody, blockConfirmCopy, blockExitDepth, blockPerson, reportBody, reportFailure, reportSubject, stillWrong,
+  validateReport, waitText,
   type PersonRef, type ReportParams,
 } from "../moderation";
 import { MESSAGE_MAX } from "../inquireApplication";
@@ -156,3 +157,28 @@ if (!BACKEND) {
   // eslint-disable-next-line no-console
   console.warn("[moderation] backend/ not found: reason-code parity NOT checked. Set BACKEND_PATH to enforce it.");
 }
+
+describe("why a report could not be sent (review step 16)", () => {
+  it("says when a day-long limit lifts instead of 'try again shortly'", () => {
+    expect(reportFailure({ status: 429, data: { error: { details: { retry_after: 3 * 3600 } } } }))
+      .toBe("You have sent a lot of reports today. You can send another in about 3 hours.");
+    expect(reportFailure({ status: 429, data: { error: { details: { retry_after: 1200 } } } })).toContain("about 20 minutes");
+  });
+  it("still says something kind when the server gave no wait", () => {
+    expect(reportFailure({ status: 429, data: {} })).toBe("You have sent a lot of reports today. Please try again later.");
+    expect(reportFailure({ status: 429, data: { error: { details: { retry_after: 0 } } } })).toContain("Please try again later");
+  });
+  it("lets the server's own sentence stand for anything else, e.g. reporting your own thing", () => {
+    expect(reportFailure({ status: 422, data: { error: { message: "That's yours, so there is nothing to report." } } }))
+      .toBe("That's yours, so there is nothing to report.");
+    expect(reportFailure({ status: 500 })).toBe("Couldn't send the report. Try again.");
+  });
+  it("words a wait in whole, plannable units", () => {
+    expect(waitText(1)).toBe("a minute");
+    expect(waitText(60)).toBe("a minute");
+    expect(waitText(61)).toBe("about 2 minutes");
+    expect(waitText(3600)).toBe("about an hour");
+    expect(waitText(3601)).toBe("about 2 hours");
+    expect(waitText(86400)).toBe("about 24 hours");
+  });
+});
