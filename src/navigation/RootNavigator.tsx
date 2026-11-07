@@ -1,9 +1,7 @@
 import { NativeStackScreenProps, createNativeStackNavigator } from "@react-navigation/native-stack";
 import Constants from "expo-constants";
-import { StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "../auth/AuthContext";
-import { ScreenHeader } from "../components/ui";
 import { useSocialSignIn } from "../auth/useSocialSignIn";
 import { AccountTypeScreen } from "../screens/AccountTypeScreen";
 import { DonateScreen } from "../screens/DonateScreen";
@@ -95,6 +93,7 @@ import { KawangGawaDetailScreen } from "../screens/KawangGawaDetailScreen";
 import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen";
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
 import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
+import { SupportScreen } from "../screens/SupportScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
 import { enterGuestShell } from "../appTabs";
 import { useLaunchRoute } from "./useLaunchRoute";
@@ -103,7 +102,6 @@ import { OwnerTabNavigator } from "./OwnerTabNavigator";
 import { ShelterTabNavigator } from "./ShelterTabNavigator";
 import { RootStackParamList } from "./types";
 import { WelcomeScreen } from "../WelcomeScreen";
-import { typography } from "../theme";
 import { DevMenuScreen } from "../screens/dev/DevMenuScreen";
 // screen imports are added as tasks land; start with the ones that exist.
 
@@ -145,7 +143,7 @@ export function RootNavigator() {
       <Stack.Screen name="resetOtp" component={ResetOtpScreen} />
       <Stack.Screen name="resetPassword" component={ResetPasswordScreen} />
       <Stack.Screen name="passwordChanged" component={PasswordChangedScreen} />
-      <Stack.Screen name="support" component={PlaceholderSupport} />
+      <Stack.Screen name="support" component={SupportScreen} />
       <Stack.Screen name="locationPicker" component={LocationPickerScreen} />
       <Stack.Screen name="memberUpgrade" component={MemberUpgradeScreen} />
       <Stack.Screen name="memberVerify" component={MemberVerifyScreen} />
@@ -263,27 +261,3 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
     />
   );
 }
-
-// Minimal stand-in so passwordChanged's "Need help?" link has somewhere to go and typechecks
-// end-to-end. A real contact-support flow (ticket form, FAQ, etc.) is out of scope for M6.
-function PlaceholderSupport({ navigation }: NativeStackScreenProps<RootStackParamList, "support">) {
-  return (
-    <View style={styles.supportScreen}>
-      <ScreenHeader title="Contact support" onBack={() => navigation.goBack()} />
-      <View style={styles.supportBody}>
-        <Text style={styles.lockedBody}>Support is coming soon. Email hello@kupkop.ph for now.</Text>
-      </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  supportScreen: { flex: 1, backgroundColor: "#F7F7F4" },
-  supportBody: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  lockedBody: {
-    color: "#62615C",
-    ...typography.meta,
-    textAlign: "center",
-    lineHeight: 20
-  }
-});

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
-import { ApplicationState, EMPTY_APPLICATION, HOME_TYPES, SHARING_NOTE, inquiryBody, yesNoIndex } from "../inquireApplication";
+import { ApplicationState, EMPTY_APPLICATION, HOME_TYPES, MESSAGE_MAX, SHARING_NOTE, inquiryBody, yesNoIndex } from "../inquireApplication";
 import { TAP_SLOP } from "../touch";
 import { colors, radii, spacing, typography } from "../theme";
 import { Button, Field, SegmentedControl } from "./ui";
@@ -36,7 +36,7 @@ export function InquireSheet({ visible, petName, posterName, sending, onSend, on
             <Text style={styles.title}>Ask about {petName}</Text>
             <Text style={styles.sub}>{posterName} will see this when they review your inquiry. Everything here is optional.</Text>
 
-            <Field label="A message (optional)" value={message} onChangeText={setMessage} multiline
+            <Field label="A message (optional)" value={message} onChangeText={setMessage} multiline maxLength={MESSAGE_MAX}
               testID="field.inquire.message" placeholder="Hi! I'd love to meet…" />
 
             <Text style={styles.label}>Where would they live?</Text>

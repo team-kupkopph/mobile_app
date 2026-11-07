@@ -18,12 +18,14 @@ const read = (rel: string) => {
   return text;
 };
 
-/** Where a person is shown, and what names them there. The listing poster, a story's author, a shift's shelter, an applicant. */
+/** Where a person is shown, and what names them there. The listing poster, a story's author, a shift's shelter, an applicant,
+ *  and (review step 7c) a volunteer as the shelter sees them. */
 const PEOPLE: Array<[string, string]> = [
   ["screens/ListingDetailScreen.tsx", "row.listingDetail.person"],
   ["screens/StoryDetailScreen.tsx", "row.storyDetail.person"],
   ["screens/KawangGawaDetailScreen.tsx", "row.kawanggawaDetail.person"],
   ["screens/ApplicantScreen.tsx", "row.applicant.person"],
+  ["screens/ShelterVolunteerDetailScreen.tsx", "row.shelterVolunteerDetail.person"],
 ];
 
 describe("every place a person is shown offers Report and Block", () => {
@@ -34,8 +36,31 @@ describe("every place a person is shown offers Report and Block", () => {
     expect(src).toContain('targetType: "account"');          // reporting a PERSON, not just their post
   });
 
-  it("covers all four, and has read something for each", () => {
-    expect(PEOPLE).toHaveLength(4);
+  it("covers all five, and has read something for each", () => {
+    expect(PEOPLE).toHaveLength(5);
+  });
+});
+
+describe("a shelter names a volunteer by their request, never by an account id", () => {
+  const src = read("screens/ShelterVolunteerDetailScreen.tsx");
+  it("sends the signup as the thing that names them", () => {
+    expect(src).toContain('via: { type: "signup", id: signupId }');
+    expect(src.includes("account_id") || src.includes("accountId")).toBe(false);
+  });
+  it("leaves the page once they are blocked", () => {
+    expect(src).toContain("onBlocked={() => navigation.goBack()}");
+  });
+});
+
+describe("the free text one person writes for another can be reported (review step 7e)", () => {
+  const src = read("screens/ApplicantScreen.tsx");
+  it("offers Report this message to the poster, who is the only one who sees it", () => {
+    expect(src).toContain('testID="btn.applicant.reportMessage"');
+    expect(src).toContain('targetType: "inquiry"');
+    expect(src).toContain("targetId: inquiryId");
+  });
+  it("caps the message the adopter writes", () => {
+    expect(read("components/InquireSheet.tsx")).toContain("maxLength={MESSAGE_MAX}");
   });
 });
 

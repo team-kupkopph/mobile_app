@@ -1,20 +1,20 @@
 /**
- * The "Contact support" placeholder (reached from Password changed's "Need help?") had no header and no back control, so a person who tapped
- * it could only leave by the system swipe-back (device walk, Run 6). It now has a header with a back button that pops the
- * stack, like the other terminal auth screens.
+ * The "Contact support" screen (reached from Password changed's "Need help?") had no header and no back control, so a person who tapped
+ * it could only leave by the system swipe-back (device walk, Run 6). It has a header with a back button that pops the stack,
+ * like the other terminal auth screens. Review step 7b replaced the placeholder with a real screen (SupportScreen.tsx) and
+ * this guard follows it, so the back control cannot be lost in the move.
  *
  * A source scan in the style of screenHeaderTitleAx5.test.ts; the device walk is the proof.
  */
 import { readFileSync } from "fs";
 import { join } from "path";
 
-const src = readFileSync(join(__dirname, "..", "navigation", "RootNavigator.tsx"), "utf-8");
-const fn = (() => {
-  const m = /function PlaceholderSupport\(([^)]*)\)\s*\{([\s\S]*?)\n\}\n/.exec(src);
-  return m ? { args: m[1], body: m[2] } : null;
-})();
+const src = readFileSync(join(__dirname, "..", "screens", "SupportScreen.tsx"), "utf-8");
+const m = /export function SupportScreen\(([^)]*)\)\s*\{([\s\S]*?)\n\}\n/.exec(src);
+const fn = m ? { args: m[1], body: m[2] } : null;
 
-test("found the placeholder", () => {
+test("found the screen", () => {
+  expect(src.length).toBeGreaterThan(200);
   expect(fn).not.toBeNull();
 });
 
@@ -23,10 +23,5 @@ test("it receives the navigation prop", () => {
 });
 
 test("it shows a header whose back pops the stack", () => {
-  const b = (fn as { body: string }).body;
-  expect(b).toMatch(/<ScreenHeader[^>]*title="Contact support"[^>]*onBack=\{\(\) => navigation\.goBack\(\)\}/);
-});
-
-test("the title is not repeated in the body", () => {
-  expect((fn as { body: string }).body).not.toMatch(/<Text style=\{styles\.lockedTitle\}>/);
+  expect((fn as { body: string }).body).toMatch(/<ScreenHeader[^>]*title="Contact support"[^>]*onBack=\{\(\) => navigation\.goBack\(\)\}/);
 });

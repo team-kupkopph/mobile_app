@@ -7,9 +7,10 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 import {
-  REPORT_REASONS, blockBody, blockConfirmCopy, blockExitDepth, blockPerson, reportBody, reportSubject, stillWrong, validateReport,
+  REPORT_REASONS, REPORT_TARGET_TYPES, blockBody, blockConfirmCopy, blockExitDepth, blockPerson, reportBody, reportSubject, stillWrong, validateReport,
   type PersonRef, type ReportParams,
 } from "../moderation";
+import { MESSAGE_MAX } from "../inquireApplication";
 
 describe("what is wrong with a report", () => {
   it("needs a category, and a note only for 'something else'", () => {
@@ -125,6 +126,29 @@ const BACKEND = [process.env.BACKEND_PATH, join(__dirname, "../../../backend"), 
     const codes = [...(block as RegExpExecArray)[1].matchAll(/^\s+[A-Z_]+ = "([a-z_]+)"/gm)].map((m) => m[1]);
     expect(codes.length).toBeGreaterThan(0);                        // and it found something inside it
     expect(REPORT_REASONS.map((r) => r.code)).toEqual(codes);
+  });
+});
+
+(BACKEND ? describe : describe.skip)("what can be reported matches the backend", () => {
+  const backend = (rel: string) => readFileSync(join(BACKEND as string, rel), "utf8");
+  it("lists the same targets as FlagTarget, in the same order", () => {
+    const block = /class FlagTarget\(models\.TextChoices\):([\s\S]*?)\n\n\n/.exec(backend("moderation/models.py"));
+    expect(block).not.toBeNull();
+    const values = [...(block as RegExpExecArray)[1].matchAll(/^\s+[A-Z_]+ = "([a-z_]+)"/gm)].map((m) => m[1]);
+    expect(values.length).toBeGreaterThan(0);
+    expect([...REPORT_TARGET_TYPES]).toEqual(values);
+  });
+  it("can name a person by the same things the backend can resolve (VIA_TYPES)", () => {
+    const m = /VIA_TYPES = \(([^)]*)\)/.exec(backend("moderation/targets.py"));
+    expect(m).not.toBeNull();
+    const via = [...(m as RegExpExecArray)[1].matchAll(/FlagTarget\.([A-Z]+)/g)].map((x) => x[1].toLowerCase());
+    expect(via.length).toBeGreaterThan(0);
+    for (const v of via) expect(REPORT_TARGET_TYPES).toContain(v);
+  });
+  it("limits an inquiry message to the length the server takes", () => {
+    const m = /^MESSAGE_MAX = (\d+)/m.exec(backend("listings/serializers.py"));
+    expect(m).not.toBeNull();
+    expect(MESSAGE_MAX).toBe(Number((m as RegExpExecArray)[1]));
   });
 });
 
