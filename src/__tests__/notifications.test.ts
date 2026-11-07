@@ -43,6 +43,11 @@ describe("notificationTarget", () => {
     expect(notificationTarget({ type: "report_reviewed", data: { flag_id: "f1" } })).toBeNull();
   });
 
+  it("routes a story takedown to the story, which the author can still open, marked hidden (step 9)", () => {
+    expect(notificationTarget({ type: "story_removed", data: { story_id: "s1" } })).toEqual({ screen: "storyDetail", storyId: "s1" });
+    expect(notificationTarget({ type: "story_removed", data: {} })).toBeNull();
+  });
+
   it("routes a moderation takedown to the poster's own view of the listing (AD7)", () => {
     expect(notificationTarget({ type: "listing_removed", data: { listing_id: "l1" } }))
       .toEqual({ screen: "posterListing", listingId: "l1" });

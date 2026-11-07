@@ -35,7 +35,9 @@ export type NotificationTarget =
   | { screen: "memberUpgrade" }
   | { screen: "listingDetail"; listingId: string }
   // AD7 · the poster's own view reads "Removed by moderation".
-  | { screen: "posterListing"; listingId: string };
+  | { screen: "posterListing"; listingId: string }
+  // Review step 9 (MO7) · a hidden story opens for its author, marked hidden, with nothing hidden from them.
+  | { screen: "storyDetail"; storyId: string };
 
 const REPORT_LINKED_TYPES = new Set([
   "offer_matched", "report_claimed", "offer_received", "report_escalated", "case_reopened",
@@ -103,6 +105,9 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
   }
   if (n.type === "listing_removed" && n.data?.listing_id) {
     return { screen: "posterListing", listingId: n.data.listing_id };
+  }
+  if (n.type === "story_removed" && n.data?.story_id) {
+    return { screen: "storyDetail", storyId: n.data.story_id };
   }
   if (n.type === "adoption_badge_needed") return { screen: "memberUpgrade" };
   if (ADOPTER_INQUIRY_TYPES.has(n.type)) {

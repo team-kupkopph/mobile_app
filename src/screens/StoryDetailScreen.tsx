@@ -125,6 +125,11 @@ export function StoryDetailScreen({ navigation, route }: Props) {
         {story.status === "hidden" ? (
           <View style={styles.hiddenBanner} testID="banner.storyDetail.hidden">
             <Text style={styles.hiddenText}>Hidden by moderation — only you can see this.</Text>
+            {/* Review step 9 (MQ7) · the way to ask for a second look is on the page itself, not only in the notice. */}
+            <PressScale onPress={() => navigation.navigate("support")} accessibilityRole="button"
+              accessibilityLabel="Contact support about this story" testID="btn.storyDetail.appeal" style={styles.appeal}>
+              <Text style={styles.appealText}>Think this was a mistake? Contact support</Text>
+            </PressScale>
           </View>
         ) : null}
         {story.photos[0]
@@ -186,6 +191,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 60 },
   hiddenBanner: { marginBottom: 14, padding: 14, borderRadius: radii.notice, backgroundColor: colors.warningBg },
   hiddenText: { color: colors.warning, ...typography.meta, fontWeight: "600" },
+  appeal: { marginTop: 10, minHeight: 44, justifyContent: "center" },
+  appealText: { color: colors.warningStrong, ...typography.meta, fontWeight: "700", textDecorationLine: "underline" },
   authorCard: { marginTop: 18 },
   photo: { height: 280, borderRadius: radii.field, backgroundColor: colors.placeholder },
   authorRow: { flexDirection: "row", alignItems: "center", gap: 12 },
