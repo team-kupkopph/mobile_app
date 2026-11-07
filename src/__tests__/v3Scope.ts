@@ -132,9 +132,9 @@ const ORGANIZATION_PROFILE = ["OrganizationProfileScreen"] as const;
  * artboard" is held by the Sprint 6 mockups and the design system until then. */
 const IMPACT_BADGES = ["ImpactScreen", "BadgeDetailScreen"] as const;
 
-/** Content-moderation review step 25 (V1, V4, V6) · the report form and the story page, moved in from OTHER_OWNER_SCREENS once
+/** Content-moderation review steps 25 and 7a (V1, V4, V6) · the report form and the story page, moved in from OTHER_OWNER_SCREENS once
  * rewritten on <ScreenBackdrop> + <Card> + <PressScale>, with the hidden banner on warning tokens. */
-const MODERATION_V3 = ["ReportContentScreen", "StoryDetailScreen"] as const;
+const MODERATION_V3 = ["ReportContentScreen", "StoryDetailScreen", "TermsScreen"] as const;
 
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,

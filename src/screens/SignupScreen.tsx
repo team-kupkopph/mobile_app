@@ -164,7 +164,10 @@ export function SignupScreen({ navigation, route }: Props) {
           <Text style={styles.linkCentered}>Already have an account? Log in</Text>
         </TouchableOpacity>
 
-        <Text style={styles.terms}>By creating an account you agree to our Terms & Privacy Policy.</Text>
+        <TouchableOpacity hitSlop={TAP_SLOP} activeOpacity={0.75} onPress={() => navigation.navigate("terms")} accessibilityRole="link"
+          accessibilityLabel="Read the terms and community guidelines" testID="btn.signup.terms">
+          <Text style={styles.terms}>By creating an account you agree to our Terms & Privacy Policy.</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

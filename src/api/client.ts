@@ -1,4 +1,5 @@
 import Constants from "expo-constants";
+import { announceTermsRefusal, isTermsRefusal } from "../termsGate";
 
 // US-E1 · the API base comes from the resolved Expo config (app.config.ts), which REFUSES to
 // build a preview or production binary without one. Reading it here rather than from
@@ -105,7 +106,9 @@ export function createApi(getTokens: () => Tokens, setTokens: (t: Tokens) => Pro
       }
       await setTokens(null);
     }
-    return { ok: res.status < 400, status: res.status, data };
+    const result = { ok: res.status < 400, status: res.status, data };
+    if (isTermsRefusal(result)) announceTermsRefusal();       // review step 7a · take them to the terms
+    return result;
   }
   return {
     get: (p: string, o?: RequestOptions) => raw("GET", p, undefined, o),

@@ -94,6 +94,7 @@ import { KawangGawaRequestedScreen } from "../screens/KawangGawaRequestedScreen"
 import { KawangGawaCheckinScreen } from "../screens/KawangGawaCheckinScreen";
 import { KawangGawaCancelScreen } from "../screens/KawangGawaCancelScreen";
 import { SupportScreen } from "../screens/SupportScreen";
+import { TermsScreen } from "../screens/TermsScreen";
 import { WaiverScreen } from "../screens/WaiverScreen";
 import { enterGuestShell } from "../appTabs";
 import { useLaunchRoute } from "./useLaunchRoute";
@@ -144,6 +145,7 @@ export function RootNavigator() {
       <Stack.Screen name="resetPassword" component={ResetPasswordScreen} />
       <Stack.Screen name="passwordChanged" component={PasswordChangedScreen} />
       <Stack.Screen name="support" component={SupportScreen} />
+      <Stack.Screen name="terms" component={TermsScreen} />
       <Stack.Screen name="locationPicker" component={LocationPickerScreen} />
       <Stack.Screen name="memberUpgrade" component={MemberUpgradeScreen} />
       <Stack.Screen name="memberVerify" component={MemberVerifyScreen} />
@@ -257,6 +259,7 @@ function WelcomeRoute({ navigation }: NativeStackScreenProps<RootStackParamList,
       onLogin={() => navigation.navigate("signin")}
       onBrowseGuest={() => enterGuestShell(navigation)}
       onSocial={onSocial}
+      onTerms={() => navigation.navigate("terms")}
       onDevMenu={() => navigation.navigate("dev")}
     />
   );
