@@ -6,6 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppLockGate } from "./src/auth/AppLockGate";
 import { AuthProvider } from "./src/auth/AuthContext";
 import { SessionGuard } from "./src/auth/SessionGuard";
+import { TermsGate } from "./src/auth/TermsGate";
 import { OfflineBanner } from "./src/components/OfflineBanner";
 import { ConnectivityProvider } from "./src/net/ConnectivityProvider";
 import { OutboxProvider } from "./src/outbox/OutboxProvider";
@@ -48,6 +49,7 @@ export default function App() {
               the top (welcome, profile) override it locally. */}
           <StatusBar style="dark" />
           <SessionGuard navRef={navRef} />
+          <TermsGate navRef={navRef} />
           {/* US-E4 · registers this install's push token and routes a tapped
               notification through the type whitelist. Renders nothing. */}
           <PushBridge navRef={navRef} />

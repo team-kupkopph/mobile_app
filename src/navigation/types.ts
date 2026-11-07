@@ -106,6 +106,8 @@ export type RootStackParamList = {
   resetPassword: { email: string; code: string };
   passwordChanged: undefined;
   support: undefined;
+  // Review step 7a · the community guidelines / Terms of Use; `accept` ends in an "I agree" that records the current version.
+  terms: { accept?: boolean } | undefined;
   // SQ5 follow-up · `home`, `adopt`, `kawanggawa`, `profile` and `homeGuest` are tabs now: see OwnerTabParamList and
   // GuestTabParamList above. (Settings → Edit profile pops back to the You tab with `editing`: `popToOwnerTab`.)
   locationPicker: undefined;

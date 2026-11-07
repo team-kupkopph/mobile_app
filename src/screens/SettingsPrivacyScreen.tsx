@@ -5,6 +5,7 @@
 // `masked_contact` describes Phase-2 chat and `approximate_location` is enforced server-side
 // regardless (§12.5 stores a city, never coordinates), so neither is a control the user
 // actually holds. They appear under ALWAYS ON as stated facts. See `privacyRows`.
+import { termsDocument } from "../legal/terms";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -110,6 +111,7 @@ export function SettingsPrivacyScreen({ navigation }: Props) {
             section is absent — a broken or placeholder link is worse than no link at all.
             See library/dev/launch-gates.md. */}
         <PrivacyPolicyLink />
+        <TermsLink onPress={() => navigation.navigate("terms")} />
 
         <Text style={styles.groupTitle}>ALWAYS ON</Text>
         <View style={styles.card}>
@@ -160,6 +162,23 @@ function ToggleRow({
 function Header({ navigation }: { navigation: Props["navigation"] }) {
   return (
     <ScreenHeader title="Privacy" onBack={() => navigation.goBack()} align="center" />
+  );
+}
+
+/** Review step 7a · the community guidelines (and the Terms of Use once counsel has written them), always reachable. */
+function TermsLink({ onPress }: { onPress: () => void }) {
+  const title = termsDocument().title;
+  return (
+    <>
+      <Text style={styles.groupTitle}>{title.toUpperCase()}</Text>
+      <View style={styles.card}>
+        <TouchableOpacity testID="link.settingsPrivacy.terms" hitSlop={TAP_SLOP} accessibilityRole="link"
+          accessibilityLabel={`Read the ${title.toLowerCase()}`} onPress={onPress} style={styles.policyRow}>
+          <Text style={styles.policyLabel}>Read the {title.toLowerCase()}</Text>
+          <Text style={styles.policyChev}>›</Text>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 }
 
