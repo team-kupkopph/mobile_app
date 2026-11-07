@@ -41,7 +41,7 @@ export function ReportContentSentScreen({ navigation, route }: Props) {
         <Text style={styles.title} maxFontSizeMultiplier={maxFontScale.title}>Thanks, we will take a look</Text>
         <Text style={styles.body}>
           Your report about {subject ?? "this"} is with our team. We review every report, and we act on the ones that
-          break our rules.
+          break our rules. We will let you know here when we have looked at it. We cannot share what we decide.
         </Text>
 
         {person ? (
