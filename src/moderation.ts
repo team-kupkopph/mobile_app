@@ -73,6 +73,29 @@ export function stillWrong(shown: ReportProblems, code: ReportReason | null, not
   };
 }
 
+/** How long to wait, in words a person can plan around: "about 3 hours", "about 20 minutes", "a minute". */
+export function waitText(seconds: number): string {
+  const minutes = Math.max(1, Math.ceil(seconds / 60));
+  if (minutes < 60) return minutes === 1 ? "a minute" : `about ${minutes} minutes`;
+  const hours = Math.ceil(minutes / 60);
+  return hours === 1 ? "about an hour" : `about ${hours} hours`;
+}
+
+/**
+ * Why a report could not be sent (review step 16, MO13). A day-long limit used to read "try again shortly", and the
+ * retry could not succeed; it now says when the limit lifts. Anything else the server said stands (it is already a sentence:
+ * "That's yours, so there is nothing to report.").
+ */
+export function reportFailure(res: { status: number; data?: any }): string {
+  const wait = res.data?.error?.details?.retry_after;
+  if (res.status === 429) {
+    return typeof wait === "number" && wait > 0
+      ? `You have sent a lot of reports today. You can send another in ${waitText(wait)}.`
+      : "You have sent a lot of reports today. Please try again later.";
+  }
+  return res.data?.error?.message ?? "Couldn't send the report. Try again.";
+}
+
 export function reportBody(p: ReportParams, code: ReportReason, note: string) {
   const trimmed = note.trim();
   const target = p.via

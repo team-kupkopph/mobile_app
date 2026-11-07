@@ -157,3 +157,11 @@ describe("a block can be seen and undone", () => {
     expect(src).not.toContain("account_id");
   });
 });
+
+describe("the report form explains a refusal (review step 16)", () => {
+  it("words every failure through reportFailure, not a hard-coded line", () => {
+    const src = read("screens/ReportContentScreen.tsx");
+    expect(src).toContain("setProblems({ form: reportFailure(res) })");
+    expect(src.includes("Couldn't send the report")).toBe(false);
+  });
+});
