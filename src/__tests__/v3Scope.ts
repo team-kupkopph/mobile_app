@@ -132,6 +132,10 @@ const ORGANIZATION_PROFILE = ["OrganizationProfileScreen"] as const;
  * artboard" is held by the Sprint 6 mockups and the design system until then. */
 const IMPACT_BADGES = ["ImpactScreen", "BadgeDetailScreen"] as const;
 
+/** Content-moderation review step 25 (V1, V4, V6) · the report form and the story page, moved in from OTHER_OWNER_SCREENS once
+ * rewritten on <ScreenBackdrop> + <Card> + <PressScale>, with the hidden banner on warning tokens. */
+const MODERATION_V3 = ["ReportContentScreen", "StoryDetailScreen"] as const;
+
 export const V3_SCOPE: readonly string[] = [
   ...SHELL_ROOTS,
   ...SHELTER_LISTINGS,
@@ -152,7 +156,9 @@ export const V3_SCOPE: readonly string[] = [
   // Plan Task 9 · Organization profile — V3 from birth.
   ...ORGANIZATION_PROFILE,
   // Impact & badges review step 10 · converted.
-  ...IMPACT_BADGES
+  ...IMPACT_BADGES,
+  // Content-moderation review step 25 · converted.
+  ...MODERATION_V3
 ];
 
 /** 6 shelter-onboarding screens (spec §3) */
@@ -194,7 +200,6 @@ const OTHER_OWNER_SCREENS = [
   "OtpLockedScreen",
   "OtpScreen",
   "PasswordChangedScreen",
-  "ReportContentScreen",
   "ReportContentSentScreen",
   "ReportDetailScreen",
   "ReportMatchesScreen",
@@ -208,7 +213,6 @@ const OTHER_OWNER_SCREENS = [
   "SignupSuccessScreen",
   "StoriesScreen",
   "StoryComposeScreen",
-  "StoryDetailScreen",
   "SupportScreen",
   "VerifyDocumentsScreen",
   "VerifyPhoneScreen",
