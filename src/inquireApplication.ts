@@ -35,6 +35,9 @@ export function buildApplication(a: ApplicationState): Record<string, string | b
   return out;
 }
 
+/** The longest message the server takes (listings.serializers.MESSAGE_MAX). A parity test holds the two together. */
+export const MESSAGE_MAX = 1000;
+
 export function inquiryBody(message: string, a: ApplicationState) {
   return { message: message.trim() || undefined, application: buildApplication(a) };
 }

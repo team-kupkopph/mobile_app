@@ -153,6 +153,17 @@ export function ApplicantScreen({ navigation, route }: Props) {
           </Card>
         ) : null}
 
+        {row.message || applicationRows(row.application).length > 0 ? (
+          // Review step 7e · the one free-text channel between users. Only the poster sees it, so only the poster can report it.
+          <TouchableOpacity hitSlop={TAP_SLOP} accessibilityRole="button" testID="btn.applicant.reportMessage"
+            accessibilityLabel={`Report ${name}'s message`} style={styles.reportMessage}
+            onPress={() => navigation.navigate("reportContent", {
+              targetType: "inquiry", targetId: inquiryId, subject: `${name}'s message`,
+              person: { name, accountId: row.adopter.account_id } })}>
+            <Text style={styles.reportMessageText}>Report this message</Text>
+          </TouchableOpacity>
+        ) : null}
+
         {open || row.status === "adopted" ? (
           <Card style={styles.card} testID="card.applicant.contact">
             <Text style={styles.label}>Contact</Text>
@@ -263,6 +274,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.lg, paddingTop: 12, paddingBottom: 48 },
   card: { marginTop: 14, padding: spacing.lg },
   quote: { backgroundColor: colors.soft },
+  reportMessage: { marginTop: 12, alignSelf: "flex-start" },
+  reportMessageText: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   answerRow: { marginTop: 10 },
   answerLabel: { color: colors.muted, ...typography.meta, fontWeight: "700" },
   personRow: { flexDirection: "row", alignItems: "center", gap: 14 },

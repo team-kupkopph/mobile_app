@@ -209,6 +209,7 @@ const OTHER_OWNER_SCREENS = [
   "StoriesScreen",
   "StoryComposeScreen",
   "StoryDetailScreen",
+  "SupportScreen",
   "VerifyDocumentsScreen",
   "VerifyPhoneScreen",
   "VerifyResubmitScreen"

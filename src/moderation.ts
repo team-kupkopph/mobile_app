@@ -20,13 +20,17 @@ export const REPORT_REASONS: ReadonlyArray<{ code: ReportReason; label: string; 
 ];
 
 /** What a person can be reached through when the app has no account id for them. Matches the backend's `VIA_TYPES`. */
-export type ViaType = "listing" | "story" | "shift";
+export type ViaType = "listing" | "story" | "shift" | "inquiry" | "signup";
 
 /** A person, for "report this person" and "block". `name` is what the screen already shows; it is never sent. */
 export type PersonRef = { name: string; accountId?: string; via?: { type: ViaType; id: string } };
 
+/** The backend's `moderation.models.FlagTarget`, in its order. A parity test keeps the two in step. */
+export const REPORT_TARGET_TYPES = ["account", "listing", "report", "qr", "message", "story", "shift", "inquiry", "signup"] as const;
+export type ReportTargetType = (typeof REPORT_TARGET_TYPES)[number];
+
 export type ReportParams = {
-  targetType: "report" | "listing" | "account" | "qr" | "message" | "shift" | "story";
+  targetType: ReportTargetType;
   /** Omitted when a person is named by what they posted (`via`). */
   targetId?: string;
   via?: { type: ViaType; id: string };
@@ -38,9 +42,10 @@ export type ReportParams = {
   leaveContent?: boolean;
 };
 
-const SUBJECT_FALLBACK: Record<ReportParams["targetType"], string> = {
+const SUBJECT_FALLBACK: Record<ReportTargetType, string> = {
   report: "this report", listing: "this listing", account: "this person", qr: "this donation QR",
-  message: "this message", shift: "this activity", story: "this story",
+  message: "this message", shift: "this activity", story: "this story", inquiry: "this message",
+  signup: "this volunteer",
 };
 
 export function reportSubject(p: Pick<ReportParams, "targetType" | "subject">): string {

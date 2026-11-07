@@ -9,6 +9,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useApi } from "../api/useApi";
 import { LoadStateView } from "../components/LoadStateView";
+import { PersonActions } from "../components/PersonActions";
 import { loadState } from "../net";
 import { RootStackParamList } from "../navigation/types";
 import { VolunteerDetail, reliabilityChip } from "../shelterVolunteer";
@@ -78,6 +79,14 @@ export function ShelterVolunteerDetailScreen({ navigation, route }: Props) {
               {detail.reliability.no_shows} no-show{detail.reliability.no_shows === 1 ? "" : "s"} ·{" "}
               {detail.reliability.consecutive_no_shows} in a row
             </Text>
+            {/* Review step 7c · a shelter can report and block a volunteer. The volunteer is named by their request: the
+                screen never holds an account id, and the server works out who. Only the shelter that owns the shift can. */}
+            <PersonActions testID="row.shelterVolunteerDetail.person"
+              person={{ name: detail.display_name, via: { type: "signup", id: signupId } }}
+              onReport={() => navigation.navigate("reportContent", {
+                targetType: "account", via: { type: "signup", id: signupId }, subject: detail.display_name,
+                person: { name: detail.display_name, via: { type: "signup", id: signupId } } })}
+              onBlocked={() => navigation.goBack()} />
           </Card>
 
           <Text style={styles.sectionLabel}>Contact</Text>
