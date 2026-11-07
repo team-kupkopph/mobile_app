@@ -138,5 +138,7 @@ export function notificationTarget(n: { type: string; data: Record<string, any> 
       ? { screen: "needPledges", needId: n.data.need_id }
       : { screen: "shelterNeeds" };
   }
+  // `report_reviewed` (review step 22) is information, not a place: "we looked at your report" has nowhere to take you, and
+  // must not, because anything it opened would hint at what was decided. It is a deliberate no-op tap.
   return null; // unknown type, or a report-linked type missing its report_id — no-op tap
 }

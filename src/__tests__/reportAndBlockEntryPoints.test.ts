@@ -52,6 +52,14 @@ describe("a shelter names a volunteer by their request, never by an account id",
   });
 });
 
+describe("the confirmation promises only what the server does (review step 22)", () => {
+  const src = read("screens/ReportContentSentScreen.tsx");
+  it("says the reporter will hear it was looked at, and that the decision is not shared", () => {
+    expect(src).toContain("We will let you know here when we have looked at it.");
+    expect(src).toContain("We cannot share what we decide.");
+  });
+});
+
 describe("the free text one person writes for another can be reported (review step 7e)", () => {
   const src = read("screens/ApplicantScreen.tsx");
   it("offers Report this message to the poster, who is the only one who sees it", () => {

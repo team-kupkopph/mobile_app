@@ -39,6 +39,10 @@ describe("notificationTarget", () => {
     }
   });
 
+  it("treats \"we looked at your report\" as information with nowhere to go, so a tap cannot hint at the outcome (step 22)", () => {
+    expect(notificationTarget({ type: "report_reviewed", data: { flag_id: "f1" } })).toBeNull();
+  });
+
   it("routes a moderation takedown to the poster's own view of the listing (AD7)", () => {
     expect(notificationTarget({ type: "listing_removed", data: { listing_id: "l1" } }))
       .toEqual({ screen: "posterListing", listingId: "l1" });
